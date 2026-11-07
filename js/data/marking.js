@@ -1,0 +1,7 @@
+'use strict';
+// LOGIC: marking answers and formatting them. Pure functions — no DOM.
+// safeAnswer turns what Apollo typed ("3/4", "1 1/2", "£12", "60 cm³") into a number.
+function safeAnswer(str){let t=String(str).trim().toLowerCase().replace(/^[£$]\s*/,'').replace(/,(?=\d{3}\b)/g,'');let mx=t.match(/^(\d+)\s+(\d+)\s*\/\s*(\d+)$/);if(mx&&+mx[3])return +mx[1]+mx[2]/mx[3];let m=t.match(/^(-?\d*\.?\d+)(?:\s*\/\s*(\d*\.?\d+))?/);if(!m)return NaN;let rest=t.slice(m[0].length).trim();if(rest&&!/^[a-z²³°%£\s.\/]*$/.test(rest))return NaN;if(m[2]!==undefined){let d=Number(m[2]);return d?Number(m[1])/d:NaN}return Number(m[1]);}
+// judge returns 'ok' | 'wrong' | 'empty' | 'simplify' | 'asfraction'.
+function judge(c,raw){let t=String(raw).trim().toLowerCase();if(!t)return 'empty';if(c.alts&&c.alts.includes(t.replace(/[.\s]/g,'')))return 'ok';if(c.kind==='time'){let m=t.replace(/\s/g,'').match(/^(\d{1,2})[:.h]?(\d{2})$/);if(!m||+m[2]>59)return 'empty';return (+m[1])*100+(+m[2])===c.a?'ok':'wrong';}let v=safeAnswer(t);if(!Number.isFinite(v))return c.kind==='text'?'wrong':'empty';if(Math.abs(v-c.a)>1e-6)return 'wrong';if(c.exact&&t.replace(/\s/g,'')!==c.exact)return t.includes('/')?'simplify':'asfraction';return 'ok';}
+function fmtAns(c){if(c.kind==='time')return hhmm(Math.floor(c.a/100)*60+c.a%100);if(c.show)return c.show;if(c.u==='£')return '£'+(Number.isInteger(c.a)?c.a:c.a.toFixed(2));return c.a+(c.u?' '+c.u:'');}
