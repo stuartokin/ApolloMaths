@@ -259,3 +259,4 @@ dialog.win-max .win-resize{display:none}
 .arcade.arc-full .arc-body{height:100%;display:flex;flex-direction:column;justify-content:center;padding:8px}
 .arcade.arc-full .arc-game{flex:1;justify-content:center}
 .arcade:fullscreen::backdrop{background:#05060f}
+.fz-chip{display:inline-block;background:#fff;border:2px solid var(--dark);border-radius:20px;padding:3px 10px;margin:3px;font-weight:800;font-size:13px}.fz-current{margin:8px 0}.fz-count{font-size:15px}.ptable input[type=checkbox]{width:22px;height:22px}

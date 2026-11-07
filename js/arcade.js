@@ -3,15 +3,17 @@
 // The games themselves are in js/games.js (all original). Admin play is unlimited and not counted.
 let arcadeOpen=false;
 const Arcade=(()=>{
- let cv,ctx,raf=0,view='menu',admin=false,cap=0,played=0,last=0,paused=false,keys={},pad={l:false,r:false,u:false,d:false,f:false},game=null,gameId='invaders',avImg=null,ac=null;
+ let latch={},cv,ctx,raf=0,view='menu',admin=false,cap=0,played=0,last=0,paused=false,keys={},pad={l:false,r:false,u:false,d:false,f:false},game=null,gameId='invaders',avImg=null,ac=null;
  const dlg=()=>get('arcade');
  const hsKey=()=>gameId==='invaders'?stats.arcade.theme:gameId;
  function beep(f,d=.08,type='square',vol=.04,slide=0){if(stats.arcade.mute)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),gn=ac.createGain();o.type=type;o.frequency.value=f;if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,f*slide),ac.currentTime+d);gn.gain.value=vol;gn.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.connect(gn).connect(ac.destination);o.start();o.stop(ac.currentTime+d);}catch(e){}}
  const fmt=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
- const inp=()=>({l:!!(keys.ArrowLeft||keys.a||keys.A||pad.l),r:!!(keys.ArrowRight||keys.d||keys.D||pad.r),u:!!(keys.ArrowUp||keys.w||keys.W||pad.u),d:!!(keys.ArrowDown||keys.s||keys.S||pad.d),f:!!(keys[' ']||keys.Enter||pad.f)});
+ // A quick tap (pressed and released between two frames) is remembered until the game has seen it.
+ const KEYMAP={ArrowLeft:'l',a:'l',A:'l',ArrowRight:'r',d:'r',D:'r',ArrowUp:'u',w:'u',W:'u',ArrowDown:'d',s:'d',S:'d',' ':'f',Enter:'f'};
+ const inp=()=>({l:!!(keys.ArrowLeft||keys.a||keys.A||pad.l||latch.l),r:!!(keys.ArrowRight||keys.d||keys.D||pad.r||latch.r),u:!!(keys.ArrowUp||keys.w||keys.W||pad.u||latch.u),d:!!(keys.ArrowDown||keys.s||keys.S||pad.d||latch.d),f:!!(keys[' ']||keys.Enter||pad.f||latch.f)});
  function hud(){get('arcHud').innerHTML=`<span>Score <b>${game.score.toLocaleString('en-GB')}</b></span><span>${game.levelName} <b>${game.level}</b></span><span>${'❤️'.repeat(Math.max(0,Math.min(6,game.lives)))||'💔'}</span><span class="${!admin&&cap-played<60?'arc-low':''}">⏱️ <b>${admin?'∞':fmt(cap-played)}</b></span>`;}
  function loop(t){if(view!=='game'){raf=0;return;}const dt=Math.min(.05,(t-(last||t))/1000);last=t;
-  if(!paused&&document.visibilityState==='visible'){played+=dt;game.update(dt,inp());if(game.over){finish('gameover');return;}if(!admin&&played>=cap){finish('time');return;}}
+  if(!paused&&document.visibilityState==='visible'){played+=dt;game.update(dt,inp());latch={};if(game.over){finish('gameover');return;}if(!admin&&played>=cap){finish('time');return;}}
   ctx.save();ctx.scale(cv.width/game.W,cv.height/game.H);game.render(ctx);
   if(paused){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,game.W,game.H);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='bold 34px monospace';ctx.fillText('PAUSED',game.W/2,game.H/2);ctx.font='14px monospace';ctx.fillText('Tap ▶ Play or press P',game.W/2,game.H/2+30);}
   ctx.restore();hud();raf=requestAnimationFrame(loop);}
@@ -25,17 +27,17 @@ const Arcade=(()=>{
    <div class="arc-games">${GAME_LIST.map(g=>`<button class="arc-gm${g.id===gameId?' on':''}" data-game="${g.id}" type="button"><span>${g.icon}</span><b>${g.name}</b><small>${g.desc}</small><em>🏆 ${(g.id==='invaders'?Math.max(H.player,H.classic):H[g.id]||0).toLocaleString('en-GB')}</em></button>`).join('')}</div>
    ${gameId==='invaders'?`<div class="arc-themes"><button class="arc-theme${t==='player'?' on':''}" data-theme="player" type="button"><span>🧍⚽</span><b>My player</b></button><button class="arc-theme classic${t==='classic'?' on':''}" data-theme="classic" type="button"><span>👾</span><b>Classic</b></button></div>`:''}
    <div class="actions" style="justify-content:center"><button class="primary" data-arc="start" type="button">▶️ Play ${GAME_LIST.find(g=>g.id===gameId).name}</button><button class="ghost" data-arc="mute" type="button">${stats.arcade.mute?'🔇 Sound off':'🔊 Sound on'}</button><button class="ghost" data-arc="full" type="button" id="arcFullBtn">${dlg().classList.contains('arc-full')?'🗗 Exit full screen':'⛶ Full screen'}</button><button class="ghost" data-arc="close" type="button">Back to maths</button></div>
-   <p class="mini">Keys: arrows (or WASD) to move, Space to fire, P to pause. Tablets: use the buttons under the game${gameId==='maze'?' or swipe on the maze':''}.</p></div>`);}
- const LABEL={invaders:{l:'◀',r:'▶',f:'⚽ KICK'},maze:{l:'◀',r:'▶',u:'▲',d:'▼'},meteor:{l:'⟲',r:'⟳',u:'▲ Thrust',f:'● Fire'},guardian:{u:'▲',d:'▼',l:'◀',r:'▶',f:'🔥 Fire'}};
+   <p class="mini">Keys: arrows (or WASD) to move, Space to fire, P to pause. Tablets: use the buttons under the game${gameId==='maze'?' or swipe on the maze':gameId==='snake'?' or swipe on the game':''}.</p></div>`);}
+ const LABEL={invaders:{l:'◀',r:'▶',f:'⚽ KICK'},maze:{l:'◀',r:'▶',u:'▲',d:'▼'},meteor:{l:'⟲',r:'⟳',u:'▲ Thrust',f:'● Fire'},guardian:{u:'▲',d:'▼',l:'◀',r:'▶',f:'🔥 Fire'},ladder:{l:'◀',r:'▶',u:'▲ Climb',d:'▼',f:'⤴ Jump'},racer:{l:'◀',r:'▶',u:'▲ Go',d:'▼ Brake',f:'🔥 Nitro'},snake:{l:'◀',r:'▶',u:'▲',d:'▼'}};
  function start(){const st=arcadeStatus(stats);if(!admin&&!st.canPlay){locked(st);return;}cap=admin?Infinity:st.sessionSecs;played=0;paused=false;keys={};Object.keys(pad).forEach(k=>pad[k]=false);
-  if(gameId==='invaders'&&stats.arcade.theme==='player'){avImg=new Image();avImg.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(drawAvatar(stats.avatar,{scene:false}));}
+  if(['invaders','ladder'].includes(gameId)){avImg=new Image();avImg.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(drawAvatar(stats.avatar,{scene:false}));}
   game=GAMES[gameId]({theme:stats.arcade.theme,avatar:avImg,beep});view='game';
   const lab=Object.assign({},LABEL[gameId]);if(gameId==='invaders'&&stats.arcade.theme==='classic')lab.f='FIRE';
   card(`<div class="arc-game"><div class="arc-hud" id="arcHud"></div><canvas id="arcCanvas" aria-label="Arcade game" style="aspect-ratio:${game.W}/${game.H}"></canvas>
    <div class="arc-pad">${PADS[gameId].map(grp=>`<div class="arc-grp">${grp.map(k=>`<button data-pad="${k}" type="button" class="pad-${k}">${lab[k]}</button>`).join('')}</div>`).join('')}</div>
    <div class="arc-ctl"><button class="ghost" data-arc="pause" type="button">⏸️ Pause</button><button class="ghost" data-arc="full" type="button" id="arcFullBtn">${dlg().classList.contains('arc-full')?'🗗 Exit full screen':'⛶ Full screen'}</button><button class="ghost" data-arc="quit" type="button">🏁 Stop</button></div></div>`);
   cv=get('arcCanvas');ctx=cv.getContext('2d');fit();
-  const padEl=get('arcBody').querySelector('.arc-pad');padEl.addEventListener('pointerdown',e=>{const b=e.target.closest('[data-pad]');if(b){pad[b.dataset.pad]=true;b.setPointerCapture(e.pointerId);e.preventDefault();}});
+  const padEl=get('arcBody').querySelector('.arc-pad');padEl.addEventListener('pointerdown',e=>{const b=e.target.closest('[data-pad]');if(b){pad[b.dataset.pad]=true;latch[b.dataset.pad]=true;b.setPointerCapture(e.pointerId);e.preventDefault();}});
   ['pointerup','pointercancel','pointerleave'].forEach(ev=>padEl.addEventListener(ev,e=>{const b=e.target.closest('[data-pad]');if(b)pad[b.dataset.pad]=false;}));
   let sw=null;cv.addEventListener('pointerdown',e=>{sw=[e.clientX,e.clientY];const r=cv.getBoundingClientRect();if(game.pointer){game.pointer((e.clientX-r.left)/r.width);pad.f=true;setTimeout(()=>pad.f=false,120);}});
   cv.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();if(e.buttons&&game.pointer)game.pointer((e.clientX-r.left)/r.width);if(sw&&game.swipe){const dx=e.clientX-sw[0],dy=e.clientY-sw[1];if(Math.hypot(dx,dy)>24){game.swipe(dx,dy);sw=[e.clientX,e.clientY];}}});
@@ -70,7 +72,7 @@ const Arcade=(()=>{
   else if(a==='pause'){paused=!paused;b.textContent=paused?'▶️ Play':'⏸️ Pause';}else if(a==='mute'){stats.arcade.mute=!stats.arcade.mute;save(false);menu(admin?null:arcadeStatus(stats));}}
  function init(){const d=dlg();d.addEventListener('click',onClick);d.addEventListener('close',()=>{if(view==='game')finish('stopped');arcadeOpen=false;});
   d.addEventListener('cancel',e=>{if(view==='game'){e.preventDefault();paused=true;}});
-  window.addEventListener('keydown',e=>{if(!arcadeOpen||view!=='game')return;if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key))e.preventDefault();if(e.key==='p'||e.key==='P'){paused=!paused;return;}keys[e.key]=true;});
+  window.addEventListener('keydown',e=>{if(!arcadeOpen||view!=='game')return;if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key))e.preventDefault();if(e.key==='p'||e.key==='P'){paused=!paused;return;}keys[e.key]=true;if(KEYMAP[e.key])latch[KEYMAP[e.key]]=true;});
   window.addEventListener('keyup',e=>{keys[e.key]=false;});window.addEventListener('resize',()=>{if(view==='game')fit();});
   ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{if(!(document.fullscreenElement||document.webkitFullscreenElement)&&dlg().classList.contains('arc-full')){dlg().classList.remove('arc-full');const b=get('arcFullBtn');if(b)b.textContent='⛶ Full screen';}setTimeout(fit,60);}));
   dlg().addEventListener('close',()=>{dlg().classList.remove('arc-full');});document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='visible'&&view==='game')paused=true;});}

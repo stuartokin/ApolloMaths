@@ -2,7 +2,7 @@
 // PRESENTATION: the Parent dashboard. All numbers come from js/data/metrics.js; nothing here changes how questions are marked.
 let parentOpen=false;
 const Parent=(()=>{
- let tab='overview',viewId=null;
+ let tab='overview',viewId=null,pending=null;
  const dlg=()=>get('parent');
  const pct=(a,b)=>b?Math.round(100*a/b)+'%':'—';
  const when=t=>t?new Date(t).toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
@@ -28,6 +28,15 @@ const Parent=(()=>{
   <div class="pcards">${card(s.learnPts.toLocaleString('en-GB'),'Learning points earned')}${card(E.filter(e=>e.type==='lesson').length,'Lessons completed')}${card(steps.length,'Lesson checks answered')}${card(pct(first,steps.length),'Checks right first time')}${card(read+'s','Average active reading per step')}${card(E.filter(e=>e.type==='example').length,'Worked examples studied')}${card(`${tw.filter(e=>e.ok).length}/${tw.length}`,'“Prove it” twins right')}${card(E.filter(e=>e.type==='explain').length,'Explainer → right answer')}${card(s.bestFocusStreak,'Best Focus streak')}${card(mast,'Mastery milestones')}</div>
   <h3>By Focus topic</h3>${table(['Topic','Lessons','Checks right first time','Avg reading','Examples','Twins right','Explainer → right','Mastery reached','Learning ⚡'],focusKeys.map(k=>{const e=E.filter(x=>x.tp===k),st=e.filter(x=>x.type==='step'),t=e.filter(x=>x.type==='twin');return[`${topics[k].emoji} ${topics[k].label}`,s.learn.lessons[k]||0,st.length?pct(st.filter(x=>x.ok&&x.tries===1).length,st.length):'—',st.length?Math.round(st.reduce((a,x)=>a+x.secs,0)/st.length)+'s':'—',e.filter(x=>x.type==='example').length,`${t.filter(x=>x.ok).length}/${t.length}`,e.filter(x=>x.type==='explain').length,(s.mastery[k]||[]).map(v=>v+'%').join(', ')||'—',e.reduce((a,x)=>a+x.pts,0)];}))}
   <h3>Recent learning activity</h3>${table(['When','Topic','Activity','Result','Active time','Points'],E.slice(-60).reverse().map(e=>[when(e.t),`${topics[e.tp].emoji} ${topics[e.tp].label}`,(act[e.type]||(()=>e.type))(e),e.type==='step'?(e.ok?(e.tries===1?'✅ first try':`✅ try ${e.tries}`):'❌ answer shown'):e.type==='twin'?(e.ok?'✅':'❌'):e.ok?'✅':'',e.secs?e.secs+'s':'—',e.pts||'—']),'small')}`;}
+ function focusTab(s,mine){const{name}=viewed(),sug=suggestFocus(s),rank=Object.fromEntries(sug.ranked.map((x,i)=>[x.k,i+1]));if(!pending)pending=s.focus.slice();
+  const chip=k=>`<span class="fz-chip">${topics[k].emoji} ${esc(topics[k].label)}</span>`;
+  return `<p class="section-note">Choose <b>five Focus areas</b> for ${esc(name)}. They get the Focus Zone cards (📘 Learn, 🎲 Examples, ⚽ Practise), bonus points, streaks, mastery rewards, readiness bars and Today’s plan. Every topic has its own Learn mission. Changes are saved with ${esc(name)}’s progress.</p>
+  <div class="fz-current"><b>Now:</b> ${s.focus.map(chip).join('')}</div>
+  <div class="dealbox">💡 <b>Suggested for ${esc(name)}:</b> ${sug.top.map(chip).join('')}<div class="actions"><button class="secondary" data-usesug type="button">Use these suggestions</button></div><span class="mini">Based on right-first-time scores, how often help (hints, explainers, methods) was needed, skipped questions and lesson checks — the topics that need most help come first. Untried topics are included when there isn’t enough evidence yet.</span></div>
+  <p class="fz-count" id="fzCount"><b>${pending.length} of 5</b> chosen</p>
+  ${table(['Pick','Topic','Need rank','Right first time','Tried','Why'],sug.ranked.map(x=>[`<input type="checkbox" data-fz="${x.k}"${pending.includes(x.k)?' checked':''} aria-label="Focus on ${esc(x.label)}">`,`${x.emoji} ${esc(x.label)}${sug.top.includes(x.k)?' <span class="badge new">SUGGESTED</span>':''}`,`#${rank[x.k]}`,x.first===null?'—':x.first+'%',x.n,esc(x.why)]),'small')}
+  <div class="actions"><button class="primary" data-savefocus type="button">💾 Save focus areas</button><button class="ghost" data-defocus type="button">Reset to the original five</button></div>`;}
+ function saveFocus(list){const{s,mine}=viewed();s.focus=list.slice();if(mine){applyFocus(stats.focus);save();updateStats();if(typeof drawTopics==='function')drawTopics();}else Storage.writeProfile(viewId,{stats:s});pending=null;toast(`🎯 Focus areas saved: ${list.map(k=>topics[k].label).join(', ')}`);render();}
  function timeTab(s){const D=dailySeries(s,14),max=Math.max(1,...D.map(d=>d.app/60));
   return `<h3>Minutes in the app — last 14 days (by date)</h3>${barSVG(D.map(d=>String(+d.day.slice(8))),D.map(d=>Math.round(d.app/60)),niceStep(max),'Minutes')}
   <h3>Right first time — last 14 days</h3>${D.some(d=>d.firstPct!==null)?lineSVG(D.map(d=>String(+d.day.slice(8))),D.map(d=>d.firstPct??0),10,'% right first time'):'<p class="muted">No questions answered yet.</p>'}
@@ -53,7 +62,7 @@ const Parent=(()=>{
  function render(){const d=dlg(),{s,name,mine}=viewed(),list=Storage.profiles();
   d.querySelector('.pd-who').innerHTML=list.length>1?`<label>Player <select id="pdWho">${list.map(p=>`<option value="${p.id}"${(viewId||Storage.current().id)===p.id?' selected':''}>${esc(p.name)}</option>`).join('')}</select></label>`:`<b>${esc(name)}</b>`;
   d.querySelectorAll('[data-ptab]').forEach(b=>b.classList.toggle('active',b.dataset.ptab===tab));
-  d.querySelector('.pd-body').innerHTML={overview,learning:learningTab,time:timeTab,topics:topicsTab,types:typesTab,mocks:mocksTab,shop:shopTab,activity:activityTab,settings:settingsTab}[tab](s,tab==='overview'?name:mine);}
+  d.querySelector('.pd-body').innerHTML={overview,focus:focusTab,learning:learningTab,time:timeTab,topics:topicsTab,types:typesTab,mocks:mocksTab,shop:shopTab,activity:activityTab,settings:settingsTab}[tab](s,tab==='overview'?name:mine);}
  const csvOut=(rows,file)=>{const csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n'),url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download=file;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);};
  function exportCsv(kind='log'){const s=stats,n=Storage.fileBase().replace('-maths-progress.json','');
   if(kind==='time')return csvOut([['date','total_minutes','questions_minutes','learning_minutes','shop_minutes','arcade_minutes','visits','answered','right_first_time'],...Object.keys(s.time.byDay).sort().map(k=>{const T=s.time.byDay[k],L=s.log.filter(e=>dayKey(new Date(e.t))===k&&!e.sk);return[k,(T.app/60).toFixed(1),(T.questions/60).toFixed(1),(T.learn/60).toFixed(1),(T.shop/60).toFixed(1),((T.game||0)/60).toFixed(1),T.visits,L.length,L.filter(e=>e.f).length]})],n+'-time.csv');
@@ -62,14 +71,17 @@ const Parent=(()=>{
  function printReport(){const s=stats,name=playerName();Printer.doPrint(`<section class="pp-report"><h1>${esc(name)}’s maths progress report</h1><p>${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p>${overview(s,name)}<h2>Topics</h2>${topicsTab(s)}<h2>Question types that need work</h2>${typesTab(s).split('<h3>🔧')[0]}</section>`);}
  function onClick(e){const b=e.target.closest('button');if(!b)return;const ds=b.dataset;
   if(ds.close!==undefined){close();return;}
-  if(ds.ptab){tab=ds.ptab;render();return;}
+  if(ds.ptab){tab=ds.ptab;pending=null;render();return;}
+  if(ds.usesug!==undefined){pending=suggestFocus(viewed().s).top;render();return;}
+  if(ds.defocus!==undefined){pending=DEFAULT_FOCUS.slice();render();return;}
+  if(ds.savefocus!==undefined){if(pending.length!==5){toast('Please choose exactly 5 Focus areas.');return;}saveFocus(pending);return;}
   if(ds.csv){exportCsv(ds.csv);return;}
   if(ds.report){printReport();return;}
   if(ds.printmock){Printer.paperMock(25);return;}
   if(ds.addpaper){const sc=Math.floor(+get('pmScore').value),tot=Math.floor(+get('pmTotal').value);if(!(tot>=1&&tot<=100&&sc>=0&&sc<=tot)){toast('Please enter a score between 0 and the total.');return;}stats.paperMocks.push({t:Date.now(),score:sc,total:tot});save();toast(`📝 Paper mock saved: ${sc}/${tot}`);render();return;}
   if(ds.saveexam){const n=get('exName').value.trim().slice(0,40),dt=get('exDate').value;if(!n||!/^\d{4}-\d{2}-\d{2}$/.test(dt)){toast('Please enter an exam name and date.');return;}stats.exam={name:n,date:dt};save();drawPlan();toast('📅 Exam date saved.');render();}}
- function open(t='overview'){tab=t;viewId=null;parentOpen=true;render();const d=dlg();if(d.showModal){if(!d.open)d.showModal();}else d.setAttribute('open','');}
+ function open(t='overview'){tab=t;viewId=null;pending=null;parentOpen=true;render();const d=dlg();if(d.showModal){if(!d.open)d.showModal();}else d.setAttribute('open','');}
  function close(){const d=dlg();if(d.close)d.close();else d.removeAttribute('open');}
- function init(){const d=dlg();d.addEventListener('click',onClick);d.addEventListener('close',()=>{parentOpen=false;});d.addEventListener('change',e=>{if(e.target.id==='pdWho'){viewId=e.target.value;render();}});}
+ function init(){const d=dlg();d.addEventListener('click',onClick);d.addEventListener('close',()=>{parentOpen=false;});d.addEventListener('change',e=>{if(e.target.id==='pdWho'){viewId=e.target.value;pending=null;render();return;}const k=e.target.dataset&&e.target.dataset.fz;if(k){if(e.target.checked){if(pending.length>=5){e.target.checked=false;toast('You can choose 5 Focus areas — untick one first.');return;}pending.push(k);}else pending=pending.filter(x=>x!==k);get('fzCount').innerHTML=`<b>${pending.length} of 5</b> chosen`;}});}
  return{init,open,exportCsv};
 })();

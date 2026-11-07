@@ -68,3 +68,19 @@ function familyTable(s){const m={};for(const e of s.log){const k=e.tp+'#'+e.g,r=
 function dailySeries(s,days=14,now=new Date()){const out=[];for(let i=days-1;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i),k=dayKey(d),T=s.time.byDay[k]||{app:0,questions:0,learn:0,shop:0,visits:0},L=s.log.filter(e=>dayKey(new Date(e.t))===k&&!e.sk);
  out.push({day:k,label:d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric'}),...T,answered:L.length,firstPct:L.length?Math.round(100*L.filter(e=>e.f).length/L.length):null});}return out;}
 const fmtDur=sec=>{sec=Math.round(sec);if(sec<60)return sec+'s';const h=Math.floor(sec/3600),m=Math.round((sec%3600)/60);return h?`${h}h ${m}m`:`${m}m`;};
+
+// ---------- Focus areas: chosen per player by a parent (default = the original five) ----------
+const DEFAULT_FOCUS=['volume','equivfrac','shapes','measure','data'];
+function cleanFocus(s){const f=Array.isArray(s.focus)?[...new Set(s.focus.filter(k=>typeof k==='string'&&topics[k]))]:[];s.focus=f.length===5?f:DEFAULT_FOCUS.slice();return s;}
+// Make the chosen five the Focus topics everywhere (bonuses, streaks, readiness, plan, Focus Zone).
+function applyFocus(list){for(const k of Object.keys(topics))topics[k].focus=list.includes(k);focusKeys.splice(0,focusKeys.length,...list);}
+// Suggest five Focus areas from how the player is actually doing. Each topic gets a "need" score (higher = needs more help) and a reason.
+function suggestFocus(s){const out=Object.keys(topics).map(k=>{const b=(s.byTopic||{})[k]||{seen:0,first:0,hints:0,skipped:0},L=s.log.filter(e=>e.tp===k),recent=L.slice(-20),
+  steps=s.learn.events.filter(e=>e.tp===k&&e.type==='step'),stepMiss=steps.length?steps.filter(e=>!(e.ok&&e.tries===1)).length/steps.length:0;
+  const n=recent.length>=6?recent.length:b.seen,first=recent.length>=6?recent.filter(e=>e.f).length/recent.length:(b.seen?b.first/b.seen:0),
+   help=L.length?L.filter(e=>e.h||e.x||e.m).length/L.length:(b.seen?Math.min(1,b.hints/b.seen):0),skip=L.length?L.filter(e=>e.sk).length/L.length:(b.seen?b.skipped/b.seen:0);
+  let need,why;
+  if(n<6){need=42-n;why=n?`Only ${n} question${n>1?'s':''} tried so far — worth a proper check-up.`:'Not tried yet — no evidence either way.';}
+  else{need=Math.round((1-first)*70+help*15+skip*10+stepMiss*5);const bits=[`${Math.round(first*100)}% right first time (${n} questions)`];if(help>=.2)bits.push(`help used on ${Math.round(help*100)}%`);if(skip>=.1)bits.push(`${Math.round(skip*100)}% skipped`);if(steps.length&&stepMiss>=.3)bits.push(`${Math.round(stepMiss*100)}% of lesson checks missed`);why=bits.join(' · ');}
+  return{k,label:topics[k].label,emoji:topics[k].emoji,need,why,n,first:n?Math.round(first*100):null};}).sort((a,b)=>b.need-a.need||a.n-b.n);
+ return{ranked:out,top:out.slice(0,5).map(x=>x.k)};}

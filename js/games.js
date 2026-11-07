@@ -261,3 +261,134 @@ function makeGuardian(env){
   drawBanner(ctx,W,H,banner);};
  return G;}
 const GAMES={invaders:makeInvaders,maze:makeMaze,meteor:makeMeteor,guardian:makeGuardian};
+
+// =====================================================================================================
+// 5. LADDER DASH (climb the girders, jump the rolling barrels, reach the trophy)
+// =====================================================================================================
+function makeLadder(env){
+ const W=480,H=580,G={W,H,score:0,lives:3,level:1,levelName:'Level',over:false};
+ const GIR=[{a:0,b:480,yl:552,yr:552},{a:50,b:480,yl:470,yr:452},{a:0,b:430,yl:362,yr:380},{a:50,b:480,yl:290,yr:272},{a:0,b:430,yl:182,yr:200},{a:150,b:330,yl:104,yr:104}];
+ const LAD=[{x:420,g:0},{x:110,g:1},{x:300,g:1},{x:400,g:2},{x:90,g:3},{x:250,g:3},{x:310,g:4}];
+ const gy=(g,x)=>{const r=GIR[g];return r.yl+(r.yr-r.yl)*(clamp(x,r.a,r.b)-r.a)/(r.b-r.a);};
+ const slope=g=>Math.sign(GIR[g].yr-GIR[g].yl);
+ let p,bar=[],stars=[],spawn=1.5,deathT=0,held=false,pops=[],banner={t:1.8,text:'LEVEL 1',sub:'Climb to the 🏆 · jump the barrels!'};
+ function reset(){p={x:40,g:0,y:gy(0,40),st:'walk',vy:0,lad:null,face:1};bar=[];spawn=1.5;stars=[1,2,3,4].sort(()=>Math.random()-.5).slice(0,3).map(g=>{const r=GIR[g],x=R(r.a+40,r.b-40);return{g,x,got:false};});}
+ reset();
+ const spd=()=>105+G.level*18;
+ G.update=(dt,inp)=>{pops.forEach(q=>q.t-=dt);pops=pops.filter(q=>q.t>0);
+  if(banner){banner.t-=dt;if(banner.t<=0){const f=banner.then;banner=null;if(f)f();}return;}
+  if(deathT>0){deathT-=dt;if(deathT<=0){if(G.lives<=0)G.over=true;else reset();}return;}
+  const jump=inp.f&&!held;held=inp.f;
+  if(p.st==='walk'){const r=GIR[p.g];p.x=clamp(p.x+(inp.r-inp.l)*135*dt,r.a+8,r.b-8);if(inp.r)p.face=1;if(inp.l)p.face=-1;p.y=gy(p.g,p.x);
+   const up=LAD.find(l=>l.g===p.g&&Math.abs(l.x-p.x)<11),down=LAD.find(l=>l.g===p.g-1&&Math.abs(l.x-p.x)<11);
+   if(inp.u&&up){p.st='climb';p.lad=up;p.x=up.x;}else if(inp.d&&down){p.st='climb';p.lad=down;p.x=down.x;p.g=down.g;}
+   else if(jump){p.st='jump';p.vy=-300;p.jx=(inp.r-inp.l)||0;env.beep(600,.1,'square',.03,1.6);}}
+  else if(p.st==='climb'){const l=p.lad,bot=gy(l.g,l.x),top=gy(l.g+1,l.x);p.y=clamp(p.y+(inp.d-inp.u)*95*dt,top,bot);p.g=l.g;
+   if(p.y<=top+.5&&inp.u){p.g=l.g+1;p.st='walk';p.lad=null;if(p.g===5){const b=5000*G.level;G.score+=b;env.beep(880,.4,'triangle',.06,1.8);banner={t:2.4,text:`LEVEL ${G.level} CLEAR!`,sub:`🏆 +${fmtN(b)}`,then:()=>{G.level++;reset();banner={t:1.4,text:`LEVEL ${G.level}`,sub:'Faster barrels!'};}};return;}}
+   else if(p.y>=bot-.5&&inp.d){p.st='walk';p.lad=null;}}
+  else if(p.st==='jump'){const r=GIR[p.g];p.x=clamp(p.x+p.jx*135*dt,r.a+8,r.b-8);p.vy+=900*dt;p.y+=p.vy*dt;const gnd=gy(p.g,p.x);if(p.vy>0&&p.y>=gnd){p.y=gnd;p.st='walk';}}
+  // barrels
+  spawn-=dt;if(spawn<=0){spawn=Math.max(.9,2.6-G.level*.25)*(0.7+Math.random()*.6);bar.push({x:205,g:4,y:gy(4,205),dir:slope(4),st:'roll',vy:0,lad:null,tried:new Set(),jumped:false,rot:0});}
+  for(const b of bar){b.rot+=dt*8*b.dir;
+   if(b.st==='roll'){b.x+=b.dir*spd()*dt;const r=GIR[b.g];b.y=gy(b.g,b.x);
+    const l=LAD.find(l=>l.g===b.g-1&&Math.abs(l.x-b.x)<3&&!b.tried.has(l));if(l){b.tried.add(l);if(Math.random()<.28){b.st='ladder';b.lad=l;b.x=l.x;}}
+    if(b.x>r.b||b.x<r.a){if(b.g===0)b.gone=true;else{b.st='fall';b.vy=0;}}}
+   else if(b.st==='fall'){b.x+=b.dir*45*dt;b.vy+=700*dt;b.y+=b.vy*dt;const ng=b.g-1;if(b.y>=gy(ng,b.x)&&b.x>=GIR[ng].a-5&&b.x<=GIR[ng].b+5){b.g=ng;b.st='roll';const s=slope(ng);if(s)b.dir=s;b.y=gy(ng,b.x);}else if(b.y>H+30)b.gone=true;}
+   else if(b.st==='ladder'){b.y+=spd()*.6*dt;const gnd=gy(b.lad.g,b.lad.x);if(b.y>=gnd){b.g=b.lad.g;b.y=gnd;b.st='roll';const s=slope(b.g);if(s)b.dir=s;}}
+   if(b.x<-30||b.x>W+30)b.gone=true;
+   // jump over = points
+   if(!b.jumped&&p.st==='jump'&&b.st==='roll'&&b.g===p.g&&Math.abs(b.x-p.x)<14&&p.y<b.y-18){b.jumped=true;G.score+=1000*G.level;pops.push({x:p.x,y:p.y-40,t:.9,txt:'+'+fmtN(1000*G.level)});env.beep(1200,.12,'triangle',.05,1.3);}
+   if(Math.hypot(b.x-p.x,(b.y-10)-(p.y-15))<19){G.lives--;deathT=1.4;env.beep(90,.6,'sawtooth',.07,.3);return;}}
+  bar=bar.filter(b=>!b.gone);
+  for(const s of stars)if(!s.got&&s.g===p.g&&Math.abs(s.x-p.x)<14&&p.st!=='climb'){s.got=true;G.score+=2000*G.level;pops.push({x:s.x,y:gy(s.g,s.x)-40,t:.9,txt:'+'+fmtN(2000*G.level)});env.beep(1500,.2,'triangle',.05,1.4);}};
+ G._state=()=>({g:p.g,st:p.st,x:Math.round(p.x),y:Math.round(p.y),barrels:bar.length});
+ G._clear=()=>{p.g=5;p.x=200;p.y=gy(5,200);G.update(.016,{l:0,r:0,u:0,d:0,f:0});const b=5000*G.level;G.score+=b;banner={t:1.2,text:`LEVEL ${G.level} CLEAR!`,sub:'',then:()=>{G.level++;reset();}};};
+ G.render=ctx=>{ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);ctx.textAlign='center';ctx.textBaseline='middle';
+  // ladders
+  ctx.strokeStyle='#3fe0ff';ctx.lineWidth=2.5;for(const l of LAD){const b=gy(l.g,l.x),t=gy(l.g+1,l.x);ctx.beginPath();ctx.moveTo(l.x-9,b);ctx.lineTo(l.x-9,t);ctx.moveTo(l.x+9,b);ctx.lineTo(l.x+9,t);for(let y=b-8;y>t;y-=10){ctx.moveTo(l.x-9,y);ctx.lineTo(l.x+9,y);}ctx.stroke();}
+  // girders
+  for(const r of GIR){ctx.fillStyle='#ff2d55';ctx.beginPath();ctx.moveTo(r.a,r.yl);ctx.lineTo(r.b,r.yr);ctx.lineTo(r.b,r.yr+9);ctx.lineTo(r.a,r.yl+9);ctx.closePath();ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1.5;ctx.beginPath();for(let x=r.a;x<r.b;x+=16){const y=r.yl+(r.yr-r.yl)*(x-r.a)/(r.b-r.a);ctx.moveTo(x,y+1);ctx.lineTo(x+8,y+8);ctx.lineTo(x+16,y+1);}ctx.stroke();}
+  ctx.font=`34px ${EMOJI_FONT}`;ctx.fillText('🦖',180,104-22);ctx.font=`26px ${EMOJI_FONT}`;ctx.fillText('🏆',305,104-16);
+  ctx.font=`18px ${EMOJI_FONT}`;for(const s of stars)if(!s.got)ctx.fillText('⭐',s.x,gy(s.g,s.x)-16);
+  for(const b of bar){ctx.save();ctx.translate(b.x,b.y-10);ctx.rotate(b.rot);ctx.fillStyle='#b5651d';ctx.beginPath();ctx.arc(0,0,10,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#5b3010';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-10,0);ctx.lineTo(10,0);ctx.moveTo(0,-10);ctx.lineTo(0,10);ctx.stroke();ctx.restore();}
+  if(!(deathT>0&&Math.floor(deathT*8)%2)){if(env.avatar&&env.avatar.complete)ctx.drawImage(env.avatar,p.x-14,p.y-36,28,35);else{ctx.font=`26px ${EMOJI_FONT}`;ctx.fillText('🧍',p.x,p.y-14);}}
+  ctx.font='bold 15px monospace';ctx.fillStyle='#ffe45e';for(const q of pops){ctx.globalAlpha=Math.min(1,q.t*2);ctx.fillText(q.txt,q.x,q.y-(.9-q.t)*25);}ctx.globalAlpha=1;
+  drawBanner(ctx,W,H,banner);};
+ return G;}
+
+// =====================================================================================================
+// 6. TURBO RACER (top-down retro road race)
+// =====================================================================================================
+function makeRacer(env){
+ const W=400,H=600,RW=250,PY=H-90,G={W,H,score:0,lives:3,level:1,levelName:'Stage',over:false};
+ let dist=0,speed=0,px=W/2,inv=0,cars=[],coins=[],spawn=1,cspawn=2,nitro=3,boost=0,held=false,next=4000,parts=[],banner={t:1.8,text:'STAGE 1',sub:'▲ go · ▼ brake · ● nitro (3)'};
+ const centre=d=>W/2+Math.sin(d/700)*55+Math.sin(d/1900+1)*35;
+ const atY=y=>dist+(PY-y);   // world distance shown at screen y
+ const maxV=()=>(430+G.level*40)*(boost>0?1.45:1);
+ const COLS=['#2457d6','#f2c218','#1f9d55','#b45bd6','#ff8a1c','#e6e9f2'];
+ G.update=(dt,inp)=>{parts.forEach(q=>{q.x+=q.vx*dt;q.y+=q.vy*dt;q.t-=dt;});parts=parts.filter(q=>q.t>0);
+  if(banner){banner.t-=dt;if(banner.t<=0){const f=banner.then;banner=null;if(f)f();}return;}
+  const nit=inp.f&&!held;held=inp.f;if(nit&&nitro>0&&boost<=0){nitro--;boost=2.2;env.beep(300,.5,'sawtooth',.05,3);}
+  if(boost>0)boost-=dt;if(inv>0)inv-=dt;
+  if(inp.u||boost>0)speed+=320*dt;else if(inp.d)speed-=520*dt;else speed+=(Math.min(260,maxV())-speed)*dt*.6;
+  speed=clamp(speed,0,maxV());px=clamp(px+(inp.r-inp.l)*(150+speed*.35)*dt,18,W-18);
+  const off=Math.abs(px-centre(dist))>RW/2-14;if(off){speed*=Math.pow(.35,dt);if(Math.random()<.3)parts.push({x:px+R(-10,10),y:PY+20,vx:R(-40,40),vy:R(40,90),t:.4,c:'#7a5b2a'});}
+  dist+=speed*dt;G.score+=Math.round(speed*dt*.35);
+  spawn-=dt;if(spawn<=0){spawn=Math.max(.45,1.3-G.level*.1)*(0.6+Math.random()*.8);const wy=dist+PY+R(80,160);cars.push({lane:R(-1,1),wy,v:R(140,240)+G.level*10,c:pick(COLS),passed:false});}
+  cspawn-=dt;if(cspawn<=0){cspawn=R(1,3);coins.push({lane:R(-1,1),wy:dist+PY+R(100,200)});}
+  for(const c of cars)c.wy+=c.v*dt;
+  const pr={x:px,y:PY};
+  cars=cars.filter(c=>{const y=PY-(c.wy-dist),x=centre(c.wy)+c.lane*RW/3;if(y>H+60){return false;}if(!c.passed&&y>PY+40){c.passed=true;G.score+=200*G.level;}
+   if(inv<=0&&Math.abs(x-pr.x)<26&&Math.abs(y-pr.y)<46){G.lives--;inv=2;speed*=.2;env.beep(80,.5,'sawtooth',.07,.3);for(let i=0;i<20;i++)parts.push({x:px,y:PY,vx:R(-160,160),vy:R(-160,160),t:.6,c:pick(['#ffe45e','#ff8a1c','#fff'])});if(G.lives<=0)banner={t:1.6,text:'GAME OVER',sub:'',then:()=>G.over=true};return false;}return y>-400;});
+  coins=coins.filter(c=>{const y=PY-(c.wy-dist),x=centre(c.wy)+c.lane*RW/3;if(y>H+30)return false;if(Math.abs(x-px)<24&&Math.abs(y-PY)<36){G.score+=500*G.level;env.beep(1300,.12,'triangle',.05,1.4);return false;}return true;});
+  if(dist>=next){const b=5000*G.level;G.score+=b;next+=4000+G.level*800;banner={t:2,text:`CHECKPOINT!`,sub:`Stage ${G.level+1} · +${fmtN(b)} · nitro refilled`,then:()=>{G.level++;nitro=3;}};env.beep(880,.4,'triangle',.06,1.8);}};
+ G._clear=()=>{dist=next;G.update(.016,{l:0,r:0,u:0,d:0,f:0});};
+ function car(ctx,x,y,col,me){ctx.fillStyle=col;ctx.fillRect(x-14,y-24,28,48);ctx.fillStyle='#121625';ctx.fillRect(x-17,y-18,5,12);ctx.fillRect(x+12,y-18,5,12);ctx.fillRect(x-17,y+8,5,12);ctx.fillRect(x+12,y+8,5,12);
+  ctx.fillStyle=me?'#bfe9ff':'#3a3f55';ctx.fillRect(x-10,y-14,20,9);ctx.fillStyle='rgba(255,255,255,.7)';if(me){ctx.fillRect(x-3,y-24,6,48);}else ctx.fillRect(x-10,y+12,20,4);}
+ G.render=ctx=>{ctx.fillStyle='#2f9a4a';ctx.fillRect(0,0,W,H);
+  for(let y=0;y<H;y+=4){const d=atY(y),c=centre(d),stripe=Math.floor(d/40)%2;ctx.fillStyle=stripe?'#2f9a4a':'#34a853';ctx.fillRect(0,y,W,4);ctx.fillStyle='#4a4f63';ctx.fillRect(c-RW/2,y,RW,4);ctx.fillStyle=stripe?'#e51c35':'#fff';ctx.fillRect(c-RW/2-8,y,8,4);ctx.fillRect(c+RW/2,y,8,4);
+   if(Math.floor(d/50)%2===0){ctx.fillStyle='#e6e9f2';ctx.fillRect(c-RW/6-2,y,4,4);ctx.fillRect(c+RW/6-2,y,4,4);}}
+  for(let i=0;i<8;i++){const d=Math.floor((dist+H)/150)*150-i*150,y=PY-(d-dist),c=centre(d);ctx.font=`22px ${EMOJI_FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(i%2?'🌳':'🌲',c-RW/2-40,y);ctx.fillText(i%2?'🌲':'🌳',c+RW/2+40,y+70);}
+  ctx.font=`22px ${EMOJI_FONT}`;for(const c of coins){const y=PY-(c.wy-dist),x=centre(c.wy)+c.lane*RW/3;ctx.fillText('🪙',x,y);}
+  for(const c of cars){const y=PY-(c.wy-dist),x=centre(c.wy)+c.lane*RW/3;car(ctx,x,y,c.c,false);}
+  if(!(inv>0&&Math.floor(inv*8)%2))car(ctx,px,PY,'#e51c35',true);
+  if(boost>0){ctx.fillStyle='#ff8a1c';ctx.fillRect(px-8,PY+24,6,R(10,22));ctx.fillRect(px+2,PY+24,6,R(10,22));}
+  for(const q of parts){ctx.globalAlpha=q.t/.6;ctx.fillStyle=q.c;ctx.fillRect(q.x-2,q.y-2,4,4);}ctx.globalAlpha=1;
+  ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(8,8,150,46);ctx.fillStyle='#fff';ctx.font='bold 14px monospace';ctx.textAlign='left';ctx.fillText(`${Math.round(speed/3)} km/h`,16,24);ctx.fillText(`Nitro: ${'🔥'.repeat(nitro)||'—'}`,16,44);
+  drawBanner(ctx,W,H,banner);};
+ return G;}
+
+// =====================================================================================================
+// 7. SUPER SNAKE
+// =====================================================================================================
+function makeSnake(env){
+ const N=24,C=20,W=N*C,H=N*C,G={W,H,score:0,lives:3,level:1,levelName:'Level',over:false};
+ let sn,dir,want,food,star=null,t=0,eaten=0,deathT=0,banner={t:1.6,text:'LEVEL 1',sub:'Eat the footballs! Don’t hit the walls or yourself.'};
+ const free=()=>{let x,y;do{x=R(1,N-2);y=R(1,N-2);}while(sn.some(s=>s[0]===x&&s[1]===y)||(food&&food[0]===x&&food[1]===y));return[x,y];};
+ function reset(){sn=[[8,12],[7,12],[6,12]];dir=[1,0];want=[1,0];food=free();star=null;}
+ reset();
+ const interval=()=>Math.max(.055,.14-G.level*.012);
+ G.update=(dt,inp)=>{if(banner){banner.t-=dt;if(banner.t<=0){const f=banner.then;banner=null;if(f)f();}return;}
+  if(deathT>0){deathT-=dt;if(deathT<=0){if(G.lives<=0)G.over=true;else reset();}return;}
+  if(inp.l)want=[-1,0];else if(inp.r)want=[1,0];else if(inp.u)want=[0,-1];else if(inp.d)want=[0,1];
+  if(star){star.t-=dt;if(star.t<=0)star=null;}
+  t+=dt;if(t<interval())return;t=0;if(!(want[0]===-dir[0]&&want[1]===-dir[1]))dir=want;
+  const h=[sn[0][0]+dir[0],sn[0][1]+dir[1]];
+  if(h[0]<1||h[1]<1||h[0]>N-2||h[1]>N-2||sn.some(s=>s[0]===h[0]&&s[1]===h[1])){G.lives--;deathT=1.2;env.beep(90,.5,'sawtooth',.07,.3);return;}
+  sn.unshift(h);
+  if(h[0]===food[0]&&h[1]===food[1]){eaten++;G.score+=500*G.level;env.beep(900,.08,'square',.04,1.3);food=free();if(eaten%5===0)star={p:free(),t:6};
+   if(eaten%8===0){const b=5000*G.level;G.score+=b;banner={t:1.8,text:`LEVEL ${G.level+1}!`,sub:`+${fmtN(b)} · a bit faster`,then:()=>{G.level++;}};}}
+  else if(star&&h[0]===star.p[0]&&h[1]===star.p[1]){G.score+=3000*G.level;star=null;env.beep(1500,.2,'triangle',.06,1.4);}
+  else sn.pop();};
+ G.swipe=(dx,dy)=>{want=Math.abs(dx)>Math.abs(dy)?[Math.sign(dx),0]:[0,Math.sign(dy)];};
+ G._clear=()=>{eaten=7;food=[sn[0][0]+dir[0],sn[0][1]+dir[1]];};
+ G.render=ctx=>{ctx.fillStyle='#0f2a17';ctx.fillRect(0,0,W,H);ctx.fillStyle='#14361e';for(let y=1;y<N-1;y++)for(let x=1;x<N-1;x++)if((x+y)%2)ctx.fillRect(x*C,y*C,C,C);
+  ctx.fillStyle='#ff8a1c';ctx.fillRect(0,0,W,C);ctx.fillRect(0,H-C,W,C);ctx.fillRect(0,0,C,H);ctx.fillRect(W-C,0,C,H);
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`17px ${EMOJI_FONT}`;ctx.fillText('⚽',food[0]*C+C/2,food[1]*C+C/2+1);if(star)ctx.fillText('⭐',star.p[0]*C+C/2,star.p[1]*C+C/2+1);
+  sn.forEach((s,i)=>{ctx.fillStyle=deathT>0&&Math.floor(deathT*8)%2?'#fff':i?(i%2?'#3cc46a':'#34b35f'):'#9dff2e';ctx.beginPath();if(ctx.roundRect)ctx.roundRect(s[0]*C+1,s[1]*C+1,C-2,C-2,6);else ctx.rect(s[0]*C+1,s[1]*C+1,C-2,C-2);ctx.fill();});
+  const h=sn[0];ctx.fillStyle='#121625';ctx.beginPath();ctx.arc(h[0]*C+C/2+dir[0]*3-dir[1]*4,h[1]*C+C/2+dir[1]*3-dir[0]*4,2.4,0,Math.PI*2);ctx.arc(h[0]*C+C/2+dir[0]*3+dir[1]*4,h[1]*C+C/2+dir[1]*3+dir[0]*4,2.4,0,Math.PI*2);ctx.fill();
+  drawBanner(ctx,W,H,banner);};
+ return G;}
+GAME_LIST.push({id:'ladder',name:'Ladder Dash',icon:'🪜',desc:'Climb the girders, jump the rolling barrels, grab the trophy!'},{id:'racer',name:'Turbo Racer',icon:'🏎️',desc:'Race the winding road — dodge traffic, grab coins, use nitro!'},{id:'snake',name:'Super Snake',icon:'🐍',desc:'Eat footballs to grow. Don’t bite your tail!'});
+Object.assign(PADS,{ladder:[['l','r'],['u','d','f']],racer:[['l','r'],['d','u','f']],snake:[['l','r'],['u','d']]});
+Object.assign(GAMES,{ladder:makeLadder,racer:makeRacer,snake:makeSnake});

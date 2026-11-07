@@ -44,11 +44,16 @@ jobs:
 
 ## Hidden arcade and Admin (parents)
 - A secret word **or secret number code** (typed into the answer box and sent with SHOOT, or typed anywhere on a computer) opens the arcade. Number codes are for tablets that only show a number keypad; they always start with `00` and are 6–10 digits, so they can never be a real answer.
-- Four original games (`js/games.js`): **Invaders** (My player or Classic style, with a bonus game after every wave — penalty shoot-out, maths blast, meteor dodge, UFO hunt), **Maze Muncher**, **Meteor Storm** and **Planet Guardian**. They are inspired by classic arcade genres; no code, artwork or names are copied. All share the same time limits; each has its own high score. A different secret word opens **Admin** (PIN-protected). The words are not written here on purpose — this repository is public.
+- Four original games (`js/games.js`): **Invaders** (My player or Classic style, with a bonus game after every wave — penalty shoot-out, maths blast, meteor dodge, UFO hunt), **Maze Muncher**, **Meteor Storm**, **Planet Guardian**, **Ladder Dash**, **Turbo Racer** and **Super Snake**. They are inspired by classic arcade genres; no code, artwork or names are copied. All share the same time limits; each has its own high score. A different secret word opens **Admin** (PIN-protected). The words are not written here on purpose — this repository is public.
 - Play time is limited per player by rules set in Admin: what must be done first (minutes of learning, questions right, Focus questions right, a Learn mission, Today's plan), earned or fixed play time, longest session, break between sessions, most per day and per week, allowed days and hours, no play on exam day, and one-off extra minutes.
 - Admin can also lock the Parent dashboard and “Reset progress” behind the PIN, see play history and play without limits (not counted).
 - The PIN and words are stored on each device as salted SHA-256 hashes. This is family-level protection: the code is public and browser developer tools could still change things.
 - Rules live in `js/data/arcade-rules.js`; the game in `js/arcade.js`; Admin in `js/admin.js`.
+
+## Focus areas (chosen by a parent)
+- Parent dashboard → **🎯 Focus areas**: tick any five topics for each player and save. They get the Focus Zone cards (📘 Learn, 🎲 Examples, ⚽ Practise), Focus bonuses, streaks, mastery rewards, readiness bars and Today’s plan. The choice is saved with the player’s progress (and in their progress file).
+- The app suggests five, ranked by need: right-first-time rate, how often help was used, skipped questions and lesson checks; untried topics are flagged when there isn’t enough evidence yet.
+- Default: Volume, Equivalent fractions, Properties of shapes, Measuring space, Representing data. Every one of the 23 topics has its own Learn mission (`js/data/learning.js`, `js/data/learning-more.js`).
 
 ## Windows, highlights and full screen
 - Every pop-up window can be moved (drag the title bar), resized (drag the bottom-right corner) and expanded (⤢ or double-click the title) — `js/windows.js`. On phones they are full-screen anyway.
