@@ -159,5 +159,5 @@ get('answer').addEventListener('input',()=>{learnMode=false;const v=get('answer'
   let c=get('locker').open?'shop':(learnMode||get('learn').open)?'learn':'questions';if(arcadeOpen){const a=Arcade.status();if(a.view!=='game'||a.admin)return;c='game';}else if(get('admin').open)return;const T=day();T.app+=dt;T[c]+=dt;acc+=dt;AS.active+=dt;total+=dt;clock();if(acc>=20){acc=0;save(false);}},1000);
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){AS.lastSeen=Date.now();save(false);}});window.addEventListener('pagehide',()=>{AS.lastSeen=Date.now();save(false);});})();
 
-applyName();Win.init();Spot.start();Admin.init();Arcade.init();Help.init();Learn.init();Locker.init();Players.init();Parent.init();Scratch.init();PWA.init();updateStats();setMode('training');restartSession();
+applyName();Win.init();Spot.start();Tour.init();Admin.init();Arcade.init();Help.init();Learn.init();Locker.init();Players.init();Parent.init();Scratch.init();PWA.init();updateStats();setMode('training');restartSession();
 Storage.init({getData:()=>({stats}),onStatus:drawSaveStatus});

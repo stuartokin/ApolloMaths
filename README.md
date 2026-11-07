@@ -50,6 +50,11 @@ jobs:
 - The PIN and words are stored on each device as salted SHA-256 hashes. This is family-level protection: the code is public and browser developer tools could still change things.
 - Rules live in `js/data/arcade-rules.js`; the game in `js/arcade.js`; Admin in `js/admin.js`.
 
+## Welcome screen and guided tours
+- The first time a player opens the app (after choosing/designing their player), a welcome screen offers a **🚀 player tour** or a **👪 grown-ups' tour**, or *Maybe later*. Ticking **Don't ask me again** stops it; finishing the player tour also stops it. This is saved with the player's progress (browser and progress file).
+- Tours spotlight each real part of the page with a speech bubble (Next/Back/Skip, arrow keys, Esc). Player tour: name/clock/Help, My player, Kit Shop, Today's plan, answering questions, help buttons, Focus Zone, game modes and timed tests, printing, topics, Match centre, medals, leaderboard, saving. Grown-ups' tour: Parent dashboard, timed tests and printouts, Focus areas, progress files, players, hidden games/Admin (contact for passcodes), Help.
+- Both tours can be rerun from the top of **❓ Help** (`js/tour.js`).
+
 ## Session clock and saved arcade time
 - The top of the page shows **this session** and **total** time (active time only — it pauses when the app isn’t being used). The session is saved every few seconds and when the page is hidden/closed; reopening within the parent’s setting (Admin → Arcade rules → Session clock, default 15 minutes, 0 = always new) carries on the same session.
 - Arcade sessions can include several games. If the arcade is left early, the unplayed time is banked (Admin: on/off, most that can be saved, default 15 minutes) and added to the next session — and if that is on a later day, on top of that day’s limits.

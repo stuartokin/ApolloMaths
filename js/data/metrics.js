@@ -16,6 +16,7 @@ function cleanMetrics(s){
  s.purchases=(Array.isArray(s.purchases)?s.purchases:[]).slice(-300).filter(p=>p&&typeof p.id==='string').map(p=>({t:num(p.t),id:str(p.id,30),price:Math.floor(num(p.price))}));
  s.fix=(Array.isArray(s.fix)?s.fix:[]).filter(f=>f&&topics[f.tp]&&bank[f.tp]&&bank[f.tp][f.g]).slice(-40).map(f=>({tp:f.tp,g:Math.floor(num(f.g)),due:Math.floor(num(f.due)),streak:Math.floor(num(f.streak,0,2)),added:num(f.added),q:str(f.q,220)}));
  const as=s.appSession&&typeof s.appSession==='object'?s.appSession:{};s.appSession={start:num(as.start),active:num(as.active,0,86400*7),lastSeen:num(as.lastSeen),count:Math.floor(num(as.count))};
+ const tu=s.tutorial&&typeof s.tutorial==='object'?s.tutorial:{};s.tutorial={dontAsk:!!tu.dontAsk,done:{player:!!(tu.done&&tu.done.player),parent:!!(tu.done&&tu.done.parent)}};
  s.fixed=Math.floor(num(s.fixed));s.qn=Math.floor(num(s.qn));
  s.plan=s.plan&&isDay(s.plan.day)?{day:s.plan.day,done:!!s.plan.done}:{day:'',done:false};
  const ln=s.learn&&typeof s.learn==='object'?s.learn:{};
