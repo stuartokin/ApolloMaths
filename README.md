@@ -43,7 +43,8 @@ jobs:
 ```
 
 ## Hidden arcade and Admin (parents)
-- A secret word (typed into the answer box and sent with SHOOT, or typed anywhere on a computer) opens an original invaders-style arcade game, in **My player** or **Classic** style. A different secret word opens **Admin** (PIN-protected). The words are not written here on purpose — this repository is public.
+- A secret word **or secret number code** (typed into the answer box and sent with SHOOT, or typed anywhere on a computer) opens the arcade. Number codes are for tablets that only show a number keypad; they always start with `00` and are 6–10 digits, so they can never be a real answer.
+- Four original games (`js/games.js`): **Invaders** (My player or Classic style, with a bonus game after every wave — penalty shoot-out, maths blast, meteor dodge, UFO hunt), **Maze Muncher**, **Meteor Storm** and **Planet Guardian**. They are inspired by classic arcade genres; no code, artwork or names are copied. All share the same time limits; each has its own high score. A different secret word opens **Admin** (PIN-protected). The words are not written here on purpose — this repository is public.
 - Play time is limited per player by rules set in Admin: what must be done first (minutes of learning, questions right, Focus questions right, a Learn mission, Today's plan), earned or fixed play time, longest session, break between sessions, most per day and per week, allowed days and hours, no play on exam day, and one-off extra minutes.
 - Admin can also lock the Parent dashboard and “Reset progress” behind the PIN, see play history and play without limits (not counted).
 - The PIN and words are stored on each device as salted SHA-256 hashes. This is family-level protection: the code is public and browser developer tools could still change things.

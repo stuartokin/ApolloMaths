@@ -18,7 +18,9 @@ const ARCADE_DEFAULTS={
  examLock:true,           // no arcade on the exam day
  bonusDay:'',bonusMins:0  // one-off extra minutes for a given day
 };
-const DEFAULT_WORDS={kid:'c19fe337aa0cd1ebc4ba00f0d16d83be47e9b047e0e61690e268088325092a7b',admin:'f9b0a0d3973f9bdda31247106c402194cce6f9313eae3e6e3d070e33383b7b1f'}; // hashes only
+const DEFAULT_WORDS={kid:'c19fe337aa0cd1ebc4ba00f0d16d83be47e9b047e0e61690e268088325092a7b',admin:'f9b0a0d3973f9bdda31247106c402194cce6f9313eae3e6e3d070e33383b7b1f',kidNum:'cdc6e04cd9378ade38d889c3c5824d2c8b26f2af384040007af60674adcae5c3',adminNum:'c861320498ae661f62dffcf04d9b48de24872d644ed58277050e860b4ecdb96b'}; // hashes only
+// Secret NUMBER codes (for tablets that only show a number keypad): they always start with 00 and are 6–10 digits, so they can never be a real answer.
+const validCode=c=>/^00\d{4,8}$/.test(String(c||'').trim());
 // SHA-256 (public-domain compact implementation) — used so secret words and the PIN are never stored as readable text.
 function sha256(ascii){const rr=(v,a)=>(v>>>a)|(v<<(32-a));const mp=Math.pow,mw=mp(2,32);let i,j,res='';const words=[],bitLen=ascii.length*8;let hash=sha256.h=sha256.h||[];const k=sha256.k=sha256.k||[];let pc=k.length;const comp={};
  for(let c=2;pc<64;c++){if(!comp[c]){for(i=0;i<313;i+=c)comp[i]=c;hash[pc]=(mp(c,.5)*mw)|0;k[pc++]=(mp(c,1/3)*mw)|0;}}
@@ -37,8 +39,8 @@ function cleanArcade(s){const a=s.arcade&&typeof s.arcade==='object'?s.arcade:{}
  const S={enabled:st.enabled===undefined?d.enabled:!!st.enabled,mode:st.mode==='fixed'?'fixed':'earned',earnPer:n(st.earnPer,1,20,d.earnPer),unlockMins:n(st.unlockMins,0,240,d.unlockMins),unlockCorrect:n(st.unlockCorrect,0,200,d.unlockCorrect),unlockFocus:n(st.unlockFocus,0,200,d.unlockFocus),needLesson:!!st.needLesson,needPlan:!!st.needPlan,
   sessionMins:n(st.sessionMins,1,120,d.sessionMins),breakMins:n(st.breakMins,0,600,d.breakMins),dayMins:n(st.dayMins,0,600,d.dayMins),weekMins:n(st.weekMins,0,3000,d.weekMins),days:Array.isArray(st.days)&&st.days.length===7?st.days.map(x=>x?1:0):d.days.slice(),from:t(st.from)||d.from,to:t(st.to)||d.to,examLock:st.examLock===undefined?d.examLock:!!st.examLock,bonusDay:isDay(st.bonusDay)?st.bonusDay:'',bonusMins:n(st.bonusMins,0,240,0)};
  const used={};const u=a.used&&typeof a.used==='object'?a.used:{};for(const k of Object.keys(u).filter(isDay).sort().slice(-60))used[k]=n(u[k],0,86400,0);
- s.arcade={settings:S,used,plays:(Array.isArray(a.plays)?a.plays:[]).slice(-200).filter(p=>p&&typeof p==='object').map(p=>({t:num(p.t),secs:n(p.secs,0,86400,0),score:n(p.score,0,1e7,0),theme:p.theme==='classic'?'classic':'player',wave:n(p.wave,1,999,1),end:str(p.end,12)})),
-  lastEnd:num(a.lastEnd),high:{player:n((a.high||{}).player,0,1e7,0),classic:n((a.high||{}).classic,0,1e7,0)},theme:a.theme==='classic'?'classic':'player',mute:!!a.mute};return s;}
+ s.arcade={settings:S,used,plays:(Array.isArray(a.plays)?a.plays:[]).slice(-200).filter(p=>p&&typeof p==='object').map(p=>({t:num(p.t),secs:n(p.secs,0,86400,0),score:n(p.score,0,1e7,0),theme:p.theme==='classic'?'classic':'player',game:['invaders','maze','meteor','guardian'].includes(p.game)?p.game:'invaders',wave:n(p.wave,1,999,1),end:str(p.end,12)})),
+  lastEnd:num(a.lastEnd),high:Object.fromEntries(['player','classic','maze','meteor','guardian'].map(k=>[k,n((a.high||{})[k],0,1e9,0)])),theme:a.theme==='classic'?'classic':'player',game:['invaders','maze','meteor','guardian'].includes(a.game)?a.game:'invaders',mute:!!a.mute};return s;}
 const mondayOf=d=>{const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x;};
 // Everything the arcade needs to know right now: is it unlocked, what is left, and why not.
 function arcadeStatus(s,now=new Date()){const st=s.arcade.settings,k=dayKey(now),T=s.time.byDay[k]||{},learn=(T.questions||0)+(T.learn||0);
