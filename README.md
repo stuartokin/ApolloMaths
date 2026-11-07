@@ -50,6 +50,12 @@ jobs:
 - The PIN and words are stored on each device as salted SHA-256 hashes. This is family-level protection: the code is public and browser developer tools could still change things.
 - Rules live in `js/data/arcade-rules.js`; the game in `js/arcade.js`; Admin in `js/admin.js`.
 
+## Windows, highlights and full screen
+- Every pop-up window can be moved (drag the title bar), resized (drag the bottom-right corner) and expanded (⤢ or double-click the title) — `js/windows.js`. On phones they are full-screen anyway.
+- After a correct answer, **Next Question** (and **Next step** in lessons) turns green and takes keyboard focus.
+- On opening the app the question panel is spotlighted until the first answer is typed; on phones a floating button jumps to it.
+- Games have a **⛶ Full screen** button (browser full screen where allowed; on iPhone the game fills the page).
+
 ## Fractions and help
 - Fractions are written the Tiffin way — numerator over a line over the denominator — in questions, hints, methods, explainers, lessons, examples, the paper mock and the mark scheme (`fracHTML` / `fracify` in `js/render/render.js`). Apollo still types them as `3/4`, and sees a preview of how they look.
 - **❓ Help** (top of the page and footer) explains how to use the app and shows the version history (`js/data/help.js`, `js/help.js`). Change `APP_VERSION` and add an entry to `versionHistory` for each release; players are told once about a new version.

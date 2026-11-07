@@ -19,7 +19,7 @@ const Learn=(()=>{
    <h3>${esc(s.title)}</h3><div class="ln-content">${renderBlocks(personalise(s.blocks))}</div>
    <div class="gate" id="lnGate"></div>
    <div class="ln-check"><b>🤔 Quick check: ${fracHTML(personalise(s.check.q))}</b><div class="ln-opts">${order.map((o,i)=>`<button class="ln-opt${disabled.includes(o)?' wrong':''}${state!=='reading'&&state!=='ready'&&o===0?' right':''}" data-opt="${o}" type="button"${state!=='ready'||disabled.includes(o)?' disabled':''}>${fracHTML(personalise(s.check.options[o]))}</button>`).join('')}</div><div class="ln-fb" id="lnFb" aria-live="polite"></div></div>
-   <div class="actions"><button class="primary${state==='right'||state==='shown'?'':' hidden'}" data-next type="button">${step+1<steps.length?'Next step ➡️':'Finish lesson 🏁'}</button></div>
+   <div class="actions"><button class="primary${state==='right'?' next-ready':''}${state==='right'||state==='shown'?'':' hidden'}" data-next type="button">${step+1<steps.length?'Next step ➡️':'Finish lesson 🏁'}</button></div>
    ${paidToday?'<p class="mini">You’ve already earned today’s points for this lesson — reading it again still makes you stronger! 💪</p>':`<p class="mini">Points: +${LEARN.stepFirst} ⚡ for each check right first time, +${LEARN.stepSecond} second time, +${LEARN.lessonBonus} ⚡ for finishing. Points come from reading carefully AND answering — not from waiting.</p>`}`;
   gate();}
  function gate(){const g=get('lnGate');if(!g)return;if(state!=='reading'){g.className='gate done';g.innerHTML=state==='ready'?'✅ Ready! Answer the quick check.':'';if(state!=='ready')g.classList.add('hidden');return;}
@@ -27,7 +27,7 @@ const Learn=(()=>{
   g.className='gate'+(isActive()?'':' paused');g.innerHTML=`<div class="gbar"><span style="width:${pct}%"></span></div><span>${isActive()?`📖 Read carefully… the check unlocks in <b>${left}s</b>`:'⏸️ Paused — tap or scroll to keep reading'}</span>`;}
  function answer(o){if(state!=='ready')return;const s=learnMissions[tp][step];tries++;const fb=get('lnFb');
   if(o===0){const pts=paidToday?0:tries===1?LEARN.stepFirst:tries===2?LEARN.stepSecond:0;lessonPts+=pts;state='right';logLearnEv('step',pts,{step,tries,secs:Math.round(active),ok:1});render();
-   get('lnFb').innerHTML=`<div class="feedback good">✅ ${tries===1?'Spot on!':'Got it!'} ${pts?`+${pts} ⚡`:''}<br>${fracHTML(personalise(s.check.why))}</div>`;return;}
+   get('lnFb').innerHTML=`<div class="feedback good">✅ ${tries===1?'Spot on!':'Got it!'} ${pts?`+${pts} ⚡`:''}<br>${fracHTML(personalise(s.check.why))}</div>`;const nb=dlg().querySelector('[data-next]');if(nb){nb.focus({preventScroll:true});nb.scrollIntoView({behavior:'smooth',block:'nearest'});}return;}
   disabled.push(o);
   if(tries>=3){state='shown';logLearnEv('step',0,{step,tries,secs:Math.round(active),ok:0});render();get('lnFb').innerHTML=`<div class="feedback try">The answer is <b>${fracHTML(personalise(s.check.options[0]))}</b>. ${fracHTML(personalise(s.check.why))}</div>`;return;}
   state='reading';need=active+5;render();get('lnFb').innerHTML=`<div class="feedback try">Not quite — read the step again. The check unlocks in a few seconds.</div>`;}
@@ -55,7 +55,7 @@ const Learn=(()=>{
  function close(){const d=dlg();if(d.close)d.close();else d.removeAttribute('open');}
  function tick(){const now=Date.now(),dt=Math.min(1,(now-last)/1000);last=now;if(!dlg().open){clearInterval(tickId);return;}
   if(mode==='lesson'&&state==='reading'){if(isActive())active+=dt;if(active>=need){state='ready';render();}else gate();}
-  else if(mode==='example'&&exShown<ex.s.length){if(isActive())exActive+=dt;const b=get('exStepBtn');if(b){const ready=exActive>=LEARN.exampleStepSecs;b.disabled=!ready;b.textContent=ready?`Show step ${exShown+1} of ${ex.s.length} ▶`:`Read… ${Math.max(0,Math.ceil(LEARN.exampleStepSecs-exActive))}s`;}}}
+  else if(mode==='example'&&exShown<ex.s.length){if(isActive())exActive+=dt;const b=get('exStepBtn');if(b){const ready=exActive>=LEARN.exampleStepSecs;b.disabled=!ready;b.classList.toggle('next-ready',ready);b.textContent=ready?`Show step ${exShown+1} of ${ex.s.length} ▶`:`Read… ${Math.max(0,Math.ceil(LEARN.exampleStepSecs-exActive))}s`;}}}
  function onClick(e){const b=e.target.closest('button');if(!b||!dlg().contains(b))return;const ds=b.dataset;
   if(ds.close!==undefined){close();return;}
   if(ds.opt!==undefined){answer(+ds.opt);return;}
