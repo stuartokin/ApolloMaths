@@ -1,0 +1,31 @@
+'use strict';
+// PRESENTATION: "Who's playing?" (player profiles: add, pick, rename, delete) and the friends leaderboard.
+const Players=(()=>{
+ let editing=null,board='points',err='';
+ const dlg=()=>get('players');
+ const statsOf=p=>{const c=Storage.current();return c&&p.id===c.id?stats:cleanStats(Storage.readProfile(p.id).stats);};
+ function render(){const list=Storage.profiles(),cur=Storage.current(),d=dlg();
+  d.querySelector('.pl-body').innerHTML=`${list.length?'<p class="section-note">Tap your player to start. Everyone has their own points, kit, stats and progress file.</p>':'<div class="note">👋 <b>Welcome!</b> Type your name to create your player.</div>'}
+  <div class="plgrid">${list.map(p=>{const s=statsOf(p);return `<div class="plcard${cur&&p.id===cur.id?' on':''}"><button class="plpick" data-pick="${p.id}" type="button">${drawAvatar(s.avatar)}<b>${esc(p.name)}</b><span class="mini">${s.points.toLocaleString('en-GB')} ⚡ · ${s.solved} right</span></button>
+   ${editing===p.id?`<div class="plrename"><input id="renameInput" maxlength="20" value="${esc(p.name)}" aria-label="New name for ${esc(p.name)}"><button class="secondary" data-saverename="${p.id}" type="button">Save</button></div>`:`<div class="plactions"><button class="linkbtn" data-rename="${p.id}" type="button">✏️ Rename</button><button class="linkbtn" data-del="${p.id}" type="button">🗑️ Delete</button></div>`}</div>`;}).join('')}</div>
+  <form class="pladd" id="addPlayerForm"><label for="newName"><b>➕ ${list.length?'New player':'Your name'}</b></label><div class="pladdrow"><input id="newName" maxlength="20" placeholder="Name" autocomplete="off" autocapitalize="words"><button class="primary" type="submit">${list.length?'Add player':'Start playing'}</button></div>${err?`<p class="plerr">${esc(err)}</p>`:''}</form>`;
+  d.querySelector('[data-close]').classList.toggle('hidden',!cur);}
+ function open(){editing=null;err='';render();const d=dlg();if(d.showModal){if(!d.open)d.showModal();}else d.setAttribute('open','');}
+ function close(){const d=dlg();if(!Storage.current())return;if(d.close)d.close();else d.removeAttribute('open');if(!stats.avatar.created)setTimeout(()=>Locker.open('look',true),150);}
+ function onClick(e){const b=e.target.closest('button');if(!b||!dlg().contains(b))return;const ds=b.dataset;
+  if(ds.close!==undefined){close();return;}
+  if(ds.pick){const c=Storage.current();if(c&&c.id===ds.pick){close();return;}Storage.flush();Storage.setActive(ds.pick);sessionStorage.setItem('am-skip-picker','1');location.reload();return;}
+  if(ds.rename){editing=ds.rename;err='';render();const i=get('renameInput');if(i){i.focus();i.select();}return;}
+  if(ds.saverename){try{Storage.renameProfile(ds.saverename,get('renameInput').value);editing=null;err='';applyName();render();drawLeaderboard();}catch(x){err=x.message;render();}return;}
+  if(ds.del){const p=Storage.profiles().find(p=>p.id===ds.del);if(!p||!confirm(`Delete ${p.name}’s player and all their progress on this device?\n\n(Any progress file they saved is not changed.)`))return;const wasCur=Storage.current().id===p.id;Storage.deleteProfile(p.id);if(wasCur)location.reload();else{render();drawLeaderboard();}}}
+ function onSubmit(e){e.preventDefault();try{Storage.flush();Storage.addProfile(get('newName').value);sessionStorage.setItem('am-skip-picker','1');location.reload();}catch(x){err=x.message;render();get('newName').focus();}}
+ // ---- leaderboard (players on this device) ----
+ const BOARDS={points:['⚡ Points',s=>s.points,v=>v.toLocaleString('en-GB')+' ⚡'],right:['✅ Right answers',s=>s.solved,v=>v],first:['🎯 First time %',s=>s.attempts>=10?Math.round(100*s.first/s.attempts):-1,v=>v<0?'needs 10':v+'%'],mock:['🏆 Best mock',s=>s.mocks.reduce((m,x)=>Math.max(m,Math.round(100*x.score/x.total)),-1),v=>v<0?'no mock yet':v+'%']};
+ function drawLeaderboard(){const el=get('leaderboard'),list=Storage.profiles();if(!el)return;el.classList.toggle('hidden',list.length<2);if(list.length<2)return;
+  const[label,fn,fmt]=BOARDS[board],cur=Storage.current(),rows=list.map(p=>({p,s:statsOf(p)})).map(r=>({...r,v:fn(r.s)})).sort((a,b)=>b.v-a.v);
+  get('lbBody').innerHTML=`<div class="choices">${Object.entries(BOARDS).map(([k,[l]])=>`<button class="chip${k===board?' active':''}" data-board="${k}" type="button">${l}</button>`).join('')}</div><ol class="lb">${rows.map((r,i)=>`<li class="${cur&&r.p.id===cur.id?'me':''}"><span class="lbrank">${['🥇','🥈','🥉'][i]||i+1}</span><span class="lbav">${drawAvatar(r.s.avatar,{scene:false})}</span><b>${esc(r.p.name)}</b><span class="lbv">${fmt(r.v)}</span></li>`).join('')}</ol><p class="mini">Players on this device. Keep practising to climb the table!</p>`;}
+ function init(){const d=dlg();d.addEventListener('click',onClick);d.addEventListener('submit',onSubmit);d.addEventListener('cancel',e=>{if(!Storage.current())e.preventDefault();});
+  get('switchPlayer').addEventListener('click',open);get('leaderboard').addEventListener('click',e=>{const b=e.target.closest('[data-board]');if(b){board=b.dataset.board;drawLeaderboard();}});
+  drawLeaderboard();const skip=sessionStorage.getItem('am-skip-picker');sessionStorage.removeItem('am-skip-picker');if(!Storage.current()||(Storage.profiles().length>1&&!skip))setTimeout(open,250);}
+ return{init,open,drawLeaderboard};
+})();

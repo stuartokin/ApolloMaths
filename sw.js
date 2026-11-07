@@ -1,0 +1,10 @@
+// Service worker: lets the installed app open offline. Network first (so updates on GitHub appear straight away), cached copy when offline.
+const CACHE='maths-missions-v6';
+const ASSETS=['./','index.html','css/app.css','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png',
+ 'js/core.js','js/data/topics.js','js/data/questions-core.js','js/data/questions-focus.js','js/data/lessons.js','js/data/explainers.js','js/data/marking.js','js/data/shop.js','js/data/metrics.js',
+ 'js/render/render.js','js/render/avatar.js','js/storage.js','js/locker.js','js/players.js','js/parent.js','js/scratchpad.js','js/print.js','js/pwa.js','js/app.js'];
+self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
+self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET'||new URL(r.url).origin!==location.origin)return;
+ e.respondWith(fetch(r).then(res=>{if(res.ok){const copy=res.clone();caches.open(CACHE).then(c=>c.put(r,copy));}return res;})
+  .catch(()=>caches.match(r,{ignoreSearch:true}).then(m=>m||(r.mode==='navigate'?caches.match('index.html'):undefined))));});

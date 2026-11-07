@@ -32,8 +32,8 @@ const Locker=(()=>{
  function lookTab(){const a=stats.avatar,o=avatarOptions;
   const sw=(key,list)=>list.map(([c,l],i)=>`<button class="swatch${a[key]===i?' on':''}" style="background:${c}" data-look="${key}" data-val="${i}" aria-label="${l}" title="${l}"></button>`).join('');
   const ch=(key,list)=>list.map(([v,l])=>`<button class="chip${a[key]===v?' active':''}" data-look="${key}" data-val="${v}">${l}</button>`).join('');
-  return `${welcome?'<div class="note">👋 <b>Welcome, Apollo!</b> Design your player. Every right answer earns ⚡ power points to spend on kits, boots, sidekicks and experiences in the Kit Shop.</div>':''}
-  <div class="lookrow"><b>Skin</b><div>${sw('skin',o.skins)}</div></div><div class="lookrow"><b>Hair style</b><div class="choices">${ch('hair',o.hair)}</div></div>
+  return `${welcome?`<div class="note">👋 <b>Welcome, ${esc(playerName())}!</b> Design your player. Every right answer earns ⚡ power points to spend on kits, boots, sidekicks and experiences in the Kit Shop.</div>`:''}
+  <div class="lookrow"><b>Name</b><div class="namerow"><input id="nameInput" maxlength="20" value="${esc(playerName())}" aria-label="Player name" autocomplete="off"><button class="secondary" data-savename="1" type="button">Save name</button></div></div><div class="lookrow"><b>Skin</b><div>${sw('skin',o.skins)}</div></div><div class="lookrow"><b>Hair style</b><div class="choices">${ch('hair',o.hair)}</div></div>
   <div class="lookrow"><b>Hair colour</b><div>${sw('hairCol',o.hairColours)}</div></div><div class="lookrow"><b>Eyes</b><div class="choices">${ch('eyes',o.eyes)}</div></div>
   <div class="lookrow"><b>Face</b><div class="choices">${ch('mouth',o.mouths)}</div></div><div class="lookrow"><b>Kit colour</b><div>${sw('kit',o.kits)}</div></div>
   <div class="lookrow"><b>Shirt number</b><div class="numpick"><button class="ghost" data-num="-1" aria-label="Lower number">−</button><span>${a.num}</span><button class="ghost" data-num="1" aria-label="Higher number">+</button></div></div>
@@ -49,7 +49,7 @@ const Locker=(()=>{
  function wear(id){const it=itemById[id];if(it&&owns(stats,id)){stats.avatar.eq[it.slot]=id;save();}}
  function takeOff(slot){stats.avatar.eq[slot]=slot==='scene'?'park':slot==='celebration'?'fistpump':null;save();}
  function buy(id){const it=itemById[id];if(!it||it.unlock||owns(stats,id)||wallet(stats)<it.price)return;
-  stats.spent+=it.price;stats.owned.push(id);stats.avatar.eq[it.slot]=id;if(stats.wish===id)stats.wish=null;
+  stats.spent+=it.price;stats.owned.push(id);stats.purchases.push({t:Date.now(),id,price:it.price});stats.avatar.eq[it.slot]=id;if(stats.wish===id)stats.wish=null;
   addMedal('🛍️ First buy');save();toast(`🎉 You bought the ${it.name}! It’s on your player now.`);preview=null;confirmId=null;refresh();updateStats();
   const av=dlg().querySelector('.lk-avatar svg');if(av&&!reduceMotion()){av.classList.add('cel-jump');setTimeout(()=>av.classList.remove('cel-jump'),900);}}
  function onClick(e){const b=e.target.closest('button,[data-try]');if(!b||!dlg().contains(b))return;const ds=b.dataset;
@@ -58,6 +58,7 @@ const Locker=(()=>{
   if(ds.cat){cat=ds.cat;preview=null;confirmId=null;render();return;}
   if(ds.look){const v=['skin','hairCol','kit'].includes(ds.look)?+ds.val:ds.val;stats.avatar[ds.look]=v;save();refresh();render();return;}
   if(ds.num){stats.avatar.num=((stats.avatar.num-1+ +ds.num+99)%99)+1;save();refresh();render();return;}
+  if(ds.savename){try{Storage.renameProfile(Storage.current().id,get('nameInput').value);applyName();Players.drawLeaderboard();toast(`✅ Name saved: ${playerName()}`);render();}catch(x){toast('❌ '+x.message);}return;}
   if(ds.done){stats.avatar.created=true;save();close();return;}
   if(ds.ask){confirmId=ds.ask;preview=itemById[ds.ask];render();return;}
   if(ds.buy){buy(ds.buy);return;}
@@ -84,6 +85,6 @@ const Locker=(()=>{
   get('openShop').addEventListener('click',()=>open('shop'));get('openLook').addEventListener('click',()=>open('look'));
   get('nudge').addEventListener('click',e=>{if(e.target.closest('[data-openshop]'))open('shop');});
   get('missionAvatar').addEventListener('click',()=>open('look'));
-  refresh();if(!stats.avatar.created)setTimeout(()=>open('look',true),400);}
+  refresh();setTimeout(()=>{if(!stats.avatar.created&&Storage.current()&&!get('players').open)open('look',true);},450);}
  return{init,refresh,open,checkUnlocks,celebrationText,onCorrect};
 })();
