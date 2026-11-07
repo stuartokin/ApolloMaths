@@ -18,6 +18,10 @@ Open `index.html` (or the GitHub Pages site). Works offline; no accounts, no adv
 ## Parent dashboard (👪 in the left-hand column)
 Overview, time (total, per day, and split into questions / learning / Kit Shop — the clock pauses after 2 minutes without a tap), every topic, every question type with the wrong answers typed, mocks (online and paper), shop purchases, an activity log and settings (exam name/date). Exports: every question, time per day and topic summary as CSV, plus a printable report.
 
+## Fractions and help
+- Fractions are written the Tiffin way — numerator over a line over the denominator — in questions, hints, methods, explainers, lessons, examples, the paper mock and the mark scheme (`fracHTML` / `fracify` in `js/render/render.js`). Apollo still types them as `3/4`, and sees a preview of how they look.
+- **❓ Help** (top of the page and footer) explains how to use the app and shows the version history (`js/data/help.js`, `js/help.js`). Change `APP_VERSION` and add an entry to `versionHistory` for each release; players are told once about a new version.
+
 ## Learning that earns points (and can't be faked)
 - **📘 Learn missions** (Focus Zone): 6 short steps per topic. Each step unlocks its quick check only after enough *active* reading time — the timer pauses after 45 seconds with no tap, scroll, key or pointer movement. +8 ⚡ per check right first time, +4 second time, +25 ⚡ for finishing. Points once per lesson per day.
 - **🎲 Example Studio**: fresh worked examples; each step is revealed after a few active seconds. +3 ⚡ per example studied in full (max 5 per topic per day).

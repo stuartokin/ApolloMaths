@@ -70,7 +70,7 @@ function pieSVG(cats,angles){const cx=115,cy=112,r=95,cols=['#e51c35','#ffe45e',
   g+=`<path d="M${cx},${cy} L${f1(p0[0])},${f1(p0[1])} A${r},${r} 0 ${a>180?1:0} 1 ${f1(p1[0])},${f1(p1[1])} Z" fill="${cols[i%cols.length]}" stroke="${INK}" stroke-width="2"/>`+txt(cx+r*0.62*Math.cos(m),cy+r*0.62*Math.sin(m),a+'°',{size:13});
   g+=`<rect x="236" y="${30+i*28}" width="16" height="16" fill="${cols[i%cols.length]}" stroke="${INK}" stroke-width="1.5"/>`+txt(260,38+i*28,cats[i],{size:13,anchor:'start'});a0=a1;});
  return svgWrap(370,228,g,'Pie chart');}
-const tableHTML=(head,rows)=>`<div class="tablewrap"><table class="qtable"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((c,i)=>i?`<td>${c}</td>`:`<th scope="row">${c}</th>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+const tableHTML=(head,rows)=>`<div class="tablewrap"><table class="qtable"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((c,i)=>i?`<td>${fracify(c)}</td>`:`<th scope="row">${fracify(c)}</th>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 const fitPts=(P,W=360,H=220,m=34)=>{const xs=P.map(p=>p[0]),ys=P.map(p=>p[1]),mnx=Math.min(...xs),mny=Math.min(...ys),sw=Math.max(...xs)-mnx,sh=Math.max(...ys)-mny,s=Math.min((W-2*m)/sw,(H-2*m-8)/sh);return P.map(([x,y])=>[(W-sw*s)/2+(x-mnx)*s,m+(y-mny)*s])};
 const rad=x=>x*Math.PI/180;
 function quadPts(A,B,C,D){const dirs=[0,180-B,360-B-C,540-B-C-D].map(rad);for(let t=0;t<600;t++){const strict=t<400,L1=1,L2=strict?0.75+Math.random()*0.5:0.5+Math.random(),rx=-(L1*Math.cos(dirs[0])+L2*Math.cos(dirs[1])),ry=-(L1*Math.sin(dirs[0])+L2*Math.sin(dirs[1])),a=Math.cos(dirs[2]),b=Math.cos(dirs[3]),c=Math.sin(dirs[2]),d=Math.sin(dirs[3]),det=a*d-b*c;if(Math.abs(det)<1e-6)continue;const L3=(rx*d-b*ry)/det,L4=(a*ry-c*rx)/det;if(strict?(L3>0.65&&L4>0.65&&L3<1.6&&L4<1.6):(L3>0.35&&L4>0.35&&L3<2.5&&L4<2.5)){const L=[L1,L2,L3],p=[[0,0]];for(let i=0;i<3;i++){const q=p[i];p.push([q[0]+L[i]*Math.cos(dirs[i]),q[1]+L[i]*Math.sin(dirs[i])])}return fitPts(p.map(([x,y])=>[x,-y]))}}return[[40,180],[320,190],[285,40],[95,58]]}
@@ -95,24 +95,33 @@ const resolvePts=P=>Array.isArray(P)&&typeof P[0]==='string'?POINTS[P[0]](...P.s
 const FIGURES={cuboid:cuboidSVG,cubes:cubesSVG,shape:shapeSVG,frame:frameSVG,ruler:rulerSVG,bar:barSVG,line:lineSVG,picto:pictoSVG,pie:pieSVG,table:tableHTML,grid:gridSVG,barModel:barModelSVG,angle:(P,...r)=>angleSVG(resolvePts(P),...r)};
 function renderFigure(spec){if(!spec)return '';if(typeof spec==='string')return spec;const[name,...args]=spec;return FIGURES[name]?FIGURES[name](...args):'';}
 
+// ---- Fractions written the Tiffin way: numerator over a line over the denominator ----
+// fracHTML(plain text) escapes the text, then turns 23/40, ?/30, 3.6/10 (and ½ ¼ ¾ ⅓ ⅔) into stacked fractions.
+const VULGAR={'½':'1/2','¼':'1/4','¾':'3/4','⅓':'1/3','⅔':'2/3','⅕':'1/5','⅛':'1/8'};
+const FRAC_RE=/(\d+(?:\.\d+)?|\?)\s?\/\s?(\d+(?:\.\d+)?|\?)/g;
+const stack=(a,b)=>`<span class="frac" role="math" aria-label="${a} over ${b}"><span class="num" aria-hidden="true">${a}</span><span class="den" aria-hidden="true">${b}</span></span>`;
+function fracHTML(text){return String(text).replace(/(\d?)([½¼¾⅓⅔⅕⅛])/g,(m,d,v)=>(d?d+'\u2009':'')+VULGAR[v]).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(FRAC_RE,(m,a,b)=>stack(a,b));}
+// fracify(html): same, but only touches text between tags (for content that already contains <b>, <br> etc.)
+function fracify(html){return String(html).split(/(<[^>]+>)/).map((part,i)=>i%2?part:part.replace(/(\d?)([½¼¾⅓⅔⅕⅛])/g,(m,d,v)=>(d?d+'\u2009':'')+VULGAR[v]).replace(FRAC_RE,(m,a,b)=>stack(a,b))).join('');}
+
 // ---- Content blocks (used by lessons) ----
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function renderBlocks(blocks){return blocks.map(b=>{
  if(b.h)return `<h3>${b.h}</h3>`;
- if(b.p)return `<p>${b.p}</p>`;
+ if(b.p)return `<p>${fracify(b.p)}</p>`;
  if(b.fig)return renderFigure(b.fig);
- if(b.eg)return `<div class="eg">${b.eg}</div>`;
- if(b.mini)return `<p class="mini">${b.mini}</p>`;
- if(b.ul)return `<ul>${b.ul.map(x=>`<li>${x}</li>`).join('')}</ul>`;
- if(b.ol)return `<ol>${b.ol.map(x=>`<li>${x}</li>`).join('')}</ol>`;
- if(b.table)return `<div class="tablewrap"><table class="qtable"><thead><tr>${b.table.head.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${b.table.rows.map(r=>`<tr>${r.map((c,i)=>i?`<td>${c}</td>`:`<th scope="row">${c}</th>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+ if(b.eg)return `<div class="eg">${fracify(b.eg)}</div>`;
+ if(b.mini)return `<p class="mini">${fracify(b.mini)}</p>`;
+ if(b.ul)return `<ul>${b.ul.map(x=>`<li>${fracify(x)}</li>`).join('')}</ul>`;
+ if(b.ol)return `<ol>${b.ol.map(x=>`<li>${fracify(x)}</li>`).join('')}</ol>`;
+ if(b.table)return `<div class="tablewrap"><table class="qtable"><thead><tr>${b.table.head.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${b.table.rows.map(r=>`<tr>${r.map((c,i)=>i?`<td>${fracify(c)}</td>`:`<th scope="row">${fracify(c)}</th>`).join('')}</tr>`).join('')}</tbody></table></div>`;
  return '';}).join('');}
 
 // ---- Explainer (structured object from js/data/explainers.js) ----
 function renderExplainer(e){return `<b class="xhead">🧒 EXPLAIN IT SIMPLY</b>
-<div class="xrow"><span class="xi">🎯</span><div><b>What is it asking?</b><br>${esc(e.asking)}</div></div>
-${e.keys.length?`<div class="xrow"><span class="xi">🔑</span><div><b>Watch the key word${e.keys.length>1?'s':''}</b><ul>${e.keys.map(k=>`<li><b>${esc(k.word)}</b> — ${esc(k.means)}</li>`).join('')}</ul></div></div>`:''}
-<div class="xrow"><span class="xi">💡</span><div><b>The big idea</b><br>${esc(e.idea)}</div></div>
-<div class="xrow"><span class="xi">🗺️</span><div><b>Your game plan</b><ol>${e.plan.map(p=>`<li>${esc(p)}</li>`).join('')}</ol></div></div>
-<div class="xrow"><span class="xi">✅</span><div><b>Check it</b><br>${esc(e.check)}</div></div>
+<div class="xrow"><span class="xi">🎯</span><div><b>What is it asking?</b><br>${fracHTML(e.asking)}</div></div>
+${e.keys.length?`<div class="xrow"><span class="xi">🔑</span><div><b>Watch the key word${e.keys.length>1?'s':''}</b><ul>${e.keys.map(k=>`<li><b>${esc(k.word)}</b> — ${fracHTML(k.means)}</li>`).join('')}</ul></div></div>`:''}
+<div class="xrow"><span class="xi">💡</span><div><b>The big idea</b><br>${fracHTML(e.idea)}</div></div>
+<div class="xrow"><span class="xi">🗺️</span><div><b>Your game plan</b><ol>${e.plan.map(p=>`<li>${fracHTML(p)}</li>`).join('')}</ol></div></div>
+<div class="xrow"><span class="xi">✅</span><div><b>Check it</b><br>${fracHTML(e.check)}</div></div>
 <p class="mini">This doesn't give away the answer — have a go! Still stuck? Try “Teach me the method”.</p>`;}
