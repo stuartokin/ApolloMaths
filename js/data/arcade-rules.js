@@ -16,7 +16,10 @@ const ARCADE_DEFAULTS={
  days:[1,1,1,1,1,1,1],    // allowed days, Monday → Sunday
  from:'07:00',to:'20:00', // allowed hours
  examLock:true,           // no arcade on the exam day
- bonusDay:'',bonusMins:0  // one-off extra minutes for a given day
+ bonusDay:'',bonusMins:0, // one-off extra minutes for a given day
+ carry:true,              // unplayed arcade time is saved for the next session
+ maxCarryMins:15,         // ... up to this many minutes
+ resumeMins:15            // session clock: reopening the app within this many minutes carries on the same session (0 = always a new session)
 };
 const DEFAULT_WORDS={kid:'c19fe337aa0cd1ebc4ba00f0d16d83be47e9b047e0e61690e268088325092a7b',admin:'f9b0a0d3973f9bdda31247106c402194cce6f9313eae3e6e3d070e33383b7b1f',kidNum:'cdc6e04cd9378ade38d889c3c5824d2c8b26f2af384040007af60674adcae5c3',adminNum:'c861320498ae661f62dffcf04d9b48de24872d644ed58277050e860b4ecdb96b'}; // hashes only
 // Secret NUMBER codes (for tablets that only show a number keypad): they always start with 00 and are 6–10 digits, so they can never be a real answer.
@@ -37,10 +40,10 @@ const pinHash=(pin,salt)=>sha256('apollo-maths-pin|'+salt+'|'+String(pin).replac
 // ---- settings & usage (stored per player in stats.arcade) ----
 function cleanArcade(s){const a=s.arcade&&typeof s.arcade==='object'?s.arcade:{},st=a.settings&&typeof a.settings==='object'?a.settings:{},d=ARCADE_DEFAULTS,n=(v,min,max,fb)=>{v=+v;return Number.isFinite(v)?Math.min(max,Math.max(min,Math.round(v))):fb;},t=v=>/^\d{2}:\d{2}$/.test(v)?v:null;
  const S={enabled:st.enabled===undefined?d.enabled:!!st.enabled,mode:st.mode==='fixed'?'fixed':'earned',earnPer:n(st.earnPer,1,20,d.earnPer),unlockMins:n(st.unlockMins,0,240,d.unlockMins),unlockCorrect:n(st.unlockCorrect,0,200,d.unlockCorrect),unlockFocus:n(st.unlockFocus,0,200,d.unlockFocus),needLesson:!!st.needLesson,needPlan:!!st.needPlan,
-  sessionMins:n(st.sessionMins,1,120,d.sessionMins),breakMins:n(st.breakMins,0,600,d.breakMins),dayMins:n(st.dayMins,0,600,d.dayMins),weekMins:n(st.weekMins,0,3000,d.weekMins),days:Array.isArray(st.days)&&st.days.length===7?st.days.map(x=>x?1:0):d.days.slice(),from:t(st.from)||d.from,to:t(st.to)||d.to,examLock:st.examLock===undefined?d.examLock:!!st.examLock,bonusDay:isDay(st.bonusDay)?st.bonusDay:'',bonusMins:n(st.bonusMins,0,240,0)};
+  sessionMins:n(st.sessionMins,1,120,d.sessionMins),breakMins:n(st.breakMins,0,600,d.breakMins),dayMins:n(st.dayMins,0,600,d.dayMins),weekMins:n(st.weekMins,0,3000,d.weekMins),days:Array.isArray(st.days)&&st.days.length===7?st.days.map(x=>x?1:0):d.days.slice(),from:t(st.from)||d.from,to:t(st.to)||d.to,examLock:st.examLock===undefined?d.examLock:!!st.examLock,bonusDay:isDay(st.bonusDay)?st.bonusDay:'',bonusMins:n(st.bonusMins,0,240,0),carry:st.carry===undefined?d.carry:!!st.carry,maxCarryMins:n(st.maxCarryMins,0,240,d.maxCarryMins),resumeMins:n(st.resumeMins,0,240,d.resumeMins)};
  const used={};const u=a.used&&typeof a.used==='object'?a.used:{};for(const k of Object.keys(u).filter(isDay).sort().slice(-60))used[k]=n(u[k],0,86400,0);
  s.arcade={settings:S,used,plays:(Array.isArray(a.plays)?a.plays:[]).slice(-200).filter(p=>p&&typeof p==='object').map(p=>({t:num(p.t),secs:n(p.secs,0,86400,0),score:n(p.score,0,1e7,0),theme:p.theme==='classic'?'classic':'player',game:['invaders','maze','meteor','guardian','ladder','racer','snake'].includes(p.game)?p.game:'invaders',wave:n(p.wave,1,999,1),end:str(p.end,12)})),
-  lastEnd:num(a.lastEnd),high:Object.fromEntries(['player','classic','maze','meteor','guardian','ladder','racer','snake'].map(k=>[k,n((a.high||{})[k],0,1e9,0)])),theme:a.theme==='classic'?'classic':'player',game:['invaders','maze','meteor','guardian','ladder','racer','snake'].includes(a.game)?a.game:'invaders',mute:!!a.mute};return s;}
+  lastEnd:num(a.lastEnd),high:Object.fromEntries(['player','classic','maze','meteor','guardian','ladder','racer','snake'].map(k=>[k,n((a.high||{})[k],0,1e9,0)])),bank:{secs:n((a.bank||{}).secs,0,14400,0),day:isDay((a.bank||{}).day)?a.bank.day:''},theme:a.theme==='classic'?'classic':'player',game:['invaders','maze','meteor','guardian','ladder','racer','snake'].includes(a.game)?a.game:'invaders',mute:!!a.mute};return s;}
 const mondayOf=d=>{const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x;};
 // Everything the arcade needs to know right now: is it unlocked, what is left, and why not.
 function arcadeStatus(s,now=new Date()){const st=s.arcade.settings,k=dayKey(now),T=s.time.byDay[k]||{},learn=(T.questions||0)+(T.learn||0);
@@ -57,7 +60,9 @@ function arcadeStatus(s,now=new Date()){const st=s.arcade.settings,k=dayKey(now)
  if(mins<toM(st.from)||mins>=toM(st.to))blocks.push(`The arcade is open from ${st.from} to ${st.to}.`);
  if(st.examLock&&k===s.exam.date)blocks.push('No arcade on exam day — good luck! 🍀');
  const usedDay=s.arcade.used[k]||0,mon=mondayOf(now);let usedWeek=0;for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(mon.getDate()+i);usedWeek+=s.arcade.used[dayKey(d)]||0;}
- const bonus=st.bonusDay===k?st.bonusMins*60:0,dayLeft=st.dayMins*60+bonus-usedDay,weekLeft=st.weekMins*60+bonus-usedWeek,earned=st.mode==='earned'?Math.floor(learn/st.earnPer)+bonus:Infinity,earnLeft=earned-usedDay;
+ // Banked (unplayed) time from the last session: always lengthens the next session; if it was banked on an earlier day it is also added on top of today's limits.
+ const bank=st.carry?Math.min(s.arcade.bank.secs,st.maxCarryMins*60):0,extra=bank&&s.arcade.bank.day!==k?bank:0;
+ const bonus=(st.bonusDay===k?st.bonusMins*60:0)+extra,dayLeft=st.dayMins*60+bonus-usedDay,weekLeft=st.weekMins*60+bonus-usedWeek,earned=st.mode==='earned'?Math.floor(learn/st.earnPer)+bonus:Infinity,earnLeft=earned-usedDay;
  const available=Math.max(0,Math.floor(Math.min(dayLeft,weekLeft,earnLeft))),breakLeft=s.arcade.lastEnd&&st.breakMins?Math.max(0,Math.ceil((s.arcade.lastEnd+st.breakMins*60000-now.getTime())/1000)):0;
  const reqsDone=reqs.every(r=>r.done),canPlay=!blocks.length&&reqsDone&&available>=30&&!breakLeft;
- return{canPlay,blocks,reqs,reqsDone,available,breakLeft,usedDay,usedWeek,dayLeft:Math.max(0,dayLeft),weekLeft:Math.max(0,weekLeft),earned:Number.isFinite(earned)?earned:null,learnSecs:learn,sessionSecs:Math.min(st.sessionMins*60,available)};}
+ return{canPlay,blocks,reqs,reqsDone,available,breakLeft,usedDay,usedWeek,dayLeft:Math.max(0,dayLeft),weekLeft:Math.max(0,weekLeft),earned:Number.isFinite(earned)?earned:null,learnSecs:learn,bank,sessionSecs:Math.min(st.sessionMins*60+bank,available)};}

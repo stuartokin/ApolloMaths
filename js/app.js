@@ -126,6 +126,7 @@ const Spot=(()=>{let on=false,io=null;const m=()=>get('mission'),btn=()=>get('go
 // ---- secret words typed on a keyboard (outside text boxes) ----
 (function secretKeys(){let buf='';window.addEventListener('keydown',e=>{const t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable)||e.ctrlKey||e.metaKey||e.altKey)return;if(!/^[a-z0-9]$/i.test(e.key))return;buf=(buf+e.key.toUpperCase()).slice(-24);
  for(let n=4;n<=buf.length;n++){const w=Admin.secret(buf.slice(-n));if(w==='admin'){buf='';Admin.open();return;}if(w==='kid'&&window.APP_CONFIG&&window.APP_CONFIG.arcade){buf='';Arcade.open();return;}}});})();
+const fmtClock=s=>{s=Math.floor(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=String(s%60).padStart(2,'0');return h?`${h}:${String(m).padStart(2,'0')}:${x}`:`${m}:${x}`;};
 // ---- learning events & "try one like this" ----
 function logLearn(type,tp,pts,extra={}){stats.learn.events.push({t:Date.now(),type,tp,pts,...extra});if(stats.learn.events.length>1500)stats.learn.events.splice(0,stats.learn.events.length-1500);}
 function practiseLike(tp,g){forceGen={tp,g,twin:false};pickTopic(tp);}
@@ -146,10 +147,17 @@ get('answer').addEventListener('input',()=>{learnMode=false;const v=get('answer'
 // ---- Active-time tracking (only while the app is visible and being used) ----
 (function tracker(){let last=Date.now(),lastInput=Date.now(),acc=0;const bump=()=>{lastInput=Date.now();window.lastInputAt=lastInput;};window.lastInputAt=Date.now();
  ['pointerdown','pointermove','keydown','wheel','touchstart','touchmove','scroll','input'].forEach(ev=>window.addEventListener(ev,bump,{passive:true,capture:true}));
- const day=()=>(stats.time.byDay[dayKey()] ||= {app:0,questions:0,learn:0,shop:0,visits:0});day().visits++;save(false);
- setInterval(()=>{const now=Date.now(),dt=Math.min(5,(now-last)/1000);last=now;if(document.visibilityState!=='visible'||now-lastInput>120000||parentOpen||get('players').open)return;
-  let c=get('locker').open?'shop':(learnMode||get('learn').open)?'learn':'questions';if(arcadeOpen){const a=Arcade.status();if(a.view!=='game'||a.admin)return;c='game';}else if(get('admin').open)return;const T=day();T.app+=dt;T[c]+=dt;acc+=dt;if(acc>=20){acc=0;save(false);}},1000);
- document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')save(false);});})();
+ const day=()=>(stats.time.byDay[dayKey()] ||= {app:0,questions:0,learn:0,shop:0,visits:0});
+ // Session clock: reopening (refresh/reload) within the parent's setting carries on the same session.
+ const AS=stats.appSession,now0=Date.now(),resumeMs=stats.arcade.settings.resumeMins*60000;
+ if(resumeMs>0&&AS.lastSeen&&now0-AS.lastSeen<=resumeMs){if(AS.active>=5)setTimeout(()=>toast(`⏱️ Welcome back! Carrying on your session (${fmtClock(AS.active)}).`),1300);}
+ else{AS.start=now0;AS.active=0;AS.count++;day().visits++;}
+ AS.lastSeen=now0;save(false);
+ let total=Object.values(stats.time.byDay).reduce((a,d)=>a+(d.app||0),0),lastSave=now0;
+ const clock=()=>{get('sessClock').textContent=fmtClock(AS.active);get('totalClock').textContent=fmtDur(total);};clock();
+ setInterval(()=>{const now=Date.now(),dt=Math.min(5,(now-last)/1000);last=now;if(document.visibilityState==='visible'){AS.lastSeen=now;if(now-lastSave>15000){lastSave=now;save(false);}}if(document.visibilityState!=='visible'||now-lastInput>120000||parentOpen||get('players').open)return;
+  let c=get('locker').open?'shop':(learnMode||get('learn').open)?'learn':'questions';if(arcadeOpen){const a=Arcade.status();if(a.view!=='game'||a.admin)return;c='game';}else if(get('admin').open)return;const T=day();T.app+=dt;T[c]+=dt;acc+=dt;AS.active+=dt;total+=dt;clock();if(acc>=20){acc=0;save(false);}},1000);
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){AS.lastSeen=Date.now();save(false);}});window.addEventListener('pagehide',()=>{AS.lastSeen=Date.now();save(false);});})();
 
 applyName();Win.init();Spot.start();Admin.init();Arcade.init();Help.init();Learn.init();Locker.init();Players.init();Parent.init();Scratch.init();PWA.init();updateStats();setMode('training');restartSession();
 Storage.init({getData:()=>({stats}),onStatus:drawSaveStatus});

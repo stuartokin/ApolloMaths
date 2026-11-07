@@ -3,7 +3,7 @@
 // The games themselves are in js/games.js (all original). Admin play is unlimited and not counted.
 let arcadeOpen=false;
 const Arcade=(()=>{
- let latch={},cv,ctx,raf=0,view='menu',admin=false,cap=0,played=0,last=0,paused=false,keys={},pad={l:false,r:false,u:false,d:false,f:false},game=null,gameId='invaders',avImg=null,ac=null;
+ let sess=null,latch={},cv,ctx,raf=0,view='menu',admin=false,cap=0,played=0,last=0,paused=false,keys={},pad={l:false,r:false,u:false,d:false,f:false},game=null,gameId='invaders',avImg=null,ac=null;
  const dlg=()=>get('arcade');
  const hsKey=()=>gameId==='invaders'?stats.arcade.theme:gameId;
  function beep(f,d=.08,type='square',vol=.04,slide=0){if(stats.arcade.mute)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),gn=ac.createGain();o.type=type;o.frequency.value=f;if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,f*slide),ac.currentTime+d);gn.gain.value=vol;gn.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.connect(gn).connect(ac.destination);o.start();o.stop(ac.currentTime+d);}catch(e){}}
@@ -23,13 +23,20 @@ const Arcade=(()=>{
   card(`<div class="arc-card"><div class="arc-big">🕹️</div><h3>The Secret Arcade</h3>${why}${!st.reqsDone&&!st.blocks.length?`<ul class="arc-reqs">${r}</ul>`:''}<p class="mini">Shhh… keep the secret code to yourself! 🤫</p><button class="primary" data-arc="close" type="button">Back to maths</button></div>`);}
  function menu(st){gameId=stats.arcade.game||'invaders';const H=stats.arcade.high,t=stats.arcade.theme;
   card(`<div class="arc-card"><h3>${admin?'🕹️ Arcade (admin — no limits)':'🕹️ You unlocked the Secret Arcade!'}</h3>
-   ${admin?'':`<p>You can play for <b>${fmt(st.sessionSecs)}</b> now. Left today: <b>${fmt(st.dayLeft)}</b> · this week: <b>${fmt(st.weekLeft)}</b>${st.earned!==null?` · earned so far today: <b>${fmt(Math.max(0,st.earned-st.usedDay))}</b>`:''}.</p>`}
+   ${admin?'':sess?`<p>⏱️ <b>${fmt(sessLeft())}</b> left in this session.</p>`:`<p>You can play for <b>${fmt(st.sessionSecs)}</b> now${st.bank?` (including <b>${fmt(st.bank)}</b> saved from last time 🎁)`:''}. Left today: <b>${fmt(st.dayLeft)}</b> · this week: <b>${fmt(st.weekLeft)}</b>${st.earned!==null?` · earned so far today: <b>${fmt(Math.max(0,st.earned-st.usedDay))}</b>`:''}.</p>`}
    <div class="arc-games">${GAME_LIST.map(g=>`<button class="arc-gm${g.id===gameId?' on':''}" data-game="${g.id}" type="button"><span>${g.icon}</span><b>${g.name}</b><small>${g.desc}</small><em>🏆 ${(g.id==='invaders'?Math.max(H.player,H.classic):H[g.id]||0).toLocaleString('en-GB')}</em></button>`).join('')}</div>
    ${gameId==='invaders'?`<div class="arc-themes"><button class="arc-theme${t==='player'?' on':''}" data-theme="player" type="button"><span>🧍⚽</span><b>My player</b></button><button class="arc-theme classic${t==='classic'?' on':''}" data-theme="classic" type="button"><span>👾</span><b>Classic</b></button></div>`:''}
    <div class="actions" style="justify-content:center"><button class="primary" data-arc="start" type="button">▶️ Play ${GAME_LIST.find(g=>g.id===gameId).name}</button><button class="ghost" data-arc="mute" type="button">${stats.arcade.mute?'🔇 Sound off':'🔊 Sound on'}</button><button class="ghost" data-arc="full" type="button" id="arcFullBtn">${dlg().classList.contains('arc-full')?'🗗 Exit full screen':'⛶ Full screen'}</button><button class="ghost" data-arc="close" type="button">Back to maths</button></div>
    <p class="mini">Keys: arrows (or WASD) to move, Space to fire, P to pause. Tablets: use the buttons under the game${gameId==='maze'?' or swipe on the maze':gameId==='snake'?' or swipe on the game':''}.</p></div>`);}
  const LABEL={invaders:{l:'◀',r:'▶',f:'⚽ KICK'},maze:{l:'◀',r:'▶',u:'▲',d:'▼'},meteor:{l:'⟲',r:'⟳',u:'▲ Thrust',f:'● Fire'},guardian:{u:'▲',d:'▼',l:'◀',r:'▶',f:'🔥 Fire'},ladder:{l:'◀',r:'▶',u:'▲ Climb',d:'▼',f:'⤴ Jump'},racer:{l:'◀',r:'▶',u:'▲ Go',d:'▼ Brake',f:'🔥 Nitro'},snake:{l:'◀',r:'▶',u:'▲',d:'▼'}};
- function start(){const st=arcadeStatus(stats);if(!admin&&!st.canPlay){locked(st);return;}cap=admin?Infinity:st.sessionSecs;played=0;paused=false;keys={};Object.keys(pad).forEach(k=>pad[k]=false);
+ // A session can hold several games (a game-over doesn't end it). It ends when its time runs out or the player leaves the arcade.
+ function endSession(reason){if(!sess||admin)return;const left=Math.max(0,Math.round(sess.cap-sess.played)),st=stats.arcade.settings;stats.arcade.lastEnd=Date.now();
+  stats.arcade.bank=st.carry&&reason!=='time'&&left>=30?{secs:Math.min(st.maxCarryMins*60,left),day:dayKey()}:{secs:0,day:''};sess=null;save();
+  if(stats.arcade.bank.secs)toast(`🕹️ ${fmt(stats.arcade.bank.secs)} of arcade time saved for next time — you won’t miss out!`);}
+ const sessLeft=()=>sess?Math.max(0,sess.cap-sess.played):0;
+ function start(){if(!admin){if(!sess){const st=arcadeStatus(stats);if(!st.canPlay){locked(st);return;}sess={cap:st.sessionSecs,played:0,carried:st.bank};if(stats.arcade.bank.secs){stats.arcade.bank={secs:0,day:''};save(false);}}
+  if(sessLeft()<10){endSession('time');locked(arcadeStatus(stats));return;}}
+  cap=admin?Infinity:sessLeft();played=0;paused=false;keys={};Object.keys(pad).forEach(k=>pad[k]=false);
   if(['invaders','ladder'].includes(gameId)){avImg=new Image();avImg.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(drawAvatar(stats.avatar,{scene:false}));}
   game=GAMES[gameId]({theme:stats.arcade.theme,avatar:avImg,beep});view='game';
   const lab=Object.assign({},LABEL[gameId]);if(gameId==='invaders'&&stats.arcade.theme==='classic')lab.f='FIRE';
@@ -55,26 +62,26 @@ const Arcade=(()=>{
   const b=get('arcFullBtn');if(b)b.textContent=on?'🗗 Exit full screen':'⛶ Full screen';setTimeout(fit,60);setTimeout(fit,400);}
  function finish(why){if(view!=='game')return;view='over';cancelAnimationFrame(raf);raf=0;const key=hsKey(),best=game.score>(stats.arcade.high[key]||0);
   if(best)stats.arcade.high[key]=game.score;
-  if(!admin){const k=dayKey(),secs=Math.round(played);stats.arcade.used[k]=(stats.arcade.used[k]||0)+secs;stats.arcade.lastEnd=Date.now();stats.arcade.plays.push({t:Date.now(),secs,score:game.score,game:gameId,theme:stats.arcade.theme,wave:game.level,end:why});if(stats.arcade.plays.length>200)stats.arcade.plays.shift();}
-  save();const st=arcadeStatus(stats),nm=GAME_LIST.find(g=>g.id===gameId).name;
+  let sessionOver=false;if(!admin){const k=dayKey(),secs=Math.round(played);stats.arcade.used[k]=(stats.arcade.used[k]||0)+secs;if(sess){sess.played+=played;if(why==='time'||sessLeft()<10){sessionOver=true;}}stats.arcade.plays.push({t:Date.now(),secs,score:game.score,game:gameId,theme:stats.arcade.theme,wave:game.level,end:why});if(stats.arcade.plays.length>200)stats.arcade.plays.shift();}
+  save();if(sessionOver)endSession('time');const st=arcadeStatus(stats),nm=GAME_LIST.find(g=>g.id===gameId).name,more=!admin&&sess&&sessLeft()>=10;
   card(`<div class="arc-card"><div class="arc-big">${why==='time'?'⏱️':why==='gameover'?'💥':'🏁'}</div><h3>${why==='time'?'Full time!':why==='gameover'?'Game over!':'Game stopped'}</h3><p>${nm}: <b class="arc-score">${game.score.toLocaleString('en-GB')}</b> points · ${game.levelName} ${game.level}${best?'<br>🏆 <b>New high score!</b>':''}</p>
-   ${admin?'':`<p class="mini">Arcade time left today: <b>${fmt(st.dayLeft)}</b>${st.earned!==null?` (earned: ${fmt(Math.max(0,st.earned-st.usedDay))})`:''}${st.breakLeft?` · next game after a <b>${Math.ceil(st.breakLeft/60)}-minute</b> break`:''}.</p><p>🧠 Back to the maths — every question earns more arcade time!</p>`}
-   <div class="actions" style="justify-content:center">${admin||st.canPlay?'<button class="secondary" data-arc="again" type="button">🔄 Play again</button><button class="ghost" data-arc="menu" type="button">🎮 Other games</button>':''}<button class="primary" data-arc="close" type="button">Back to maths</button></div></div>`);}
+   ${admin?'':more?`<p>⏱️ <b>${fmt(sessLeft())}</b> left in this session — play again or try another game!</p><p class="mini">Leaving now? Any unplayed time ${stats.arcade.settings.carry?'is saved for next time':'is not saved (carry-over is switched off)'}.</p>`:`<p class="mini">Arcade time left today: <b>${fmt(st.dayLeft)}</b>${st.earned!==null?` (earned: ${fmt(Math.max(0,st.earned-st.usedDay))})`:''}${st.breakLeft?` · next game after a <b>${Math.ceil(st.breakLeft/60)}-minute</b> break`:''}.</p><p>🧠 Back to the maths — every question earns more arcade time!</p>`}
+   <div class="actions" style="justify-content:center">${admin||more?'<button class="secondary" data-arc="again" type="button">🔄 Play again</button><button class="ghost" data-arc="menu" type="button">🎮 Other games</button>':''}<button class="primary" data-arc="close" type="button">Back to maths</button></div></div>`);}
  function open(opts={}){admin=!!opts.admin;if(!admin&&!(window.APP_CONFIG&&window.APP_CONFIG.arcade))return false;arcadeOpen=true;view='menu';
   const d=dlg();if(d.showModal){if(!d.open)d.showModal();}else d.setAttribute('open','');
-  if(admin)menu(null);else{const st=arcadeStatus(stats);st.canPlay?menu(st):locked(st);}return true;}
- function close(){if(dlg().classList.contains('arc-full'))setFull(false);if(view==='game')finish('stopped');view='menu';arcadeOpen=false;const d=dlg();if(d.close)d.close();else d.removeAttribute('open');}
+  if(admin)menu(null);else{const st=arcadeStatus(stats);(sess||st.canPlay)?menu(st):locked(st);}return true;}
+ function close(){if(dlg().classList.contains('arc-full'))setFull(false);if(view==='game')finish('stopped');endSession('left');view='menu';arcadeOpen=false;const d=dlg();if(d.close)d.close();else d.removeAttribute('open');}
  function onClick(e){const b=e.target.closest('button');if(!b||!dlg().contains(b))return;const a=b.dataset.arc;
   if(b.dataset.game){stats.arcade.game=b.dataset.game;save(false);menu(admin?null:arcadeStatus(stats));return;}
   if(b.dataset.theme){stats.arcade.theme=b.dataset.theme;save(false);menu(admin?null:arcadeStatus(stats));return;}
   if(a==='start'||a==='again')start();else if(a==='menu'){view='menu';menu(admin?null:arcadeStatus(stats));}else if(a==='close'||b.dataset.close!==undefined)close();else if(a==='quit')finish('stopped');
   else if(a==='full'){setFull(!dlg().classList.contains('arc-full'));}
   else if(a==='pause'){paused=!paused;b.textContent=paused?'▶️ Play':'⏸️ Pause';}else if(a==='mute'){stats.arcade.mute=!stats.arcade.mute;save(false);menu(admin?null:arcadeStatus(stats));}}
- function init(){const d=dlg();d.addEventListener('click',onClick);d.addEventListener('close',()=>{if(view==='game')finish('stopped');arcadeOpen=false;});
+ function init(){const d=dlg();d.addEventListener('click',onClick);d.addEventListener('close',()=>{if(view==='game')finish('stopped');endSession('left');arcadeOpen=false;});
   d.addEventListener('cancel',e=>{if(view==='game'){e.preventDefault();paused=true;}});
   window.addEventListener('keydown',e=>{if(!arcadeOpen||view!=='game')return;if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key))e.preventDefault();if(e.key==='p'||e.key==='P'){paused=!paused;return;}keys[e.key]=true;if(KEYMAP[e.key])latch[KEYMAP[e.key]]=true;});
   window.addEventListener('keyup',e=>{keys[e.key]=false;});window.addEventListener('resize',()=>{if(view==='game')fit();});
   ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{if(!(document.fullscreenElement||document.webkitFullscreenElement)&&dlg().classList.contains('arc-full')){dlg().classList.remove('arc-full');const b=get('arcFullBtn');if(b)b.textContent='⛶ Full screen';}setTimeout(fit,60);}));
   dlg().addEventListener('close',()=>{dlg().classList.remove('arc-full');});document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='visible'&&view==='game')paused=true;});}
- return{init,open,close,status:()=>({view,played,cap,admin,game:gameId,score:game&&game.score,full:dlg().classList.contains('arc-full')}),_game:()=>game};
+ return{init,open,close,status:()=>({view,played,cap,admin,sessLeft:sessLeft(),bank:stats.arcade.bank.secs,game:gameId,score:game&&game.score,full:dlg().classList.contains('arc-full')}),_game:()=>game};
 })();

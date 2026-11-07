@@ -50,6 +50,10 @@ jobs:
 - The PIN and words are stored on each device as salted SHA-256 hashes. This is family-level protection: the code is public and browser developer tools could still change things.
 - Rules live in `js/data/arcade-rules.js`; the game in `js/arcade.js`; Admin in `js/admin.js`.
 
+## Session clock and saved arcade time
+- The top of the page shows **this session** and **total** time (active time only — it pauses when the app isn’t being used). The session is saved every few seconds and when the page is hidden/closed; reopening within the parent’s setting (Admin → Arcade rules → Session clock, default 15 minutes, 0 = always new) carries on the same session.
+- Arcade sessions can include several games. If the arcade is left early, the unplayed time is banked (Admin: on/off, most that can be saved, default 15 minutes) and added to the next session — and if that is on a later day, on top of that day’s limits.
+
 ## Focus areas (chosen by a parent)
 - Parent dashboard → **🎯 Focus areas**: tick any five topics for each player and save. They get the Focus Zone cards (📘 Learn, 🎲 Examples, ⚽ Practise), Focus bonuses, streaks, mastery rewards, readiness bars and Today’s plan. The choice is saved with the player’s progress (and in their progress file).
 - The app suggests five, ranked by need: right-first-time rate, how often help was used, skipped questions and lesson checks; untried topics are flagged when there isn’t enough evidence yet.
