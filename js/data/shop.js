@@ -11,7 +11,7 @@ const avatarOptions={
  kits:[['#e51c35','Red'],['#2457d6','Blue'],['#1f9d55','Green'],['#f2c218','Yellow'],['#6b3fc9','Purple'],['#1e2333','Black']]
 };
 const defaultAvatar=()=>({created:false,skin:1,hair:'short',hairCol:1,eyes:'round',mouth:'grin',kit:0,num:7,
- eq:{top:null,hat:null,boots:null,glasses:null,neck:null,chest:null,arm:null,back:null,hand:'ball',pet:null,scene:'park',celebration:'fistpump'}});
+ eq:{top:null,hat:null,boots:null,glasses:null,neck:null,chest:null,arm:null,back:null,hand:'ball',pet:null,scene:'park',celebration:'fistpump',title:null,frame:null}});
 // Slots an item can be worn in. "free" items are owned from the start.
 const SLOTS=['top','hat','boots','glasses','neck','chest','arm','back','hand','pet','scene','celebration'];
 const shopCats=[['kits','👕 Kits'],['hats','🧢 Hats'],['boots','👟 Boots'],['extras','🧣 Extras'],['hands','⚽ In my hand'],['pets','🐾 Sidekicks'],['scenes','🏟️ Experiences'],['celebrations','🎉 Celebrations']];

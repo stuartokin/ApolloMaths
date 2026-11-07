@@ -17,6 +17,14 @@ function cleanMetrics(s){
  s.fix=(Array.isArray(s.fix)?s.fix:[]).filter(f=>f&&topics[f.tp]&&bank[f.tp]&&bank[f.tp][f.g]).slice(-40).map(f=>({tp:f.tp,g:Math.floor(num(f.g)),due:Math.floor(num(f.due)),streak:Math.floor(num(f.streak,0,2)),added:num(f.added),q:str(f.q,220)}));
  s.fixed=Math.floor(num(s.fixed));s.qn=Math.floor(num(s.qn));
  s.plan=s.plan&&isDay(s.plan.day)?{day:s.plan.day,done:!!s.plan.done}:{day:'',done:false};
+ const ln=s.learn&&typeof s.learn==='object'?s.learn:{};
+ s.learn={events:(Array.isArray(ln.events)?ln.events:[]).filter(e=>e&&typeof e.type==='string'&&topics[e.tp]).slice(-1500).map(e=>({t:num(e.t),type:str(e.type,12),tp:e.tp,pts:Math.floor(num(e.pts,0,1000)),step:Math.floor(num(e.step,0,20)),tries:Math.floor(num(e.tries,0,9)),secs:Math.floor(num(e.secs,0,3600)),ok:e.ok?1:0,n:Math.floor(num(e.n,0,999)),thr:Math.floor(num(e.thr,0,100))})),
+  days:{},lessons:{}};
+ const lds=ln.days&&typeof ln.days==='object'?ln.days:{};for(const k of Object.keys(lds).filter(k=>/^\d{4}-\d{2}-\d{2}\|\w+$/.test(k)).sort().slice(-300)){const v=lds[k]||{};s.learn.days[k]={lessons:Math.floor(num(v.lessons,0,99)),examples:Math.floor(num(v.examples,0,999))};}
+ const lls=ln.lessons&&typeof ln.lessons==='object'?ln.lessons:{};for(const k of Object.keys(lls))if(topics[k])s.learn.lessons[k]=Math.floor(num(lls[k],0,9999));
+ s.learnPts=Math.floor(num(s.learnPts));s.focusStreak=Math.floor(num(s.focusStreak,0,9999));s.bestFocusStreak=Math.floor(num(s.bestFocusStreak,0,9999));
+ const ms=s.mastery&&typeof s.mastery==='object'?s.mastery:{};s.mastery={};for(const k of Object.keys(ms))if(topics[k]&&Array.isArray(ms[k]))s.mastery[k]=ms[k].filter(v=>[60,80,95].includes(v));
+ s.announced=(Array.isArray(s.announced)?s.announced:[]).filter(id=>typeof id==='string').slice(-500);s.shopVer=Math.floor(num(s.shopVer,0,99));s.newSince=num(s.newSince);s.dealSeen=isDay(s.dealSeen)?s.dealSeen:'';
  const ex=s.exam&&typeof s.exam==='object'?s.exam:{};s.exam={name:str(ex.name,40).trim()||EXAM_DEFAULT.name,date:isDay(ex.date)?ex.date:EXAM_DEFAULT.date};
  return s;}
 
@@ -44,7 +52,8 @@ function planFor(s,now=new Date()){const dl=daysLeft(s,now),L=todayLog(s,now),fo
  if(dl===0){msg='Exam day! Eat a good breakfast, take a pencil and rubber, and read every question twice. You’ve got this! 💪';t.push({id:'warm',label:'Gentle warm-up: 5 Focus mix questions',go:'focus',done:focusN>=5});}
  else if(dl===1){msg='Tomorrow is the big day. A light session today — then an early night!';t.push({id:'focus',label:'10 Focus mix questions',go:'focus',done:focusN>=10},{id:'fix',label:s.fix.length?`Fix-it list (${s.fix.length} to fix)`:'Fix-it list — all clear!',go:'fixit',done:fixDone});}
  else{msg=dl>1?`${dl} days to go. Little and often wins!`:'Keep your maths muscles strong!';
-  t.push({id:'focus',label:'10 Focus mix questions',go:'focus',done:focusN>=10},{id:'fix',label:s.fix.length?`Fix-it list (${s.fix.length} to fix)`:'Fix-it list — all clear!',go:'fixit',done:fixDone},{id:'weak',label:`8 questions on ${topics[weak].label}`,go:weak,done:weakN>=8});
+  const lessonDone=((s.learn.days||{})[dayKey(now)+'|'+weak]||{}).lessons>0;
+  t.push({id:'learn',label:`Finish the ${topics[weak].label} lesson`,go:'learn:'+weak,done:lessonDone},{id:'focus',label:'10 Focus mix questions',go:'focus',done:focusN>=10},{id:'fix',label:s.fix.length?`Fix-it list (${s.fix.length} to fix)`:'Fix-it list — all clear!',go:'fixit',done:fixDone},{id:'weak',label:`8 questions on ${topics[weak].label}`,go:weak,done:weakN>=8});
   t.push(dl>1&&dl%2===0?{id:'mock',label:'A full 40-question mock',go:'mock',done:mockDone}:{id:'sprint',label:'A 5-minute sprint',go:'sprint',done:sprintDone||mockDone});}
  return{daysLeft:dl,message:msg,tasks:t,allDone:t.every(x=>x.done)};}
 

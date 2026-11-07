@@ -129,3 +129,39 @@ html{-webkit-text-size-adjust:100%}.shell{padding-left:max(18px,env(safe-area-in
  .pp-marks{break-before:page;page-break-before:always}.pp-marks table{border-collapse:collapse;width:100%;font-size:10pt}.pp-marks td,.pp-marks th{border:1px solid #888;padding:4px 6px;vertical-align:top;text-align:left}
  .pp-report h1{font-size:20pt;text-transform:none;text-shadow:none;letter-spacing:0;margin:0}.pp-report .pcards{grid-template-columns:repeat(4,1fr)}.pp-report .ptable th{position:static}.pp-report h3,.pp-report h2{break-after:avoid}
  @page{margin:14mm}}
+
+/* ---- Learn Studio ---- */
+.learn{border:4px solid var(--dark);border-radius:24px;padding:0;background:#fffaf0;color:var(--ink);box-shadow:10px 10px 0 var(--dark);width:min(820px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:hidden}
+.learn[open]{display:flex;flex-direction:column}.learn::backdrop{background:rgba(18,22,37,.6)}.learn .lk-head{background:#25795e}
+.ln-body{padding:14px 18px 18px;overflow:auto;min-height:0;line-height:1.55}.ln-body h3{margin:6px 0 8px;font-size:21px}
+.ln-dots{display:flex;gap:6px;align-items:center;margin-bottom:6px}.ln-dots span{width:22px;height:9px;border-radius:9px;background:#e2d8c2}.ln-dots span.ok{background:#34c98d}.ln-dots span.now{background:var(--red)}.ln-dots small{margin-left:auto;font-weight:800;color:#555d72}
+.ln-content .eg{background:#fff;border-left:6px solid var(--red);border-radius:8px;padding:9px 12px;margin:10px 0}.ln-content .qfig{max-width:420px;margin:8px auto}
+.gate{display:flex;flex-direction:column;gap:6px;margin:12px 0;padding:10px 12px;border-radius:12px;background:#eef6ff;border:2px solid #3b78d8;font-weight:800;font-size:14px}.gate.paused{background:#fff4d6;border-color:#b48a00}.gate.done{background:#e3fbef;border-color:#25795e}
+.gbar{height:10px;border-radius:10px;background:#d6e2f5;overflow:hidden}.gbar span{display:block;height:100%;background:#3b78d8;transition:width .25s}
+.ln-check{background:#fff;border:3px solid var(--dark);border-radius:14px;padding:12px;margin-top:10px}.ln-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr));gap:8px;margin-top:10px}
+.ln-opt{border:3px solid var(--dark);border-radius:12px;background:#fffaf0;padding:12px;font-weight:900;font-size:16px;min-height:52px}.ln-opt:disabled{opacity:.55}.ln-opt.wrong{background:#ffe3e9;text-decoration:line-through}.ln-opt.right{background:#c9f9df;opacity:1}
+.ln-done{text-align:center}.bigemoji{font-size:56px}.ex-q{font-size:19px;font-weight:850;white-space:pre-line;margin:8px 0}.ex-try{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}.ex-try input{border:2px solid var(--dark);border-radius:10px;padding:9px;font-size:16px;flex:1 1 180px;min-width:0}
+.ex-steps{background:#edfbf8;border:2px solid #25795e;border-radius:12px;padding:10px 12px 10px 32px}.ex-steps:empty{display:none}.ex-steps li{margin:4px 0}
+@media(max-width:700px){.learn{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;border:none;box-shadow:none}.ln-body{padding:12px}}
+/* ---- Shop extras: badges, deal, news, titles, frames, cards ---- */
+.badge{display:inline-block;font-size:10px;font-weight:950;border:2px solid var(--dark);border-radius:20px;padding:2px 7px;margin-right:4px;width:max-content}.badge.new{background:#9dff2e}.badge.deal{background:#ffb070}.badge s{opacity:.7}
+.dealbox{background:#fff1d6;border:3px dashed #e57a00;border-radius:12px;padding:10px 12px;margin:8px 0;font-size:14px}
+.shopnews{display:block;width:100%;text-align:left;margin-top:8px;background:#1e2333;color:#ffe45e;border:none;border-radius:10px;padding:8px 10px;font-weight:850;font-size:13px;min-height:40px;cursor:pointer}
+.ptitle{display:inline-block;background:var(--yellow);border:2px solid var(--dark);border-radius:20px;padding:2px 10px;font-weight:950;font-size:12px;margin:2px 0 4px}.lbt{display:block;font-size:10px;color:#7a4b00;font-weight:900}
+.pc-avatar.frame-silver .avatar-svg,.lk-av.frame-silver .avatar-svg{border:5px solid #c9d1df;box-shadow:0 0 0 3px var(--dark)}
+.pc-avatar.frame-comic .avatar-svg,.lk-av.frame-comic .avatar-svg{border:6px dashed #e51c35;background:#ffe45e}
+.pc-avatar.frame-neon .avatar-svg,.lk-av.frame-neon .avatar-svg{border:4px solid #9dff2e;box-shadow:0 0 14px #9dff2e,0 0 0 3px var(--dark)}
+.pc-avatar.frame-ice .avatar-svg,.lk-av.frame-ice .avatar-svg{border:5px solid #bfe9ff;box-shadow:0 0 12px #64d9f5,0 0 0 3px var(--dark)}
+.pc-avatar.frame-flames .avatar-svg,.lk-av.frame-flames .avatar-svg{border:5px solid #ff8a1c;box-shadow:0 0 16px #ff5a1c,0 0 0 3px var(--dark)}
+.pc-avatar.frame-gold .avatar-svg,.lk-av.frame-gold .avatar-svg{border:6px double #f5c542;box-shadow:0 0 14px #f5c542,0 0 0 3px var(--dark)}
+.pc-avatar.frame-rainbow .avatar-svg,.lk-av.frame-rainbow .avatar-svg{border:6px solid transparent;background:linear-gradient(#fff,#fff) padding-box,linear-gradient(90deg,#e51c35,#ff8a1c,#ffe45e,#3cc46a,#2f7bff,#6b3fc9) border-box}
+.pc-avatar.frame-galaxy .avatar-svg,.lk-av.frame-galaxy .avatar-svg{border:6px solid #3a1d8f;box-shadow:0 0 18px #b45bd6,0 0 0 3px var(--dark)}
+.pc-avatar.frame-diamond .avatar-svg,.lk-av.frame-diamond .avatar-svg{border:6px solid #e0f7ff;box-shadow:0 0 22px #9be7ff,0 0 6px #fff,0 0 0 3px var(--dark)}
+.lcard{background:linear-gradient(160deg,#fff7d6,#ffe1a8);border:4px solid var(--dark);border-radius:18px;padding:14px;text-align:center;box-shadow:4px 4px 0 var(--dark);line-height:1.45}.lcard.locked{filter:grayscale(.8);opacity:.85}
+.lc-icon{font-size:52px}.lcard b{display:block;font-size:18px}.lcard small{display:block;color:#7a4b00;font-weight:800;margin-bottom:6px}.lcard p{text-align:left;font-size:14px;margin:6px 0}.lc-puzzle{text-align:left;background:#fff;border-radius:10px;padding:8px;font-size:13px}.lc-ans{font-weight:900;color:#25795e;margin-left:4px}
+.cel-spin{animation:celSpin 1s ease}.cel-wiggle{animation:celWiggle 1s ease}
+@keyframes celSpin{0%{transform:none}50%{transform:translateY(-20px) rotate(180deg)}100%{transform:rotate(360deg)}}
+@keyframes celWiggle{0%,100%{transform:none}20%{transform:rotate(-12deg)}40%{transform:rotate(10deg) translateY(-8px)}60%{transform:rotate(-8deg)}80%{transform:rotate(6deg)}}
+@media(prefers-reduced-motion:reduce){.cel-spin,.cel-wiggle{animation:none}}
+.fcard .fb{flex-wrap:wrap}.fcard .fb button{flex:1 1 60px}
+@media(max-width:700px){.cats,.lk-tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}.cats .chip,.lk-tabs .chip{flex:0 0 auto}}

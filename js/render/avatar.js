@@ -5,27 +5,30 @@ const AV_INK='#121625';
 let avatarSeq=0;
 function drawAvatar(av,opt={}){
  const id='av'+(++avatarSeq),eq={...av.eq,...(opt.preview||{})};
+ const itm=slot=>(typeof itemById!=='undefined'&&itemById[eq[slot]])||null,art=slot=>{const i=itm(slot);return i?(i.art||i.id):null;},sty=slot=>{const i=itm(slot);return i&&i.style||{};};let extraDefs='';
  const skin=avatarOptions.skins[av.skin][0],hairC=avatarOptions.hairColours[av.hairCol][0],kit=avatarOptions.kits[av.kit][0];
  const st=`stroke="${AV_INK}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"`;
  const shade=(hex,f)=>{const n=parseInt(hex.slice(1),16),c=[n>>16,(n>>8)&255,n&255].map(v=>Math.max(0,Math.min(255,Math.round(f<0?v*(1+f):v+(255-v)*f))));return'#'+c.map(v=>v.toString(16).padStart(2,'0')).join('');};
  const light=hex=>{const n=parseInt(hex.slice(1),16);return((n>>16)*0.3+((n>>8)&255)*0.59+(n&255)*0.11)>150;};
  let g='';
  // ---------- scene ----------
- if(opt.scene!==false)g+=`<g clip-path="url(#${id}c)">${SCENES[eq.scene]||SCENES.park}</g>`;
+ if(opt.scene!==false)g+=`<g clip-path="url(#${id}c)">${SCENES[eq.scene]||(typeof SCENES_X!=='undefined'&&SCENES_X[art('scene')]?SCENES_X[art('scene')]():SCENES.park)}</g>`;
  // ---------- behind the body ----------
  if(eq.back==='cape')g+=`<path d="M84,166 Q58,230 52,286 L188,286 Q182,230 156,166 Z" fill="#c8102e" ${st}/><path d="M92,178 Q76,236 72,280" stroke="#8d0b20" stroke-width="3" fill="none"/>`;
  if(eq.back==='jetpack')g+=`<rect x="58" y="150" width="24" height="64" rx="11" fill="#9aa3b5" ${st}/><rect x="158" y="150" width="24" height="64" rx="11" fill="#9aa3b5" ${st}/><path d="M62,214 L70,246 L78,214Z M162,214 L170,246 L178,214Z" fill="#ff8a1c" ${st}/><path d="M66,214 L70,232 L74,214Z M166,214 L170,232 L174,214Z" fill="#ffe45e"/>`;
+ {const bx=typeof BACK_X!=='undefined'&&BACK_X[art('back')];if(bx&&!['cape','jetpack'].includes(eq.back))g+=bx(st,sty('back'));}
  if(av.hair==='afro')g+=`<circle cx="120" cy="92" r="64" fill="${hairC}" ${st}/>`;
  // ---------- legs, socks, boots ----------
  g+=`<rect x="92" y="250" width="17" height="28" fill="${skin}" ${st}/><rect x="131" y="250" width="17" height="28" fill="${skin}" ${st}/>`;
  g+=`<rect x="91" y="266" width="19" height="16" rx="3" fill="${eq.top==='goldkit'?'#f5c542':'#fff'}" ${st}/><rect x="130" y="266" width="19" height="16" rx="3" fill="${eq.top==='goldkit'?'#f5c542':'#fff'}" ${st}/>`;
- const bootCol={classicboots:'#ffffff',neonboots:'#9dff2e',boltboots:'#2f7bff',goldboots:'#f5c542'}[eq.boots]||'#1e2333';
+ const bst=sty('boots'),bootCol=bst.c||{classicboots:'#ffffff',neonboots:'#9dff2e',boltboots:'#2f7bff',goldboots:'#f5c542'}[eq.boots]||'#1e2333';
  g+=`<path d="M88,292 Q86,280 98,280 L110,280 Q116,286 114,292 Z" fill="${bootCol}" ${st}/><path d="M152,292 Q154,280 142,280 L130,280 Q124,286 126,292 Z" fill="${bootCol}" ${st}/>`;
+ if(bst.s)g+=`<path d="M95,284 L100,290 M101,283 L106,290 M145,284 L140,290 M139,283 L134,290" stroke="${bst.s}" stroke-width="2.4"/>`;
  if(eq.boots==='classicboots')g+=`<path d="M96,284 L100,290 M102,283 L106,290 M144,284 L140,290 M138,283 L134,290" stroke="${AV_INK}" stroke-width="2"/>`;
  if(eq.boots==='boltboots')g+=`<path d="M100,281 L96,287 L102,286 L99,291 M140,281 L144,287 L138,286 L141,291" stroke="#ffe45e" stroke-width="2.4" fill="none"/>`;
  if(eq.boots==='goldboots')g+=`<path d="M93,284 L104,284 M136,284 L147,284" stroke="#fff6b0" stroke-width="2.5"/>`;
  // ---------- shorts ----------
- const shortsCol=eq.top==='hero'?'#c8102e':eq.top==='goldkit'?'#ffffff':eq.top==='galaxy'?'#140b33':'#1e2333';
+ const shortsCol=sty('top').shorts||(sty('top').pat?'#1e2333':(eq.top==='hero'?'#c8102e':eq.top==='goldkit'?'#ffffff':eq.top==='galaxy'?'#140b33':'#1e2333'));
  g+=`<path d="M84,222 L156,222 L158,256 L124,256 L120,244 L116,256 L82,256 Z" fill="${shortsCol}" ${st}/>`;
  // ---------- neck, torso, arms ----------
  g+=`<rect x="109" y="136" width="22" height="26" fill="${skin}" ${st}/>`;
@@ -37,14 +40,16 @@ function drawAvatar(av,opt={}){
  if(eq.top==='hero'){topFill='#2457d6';showNum=false;deco=`<path d="M120,172 L138,188 L120,206 L102,188 Z" fill="#ffe45e" stroke="${AV_INK}" stroke-width="2.5"/><text x="120" y="194" text-anchor="middle" font-size="17" font-weight="900" fill="#c8102e" font-family="system-ui,Arial">A</text><rect x="82" y="214" width="76" height="9" fill="#c8102e"/>`;}
  if(eq.top==='goldkit'){topFill=`url(#${id}gold)`;numCol=AV_INK;deco=`<path d="M86,170 L100,160 L94,226 L84,226 Z" fill="#fff" opacity=".35"/>`;}
  if(eq.top==='galaxy'){topFill=`url(#${id}gal)`;numCol='#ffe45e';deco=Array.from({length:14},(_,i)=>`<circle cx="${84+((i*37)%72)}" cy="${164+((i*23)%60)}" r="${i%3?1.4:2.4}" fill="#fff"/>`).join('');}
+ {const ts=sty('top');if(ts.pat&&typeof TOP_PAT!=='undefined'){topFill=ts.pat==='gradient'?`url(#${id}tg)`:ts.c1;deco=TOP_PAT[ts.pat](ts.c1,ts.c2);numCol=ts.pat==='gradient'?'#fff':light(ts.c1)?AV_INK:'#fff';showNum=true;if(ts.pat==='gradient')extraDefs+=`<linearGradient id="${id}tg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="${ts.c1}"/><stop offset="1" stop-color="${ts.c2}"/></linearGradient>`;}}
  g+=`<path d="${torso}" fill="${topFill}" ${st}/><g clip-path="url(#${id}t)">${deco}</g><path d="${torso}" fill="none" ${st}/>`;
- if(showNum)g+=`<text x="120" y="204" text-anchor="middle" font-size="26" font-weight="900" fill="${numCol}" font-family="system-ui,Arial">${av.num}</text>`;
+ if(showNum)g+=`<text x="120" y="204" text-anchor="middle" font-size="26" font-weight="900" fill="${numCol}" font-family="system-ui,Arial" paint-order="stroke" stroke="${numCol===AV_INK?'#fff':AV_INK}" stroke-width="3">${av.num}</text>`;
  if(eq.top!=='hoodie'&&eq.top!=='hero')g+=`<path d="M108,158 L120,170 L132,158" fill="none" stroke="${eq.top==='bib'?AV_INK:'#fff'}" stroke-width="3"/>`;
  g+=`<rect x="63" y="198" width="15" height="34" rx="7" fill="${skin}" ${st}/><rect x="162" y="198" width="15" height="34" rx="7" fill="${skin}" ${st}/><circle cx="70" cy="236" r="9" fill="${skin}" ${st}/><circle cx="170" cy="236" r="9" fill="${skin}" ${st}/>`;
  // ---------- chest / neck / arm extras ----------
  if(eq.arm==='armband')g+=`<rect x="61" y="204" width="19" height="11" rx="2" fill="#ffe45e" ${st}/><text x="70.5" y="213.5" text-anchor="middle" font-size="10" font-weight="900" fill="${AV_INK}" font-family="system-ui,Arial">C</text>`;
  if(eq.chest==='medal'||eq.chest==='acemedal')g+=`<path d="M106,158 L120,186 L134,158" fill="none" stroke="${eq.chest==='medal'?'#2457d6':'#c8102e'}" stroke-width="6"/><circle cx="120" cy="192" r="12" fill="#f5c542" ${st}/><text x="120" y="197" text-anchor="middle" font-size="${eq.chest==='medal'?13:10}" font-weight="900" fill="${AV_INK}" font-family="system-ui,Arial">${eq.chest==='medal'?'★':'A+'}</text>`;
  if(eq.neck==='scarf')g+=`<path d="M100,154 Q120,168 140,154 L142,164 Q120,178 98,164 Z" fill="#e51c35" ${st}/><path d="M134,164 L146,206 L134,208 L126,168 Z" fill="#e51c35" ${st}/><path d="M131,178 L141,177 M134,190 L144,189 M106,160 L108,168 M118,163 L118,172" stroke="#fff" stroke-width="3"/>`;
+ if(typeof NECK_X!=='undefined'){const nx=NECK_X[art('neck')];if(nx&&eq.neck!=='scarf')g+=nx(st,sty('neck'));const cx=CHEST_X[art('chest')];if(cx&&!['medal','acemedal'].includes(eq.chest))g+=cx(st,sty('chest'));}
  // ---------- head ----------
  g+=`<circle cx="76" cy="104" r="9" fill="${skin}" ${st}/><circle cx="164" cy="104" r="9" fill="${skin}" ${st}/><circle cx="120" cy="100" r="44" fill="${skin}" ${st}/>`;
  g+=HAIR[av.hair](hairC,st);
@@ -54,11 +59,12 @@ function drawAvatar(av,opt={}){
  // ---------- glasses & hats ----------
  if(eq.glasses==='shades')g+=`<path d="M92,96 L114,96 L112,108 Q104,113 95,108 Z M126,96 L148,96 L145,108 Q136,113 128,108 Z" fill="#1e2333" ${st}/><path d="M114,99 L126,99" stroke="${AV_INK}" stroke-width="3"/><path d="M97,99 L104,99" stroke="#9db7ff" stroke-width="2"/>`;
  if(eq.glasses==='shapeshades')g+=`<path d="M92,108 L103,90 L114,108 Z" fill="#64d9f5" opacity=".85" ${st}/><path d="M128,92 L140,92 L146,101 L140,110 L128,110 L122,101 Z" fill="#ffb070" opacity=".9" ${st}/><path d="M114,101 L122,101" stroke="${AV_INK}" stroke-width="3"/>`;
- g+=(HATS[eq.hat]||(()=>''))(st,hairC);
+ if(typeof GLASS_X!=='undefined'){const gx=GLASS_X[art('glasses')];if(gx&&!['shades','shapeshades'].includes(eq.glasses))g+=gx(st,sty('glasses'));}
+ g+=(HATS[eq.hat]||(typeof HATS_X!=='undefined'&&HATS_X[art('hat')])||(()=>''))(st,hairC,sty('hat'));
  // ---------- held item & sidekick ----------
- g+=(HANDS[eq.hand]||(()=>''))(st);
- g+=(PETS[eq.pet]||(()=>''))(st);
- const defs=`<defs><clipPath id="${id}c"><rect width="240" height="300" rx="24"/></clipPath><clipPath id="${id}t"><path d="${torso}"/></clipPath><linearGradient id="${id}gold" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#fff2a8"/><stop offset=".45" stop-color="#f5c542"/><stop offset="1" stop-color="#c8901a"/></linearGradient><linearGradient id="${id}gal" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#3a1d8f"/><stop offset="1" stop-color="#0d0630"/></linearGradient></defs>`;
+ g+=(HANDS[eq.hand]||(typeof HANDS_X!=='undefined'&&HANDS_X[art('hand')])||(()=>''))(st,sty('hand'));
+ g+=(PETS[eq.pet]||(typeof PETS_X!=='undefined'&&PETS_X[art('pet')])||(()=>''))(st);
+ const defs=`<defs><clipPath id="${id}c"><rect width="240" height="300" rx="24"/></clipPath><clipPath id="${id}t"><path d="${torso}"/></clipPath><linearGradient id="${id}gold" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#fff2a8"/><stop offset=".45" stop-color="#f5c542"/><stop offset="1" stop-color="#c8901a"/></linearGradient><linearGradient id="${id}gal" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#3a1d8f"/><stop offset="1" stop-color="#0d0630"/></linearGradient>${extraDefs}</defs>`;
  return `<svg class="avatar-svg" viewBox="0 0 240 300" role="img" aria-label="Apollo’s player" xmlns="http://www.w3.org/2000/svg">${defs}${g}</svg>`;
 }
 const HAIR={

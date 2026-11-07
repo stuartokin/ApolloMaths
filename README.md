@@ -5,8 +5,8 @@ Open `index.html` (or the GitHub Pages site). Works offline; no accounts, no adv
 ## How the code is organised
 | Layer | Files | What it does |
 |---|---|---|
-| Data (no screen code) | `js/core.js`, `js/data/topics.js`, `js/data/questions-core.js`, `js/data/questions-focus.js`, `js/data/lessons.js`, `js/data/explainers.js`, `js/data/marking.js`, `js/data/shop.js`, `js/data/metrics.js` | Topics, question generators, lessons, "Explain it simply" content, answer marking, avatar options, Kit Shop catalogue and reward rules. Diagrams are described as specs, e.g. `F('cuboid',5,3,4,…)`. |
-| Presentation | `index.html`, `css/app.css`, `js/render/render.js`, `js/render/avatar.js`, `js/locker.js`, `js/players.js`, `js/parent.js`, `js/scratchpad.js`, `js/print.js`, `js/pwa.js` | Page structure, styles for phones → large screens, drawing of diagrams/lessons/explainers, Apollo's player, the Locker Room, “Who’s playing?”, leaderboard, Parent dashboard, scratchpad, printing and app install. |
+| Data (no screen code) | `js/core.js`, `js/data/topics.js`, `js/data/questions-core.js`, `js/data/questions-focus.js`, `js/data/lessons.js`, `js/data/explainers.js`, `js/data/marking.js`, `js/data/questions-extra.js`, `js/data/shop.js`, `js/data/shop-extra.js`, `js/data/learning.js`, `js/data/metrics.js` | Topics, question generators, lessons, "Explain it simply" content, answer marking, avatar options, Kit Shop catalogue and reward rules. Diagrams are described as specs, e.g. `F('cuboid',5,3,4,…)`. |
+| Presentation | `index.html`, `css/app.css`, `js/render/render.js`, `js/render/avatar.js`, `js/render/avatar-extra.js`, `js/learn.js`, `js/locker.js`, `js/players.js`, `js/parent.js`, `js/scratchpad.js`, `js/print.js`, `js/pwa.js` | Page structure, styles for phones → large screens, drawing of diagrams/lessons/explainers, Apollo's player, the Locker Room, “Who’s playing?”, leaderboard, Parent dashboard, scratchpad, printing and app install. |
 | Storage | `js/storage.js` | Player profiles; saves each player's progress in the browser automatically, and to their own progress file (e.g. `apollo-maths-progress.json`). |
 | App | `js/app.js` | Buttons, game modes, scoring, save/open wiring. |
 
@@ -18,12 +18,28 @@ Open `index.html` (or the GitHub Pages site). Works offline; no accounts, no adv
 ## Parent dashboard (👪 in the left-hand column)
 Overview, time (total, per day, and split into questions / learning / Kit Shop — the clock pauses after 2 minutes without a tap), every topic, every question type with the wrong answers typed, mocks (online and paper), shop purchases, an activity log and settings (exam name/date). Exports: every question, time per day and topic summary as CSV, plus a printable report.
 
+## Learning that earns points (and can't be faked)
+- **📘 Learn missions** (Focus Zone): 6 short steps per topic. Each step unlocks its quick check only after enough *active* reading time — the timer pauses after 45 seconds with no tap, scroll, key or pointer movement. +8 ⚡ per check right first time, +4 second time, +25 ⚡ for finishing. Points once per lesson per day.
+- **🎲 Example Studio**: fresh worked examples; each step is revealed after a few active seconds. +3 ⚡ per example studied in full (max 5 per topic per day).
+- **🔁 Prove it**: after “Teach me the method”, a twin question of the same type. +15 ⚡ if right first time.
+- **🧒 Explainer bonus**: +3 ⚡ only when the explainer is followed by a correct answer.
+- **Focus rewards**: +10 ⚡ for a Focus answer right first time (+3 after a retry); Focus streaks of 3/5/10 earn +15/+30/+75; mastery milestones at 60/80/95% readiness (10+ recent answers) earn +100/+200/+300.
+- **Guess guard**: no points after three wrong tries.
+- All learning activity is shown in the Parent dashboard → 🧠 Learning.
+- 237 question families in total (each makes endless fresh versions), including 36 added for the Focus topics and Tiffin-style puzzles.
+
 ## Learning extras
 - **Fix-it list**: question types that went wrong come back with new numbers until they are right first time twice in a row.
 - **Today’s plan**: exam countdown, daily tasks (+30 ⚡ when all are done) and a readiness bar for each Focus topic.
 - **🖨️ Print a paper mock**: 25 Stage 2-style questions with working space, plus a mark scheme; record the score in the Parent dashboard.
 - **✏️ Scratchpad**: draw working out with a finger, stylus or mouse.
 - **📲 Install app**: on GitHub Pages the app can be installed (Chrome/Edge: install button; iPad/iPhone: Share → Add to Home Screen) and then works offline. `sw.js` always fetches the newest files when online.
+
+## Kit Shop (222 items)
+Kits, boots, hats, glasses, scarves, medals, wings, things to hold, sidekicks, 25 experiences (backgrounds), 15 goal celebrations, 20 titles, 9 card frames and 17 **Maths Legends cards** (true stories of famous mathematicians, each with a puzzle). Prices run from 40 to 8,000 ⚡ in small steps.
+- **🔥 For you**: items at or just above what the player can spend right now.
+- **Deal of the day**: one nearby item at 25% off (announced once a day).
+- **Announcements**: a message when something new becomes affordable; a news ticker on the player card.
 
 ## Player, points and the Kit Shop
 - Apollo designs his own player (skin, hair, eyes, face, kit colour, shirt number).
