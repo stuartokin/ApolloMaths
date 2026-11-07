@@ -9,7 +9,7 @@ const isDay=d=>typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d);
 // Make sure every metric loaded from storage or a file has the right shape.
 function cleanMetrics(s){
  const t=s.time&&typeof s.time==='object'?s.time:{},bd=t.byDay&&typeof t.byDay==='object'?t.byDay:{};s.time={byDay:{}};
- for(const d of Object.keys(bd).filter(isDay).sort().slice(-400)){const x=bd[d]||{};s.time.byDay[d]={app:num(x.app),questions:num(x.questions),learn:num(x.learn),shop:num(x.shop),visits:num(x.visits)};}
+ for(const d of Object.keys(bd).filter(isDay).sort().slice(-400)){const x=bd[d]||{};s.time.byDay[d]={app:num(x.app),questions:num(x.questions),learn:num(x.learn),shop:num(x.shop),game:num(x.game),visits:num(x.visits)};}
  s.log=(Array.isArray(s.log)?s.log:[]).filter(e=>e&&typeof e==='object'&&topics[e.tp]).slice(-LOG_MAX).map(e=>({t:num(e.t),tp:e.tp,g:Math.floor(num(e.g,0,99)),ok:e.ok?1:0,f:e.f?1:0,sk:e.sk?1:0,h:Math.floor(num(e.h,0,3)),x:e.x?1:0,m:e.m?1:0,tr:Math.floor(num(e.tr,0,99)),s:Math.floor(num(e.s,0,3600)),w:(Array.isArray(e.w)?e.w:[]).slice(0,4).map(v=>str(v,24)),md:str(e.md,10),lv:str(e.lv,8),fx:e.fx?1:0,q:str(e.q,220),a:str(e.a,30)}));
  s.mocks=(Array.isArray(s.mocks)?s.mocks:[]).slice(-50).filter(m=>m&&typeof m==='object').map(m=>({t:num(m.t),score:Math.floor(num(m.score,0,40)),total:Math.floor(num(m.total,1,40)),secs:Math.floor(num(m.secs,0,7200)),timedOut:!!m.timedOut}));
  s.paperMocks=(Array.isArray(s.paperMocks)?s.paperMocks:[]).slice(-50).filter(m=>m&&typeof m==='object').map(m=>({t:num(m.t),score:Math.floor(num(m.score,0,100)),total:Math.floor(num(m.total,1,100))}));
@@ -58,7 +58,7 @@ function planFor(s,now=new Date()){const dl=daysLeft(s,now),L=todayLog(s,now),fo
  return{daysLeft:dl,message:msg,tasks:t,allDone:t.every(x=>x.done)};}
 
 // ---------- Aggregates for the parent dashboard ----------
-function timeTotals(s){const tot={app:0,questions:0,learn:0,shop:0,visits:0,days:0};for(const d of Object.values(s.time.byDay)){for(const k of['app','questions','learn','shop','visits'])tot[k]+=d[k];if(d.app>=60)tot.days++;}return tot;}
+function timeTotals(s){const tot={app:0,questions:0,learn:0,shop:0,game:0,visits:0,days:0};for(const d of Object.values(s.time.byDay)){for(const k of['app','questions','learn','shop','game','visits'])tot[k]+=d[k]||0;if(d.app>=60)tot.days++;}return tot;}
 function topicTable(s){return Object.keys(topics).map(k=>{const b=(s.byTopic||{})[k]||{seen:0,correct:0,first:0,hints:0,skipped:0},L=s.log.filter(e=>e.tp===k),timed=L.filter(e=>e.s>0);
  return{k,label:topics[k].label,emoji:topics[k].emoji,focus:!!topics[k].focus,seen:b.seen,correct:b.correct,first:b.first,hints:b.hints,skipped:b.skipped,
   explains:L.filter(e=>e.x).length,methods:L.filter(e=>e.m).length,avgSecs:timed.length?Math.round(timed.reduce((a,e)=>a+e.s,0)/timed.length):0,last:L.length?L[L.length-1].t:0,ready:readiness(s,k)};});}

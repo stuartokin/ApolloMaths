@@ -5,6 +5,7 @@
 <title>Apollo’s Maths Missions — Ultimate Edition</title>
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png" type="image/png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Maths Missions"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="stylesheet" href="css/app.css">
+<script src="config.js"></script>
 </head>
 <body><main class="shell">
 <header class="hero"><small>🔴 ANFIELD MATHS ACADEMY • THE ULTIMATE EDITION</small><h1><span class="pname">Apollo</span>'S<br>MATHS MISSIONS! <span class="rocket">🚀</span></h1><p>Train your brain for Tiffin Stage 2 with hundreds of changing puzzles, comic chaos, proper coaching and epic mock exams!</p><div class="whoplays"><span>Playing as <b class="pname">Apollo</b></span><button class="heroBtn" id="switchPlayer" type="button">🔁 Switch player</button><button class="heroBtn" data-help="guide" type="button">❓ Help</button><button class="heroBtn hidden" id="installBtn" type="button">📲 Install app</button></div><span class="sticker">BAM!<br>YOU'VE<br>GOT THIS!</span></header>
@@ -28,6 +29,8 @@
 <div class="pd-body"></div></dialog>
 <dialog class="learn" id="learn" aria-label="Learn Studio"><div class="lk-head"><h2 class="ln-title">📘 Learn</h2><button class="ghost lk-close" data-close type="button" aria-label="Close">✕</button></div><div class="ln-body"></div></dialog>
 <dialog class="help" id="help" aria-label="Help"><div class="lk-head"><h2>❓ Help</h2><button class="ghost lk-close" data-close type="button" aria-label="Close">✕</button></div><div class="lk-tabs"><button class="chip" data-htab="guide" type="button">📖 How to use the app</button><button class="chip" data-htab="versions" type="button">🆕 Version history</button></div><div class="hp-body"></div></dialog>
+<dialog class="arcade" id="arcade" aria-label="Secret Arcade"><div class="lk-head"><h2>🕹️ Secret Arcade</h2><button class="ghost lk-close" data-close type="button" aria-label="Close">✕</button></div><div class="arc-body" id="arcBody"></div></dialog>
+<dialog class="admin" id="admin" aria-label="Admin"><div class="lk-head"><h2>🔐 Admin</h2><button class="ghost lk-close" data-close type="button" aria-label="Close">✕</button></div><div class="lk-tabs adm-tabs hidden"><button class="chip" data-atab="rules" type="button">🕹️ Arcade rules</button><button class="chip" data-atab="history" type="button">📊 Play history</button><button class="chip" data-atab="words" type="button">🔑 Words & PIN</button><button class="chip" data-atab="locks" type="button">🔒 Locks</button><button class="chip" data-atab="play" type="button">🎮 Play</button></div><div class="adm-body"></div></dialog>
 <div id="printArea" class="printarea"></div>
 <div class="burst" id="burst" aria-hidden="true"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -45,6 +48,7 @@
 <script src="js/data/learning.js"></script>
 <script src="js/data/metrics.js"></script>
 <script src="js/data/help.js"></script>
+<script src="js/data/arcade-rules.js"></script>
 <!-- Presentation, storage and app -->
 <script src="js/render/render.js"></script>
 <script src="js/render/avatar.js"></script>
@@ -52,6 +56,8 @@
 <script src="js/storage.js"></script>
 <script src="js/learn.js"></script>
 <script src="js/help.js"></script>
+<script src="js/arcade.js"></script>
+<script src="js/admin.js"></script>
 <script src="js/locker.js"></script>
 <script src="js/players.js"></script>
 <script src="js/parent.js"></script>

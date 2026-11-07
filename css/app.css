@@ -182,3 +182,24 @@ html{-webkit-text-size-adjust:100%}.shell{padding-left:max(18px,env(safe-area-in
 .footer .linkbtn{font-size:12px;padding:2px}
 @media(max-width:700px){.help{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;border:none;box-shadow:none}}
 kbd{font-family:ui-monospace,Menlo,Consolas,monospace;background:#fff;border:2px solid var(--dark);border-bottom-width:3px;border-radius:6px;padding:0 6px;font-weight:800}
+
+/* ---- Arcade & Admin ---- */
+.arcade,.admin{border:4px solid var(--dark);border-radius:24px;padding:0;color:var(--ink);box-shadow:10px 10px 0 var(--dark);max-height:calc(100dvh - 24px);overflow:hidden}
+.arcade{background:#10142b;width:min(620px,calc(100vw - 24px))}.admin{background:#fffaf0;width:min(920px,calc(100vw - 24px))}
+.arcade[open],.admin[open]{display:flex;flex-direction:column}.arcade::backdrop,.admin::backdrop{background:rgba(5,6,15,.8)}
+.arcade .lk-head{background:#5b3cc4}.admin .lk-head{background:#1e2333}
+.arc-body{padding:12px;overflow:auto;min-height:0;color:#fff}.adm-body{padding:14px 16px;overflow:auto;min-height:0}
+.arc-card{text-align:center;padding:10px;color:inherit}.arcade .arc-card{color:#fff}.arc-big{font-size:56px}.arc-card h3{margin:6px 0}.arc-card .mini{color:#c9cde0}.admin .arc-card .mini{color:#555d72}
+.arc-reqs{list-style:none;padding:0;text-align:left;display:inline-block}.arc-reqs li{margin:6px 0;font-weight:800}.arc-reqs li.ok{color:#7dffb0}.arc-reqs small{opacity:.8}
+.arc-themes{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:12px 0}.arc-theme{background:#1e2650;color:#fff;border:3px solid #64d9f5;border-radius:16px;padding:12px 16px;min-width:150px;display:flex;flex-direction:column;gap:2px;align-items:center}.arc-theme span{font-size:32px}.arc-theme small{opacity:.8}.arc-theme.on{background:#64d9f5;color:#10142b}.arc-theme.classic{border-color:#3cff6a;font-family:ui-monospace,Menlo,Consolas,monospace}.arc-theme.classic.on{background:#3cff6a}
+.arc-game{display:flex;flex-direction:column;align-items:center;gap:8px}.arc-hud{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15px;color:#fff}.arc-low{color:#ff6b6b;animation:pop 1s infinite}
+#arcCanvas{width:min(100%,calc((100dvh - 250px)*0.8));aspect-ratio:480/600;height:auto;border:3px solid #64d9f5;border-radius:10px;touch-action:none;background:#000}
+.arc-pad{display:flex;gap:10px;width:min(100%,480px)}.arc-pad button{flex:1;min-height:56px;font-size:20px;font-weight:900;border:3px solid #fff;border-radius:14px;background:#2b3470;color:#fff;touch-action:none;user-select:none;-webkit-user-select:none}.arc-pad button:nth-child(2){background:#e51c35}
+.arc-ctl{display:flex;gap:8px}.arcade .ghost{background:#fff}
+@media(pointer:fine){.arc-pad{display:none}}
+@media(max-width:700px){.arcade,.admin{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;border:none;box-shadow:none}#arcCanvas{width:min(100%,calc((100dvh - 290px)*0.8))}}
+.adm-who select{font-weight:800;border:2px solid var(--dark);border-radius:9px;padding:6px;margin-left:6px}.adm-status{background:#eef6ff;border:2px solid #3b78d8;border-radius:12px;padding:8px 12px;margin:10px 0;font-weight:800;font-size:13px}
+.adm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:12px}.adm-grid fieldset{border:3px solid var(--dark);border-radius:14px;background:#fff;padding:8px 12px}.adm-grid legend{font-weight:950;padding:0 6px}
+.adm-grid label,.adm-line{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin:7px 0;font-weight:700;font-size:14px}.adm-grid input[type=number]{width:70px;border:2px solid var(--dark);border-radius:8px;padding:6px;font-weight:800}.adm-grid input[type=time]{border:2px solid var(--dark);border-radius:8px;padding:4px}
+.chk{justify-content:flex-start!important}.chk input{width:20px;height:20px}.adm-days{display:flex;flex-wrap:wrap;gap:4px 12px}.adm-line span{display:flex;gap:6px;flex-wrap:wrap}.adm-line input,.admin .arc-card input{border:2px solid var(--dark);border-radius:10px;padding:9px;font-size:16px;margin:4px}
+.chk{flex-wrap:nowrap!important;align-items:flex-start!important}.chk input{flex:0 0 auto;margin-top:2px}

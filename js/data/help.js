@@ -1,6 +1,6 @@
 'use strict';
 // DATA: the in-app Help guide and version history. Reward numbers are read from the real settings (LEARN, REWARDS, FIX), so they stay accurate.
-const APP_VERSION='2.2';
+const APP_VERSION='2.3';
 const helpSections=()=>[
  {icon:'🚀',title:'Getting started',blocks:[
   {ul:['<b>Who’s playing?</b> Pick your player, or add a new one. Tap <b>🔁 Switch player</b> at the top to change. Everyone has their own name, points, kit and progress.','<b>🎨 Change my look</b> (on “My player”) — design your footballer and change your <b>name</b>.','The page runs top to bottom: <b>My player</b> and <b>Today’s plan</b> → the <b>question</b> → <b>Focus Zone</b> → <b>game modes</b>. On a phone, the <b>🗂️ Topics</b> button jumps to the topic list.']}]},
@@ -26,6 +26,7 @@ const helpSections=()=>[
   {ul:['<b>👪 Parent dashboard</b> (left-hand column): overview, learning, time (questions / learning / shop), every topic and question type with the wrong answers typed, mocks, shop, activity log.','Settings: change the exam name and date. Exports: every question, time per day and topic summary (CSV), plus a printable report.','Learning points are only given for proof of learning (active reading and correct checks), so leaving the app open earns nothing.','<b>Reset saved progress</b> (left-hand column) clears the current player on this device only.']}]}
 ];
 const versionHistory=[
+ {v:'2.3',date:'7 November 2026',items:['🤫 A secret surprise for players who put the work in…','🔐 Parents can lock the Parent dashboard and reset with a PIN.','Arcade time (when earned) shows in the Parent dashboard.']},
  {v:'2.2',date:'7 November 2026',items:['Fractions are now written the Tiffin way — numerator over a line over the denominator — in questions, hints, methods, explainers, lessons, examples, the paper mock and the mark scheme.','When you type a fraction, the app shows how it looks written properly.','New ❓ Help guide and this version history.']},
  {v:'2.1',date:'7 November 2026',items:['📘 Learn missions: six steps per Focus topic, each with a quick check that only unlocks after active reading.','🎲 Example Studio, 🔁 “Prove it” twin questions and an explainer bonus.','Bigger Focus rewards: streaks and mastery milestones; a guess guard (no points after three wrong tries).','36 more question types (237 in total).','173 new Kit Shop items: kits, boots, hats, pets, wings, 25 experiences, celebrations, titles, frames and 17 Maths Legends cards.','🔥 “For you” picks, a deal of the day and announcements when something becomes affordable.','🧠 Learning tab in the Parent dashboard.']},
  {v:'2.0',date:'7 November 2026',items:['Player profiles: “Who’s playing?”, change your name, a leaderboard, a progress file for each player.','👪 Parent dashboard: time on the app (questions / learning / shop), every topic and question type, mistakes, mocks, shop, activity, CSV exports and a printable report.','🔧 Fix-it list, 📅 Today’s plan with exam countdown and readiness bars.','🖨️ Printable paper mock with mark scheme, ✏️ Scratchpad.','📲 Installable app that works offline.']},

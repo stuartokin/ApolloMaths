@@ -18,6 +18,37 @@ Open `index.html` (or the GitHub Pages site). Works offline; no accounts, no adv
 ## Parent dashboard (👪 in the left-hand column)
 Overview, time (total, per day, and split into questions / learning / Kit Shop — the clock pauses after 2 minutes without a tap), every topic, every question type with the wrong answers typed, mocks (online and paper), shop purchases, an activity log and settings (exam name/date). Exports: every question, time per day and topic summary as CSV, plus a printable report.
 
+## Site switches (`config.js`)
+`config.js` holds switches that apply to every device. To turn the hidden arcade off or on, edit it on GitHub:
+```js
+window.APP_CONFIG = { arcade: true };   // false = arcade off everywhere
+```
+GitHub Pages is a static site, so it can't read environment variables while running. If you'd rather use a **repository variable**, set Pages → Source to **GitHub Actions**, add a variable `ARCADE_ENABLED` (`true`/`false`) under Settings → Secrets and variables → Actions → Variables, and use a workflow like this (`.github/workflows/pages.yml`; check the action versions are current):
+```yaml
+name: Deploy site
+on: { push: { branches: [main] }, workflow_dispatch: {} }
+permissions: { contents: read, pages: write, id-token: write }
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: { name: github-pages, url: "${{ steps.d.outputs.page_url }}" }
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "window.APP_CONFIG={arcade:${{ vars.ARCADE_ENABLED == 'false' && 'false' || 'true' }}};" > config.js
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: . }
+      - id: d
+        uses: actions/deploy-pages@v4
+```
+
+## Hidden arcade and Admin (parents)
+- A secret word (typed into the answer box and sent with SHOOT, or typed anywhere on a computer) opens an original invaders-style arcade game, in **My player** or **Classic** style. A different secret word opens **Admin** (PIN-protected). The words are not written here on purpose — this repository is public.
+- Play time is limited per player by rules set in Admin: what must be done first (minutes of learning, questions right, Focus questions right, a Learn mission, Today's plan), earned or fixed play time, longest session, break between sessions, most per day and per week, allowed days and hours, no play on exam day, and one-off extra minutes.
+- Admin can also lock the Parent dashboard and “Reset progress” behind the PIN, see play history and play without limits (not counted).
+- The PIN and words are stored on each device as salted SHA-256 hashes. This is family-level protection: the code is public and browser developer tools could still change things.
+- Rules live in `js/data/arcade-rules.js`; the game in `js/arcade.js`; Admin in `js/admin.js`.
+
 ## Fractions and help
 - Fractions are written the Tiffin way — numerator over a line over the denominator — in questions, hints, methods, explainers, lessons, examples, the paper mock and the mark scheme (`fracHTML` / `fracify` in `js/render/render.js`). Apollo still types them as `3/4`, and sees a preview of how they look.
 - **❓ Help** (top of the page and footer) explains how to use the app and shows the version history (`js/data/help.js`, `js/help.js`). Change `APP_VERSION` and add an entry to `versionHistory` for each release; players are told once about a new version.
