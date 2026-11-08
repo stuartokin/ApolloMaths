@@ -67,6 +67,17 @@ jobs:
 - Tours spotlight each real part of the page with a speech bubble (Next/Back/Skip, arrow keys, Esc). Player tour: name/clock/Help, My player, Kit Shop, Today's plan, answering questions, help buttons, Focus Zone, game modes and timed tests, printing, topics, Match centre, medals, leaderboard, saving. Grown-ups' tour: opens the Parent dashboard and explains Overview, Focus areas (the five, suggestions, choosing, saving), Learning, Question types & mistakes, Time, Mocks and Settings (skipped if the dashboard is PIN-locked); then timed tests and printouts, progress files, players, voices, hidden games/Admin (contact for passcodes), Help.
 - Both tours can be rerun from the top of **❓ Help** (`js/tour.js`).
 
+## Starlane Trader (js/starlane.js)
+An original space-trading game in the style of the 1984 wireframe classics — original names, ships, systems, goods and text; the classic *mechanics* are recreated from published research (Mark Moxon's annotated 6502 source at bbcelite.com).
+- **Galaxy:** 160 procedurally generated systems (seed 20261108) with economy, government, tech level, population, species, description and market; distances tuned so every system is reachable within 7 light years.
+- **Markets:** price = base + (random AND mask) + economy × factor; illegal goods risk customs scans.
+- **Flight:** back-face-culled wireframe ships, stardust, planets, sun, rotating octagonal station; dashboard with 3D elliptical scanner, gauges, compass, safe-zone and mass-lock lights.
+- **Docking:** manual (within 26° of head-on, inside a 22° approach cone, slot within ~34° of level, slow) or docking computer (goes round the station if needed, matches rotation; plays The Blue Danube — public domain).
+- **Combat & law:** lasers with heat, missiles, ECM, shock pulse, escape capsule; pirates, police, traders, distress calls, asteroids, cargo scooping, bounties, ranks; Clean/Offender/Fugitive.
+- **Missions:** courier, supply, bounty, and political missions that change a system's government (saved as `gov` overrides, reported as Galactic News). Future upgrades add galaxies, systems, mission types and political events here.
+- **Controls:** keyboard, mouse wheel, gamepad, on-screen buttons; touch: floating stick, FIRE, speed slider (multi-touch). Opens full screen on small touch screens.
+- **Saving:** the commander lives in `stats.arcade.saves.starlane`; stopping or running out of time mid-flight docks and saves; being destroyed rolls back to the last docking.
+
 ## New-version announcements
 - `version.json` (generated from the version history in `js/data/help.js` by `node tools/make-version.js`) holds the latest version and child-friendly highlights, tagged `games`, `shop` or `look`. When online, the app checks it on opening, every 30 minutes and when it comes back online; if newer, it shows what’s new and how to save and update. **Upload `version.json` with every release.**
 - The service worker always asks the website for fresh files and never caches `version.json`, so “Update now” picks up the new version straight away.

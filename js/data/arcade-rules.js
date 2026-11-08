@@ -1,7 +1,7 @@
 'use strict';
 // DATA + LOGIC: arcade limits and unlock rules, and safe hashing for the secret words and admin PIN. Pure functions — no DOM.
 // Every hidden game (keep in step with GAME_LIST in js/games.js). Their high scores and play records are saved.
-const ARCADE_GAMES=['invaders','maze','meteor','guardian','ladder','racer','snake','pinball','bricks','hopper','blocks'];
+const ARCADE_GAMES=['invaders','maze','meteor','guardian','ladder','racer','snake','pinball','bricks','hopper','blocks','starlane'];
 const ARCADE_DEFAULTS={
  enabled:true,            // this player may use the arcade
  mode:'earned',           // 'earned' = play time is earned from learning; 'fixed' = a set daily allowance once unlocked
@@ -46,6 +46,7 @@ function cleanArcade(s){const a=s.arcade&&typeof s.arcade==='object'?s.arcade:{}
  const used={};const u=a.used&&typeof a.used==='object'?a.used:{};for(const k of Object.keys(u).filter(isDay).sort().slice(-60))used[k]=n(u[k],0,86400,0);
  s.arcade={settings:S,used,plays:(Array.isArray(a.plays)?a.plays:[]).slice(-200).filter(p=>p&&typeof p==='object').map(p=>({t:num(p.t),secs:n(p.secs,0,86400,0),score:n(p.score,0,1e7,0),theme:p.theme==='classic'?'classic':'player',game:ARCADE_GAMES.includes(p.game)?p.game:'invaders',wave:n(p.wave,1,999,1),end:str(p.end,12)})),
   lastEnd:num(a.lastEnd),high:Object.fromEntries(['player','classic',...ARCADE_GAMES.slice(1)].map(k=>[k,n((a.high||{})[k],0,1e9,0)])),bank:{secs:n((a.bank||{}).secs,0,14400,0),day:isDay((a.bank||{}).day)?a.bank.day:''},theme:a.theme==='classic'?'classic':'player',game:ARCADE_GAMES.includes(a.game)?a.game:'invaders',mute:!!a.mute,crt:a.crt===undefined?true:!!a.crt,twoP:{on:!!(a.twoP&&a.twoP.on),p2:(a.twoP&&typeof a.twoP.p2==='string'&&a.twoP.p2.trim().slice(0,16))||'Player 2'},
+  saves:Object.fromEntries(Object.entries(a.saves&&typeof a.saves==='object'?a.saves:{}).filter(([k,v])=>/^[a-z]{2,12}$/.test(k)&&v&&typeof v==='object'&&JSON.stringify(v).length<400000)),
   tables:Object.fromEntries(Object.entries(a.tables&&typeof a.tables==='object'?a.tables:{}).filter(([k,v])=>/^[a-z]{2,12}$/.test(k)&&Array.isArray(v)).map(([k,v])=>[k,v.filter(r=>r&&typeof r==='object').map(r=>({n:String(r.n||'Player').slice(0,16),s:n(r.s,0,1e9,0),d:isDay(r.d)?r.d:dayKey()})).filter(r=>r.s>0).sort((x,y)=>y.s-x.s).slice(0,5)]))};return s;}
 const mondayOf=d=>{const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x;};
 // Everything the arcade needs to know right now: is it unlocked, what is left, and why not.

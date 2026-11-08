@@ -1,7 +1,23 @@
 {
- "version": "2.16",
- "date": "8 November 2026",
+ "version": "2.17",
+ "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.17",
+   "date": "9 November 2026",
+   "kids": [
+    "🚀 A HUGE new game: trade, fight and explore a whole galaxy of 160 star systems!",
+    "🛸 Dock with spinning space stations — by hand, or let the docking computer do it",
+    "🗳️ Special missions can change how a planet is ruled — forever!",
+    "💾 Your space career is saved, so you can carry on next time"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🚀 New in the secret arcade: Starlane Trader — an original space-trading game in the style of the 1984 wireframe classics, with trading, missions, docking and hyperspace. Your career is saved."
+   ]
+  },
   {
    "v": "2.16",
    "date": "8 November 2026",
@@ -109,17 +125,6 @@
    "tags": [],
    "items": [
     "🎓 A guided tour of the app — one for players and one for grown-ups — offered with a welcome screen the first time, and always available from ❓ Help. Choose “Don’t ask me again” to stop the welcome screen (saved with your progress)."
-   ]
-  },
-  {
-   "v": "2.7",
-   "date": "7 November 2026",
-   "kids": [],
-   "tags": [],
-   "items": [
-    "⏱️ A clock at the top shows this session’s time and the total time in the app. If the app is refreshed or reopened within 15 minutes (parents can change this), the session carries on.",
-    "Hidden games: unplayed time is saved for next time (a parent setting), and one session can include several games.",
-    "Fixed: dates in the history could be lost after a page reload."
    ]
   }
  ]
