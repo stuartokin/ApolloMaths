@@ -9,12 +9,17 @@ const Arcade=(()=>{
  function beep(f,d=.08,type='square',vol=.04,slide=0){if(stats.arcade.mute)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),gn=ac.createGain();o.type=type;o.frequency.value=f;if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,f*slide),ac.currentTime+d);gn.gain.value=vol;gn.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.connect(gn).connect(ac.destination);o.start();o.stop(ac.currentTime+d);}catch(e){}}
  const fmt=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
  // A quick tap (pressed and released between two frames) is remembered until the game has seen it.
- const KEYMAP={ArrowLeft:'l',a:'l',A:'l',ArrowRight:'r',d:'r',D:'r',ArrowUp:'u',w:'u',W:'u',ArrowDown:'d',s:'d',S:'d',' ':'f',Enter:'f'};
- const inp=()=>({l:!!(keys.ArrowLeft||keys.a||keys.A||pad.l||latch.l),r:!!(keys.ArrowRight||keys.d||keys.D||pad.r||latch.r),u:!!(keys.ArrowUp||keys.w||keys.W||pad.u||latch.u),d:!!(keys.ArrowDown||keys.s||keys.S||pad.d||latch.d),f:!!(keys[' ']||keys.Enter||pad.f||latch.f)});
+ const KEYMAP={ArrowLeft:'l',a:'l',A:'l',ArrowRight:'r',d:'r',D:'r',ArrowUp:'u',w:'u',W:'u',ArrowDown:'d',s:'d',S:'d',' ':'f',Enter:'f',b:'b',B:'b',x:'b',X:'b',Shift:'b'};
+ const inp=()=>({l:!!(keys.ArrowLeft||keys.a||keys.A||pad.l||latch.l),r:!!(keys.ArrowRight||keys.d||keys.D||pad.r||latch.r),u:!!(keys.ArrowUp||keys.w||keys.W||pad.u||latch.u),d:!!(keys.ArrowDown||keys.s||keys.S||pad.d||latch.d),f:!!(keys[' ']||keys.Enter||pad.f||latch.f),b:!!(keys.b||keys.B||keys.x||keys.X||keys.Shift||pad.b||latch.b)});
+ // Sound helpers for the games: white-noise bursts (explosions) and a continuous engine tone.
+ let nbuf=null,eng=null;
+ function noise(d=.3,vol=.08,freq=1200){if(stats.arcade.mute)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(!nbuf){nbuf=ac.createBuffer(1,ac.sampleRate,ac.sampleRate);const a=nbuf.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=Math.random()*2-1;}
+  const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();s.buffer=nbuf;f.type='lowpass';f.frequency.value=freq;g.gain.value=vol;g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);s.connect(f).connect(g).connect(ac.destination);s.start();s.stop(ac.currentTime+d);}catch(e){}}
+ const engine={set(freq,vol=.03){if(stats.arcade.mute){this.stop();return;}try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(!eng){const o=ac.createOscillator(),g=ac.createGain();o.type='sawtooth';o.connect(g).connect(ac.destination);g.gain.value=0;o.start();eng={o,g};}eng.o.frequency.setTargetAtTime(freq,ac.currentTime,.05);eng.g.gain.setTargetAtTime(vol,ac.currentTime,.05);}catch(e){}},stop(){if(eng){try{eng.g.gain.value=0;eng.o.stop();}catch(e){}eng=null;}}};
  function hud(){get('arcHud').innerHTML=`<span>Score <b>${game.score.toLocaleString('en-GB')}</b></span><span>${game.levelName} <b>${game.level}</b></span><span>${'❤️'.repeat(Math.max(0,Math.min(6,game.lives)))||'💔'}</span><span class="${!admin&&cap-played<60?'arc-low':''}">⏱️ <b>${admin?'∞':fmt(cap-played)}</b></span>`;}
  function loop(t){if(view!=='game'){raf=0;return;}const dt=Math.min(.05,(t-(last||t))/1000);last=t;
-  if(!paused&&document.visibilityState==='visible'){played+=dt;game.update(dt,inp());latch={};if(game.over){finish('gameover');return;}if(!admin&&played>=cap){finish('time');return;}}
-  ctx.save();ctx.scale(cv.width/game.W,cv.height/game.H);game.render(ctx);
+  if(!paused&&document.visibilityState==='visible'){if(!game.intro)played+=dt;game.update(dt,inp());latch={};if(game.over){finish('gameover');return;}if(!admin&&played>=cap){finish('time');return;}}
+  ctx.save();ctx.scale(cv.width/game.W,cv.height/game.H);game.render(ctx);if(stats.arcade.crt!==false)Retro.crt(ctx,game.W,game.H);
   if(paused){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,game.W,game.H);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='bold 34px monospace';ctx.fillText('PAUSED',game.W/2,game.H/2);ctx.font='14px monospace';ctx.fillText('Tap ▶ Play or press P',game.W/2,game.H/2+30);}
   ctx.restore();hud();raf=requestAnimationFrame(loop);}
  function card(html){get('arcBody').innerHTML=html;}
@@ -26,9 +31,9 @@ const Arcade=(()=>{
    ${admin?'':sess?`<p>⏱️ <b>${fmt(sessLeft())}</b> left in this session.</p>`:`<p>You can play for <b>${fmt(st.sessionSecs)}</b> now${st.bank?` (including <b>${fmt(st.bank)}</b> saved from last time 🎁)`:''}. Left today: <b>${fmt(st.dayLeft)}</b> · this week: <b>${fmt(st.weekLeft)}</b>${st.earned!==null?` · earned so far today: <b>${fmt(Math.max(0,st.earned-st.usedDay))}</b>`:''}.</p>`}
    <div class="arc-games">${GAME_LIST.map(g=>`<button class="arc-gm${g.id===gameId?' on':''}" data-game="${g.id}" type="button"><span>${g.icon}</span><b>${g.name}</b><small>${g.desc}</small><em>🏆 ${(g.id==='invaders'?Math.max(H.player,H.classic):H[g.id]||0).toLocaleString('en-GB')}</em></button>`).join('')}</div>
    ${gameId==='invaders'?`<div class="arc-themes"><button class="arc-theme${t==='player'?' on':''}" data-theme="player" type="button"><span>🧍⚽</span><b>My player</b></button><button class="arc-theme classic${t==='classic'?' on':''}" data-theme="classic" type="button"><span>👾</span><b>Classic</b></button></div>`:''}
-   <div class="actions" style="justify-content:center"><button class="primary" data-arc="start" type="button">▶️ Play ${GAME_LIST.find(g=>g.id===gameId).name}</button><button class="ghost" data-arc="mute" type="button">${stats.arcade.mute?'🔇 Sound off':'🔊 Sound on'}</button><button class="ghost" data-arc="full" type="button" id="arcFullBtn">${dlg().classList.contains('arc-full')?'🗗 Exit full screen':'⛶ Full screen'}</button><button class="ghost" data-arc="close" type="button">Back to maths</button></div>
+   <div class="actions" style="justify-content:center"><button class="primary" data-arc="start" type="button">▶️ Play ${GAME_LIST.find(g=>g.id===gameId).name}</button><button class="ghost" data-arc="mute" type="button">${stats.arcade.mute?'🔇 Sound off':'🔊 Sound on'}</button><button class="ghost" data-arc="crt" type="button">${stats.arcade.crt!==false?'📺 Retro screen on':'📺 Retro screen off'}</button><button class="ghost" data-arc="full" type="button" id="arcFullBtn">${dlg().classList.contains('arc-full')?'🗗 Exit full screen':'⛶ Full screen'}</button><button class="ghost" data-arc="close" type="button">Back to maths</button></div>
    <p class="mini">Keys: arrows (or WASD) to move, Space to fire, P to pause. Tablets: use the buttons under the game${gameId==='maze'?' or swipe on the maze':gameId==='snake'?' or swipe on the game':''}.</p></div>`);}
- const LABEL={invaders:{l:'◀',r:'▶',f:'⚽ KICK'},maze:{l:'◀',r:'▶',u:'▲',d:'▼'},meteor:{l:'⟲',r:'⟳',u:'▲ Thrust',f:'● Fire'},guardian:{u:'▲',d:'▼',l:'◀',r:'▶',f:'🔥 Fire'},ladder:{l:'◀',r:'▶',u:'▲ Climb',d:'▼',f:'⤴ Jump'},racer:{l:'◀',r:'▶',u:'▲ Go',d:'▼ Brake',f:'🔥 Nitro'},snake:{l:'◀',r:'▶',u:'▲',d:'▼'}};
+ const LABEL={invaders:{l:'◀',r:'▶',f:'⚽ KICK'},maze:{l:'◀',r:'▶',u:'▲',d:'▼'},meteor:{l:'⟲',r:'⟳',u:'▲ Thrust',f:'● Fire',d:'🌀 Hyper'},guardian:{u:'▲',d:'▼',l:'◀',r:'▶',f:'🔥 Fire',b:'💣 Bomb'},ladder:{l:'◀',r:'▶',u:'▲ Climb',d:'▼',f:'⤴ Jump'},racer:{l:'◀',r:'▶',u:'▲ Go',d:'▼ Brake',f:'🔥 Nitro'},snake:{l:'◀',r:'▶',u:'▲',d:'▼'}};
  // A session can hold several games (a game-over doesn't end it). It ends when its time runs out or the player leaves the arcade.
  function endSession(reason){if(!sess||admin)return;const left=Math.max(0,Math.round(sess.cap-sess.played)),st=stats.arcade.settings;stats.arcade.lastEnd=Date.now();
   stats.arcade.bank=st.carry&&reason!=='time'&&left>=30?{secs:Math.min(st.maxCarryMins*60,left),day:dayKey()}:{secs:0,day:''};sess=null;save();
@@ -38,7 +43,7 @@ const Arcade=(()=>{
   if(sessLeft()<10){endSession('time');locked(arcadeStatus(stats));return;}}
   cap=admin?Infinity:sessLeft();played=0;paused=false;keys={};Object.keys(pad).forEach(k=>pad[k]=false);
   if(['invaders','ladder'].includes(gameId)){avImg=new Image();avImg.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(drawAvatar(stats.avatar,{scene:false}));}
-  game=GAMES[gameId]({theme:stats.arcade.theme,avatar:avImg,beep});view='game';
+  game=GAMES[gameId]({theme:stats.arcade.theme,avatar:avImg,beep,noise,engine,hi:()=>stats.arcade.high[hsKey()]||0});view='game';
   const lab=Object.assign({},LABEL[gameId]);if(gameId==='invaders'&&stats.arcade.theme==='classic')lab.f='FIRE';
   card(`<div class="arc-game"><div class="arc-hud" id="arcHud"></div><canvas id="arcCanvas" aria-label="Arcade game" style="aspect-ratio:${game.W}/${game.H}"></canvas>
    <div class="arc-pad">${PADS[gameId].map(grp=>`<div class="arc-grp">${grp.map(k=>`<button data-pad="${k}" type="button" class="pad-${k}">${lab[k]}</button>`).join('')}</div>`).join('')}</div>
@@ -46,7 +51,7 @@ const Arcade=(()=>{
   cv=get('arcCanvas');ctx=cv.getContext('2d');fit();
   const padEl=get('arcBody').querySelector('.arc-pad');padEl.addEventListener('pointerdown',e=>{const b=e.target.closest('[data-pad]');if(b){pad[b.dataset.pad]=true;latch[b.dataset.pad]=true;b.setPointerCapture(e.pointerId);e.preventDefault();}});
   ['pointerup','pointercancel','pointerleave'].forEach(ev=>padEl.addEventListener(ev,e=>{const b=e.target.closest('[data-pad]');if(b)pad[b.dataset.pad]=false;}));
-  let sw=null;cv.addEventListener('pointerdown',e=>{sw=[e.clientX,e.clientY];const r=cv.getBoundingClientRect();if(game.pointer){game.pointer((e.clientX-r.left)/r.width);pad.f=true;setTimeout(()=>pad.f=false,120);}});
+  let sw=null;cv.addEventListener('pointerdown',e=>{if(game.tap&&game.tap())return;sw=[e.clientX,e.clientY];const r=cv.getBoundingClientRect();if(game.pointer){game.pointer((e.clientX-r.left)/r.width);pad.f=true;setTimeout(()=>pad.f=false,120);}});
   cv.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();if(e.buttons&&game.pointer)game.pointer((e.clientX-r.left)/r.width);if(sw&&game.swipe){const dx=e.clientX-sw[0],dy=e.clientY-sw[1];if(Math.hypot(dx,dy)>24){game.swipe(dx,dy);sw=[e.clientX,e.clientY];}}});
   cv.addEventListener('pointerup',()=>sw=null);
   last=0;if(!raf)raf=requestAnimationFrame(loop);}
@@ -60,7 +65,7 @@ const Arcade=(()=>{
   try{if(on&&!fsEl){const r=d.requestFullscreen||d.webkitRequestFullscreen;if(r){const p=r.call(d);if(p&&p.catch)p.catch(()=>{});}}
    else if(!on&&fsEl){const x=document.exitFullscreen||document.webkitExitFullscreen;if(x){const p=x.call(document);if(p&&p.catch)p.catch(()=>{});}}}catch(e){}
   const b=get('arcFullBtn');if(b)b.textContent=on?'🗗 Exit full screen':'⛶ Full screen';setTimeout(fit,60);setTimeout(fit,400);}
- function finish(why){if(view!=='game')return;view='over';cancelAnimationFrame(raf);raf=0;const key=hsKey(),best=game.score>(stats.arcade.high[key]||0);
+ function finish(why){if(view!=='game')return;view='over';engine.stop();cancelAnimationFrame(raf);raf=0;const key=hsKey(),best=game.score>(stats.arcade.high[key]||0);
   if(best)stats.arcade.high[key]=game.score;
   let sessionOver=false;if(!admin){const k=dayKey(),secs=Math.round(played);stats.arcade.used[k]=(stats.arcade.used[k]||0)+secs;if(sess){sess.played+=played;if(why==='time'||sessLeft()<10){sessionOver=true;}}stats.arcade.plays.push({t:Date.now(),secs,score:game.score,game:gameId,theme:stats.arcade.theme,wave:game.level,end:why});if(stats.arcade.plays.length>200)stats.arcade.plays.shift();}
   save();if(sessionOver)endSession('time');const st=arcadeStatus(stats),nm=GAME_LIST.find(g=>g.id===gameId).name,more=!admin&&sess&&sessLeft()>=10;
@@ -76,7 +81,7 @@ const Arcade=(()=>{
   if(b.dataset.theme){stats.arcade.theme=b.dataset.theme;save(false);menu(admin?null:arcadeStatus(stats));return;}
   if(a==='start'||a==='again')start();else if(a==='menu'){view='menu';menu(admin?null:arcadeStatus(stats));}else if(a==='close'||b.dataset.close!==undefined)close();else if(a==='quit')finish('stopped');
   else if(a==='full'){setFull(!dlg().classList.contains('arc-full'));}
-  else if(a==='pause'){paused=!paused;b.textContent=paused?'▶️ Play':'⏸️ Pause';}else if(a==='mute'){stats.arcade.mute=!stats.arcade.mute;save(false);menu(admin?null:arcadeStatus(stats));}}
+  else if(a==='pause'){paused=!paused;b.textContent=paused?'▶️ Play':'⏸️ Pause';}else if(a==='mute'){stats.arcade.mute=!stats.arcade.mute;save(false);menu(admin?null:arcadeStatus(stats));}else if(a==='crt'){stats.arcade.crt=stats.arcade.crt===false;save(false);menu(admin?null:arcadeStatus(stats));}}
  function init(){const d=dlg();d.addEventListener('click',onClick);d.addEventListener('close',()=>{if(view==='game')finish('stopped');endSession('left');arcadeOpen=false;});
   d.addEventListener('cancel',e=>{if(view==='game'){e.preventDefault();paused=true;}});
   window.addEventListener('keydown',e=>{if(!arcadeOpen||view!=='game')return;if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key))e.preventDefault();if(e.key==='p'||e.key==='P'){paused=!paused;return;}keys[e.key]=true;if(KEYMAP[e.key])latch[KEYMAP[e.key]]=true;});
