@@ -17,8 +17,16 @@ const Speech=(()=>{
  // Voices of the chosen gender (British first). Falls back to any English voice if the device has none of that gender.
  function pool(g){const want=g==='male'?v=>MAL.test(v.name)&&!FEM.test(v.name):v=>FEM.test(v.name);let p=voices.filter(want);if(!p.length)p=voices.filter(v=>!(g==='male'?FEM:MAL).test(v.name));if(!p.length)p=voices.slice();
   return p.sort((a,b)=>(/en[-_]GB/i.test(b.lang)-/en[-_]GB/i.test(a.lang))||(b.localService-a.localService));}
- // Automatic choice for a role: a different voice of the chosen gender for each role (when the device has several).
- const autoVoice=role=>{const p=pool(set().gender);return p.length?p[ROLES[role].slot%p.length]:null;};
+ // Natural (neural) voices sound far better: Microsoft "Online (Natural)"/"Neural", Apple "Premium"/"Enhanced".
+ const NATURAL=/natural|neural|premium|enhanced/i,isNatural=v=>NATURAL.test(v.name),isGB=v=>/^en[-_]GB/i.test(v.lang);
+ const isGender=(v,g)=>g==='male'?MAL.test(v.name)&&!FEM.test(v.name):FEM.test(v.name);
+ // Natural voices in order of preference: chosen gender (British first), then the other gender (British first).
+ function naturalList(g){const nat=voices.filter(isNatural),other=g==='male'?'female':'male',seen=new Set(),out=[];
+  for(const grp of [nat.filter(v=>isGB(v)&&isGender(v,g)),nat.filter(v=>isGB(v)&&!isGender(v,g)&&!isGender(v,other)),nat.filter(v=>isGB(v)&&isGender(v,other)),nat.filter(v=>!isGB(v)&&isGender(v,g)),nat.filter(v=>!isGB(v)&&!isGender(v,other)),nat.filter(v=>!isGB(v))])
+   for(const v of grp)if(!seen.has(v.name)){seen.add(v.name);out.push(v);}return out;}
+ // Automatic choice for a role: natural voices first — a different one for each role where possible (mixing genders if needed,
+ // reusing voices if there are fewer than four). Only devices with no natural voices fall back to the ordinary ones.
+ const autoVoice=role=>{const n=naturalList(set().gender);if(n.length)return n[ROLES[role].slot%n.length];const p=pool(set().gender);return p.length?p[ROLES[role].slot%p.length]:null;};
  // A voice picked by name for a role (saved per player); if it isn't on this device, the automatic choice is used.
  const chosen=role=>{const n=(set().voice||{})[role];return n?all.find(v=>v.name===n)||null:null;};
  const voiceFor=role=>chosen(role)||autoVoice(role);
@@ -33,8 +41,8 @@ const Speech=(()=>{
   .replace(/½/g,' and a half').replace(/¼/g,' and a quarter').replace(/¾/g,' and three quarters')
   .replace(/(\d)\s?cm²/g,'$1 square centimetres').replace(/(\d)\s?m²/g,'$1 square metres').replace(/(\d)\s?cm³/g,'$1 cubic centimetres').replace(/(\d)\s?m³/g,'$1 cubic metres')
   .replace(/cm³/g,'cubic centimetres').replace(/cm²/g,'square centimetres').replace(/\bm³/g,'cubic metres').replace(/\bm²/g,'square metres').replace(/(\d)\s?km\/h/g,'$1 kilometres per hour').replace(/(\d)\s?mm\b/g,'$1 millimetres').replace(/(\d)\s?cm\b/g,'$1 centimetres').replace(/(\d)\s?km\b/g,'$1 kilometres').replace(/(\d)\s?kg\b/g,'$1 kilograms').replace(/(\d)\s?ml\b/g,'$1 millilitres').replace(/(\d)\s?m\b/g,'$1 metres').replace(/(\d)\s?g\b/g,'$1 grams')
-  .replace(/×/g,' times ').replace(/÷/g,' divided by ').replace(/−/g,' minus ').replace(/(\d)\s?-\s?(\d)/g,'$1 minus $2').replace(/=/g,' equals ').replace(/°C/g,' degrees Celsius').replace(/°/g,' degrees')
-  .replace(/\+\s?(\d)/g,'plus $1').replace(/⚡/g,' points').replace(/(\d),(\d{3})/g,'$1$2')
+  .replace(/(^|[^\d.])1 ((?:square |cubic )?(?:millimetre|centimetre|metre|kilometre|kilogram|gram|millilitre|point|degree))s\b/g,'$11 $2').replace(/×/g,' times ').replace(/÷/g,' divided by ').replace(/−/g,' minus ').replace(/(\d)\s?-\s?(\d)/g,'$1 minus $2').replace(/=/g,' equals ').replace(/°C/g,' degrees Celsius').replace(/°/g,' degrees')
+  .replace(/\+\s?(\d)/g,'plus $1').replace(/⚡/g,' points').replace(/(^|[^\d.])1\s+points\b/g,'$11 point').replace(/(\d),(\d{3})/g,'$1$2')
   .replace(/\b[A-Z]{2,}\b/g,w=>KEEP.test(w)?w:w.toLowerCase())
   .replace(/\p{Extended_Pictographic}|\uFE0F|\u200D/gu,' ').replace(/[•·|→←▶◀]/g,', ').replace(/\s+/g,' ').replace(/\s+([.,!?;:])/g,'$1').replace(/([.!?])[.,]+/g,'$1').trim();}
  const sentences=t=>(t.match(/[^.!?…]+[.!?…]*/g)||[t]).map(s=>s.trim()).filter(Boolean).flatMap(s=>s.length<=220?[s]:s.match(/.{1,200}(\s|$)/g));
@@ -52,5 +60,5 @@ const Speech=(()=>{
  function announce(text){if(!set().announce||!text)return;if(current&&current.role!=='announce')return;
   if(current){if(queue.length<2)queue.push(text);return;}say(text,'announce',()=>{const n=queue.shift();if(n)announce(n);});}
  const speaking=role=>!!current&&(!role||current.role===role);
- return{ok,ROLES,say,stop,announce,speaking,voiceFor,autoVoice,chosen,speakable,voices:()=>voices,allVoices:()=>all,pool,onVoices:f=>listeners.push(f)};
+ return{ok,ROLES,say,stop,announce,speaking,voiceFor,autoVoice,chosen,isNatural,naturalCount:()=>voices.filter(isNatural).length,speakable,voices:()=>voices,allVoices:()=>all,pool,onVoices:f=>listeners.push(f)};
 })();
