@@ -1,7 +1,22 @@
 {
- "version": "2.22",
+ "version": "2.23",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.23",
+   "date": "9 November 2026",
+   "kids": [
+    "🤖 Starlane Trader: your assistant now really talks — with tips in battle, when trading and choosing missions",
+    "✈️ Enemy fighters swoop past instead of crashing into you",
+    "🎮 Tidier pause and controls screens"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🚀 Starlane Trader: assistant voice fixed; separate voice and subtitle switches; battle, trading and mission tips; enemy fighters break off earlier and most close calls are near misses; controls page fits all keys."
+   ]
+  },
   {
    "v": "2.22",
    "date": "9 November 2026",
@@ -144,22 +159,6 @@
    "items": [
     "✅ Quality check of every question, hint, worked method and lesson. Hints and methods now show EVERY step of the working — for example, in ratio questions, “divide the total by the number of parts” is always shown with the actual sum.",
     "🤫 Three more surprises for players who put the work in…"
-   ]
-  },
-  {
-   "v": "2.13",
-   "date": "8 November 2026",
-   "kids": [
-    "🎨 Loads more ways to make your player look like you — hair, skin tones, head coverings and more"
-   ],
-   "tags": [
-    "look"
-   ],
-   "items": [
-    "🎨 More ways to make your player look like you: boy or girl, 10 skin tones, 13 hair styles (including afro, braids, locs, two puffs, bob and bun), 11 hair colours, eye shapes, and head coverings (hijab, patka, dastar, kippah, headwrap).",
-    "💾 The save bar shows your progress file’s name and when it was last saved — hover over it (or the Save button) to see where it is. New “Save as…” and “⬇️ Export (.json)” buttons.",
-    "📄 Links to Tiffin School’s official sample maths questions and admissions page (Help and the bottom of the page).",
-    "🤖 A clear note that the app was made with AI and isn’t affiliated with Tiffin School."
    ]
   }
  ]
