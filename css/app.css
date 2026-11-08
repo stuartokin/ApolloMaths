@@ -305,3 +305,4 @@ dialog.tour-front[open]{position:fixed;inset:0;margin:auto;z-index:91}
 .vc-try{grid-template-columns:1fr!important}
 .vc-body fieldset{min-width:0}.vc-pick select{max-width:100%;width:100%}.vc-role{min-width:0}
 .vc-body .chk{display:block!important;padding-left:30px;text-indent:-30px;line-height:1.45}.vc-body .chk input{margin:0 8px 0 0;vertical-align:-4px;text-indent:0}.vc-row .chk{display:inline-block!important;padding-left:0;text-indent:0;margin-right:14px}
+.filechip{display:inline-block!important;margin-top:5px;background:#fff;border:2px solid var(--dark);border-radius:10px;padding:3px 9px;font-size:13px;font-weight:800;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:help}

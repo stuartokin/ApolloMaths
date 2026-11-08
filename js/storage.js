@@ -63,6 +63,9 @@ const Storage=(()=>{
  async function writeHandle(){const w=await handle.createWritable();await w.write(pack());await w.close();set({state:'saved',lastSaved:new Date().toISOString(),dirty:false,fileName:handle.name});}
  async function safeWrite(){set({state:'saving'});try{await writeHandle();return{ok:true,auto:true}}catch(e){set({state:e&&e.name==='NotAllowedError'?'reconnect':'error'});return{ok:false,error:e}}}
  function download(){const url=URL.createObjectURL(new Blob([pack()],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=meta.fileName||fileBase();document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);set({state:'downloaded',fileName:a.download,lastSaved:new Date().toISOString(),dirty:false});return{ok:true,auto:false};}
+ // Download a copy of the progress file (.json) without changing where auto-save writes.
+ function exportCopy(){const base=(meta.fileName||fileBase()).replace(/\.json$/i,''),d=new Date(),name=`${base}-copy-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}.json`;
+  const url=URL.createObjectURL(new Blob([pack()],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);return{ok:true,name};}
  async function saveAs(){
   if(!canPick)return download();
   let h;try{h=await window.showSaveFilePicker({suggestedName:meta.fileName||fileBase(),types:[{description:'Maths progress file',accept:{'application/json':['.json']}}]});}
@@ -92,6 +95,6 @@ const Storage=(()=>{
    else if(meta.state==='saved'||meta.state==='reconnect')meta.state=meta.lastSaved?'dirty':'none';}
   else if(meta.state==='saved'||meta.state==='reconnect')meta.state=meta.dirty?'dirty':'downloaded';
   emit();if(handle&&meta.state==='saved'&&meta.dirty)safeWrite();}
- return{boot,profiles,current,addProfile,renameProfile,deleteProfile,setActive,readProfile,writeProfile,validName,cleanName,
+ return{exportCopy,boot,profiles,current,addProfile,renameProfile,deleteProfile,setActive,readProfile,writeProfile,validName,cleanName,
   readLocal,writeLocal,save,saveAs,open,reconnect,changed,flush,init,status,canPick,fileBase};
 })();

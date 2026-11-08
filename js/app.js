@@ -95,13 +95,23 @@ function drawSaveStatus(st){const f=esc(st.fileName||Storage.fileBase()),at=time
  const[cls,icon,title,detail,btn]=views[st.state]||views.none;
  get('saveBar').className='savebar '+cls;get('saveIcon').textContent=icon;get('saveTitle').textContent=title;
  get('saveDetail').innerHTML=detail+(st.localOK?'':' <b>Warning: this browser isn’t keeping progress (private browsing?) — save to a file!</b>');
- const b=get('saveBtn');b.textContent=btn;b.disabled=st.state==='saving';get('saveAsBtn').classList.toggle('hidden',st.state==='none');}
+ const b=get('saveBtn');b.textContent=btn;b.disabled=st.state==='saving';
+ // Show the file name, and explain where it is when you hover (browsers never reveal the full folder path to a web page).
+ const name=st.fileName||Storage.fileBase(),picked=st.canPick&&['saved','saving','reconnect','error'].includes(st.state),
+  where=st.state==='none'?'':picked?'in the folder you chose when you first saved':'in your Downloads folder (or wherever your browser saves downloads)';
+ const chip=get('fileChip');chip.textContent=st.state==='none'?`📄 Will be saved as ${name}`:`📄 ${name}${at?` · saved ${at}`:''}`;
+ chip.title=st.state==='none'?`When you save, your progress file will be called “${name}”.`:`Your progress file is “${name}”, ${where}. Browsers don’t show the full folder path, for privacy.`;
+ b.title=st.state==='none'?`Save your progress as “${name}”`:`Saves to “${name}” ${where}.`;
+ const sa=get('saveAsBtn');sa.textContent=st.canPick?'📄 Save as…':'⬇️ Export file';
+get('exportBtn').classList.toggle('hidden',!st.canPick);get('exportBtn').title=`Download a copy of your progress file (.json) to keep safe, email or open on another device. Auto-save keeps using “${name}”.`;
+ sa.title=st.canPick?'Save your progress under a new name or in a different folder (a .json file). Auto-save then uses the new file.':'Download a copy of your progress file (.json) — to keep safe or open on another device.';}
 async function doSave(fn){const before=Storage.status().state;let r;try{r=await fn();}catch(e){r={ok:false,error:e};}
  if(r.cancelled)toast('Save cancelled — your progress is NOT in a file yet.');
  else if(r.ok)toast(r.auto?(before==='saved'?'✅ Saved!':'✅ Saved! From now on your progress saves itself automatically.'):'✅ Saved! Remember to save again after you practise.');
  else toast('❌ Couldn’t save. Please try again.');}
 get('saveBtn').addEventListener('click',()=>doSave(Storage.save));
 get('saveAsBtn').addEventListener('click',()=>doSave(Storage.saveAs));
+get('exportBtn').addEventListener('click',()=>{const r=Storage.exportCopy();toast(`⬇️ Exported a copy: ${r.name} (look in your Downloads folder).`);});
 get('openBtn').addEventListener('click',async()=>{let r;try{r=await Storage.open();}catch(e){toast('❌ '+e.message);return;}if(r.cancelled)return;
  const incoming=cleanStats(r.data.stats),fileName=r.data.name,cur=Storage.current();
  // A file belongs to a named player: load it into that player (creating them if needed).

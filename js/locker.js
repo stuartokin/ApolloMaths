@@ -48,8 +48,8 @@ const Locker=(()=>{
   const sw=(key,list)=>list.map(([c,l],i)=>`<button class="swatch${a[key]===i?' on':''}" style="background:${c}" data-look="${key}" data-val="${i}" aria-label="${l}" title="${l}"></button>`).join('');
   const ch=(key,list)=>list.map(([v,l])=>`<button class="chip${a[key]===v?' active':''}" data-look="${key}" data-val="${v}">${l}</button>`).join('');
   return `${welcome?`<div class="note">👋 <b>Welcome, ${esc(playerName())}!</b> Design your player. Every right answer earns ⚡ power points to spend on kits, boots, sidekicks and experiences in the Kit Shop.</div>`:''}
-  <div class="lookrow"><b>Name</b><div class="namerow"><input id="nameInput" maxlength="20" value="${esc(playerName())}" aria-label="Player name" autocomplete="off"><button class="secondary" data-savename="1" type="button">Save name</button></div></div><div class="lookrow"><b>Skin</b><div>${sw('skin',o.skins)}</div></div><div class="lookrow"><b>Hair style</b><div class="choices">${ch('hair',o.hair)}</div></div>
-  <div class="lookrow"><b>Hair colour</b><div>${sw('hairCol',o.hairColours)}</div></div><div class="lookrow"><b>Eyes</b><div class="choices">${ch('eyes',o.eyes)}</div></div>
+  <div class="lookrow"><b>Name</b><div class="namerow"><input id="nameInput" maxlength="20" value="${esc(playerName())}" aria-label="Player name" autocomplete="off"><button class="secondary" data-savename="1" type="button">Save name</button></div></div><div class="lookrow"><b>Player</b><div class="choices">${ch('body',o.body)}</div></div><div class="lookrow"><b>Skin tone</b><div>${o.skinOrder.map(i=>{const[c,l]=o.skins[i];return `<button class="swatch${a.skin===i?' on':''}" style="background:${c}" data-look="skin" data-val="${i}" aria-label="${l}" title="${l}"></button>`;}).join('')}</div></div><div class="lookrow"><b>Hair style</b><div class="choices">${ch('hair',o.hair)}</div></div>
+  <div class="lookrow"><b>Hair colour</b><div>${sw('hairCol',o.hairColours)}</div></div><div class="lookrow"><b>Head covering</b><div class="choices">${ch('cover',o.covers)}</div></div>${a.cover&&a.cover!=='none'?`<div class="lookrow"><b>Covering colour</b><div>${sw('coverCol',o.coverCols)}</div></div>`:''}<div class="lookrow"><b>Eyes</b><div class="choices">${ch('eyes',o.eyes)}</div></div>
   <div class="lookrow"><b>Face</b><div class="choices">${ch('mouth',o.mouths)}</div></div><div class="lookrow"><b>Kit colour</b><div>${sw('kit',o.kits)}</div></div>
   <div class="lookrow"><b>Shirt number</b><div class="numpick"><button class="ghost" data-num="-1" aria-label="Lower number">−</button><span>${a.num}</span><button class="ghost" data-num="1" aria-label="Higher number">+</button></div></div>
   <button class="primary" data-done="1">✅ ${welcome?'Let’s play!':'Looking good — done'}</button>`;}
@@ -75,7 +75,7 @@ const Locker=(()=>{
   if(ds.close!==undefined){close();return;}
   if(ds.tab){tab=ds.tab;preview=null;confirmId=null;render();return;}
   if(ds.cat){cat=ds.cat;preview=null;confirmId=null;render();return;}
-  if(ds.look){const v=['skin','hairCol','kit'].includes(ds.look)?+ds.val:ds.val;stats.avatar[ds.look]=v;save();refresh();render();return;}
+  if(ds.look){const v=['skin','hairCol','kit','coverCol'].includes(ds.look)?+ds.val:ds.val;stats.avatar[ds.look]=v;save();refresh();render();return;}
   if(ds.num){stats.avatar.num=((stats.avatar.num-1+ +ds.num+99)%99)+1;save();refresh();render();return;}
   if(ds.savename){try{Storage.renameProfile(Storage.current().id,get('nameInput').value);applyName();Players.drawLeaderboard();toast(`✅ Name saved: ${playerName()}`);render();}catch(x){toast('❌ '+x.message);}return;}
   if(ds.done){stats.avatar.created=true;save();close();return;}

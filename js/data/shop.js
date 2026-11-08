@@ -3,14 +3,19 @@
 // Points are only earned by answering maths questions. Spending never removes "Power points" earned (lifetime score);
 // it reduces the wallet: wallet = points earned − points spent. No random boxes, no timers, nothing costs real money.
 const avatarOptions={
- skins:[['#FFDCB8','Light'],['#F3C48E','Fair'],['#DDA56C','Medium'],['#C17F48','Tan'],['#8E5630','Brown'],['#5C3920','Deep brown']],
- hair:[['short','Short'],['spiky','Spiky'],['curly','Curly'],['afro','Afro'],['quiff','Quiff'],['buzz','Buzz cut']],
- hairColours:[['#1d1a1a','Black'],['#4a2c14','Dark brown'],['#8b5a2b','Brown'],['#e0b04a','Blond'],['#b9542c','Ginger'],['#2f6fe0','Electric blue']],
- eyes:[['round','Bright'],['happy','Happy'],['big','Wide awake'],['cool','Cool']],
+ // New tones are added at the end so saved players keep theirs; skinOrder shows them light → dark.
+ skins:[['#FFDCB8','Light'],['#F3C48E','Fair'],['#DDA56C','Medium'],['#C17F48','Tan'],['#8E5630','Brown'],['#5C3920','Deep brown'],['#FFEBDD','Very light'],['#E9C4A0','Light olive'],['#B8875A','Olive'],['#3E2416','Very deep brown']],
+ skinOrder:[6,0,1,7,2,8,3,4,5,9],
+ body:[['boy','👦 Boy'],['girl','👧 Girl']],
+ hair:[['short','Short'],['spiky','Spiky'],['curly','Curly'],['afro','Afro'],['quiff','Quiff'],['buzz','Buzz cut'],['long','Long'],['ponytail','Ponytail'],['puffs','Two puffs'],['bob','Bob'],['bun','Bun'],['braids','Braids'],['locs','Locs']],
+ covers:[['none','None'],['hijab','Hijab'],['patka','Patka'],['dastar','Dastar (turban)'],['kippah','Kippah'],['headwrap','Headwrap']],
+ coverCols:[['#1e2333','Black'],['#1d2b5c','Navy'],['#e51c35','Red'],['#17a398','Teal'],['#6b3fc9','Purple'],['#f2f2f2','White'],['#f28ab2','Pink'],['#f2c218','Yellow']],
+ hairColours:[['#1d1a1a','Black'],['#4a2c14','Dark brown'],['#8b5a2b','Brown'],['#e0b04a','Blond'],['#b9542c','Ginger'],['#2f6fe0','Electric blue'],['#7a3b22','Auburn'],['#a87b4f','Light brown'],['#f1e2a8','Platinum'],['#b9b9b9','Grey'],['#e85d9e','Pink']],
+ eyes:[['round','Bright'],['happy','Happy'],['big','Wide awake'],['cool','Cool'],['almond','Almond'],['gentle','Gentle']],
  mouths:[['grin','Big grin'],['smile','Smile'],['cheeky','Cheeky'],['determined','Focused']],
  kits:[['#e51c35','Red'],['#2457d6','Blue'],['#1f9d55','Green'],['#f2c218','Yellow'],['#6b3fc9','Purple'],['#1e2333','Black']]
 };
-const defaultAvatar=()=>({created:false,skin:1,hair:'short',hairCol:1,eyes:'round',mouth:'grin',kit:0,num:7,
+const defaultAvatar=()=>({created:false,body:'boy',skin:1,hair:'short',hairCol:1,cover:'none',coverCol:0,eyes:'round',mouth:'grin',kit:0,num:7,
  eq:{top:null,hat:null,boots:null,glasses:null,neck:null,chest:null,arm:null,back:null,hand:'ball',pet:null,scene:'park',celebration:'fistpump',title:null,frame:null}});
 // Slots an item can be worn in. "free" items are owned from the start.
 const SLOTS=['top','hat','boots','glasses','neck','chest','arm','back','hand','pet','scene','celebration'];
@@ -93,7 +98,7 @@ function nextGoal(s){const w=wallet(s);let it=s.wish&&itemById[s.wish]&&!owns(s,
 function cleanPlayer(s){const d=defaultAvatar(),a=s.avatar&&typeof s.avatar==='object'?s.avatar:{};
  const inList=(v,list,fb)=>list.some(x=>x[0]===v)?v:fb,inRange=(v,n,fb)=>Number.isInteger(v)&&v>=0&&v<n?v:fb;
  const av={created:!!a.created,skin:inRange(a.skin,avatarOptions.skins.length,d.skin),hair:inList(a.hair,avatarOptions.hair,d.hair),hairCol:inRange(a.hairCol,avatarOptions.hairColours.length,d.hairCol),
-  eyes:inList(a.eyes,avatarOptions.eyes,d.eyes),mouth:inList(a.mouth,avatarOptions.mouths,d.mouth),kit:inRange(a.kit,avatarOptions.kits.length,d.kit),num:Number.isInteger(a.num)&&a.num>=1&&a.num<=99?a.num:d.num,eq:{...d.eq}};
+  eyes:inList(a.eyes,avatarOptions.eyes,d.eyes),mouth:inList(a.mouth,avatarOptions.mouths,d.mouth),kit:inRange(a.kit,avatarOptions.kits.length,d.kit),body:inList(a.body,avatarOptions.body,d.body),cover:inList(a.cover,avatarOptions.covers,d.cover),coverCol:inRange(a.coverCol,avatarOptions.coverCols.length,d.coverCol),num:Number.isInteger(a.num)&&a.num>=1&&a.num<=99?a.num:d.num,eq:{...d.eq}};
  s.mocksDone=Number.isInteger(s.mocksDone)&&s.mocksDone>=0?s.mocksDone:0;
  s.owned=Array.isArray(s.owned)?[...new Set(s.owned.filter(id=>itemById[id]&&!itemById[id].free))]:[];
  s.spent=Number.isFinite(+s.spent)&&+s.spent>=0?Math.min(Math.floor(+s.spent),s.points||0):0;

@@ -17,7 +17,9 @@ function drawAvatar(av,opt={}){
  if(eq.back==='cape')g+=`<path d="M84,166 Q58,230 52,286 L188,286 Q182,230 156,166 Z" fill="#c8102e" ${st}/><path d="M92,178 Q76,236 72,280" stroke="#8d0b20" stroke-width="3" fill="none"/>`;
  if(eq.back==='jetpack')g+=`<rect x="58" y="150" width="24" height="64" rx="11" fill="#9aa3b5" ${st}/><rect x="158" y="150" width="24" height="64" rx="11" fill="#9aa3b5" ${st}/><path d="M62,214 L70,246 L78,214Z M162,214 L170,246 L178,214Z" fill="#ff8a1c" ${st}/><path d="M66,214 L70,232 L74,214Z M166,214 L170,232 L174,214Z" fill="#ffe45e"/>`;
  {const bx=typeof BACK_X!=='undefined'&&BACK_X[art('back')];if(bx&&!['cape','jetpack'].includes(eq.back))g+=bx(st,sty('back'));}
- if(av.hair==='afro')g+=`<circle cx="120" cy="92" r="64" fill="${hairC}" ${st}/>`;
+ const cover=av.cover||'none',coverC=avatarOptions.coverCols[av.coverCol||0][0];
+ if(cover==='hijab')g+=`<path d="M62,104 C58,34 182,34 178,104 L184,172 Q120,190 56,172 Z" fill="${coverC}" ${st}/>`;
+ else if(!['patka','headwrap','dastar'].includes(cover)){if(av.hair==='afro')g+=`<circle cx="120" cy="92" r="64" fill="${hairC}" ${st}/>`;if(HAIR_BACK[av.hair])g+=HAIR_BACK[av.hair](hairC,st,shade);}
  // ---------- legs, socks, boots ----------
  g+=`<rect x="92" y="250" width="17" height="28" fill="${skin}" ${st}/><rect x="131" y="250" width="17" height="28" fill="${skin}" ${st}/>`;
  g+=`<rect x="91" y="266" width="19" height="16" rx="3" fill="${eq.top==='goldkit'?'#f5c542':'#fff'}" ${st}/><rect x="130" y="266" width="19" height="16" rx="3" fill="${eq.top==='goldkit'?'#f5c542':'#fff'}" ${st}/>`;
@@ -52,7 +54,13 @@ function drawAvatar(av,opt={}){
  if(typeof NECK_X!=='undefined'){const nx=NECK_X[art('neck')];if(nx&&eq.neck!=='scarf')g+=nx(st,sty('neck'));const cx=CHEST_X[art('chest')];if(cx&&!['medal','acemedal'].includes(eq.chest))g+=cx(st,sty('chest'));}
  // ---------- head ----------
  g+=`<circle cx="76" cy="104" r="9" fill="${skin}" ${st}/><circle cx="164" cy="104" r="9" fill="${skin}" ${st}/><circle cx="120" cy="100" r="44" fill="${skin}" ${st}/>`;
- g+=HAIR[av.hair](hairC,st);
+ if(cover==='hijab')g+=`<path d="M66,104 C64,40 176,40 174,104 L172,146 C162,156 152,156 146,150 C158,132 161,112 159,96 C152,70 88,70 81,96 C79,112 82,132 94,150 C88,156 78,156 68,146 Z" fill="${coverC}" ${st}/><path d="M84,90 C96,72 144,72 156,90" stroke="${shade(coverC,-.25)}" stroke-width="3" fill="none"/>`;
+ else if(cover==='patka')g+=`<path d="M74,96 C70,42 170,42 166,96 Q120,80 74,96Z" fill="${coverC}" ${st}/><circle cx="120" cy="52" r="14" fill="${coverC}" ${st}/><path d="M84,84 Q120,70 156,84 M110,48 Q120,58 130,48" stroke="${shade(coverC,-.25)}" stroke-width="3" fill="none"/>`;
+ else if(cover==='dastar')g+=`<path d="M68,100 C60,30 180,30 172,100 Q120,84 68,100Z" fill="${coverC}" ${st}/><path d="M74,92 Q118,50 166,80 M72,80 Q114,40 160,62 M80,66 Q118,34 150,48" stroke="${shade(coverC,-.28)}" stroke-width="3.2" fill="none"/><path d="M104,94 L120,52 L136,94" stroke="${shade(coverC,-.32)}" stroke-width="3" fill="none" stroke-linejoin="round"/>`;
+ else if(cover==='headwrap')g+=`<path d="M72,98 C66,36 174,36 168,98 Q120,80 72,98Z" fill="${coverC}" ${st}/><ellipse cx="146" cy="46" rx="20" ry="13" transform="rotate(-20 146 46)" fill="${coverC}" ${st}/><path d="M80,86 Q120,66 160,86 M86,74 Q120,56 154,74" stroke="${shade(coverC,-.25)}" stroke-width="3" fill="none"/>`;
+ else g+=HAIR[av.hair](hairC,st);
+ if(cover==='kippah')g+=`<ellipse cx="120" cy="58" rx="26" ry="10" fill="${coverC}" ${st}/><path d="M100,58 Q120,50 140,58" stroke="${shade(coverC,.35)}" stroke-width="2.5" fill="none"/>`;
+ if(av.body==='girl'&&!['happy','gentle'].includes(av.eyes))g+=`<path d="M93,94 L89,90 M96,92 L93,87 M147,94 L151,90 M144,92 L147,87" stroke="${AV_INK}" stroke-width="2.5" stroke-linecap="round"/>`;
  const brow=av.mouth==='determined'?`<path d="M96,86 L112,90 M144,86 L128,90" stroke="${AV_INK}" stroke-width="3.5"/>`:`<path d="M96,88 Q104,83 112,88 M128,88 Q136,83 144,88" stroke="${AV_INK}" stroke-width="3" fill="none"/>`;
  if(!(eq.hat==='helmet'))g+='';
  g+=brow+EYES[av.eyes]()+MOUTHS[av.mouth]()+`<circle cx="94" cy="116" r="6" fill="#ff7a8a" opacity=".35"/><circle cx="146" cy="116" r="6" fill="#ff7a8a" opacity=".35"/>`;
@@ -65,20 +73,39 @@ function drawAvatar(av,opt={}){
  g+=(HANDS[eq.hand]||(typeof HANDS_X!=='undefined'&&HANDS_X[art('hand')])||(()=>''))(st,sty('hand'));
  g+=(PETS[eq.pet]||(typeof PETS_X!=='undefined'&&PETS_X[art('pet')])||(()=>''))(st);
  const defs=`<defs><clipPath id="${id}c"><rect width="240" height="300" rx="24"/></clipPath><clipPath id="${id}t"><path d="${torso}"/></clipPath><linearGradient id="${id}gold" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#fff2a8"/><stop offset=".45" stop-color="#f5c542"/><stop offset="1" stop-color="#c8901a"/></linearGradient><linearGradient id="${id}gal" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#3a1d8f"/><stop offset="1" stop-color="#0d0630"/></linearGradient>${extraDefs}</defs>`;
- return `<svg class="avatar-svg" viewBox="0 0 240 300" role="img" aria-label="Apollo’s player" xmlns="http://www.w3.org/2000/svg">${defs}${g}</svg>`;
+ return `<svg class="avatar-svg" viewBox="0 0 240 300" role="img" aria-label="Your player" xmlns="http://www.w3.org/2000/svg">${defs}${g}</svg>`;
 }
+// Back layers for longer styles (drawn behind the head).
+const HAIR_BACK={
+ long:(c,st)=>`<path d="M72,98 C68,40 172,40 168,98 L174,178 Q120,194 66,178 Z" fill="${c}" ${st}/>`,
+ braids:(c,st,sh)=>{let s=`<path d="M72,98 C68,40 172,40 168,98 L172,182 Q120,196 68,182 Z" fill="${c}" ${st}/>`;for(let x=78;x<=162;x+=12)s+=`<path d="M${x},120 L${x},${178+((x/12)%2)*4}" stroke="${sh(c,.3)}" stroke-width="3" stroke-dasharray="5 4"/>`;return s;},
+ locs:(c,st,sh)=>{let s='';for(let x=72;x<=162;x+=13)s+=`<rect x="${x}" y="70" width="11" height="${108+((x/13)%3)*8}" rx="5.5" fill="${c}" ${st}/>`;return s;},
+ ponytail:(c,st)=>`<path d="M152,70 Q196,82 186,138 Q180,160 166,146 Q178,112 152,94Z" fill="${c}" ${st}/>`,
+ puffs:(c,st)=>`<circle cx="70" cy="74" r="21" fill="${c}" ${st}/><circle cx="170" cy="74" r="21" fill="${c}" ${st}/>`,
+ bob:(c,st)=>`<path d="M70,100 C66,44 174,44 170,100 L172,142 Q152,150 138,140 L102,140 Q88,150 68,142 Z" fill="${c}" ${st}/>`,
+ bun:(c,st)=>`<circle cx="120" cy="46" r="18" fill="${c}" ${st}/>`
+};
 const HAIR={
  short:(c,st)=>`<path d="M76,98 C72,60 102,50 120,50 C140,50 168,60 164,98 C158,80 148,72 120,72 C96,72 82,82 76,98Z" fill="${c}" ${st}/>`,
  spiky:(c,st)=>`<path d="M76,96 L72,70 L86,78 L86,52 L102,66 L110,42 L120,62 L132,42 L138,64 L154,50 L154,76 L168,70 L164,96 C156,80 140,74 120,74 C100,74 84,80 76,96Z" fill="${c}" ${st}/>`,
  curly:(c,st)=>{let s=`<path d="M78,96 C76,62 100,52 120,52 C142,52 166,62 162,96 C150,78 90,78 78,96Z" fill="${c}"/>`;for(let a=195;a<=345;a+=19){const r=a*Math.PI/180;s+=`<circle cx="${(120+42*Math.cos(r)).toFixed(1)}" cy="${(98+42*Math.sin(r)).toFixed(1)}" r="12" fill="${c}" ${st}/>`;}return s;},
  afro:(c,st)=>`<path d="M80,90 Q120,58 160,90 Q150,70 120,66 Q90,70 80,90Z" fill="${c}" ${st}/>`,
  quiff:(c,st)=>`<path d="M76,98 C72,64 96,52 116,52 C124,38 152,32 162,46 C150,46 146,54 150,60 C162,68 168,82 164,98 C156,80 146,74 120,74 C98,74 84,82 76,98Z" fill="${c}" ${st}/>`,
+ long:(c,st)=>`<path d="M76,100 C72,56 102,48 120,48 C142,48 168,56 164,100 L162,130 C158,104 154,86 134,76 C112,86 92,86 80,102 L78,130Z" fill="${c}" ${st}/>`,
+ ponytail:(c,st)=>`<path d="M76,98 C72,58 102,50 120,50 C140,50 168,58 164,98 C156,80 142,72 120,72 C98,72 84,80 76,98Z" fill="${c}" ${st}/><circle cx="158" cy="78" r="5" fill="#e51c35" ${st}/>`,
+ puffs:(c,st)=>`<path d="M78,96 C76,60 100,52 120,52 C142,52 166,60 162,96 C150,78 90,78 78,96Z" fill="${c}" ${st}/><path d="M120,52 L120,64" stroke="${AV_INK}" stroke-width="2"/>`,
+ bob:(c,st)=>`<path d="M76,96 C72,54 168,54 164,96 Q150,80 120,84 Q92,80 76,96Z" fill="${c}" ${st}/>`,
+ bun:(c,st)=>`<path d="M78,96 C76,60 100,54 120,54 C142,54 166,60 162,96 C150,80 90,80 78,96Z" fill="${c}" ${st}/>`,
+ braids:(c,st)=>`<path d="M76,100 C72,56 102,48 120,48 C142,48 168,56 164,100 L160,126 C156,100 146,80 120,76 C96,80 84,100 80,126Z" fill="${c}" ${st}/><path d="M120,50 L120,74 M104,54 L102,78 M136,54 L138,78" stroke="${AV_INK}" stroke-width="2" opacity=".6"/>`,
+ locs:(c,st)=>`<path d="M76,98 C72,58 102,50 120,50 C140,50 168,58 164,98 C156,82 142,74 120,74 C98,74 84,82 76,98Z" fill="${c}" ${st}/>`,
  buzz:(c,st)=>`<path d="M78,94 C78,64 100,56 120,56 C140,56 162,64 162,94 C154,78 140,70 120,70 C100,70 86,78 78,94Z" fill="${c}" opacity=".75" ${st}/>`
 };
 const EYES={
  round:()=>`<ellipse cx="104" cy="101" rx="8" ry="9" fill="#fff" stroke="${AV_INK}" stroke-width="2.5"/><ellipse cx="136" cy="101" rx="8" ry="9" fill="#fff" stroke="${AV_INK}" stroke-width="2.5"/><circle cx="105" cy="102" r="4.2" fill="${AV_INK}"/><circle cx="137" cy="102" r="4.2" fill="${AV_INK}"/><circle cx="106.5" cy="100" r="1.4" fill="#fff"/><circle cx="138.5" cy="100" r="1.4" fill="#fff"/>`,
  happy:()=>`<path d="M96,104 Q104,94 112,104 M128,104 Q136,94 144,104" stroke="${AV_INK}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`,
  big:()=>`<circle cx="104" cy="101" r="10" fill="#fff" stroke="${AV_INK}" stroke-width="2.5"/><circle cx="136" cy="101" r="10" fill="#fff" stroke="${AV_INK}" stroke-width="2.5"/><circle cx="105" cy="102" r="6" fill="#3a6fd8"/><circle cx="137" cy="102" r="6" fill="#3a6fd8"/><circle cx="105" cy="102" r="3" fill="${AV_INK}"/><circle cx="137" cy="102" r="3" fill="${AV_INK}"/><circle cx="107" cy="99" r="2" fill="#fff"/><circle cx="139" cy="99" r="2" fill="#fff"/>`,
+ almond:()=>`<path d="M95,102 Q104,94 113,101 Q104,107 95,102Z" fill="#fff" stroke="${AV_INK}" stroke-width="2.5"/><path d="M127,101 Q136,94 145,102 Q136,107 127,101Z" fill="#fff" stroke="${AV_INK}" stroke-width="2.5"/><circle cx="105" cy="101.5" r="3.4" fill="${AV_INK}"/><circle cx="137" cy="101.5" r="3.4" fill="${AV_INK}"/>`,
+ gentle:()=>`<path d="M96,101 Q104,107 112,101 M128,101 Q136,107 144,101" stroke="${AV_INK}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`,
  cool:()=>`<ellipse cx="104" cy="102" rx="8" ry="7" fill="#fff" stroke="${AV_INK}" stroke-width="2.5"/><ellipse cx="136" cy="102" rx="8" ry="7" fill="#fff" stroke="${AV_INK}" stroke-width="2.5"/><circle cx="106" cy="104" r="3.6" fill="${AV_INK}"/><circle cx="138" cy="104" r="3.6" fill="${AV_INK}"/><path d="M95,99 L113,99 M127,99 L145,99" stroke="${AV_INK}" stroke-width="4"/>`
 };
 const MOUTHS={
