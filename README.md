@@ -76,7 +76,13 @@ An original space-trading game in the style of the 1984 wireframe classics — o
 - **Combat & law:** lasers with heat, missiles, ECM, shock pulse, escape capsule; pirates, police, traders, distress calls, asteroids, cargo scooping, bounties, ranks; Clean/Offender/Fugitive.
 - **Missions:** courier, supply, bounty, and political missions that change a system's government (saved as `gov` overrides, reported as Galactic News). Future upgrades add galaxies, systems, mission types and political events here.
 - **Controls:** keyboard, mouse wheel, gamepad, on-screen buttons; touch: floating stick, FIRE, speed slider (multi-touch). Opens full screen on small touch screens.
-- **Saving:** the commander lives in `stats.arcade.saves.starlane`; stopping or running out of time mid-flight docks and saves; being destroyed rolls back to the last docking.
+- **Flight deck (v2.18):** 14 console keys with status lights (MSL, ECM, JUMP, DOCK, HYPER, TIME, VIEW, CAM, BOMB, POD, HOLD, MISN, MAP, MENU); hover (or tap) help on every key and gauge, switchable in settings. Station shown on the scanner rim when out of range.
+- **Pause menu (P / Esc / MENU):** resume, save, hover help / cut scenes / invert pitch, full key remapping (saved per player), how-to-play guides (docking, trading, combat, travel, missions). The arcade session clock stops while it is open (`game.paused`, via the `game.onPause` hook).
+- **Views:** front, rear, left, right (keys 1–4) and an outside chase camera (O) you can fly from. Time acceleration ×2/×4/×8 (T) switches off when danger appears.
+- **Hyperspace:** streaking-stars effect, spooling up in the last second of the countdown, and the reverse on arrival.
+- **Cut scenes:** docking (outside approach, then hangar landing among parked ships) and launch (hangar lift-off, then flying out of the spinning station). Tap or any key skips; can be switched off.
+- **Varied systems:** from a separate random stream per system (the galaxy itself is unchanged): rocky / cratered / gas-giant planets, rings, 0–3 moons, single / binary / triple stars of different colours, asteroid belts, meteor showers. Shown on the DATA screen.
+- **Saving:** the commander lives in `stats.arcade.saves.starlane`. SAVE in the pause menu works docked or in flight (resumes at the same spot); stopping or running out of time also saves in flight; being destroyed rolls back to the last save.
 
 ## New-version announcements
 - `version.json` (generated from the version history in `js/data/help.js` by `node tools/make-version.js`) holds the latest version and child-friendly highlights, tagged `games`, `shop` or `look`. When online, the app checks it on opening, every 30 minutes and when it comes back online; if newer, it shows what’s new and how to save and update. **Upload `version.json` with every release.**

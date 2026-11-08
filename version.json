@@ -1,7 +1,24 @@
 {
- "version": "2.17",
+ "version": "2.18",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.18",
+   "date": "9 November 2026",
+   "kids": [
+    "🛸 Starlane Trader: a real flight deck — glowing console keys that tell you what they do when you hover or tap",
+    "🌌 A brand-new hyperspace jump: stars stretch into streaks!",
+    "🎬 Watch your ship land inside the station hangar — and take off again",
+    "🪐 Planets with rings, moons, gas giants and double or triple suns",
+    "👀 Side views and an outside camera, speed-up-time, save anywhere, and change any key"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🚀 Starlane Trader upgrade: flight-deck console keys with hover help, pause menu (save, settings, key remapping, how-to-play guides), cargo and mission screens in the cockpit, station marker on the scanner, time acceleration, save in flight, side and outside views, new hyperspace effect, docking and launch cut scenes, and varied systems (gas giants, rings, moons, multiple stars, asteroid belts, meteor showers)."
+   ]
+  },
   {
    "v": "2.17",
    "date": "9 November 2026",
@@ -116,15 +133,6 @@
     "🔊 Reading aloud: tap 🔊 to hear a question, an explainer, a worked method, a Learn step or an example read out. Different voices for the tour, announcements, questions and teaching — choose female or male voices and the speed in 🎙️ Voices.",
     "📣 Announcements (celebrations, tips and answer feedback) can be read out — the 🔊 / 🔇 button at the top turns them on or off.",
     "🗺️ The tours now read themselves aloud and move on automatically, with a pause button. The grown-ups’ tour now opens the Parent dashboard and explains each tab, especially the Focus areas."
-   ]
-  },
-  {
-   "v": "2.8",
-   "date": "7 November 2026",
-   "kids": [],
-   "tags": [],
-   "items": [
-    "🎓 A guided tour of the app — one for players and one for grown-ups — offered with a welcome screen the first time, and always available from ❓ Help. Choose “Don’t ask me again” to stop the welcome screen (saved with your progress)."
    ]
   }
  ]
