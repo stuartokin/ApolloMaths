@@ -37,7 +37,7 @@ const learnMissions={
    check:{q:'What is 12/16 in its simplest form?',options:['3/4','6/8','4/5','2/3'],why:'12 and 16 both divide by 4: 12 ÷ 4 = 3 and 16 ÷ 4 = 4. (6/8 is equal, but can still be simplified.)'}},
   {title:'When it isn’t a multiple — simplify first',blocks:[{p:'12/20 = ?/35. 35 isn’t a multiple of 20, so simplify first, then scale up.'},{eg:'12/20 = 3/5 (÷ 4). 5 × 7 = 35, so 3 × 7 = <b>21</b>.'}],
    check:{q:'8/12 = ?/15',options:['10','11','12','9'],why:'8/12 = 2/3 (÷ 4). 3 × 5 = 15, so 2 × 5 = 10.'}},
-  {title:'Answers can be decimals',blocks:[{p:'Sometimes the missing number isn’t a whole number — that’s fine.'},{eg:'18/50 = ?/30. 50 and 30 share 10, so divide by 5: 18/50 = 3.6/10. Multiply by 3: <b>10.8</b>/30.<br><span class="mini">Check: 18 × 30 ÷ 50 = 540 ÷ 50 = 10.8 ✓</span>'}],
+  {title:'Answers can be decimals',blocks:[{p:'Sometimes the missing number isn’t a whole number — that’s fine.'},{eg:'18/50 = ?/30. 30 isn’t a multiple of 50, so go through tenths. 50 ÷ 5 = 10, so divide the top by 5 too: 18 ÷ 5 = 3.6, giving 18/50 = 3.6/10. Now 10 × 3 = 30, so multiply the top by 3: 3.6 × 3 = <b>10.8</b>, giving 10.8/30.<br><span class="mini">Check: 18 × 30 ÷ 50 = 540 ÷ 50 = 10.8 ✓</span>'}],
    check:{q:'9/10 = ?/5',options:['4.5','4','45','9'],why:'10 ÷ 2 = 5, so divide the top by 2 as well: 9 ÷ 2 = 4.5.'}},
   {title:'Comparing fractions',blocks:[{p:'To compare, give both fractions the <b>same denominator</b>, then compare the tops.'},{eg:'3/4 or 5/8? 3/4 = 6/8, and 6/8 is bigger than 5/8.'}],
    check:{q:'Which is bigger: 2/3 or 3/5?',options:['2/3','3/5','They are the same'],why:'Use fifteenths: 2/3 = 10/15 and 3/5 = 9/15. 10/15 is bigger.'}}],
@@ -64,7 +64,7 @@ const learnMissions={
   {title:'Convert first!',blocks:[{ul:['10 mm = 1 cm','100 cm = 1 m','1000 m = 1 km']},{p:'Before adding, taking away or multiplying, change everything into the <b>same unit</b>.'}],
    check:{q:'How many centimetres is 2.4 m?',options:['240 cm','24 cm','2400 cm','204 cm'],why:'1 m = 100 cm, so 2.4 × 100 = 240 cm.'}},
   {title:'Reading a ruler',blocks:[{fig:F('ruler',13,52)},{p:'Check where it <b>starts</b> — it might not be at 0! Length = end − start.'},{eg:'52 mm − 13 mm = <b>39 mm</b>.'}],
-   check:{q:'A pencil starts at 2.5 cm and ends at 9.1 cm. How long is it in mm?',options:['66 mm','91 mm','116 mm','6.6 mm'],why:'9.1 cm = 91 mm and 2.5 cm = 25 mm. 91 − 25 = 66 mm.'}},
+   check:{q:'A pencil starts at 2.5 cm and ends at 9.1 cm. How long is it in mm?',options:['66 mm','91 mm','116 mm','6.6 mm'],why:'9.1 cm = 9.1 × 10 = 91 mm and 2.5 cm = 2.5 × 10 = 25 mm. 91 − 25 = 66 mm.'}},
   {title:'Same area, different perimeters',blocks:[{p:'Rectangles with the same area can have different perimeters. The closer to a <b>square</b>, the smaller the perimeter.'},{eg:'Area 24: 1 × 24 (perimeter 50), 2 × 12 (28), 3 × 8 (22), 4 × 6 (20 — smallest).'}],
    check:{q:'A rectangle has area 36 cm² and whole-number sides. What is the SMALLEST perimeter?',options:['24 cm','26 cm','40 cm','74 cm'],why:'6 × 6 is closest to a square: perimeter = 6 + 6 + 6 + 6 = 24 cm.'}}],
  data:[
@@ -72,12 +72,12 @@ const learnMissions={
    check:{q:'In the chart above, how many goals were scored on Tuesday?',options:['18','9','16','20'],why:'The Tuesday bar reaches 18 on the scale.'}},
   {title:'Differences and totals',blocks:[{p:'“How many more” means <b>bigger − smaller</b>. “Altogether” means <b>add</b>.'},{fig:F('bar',['Mon','Tue','Wed','Thu'],[12,18,6,14],2,'Goals')}],
    check:{q:'What is the difference between the most and the fewest goals in this chart?',options:['12','18','6','24'],why:'Most = 18 (Tue), fewest = 6 (Wed). 18 − 6 = 12.'}},
-  {title:'The mean',blocks:[{p:'The <b>mean</b> is fair sharing: add everything up, then divide by how many there are.'},{eg:'Mean of 12, 18, 6 and 14 = 50 ÷ 4 = 12.5'}],
+  {title:'The mean',blocks:[{p:'The <b>mean</b> is fair sharing: add everything up, then divide by how many there are.'},{eg:'Mean of 12, 18, 6 and 14: add them, 12 + 18 + 6 + 14 = 50. There are 4 numbers, so 50 ÷ 4 = 12.5'}],
    check:{q:'What is the mean of 4, 7 and 10?',options:['7','21','6','10'],why:'4 + 7 + 10 = 21, and 21 ÷ 3 = 7.'}},
   {title:'Pictograms',blocks:[{fig:F('picto',['Apollo','Ben'],[14,9],2,'goals')},{p:'Always read the <b>key</b>. Half a symbol is worth half the key.'}],
    check:{q:'In a pictogram, ⚽ = 4 goals. How many goals do 3½ balls show?',options:['14','12','3.5','16'],why:'3 × 4 = 12, plus half of 4 = 2. Total 14.'}},
   {title:'Pie charts',blocks:[{fig:F('pie',['Football','Swimming','Netball','Tennis'],[180,90,60,30])},{p:'The whole circle (360°) is <b>everybody</b>. 180° is a half, 90° is a quarter.'}],
-   check:{q:'60 children are shown in a pie chart. How many does a 90° slice show?',options:['15','90','30','6'],why:'90° is a quarter of 360°, and a quarter of 60 is 15.'}},
+   check:{q:'60 children are shown in a pie chart. How many does a 90° slice show?',options:['15','90','30','6'],why:'90° is a quarter of 360° (360 ÷ 4 = 90), and a quarter of 60 is 60 ÷ 4 = 15.'}},
   {title:'Tables and timetables',blocks:[{fig:F('table',['Stop','Bus 1','Bus 2'],[['Kingston','09:20','09:47'],['Richmond','09:41','10:08'],['Kew','09:52','10:15']])},{p:'Go along the row and down the column. To find a journey time, count on from one time to the other.'}],
    check:{q:'Bus 2 leaves Kingston at 09:47 and reaches Kew at 10:15. How long is the journey?',options:['28 minutes','32 minutes','68 minutes','38 minutes'],why:'09:47 → 10:00 is 13 minutes, then 10:00 → 10:15 is 15 more. 13 + 15 = 28 minutes.'}}]
 };

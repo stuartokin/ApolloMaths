@@ -37,7 +37,7 @@ const Retro=(()=>{
   const subH=o.sub?22:0,room=legY-H*.04-subH-8;let sc=Math.max(2,Math.min(7,Math.floor(W*.86/(maxLen*6)),Math.floor(room/(words.length*9))));
   let y=Math.max(8,H*.04+(room-words.length*9*sc)/2);
   words.forEach((w,i)=>{text(ctx,w,W/2+sc*.6,y+sc*.6,sc,'rgba(0,0,0,.6)','center');text(ctx,w,W/2,y,sc,o.color==='cycle'?'cycle':o.color,'center',t+i);y+=sc*9;});
-  if(o.sub)text(ctx,o.sub,W/2,y,2,'#3fe0ff','center');
+  if(o.sub)text(ctx,o.sub,W/2,y,textW(o.sub,2)<=W*.94?2:1,'#3fe0ff','center');
   if(rows){let ly=legY;text(ctx,o.tableTitle||'SCORE TABLE',W/2,ly,2,'#fff','center');ly+=26;const cw=W/cols;
    L.forEach((e,i)=>{const cx=cw*(i%cols)+cw/2,cy=ly+Math.floor(i/cols)*rowH;e.draw(ctx,cx,cy+12,t);text(ctx,e.name,cx,cy+28,2,e.color||'#b45bd6','center');text(ctx,e.pts,cx,cy+46,2,e.color||'#b45bd6','center');});}
   const by=H-(o.hint?58:36);if(o.hi)text(ctx,`HI-SCORE ${o.hi}`,W/2,by,2,'#ffe45e','center');
