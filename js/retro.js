@@ -45,7 +45,7 @@ const Retro=(()=>{
   if(o.hint)text(ctx,o.hint,W/2,H-14,1,'#9aa3c7','center');}
  // Wrap a game so it opens on its attract screen; FIRE (or a tap) starts it. While G.intro is true the session clock doesn't run.
  function intro(G,opts){G.intro=true;let t=0,held=true;const up=G.update,draw=G.render;
-  G.update=(dt,inp)=>{if(!G.intro)return up(dt,inp);t+=dt;const f=inp.f||inp.u;if(f&&!held){G.intro=false;if(opts.onStart)opts.onStart();}held=f;};
+  G.update=(dt,inp,inp2)=>{if(!G.intro)return up(dt,inp,inp2);t+=dt;const f=inp.f||inp.u||!!(inp2&&(inp2.f||inp2.u));if(f&&!held){G.intro=false;if(opts.onStart)opts.onStart();}held=f;};
   G.render=ctx=>{if(!G.intro)return draw(ctx);title(ctx,G.W,G.H,{...opts,hi:opts.hi&&opts.hi()},t);};G.tap=()=>{if(G.intro){G.intro=false;if(opts.onStart)opts.onStart();return true;}return false;};return G;}
  // Big centred banner in pixel letters.
  function banner(ctx,W,H,b){if(!b)return;const sc=W>=600?4:3;ctx.fillStyle='rgba(0,0,0,.72)';ctx.fillRect(0,H/2-62,W,124);text(ctx,b.text,W/2,H/2-36,sc,b.color||'#ffe45e','center',b.t||0);if(b.sub)text(ctx,b.sub,W/2,H/2+14,2,'#fff','center');}

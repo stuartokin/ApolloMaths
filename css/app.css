@@ -306,3 +306,31 @@ dialog.tour-front[open]{position:fixed;inset:0;margin:auto;z-index:91}
 .vc-body fieldset{min-width:0}.vc-pick select{max-width:100%;width:100%}.vc-role{min-width:0}
 .vc-body .chk{display:block!important;padding-left:30px;text-indent:-30px;line-height:1.45}.vc-body .chk input{margin:0 8px 0 0;vertical-align:-4px;text-indent:0}.vc-row .chk{display:inline-block!important;padding-left:0;text-indent:0;margin-right:14px}
 .filechip{display:inline-block!important;margin-top:5px;background:#fff;border:2px solid var(--dark);border-radius:10px;padding:3px 9px;font-size:13px;font-weight:800;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:help}
+
+/* ---- Hover / tap help ---- */
+.tipbub{position:fixed;z-index:200;background:#121625;color:#fff;font-size:13px;line-height:1.4;font-weight:600;padding:8px 11px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.35);pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s;max-width:300px}
+.tipbub.on{opacity:1;transform:none}
+[data-tip]{cursor:help}button[data-tip],input[data-tip]{cursor:pointer}
+.tipi{border:none;background:#e3ecff;color:#2457d6;border-radius:50%;width:22px;height:22px;min-width:22px;font-size:13px;font-weight:900;line-height:1;margin-left:6px;cursor:pointer;flex:0 0 auto;vertical-align:middle;padding:0}
+@media (hover:hover){.tipi{display:none}}
+
+/* ---- Arcade: players, tables ---- */
+.arc-players{display:flex;gap:8px;justify-content:center;margin:10px 0 4px}.arc-pl{background:#1e2650;color:#fff;border:3px solid #3b4a8f;border-radius:30px;padding:8px 16px;font-weight:900;min-height:44px}.arc-pl.on{background:#ffe45e;color:#10142b;border-color:#ffe45e}
+.arc-p2{display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;margin:6px 0}.arc-p2 input{border:2px solid #ff4fd8;border-radius:10px;padding:6px 8px;font-weight:800;width:150px;margin-left:6px}
+.hp1{color:#3fe0ff}.hp2{color:#ff4fd8}.arcade .arc-card .hp1 b{color:#3fe0ff}.arcade .arc-card .hp2 b{color:#ff4fd8}
+.arc-vs{display:flex;gap:16px;justify-content:center;align-items:center;margin:8px 0}.arc-vs>div{display:flex;flex-direction:column;align-items:center;background:#1e2650;border:3px solid #3b4a8f;border-radius:16px;padding:8px 18px;min-width:120px}.arc-vs>div.win{border-color:#ffe45e;box-shadow:0 0 0 3px #ffe45e55}.arc-vs>span{font-weight:900;color:#9aa3c7}
+.arc-hs{margin:10px auto;border-collapse:collapse;font-size:13px;color:#fff;min-width:260px}.arc-hs th{color:#ffe45e;font-weight:900;padding:3px 8px;border-bottom:2px solid #3b4a8f;text-align:left}.arc-hs td{padding:3px 8px;border-bottom:1px solid #2a2f55}.arc-hs tr.me td{background:#2b3470;color:#ffe45e;font-weight:900}
+.arc-pad.two{justify-content:space-between}.arc-pad.two .arc-grp{flex-wrap:wrap;gap:6px;flex:1;max-width:50%;align-content:flex-start;position:relative;padding-top:18px}.arc-pad.two .pl{position:absolute;top:0;left:4px;font-size:11px;font-weight:900}
+.arc-pad.two .p1 .pl{color:#3fe0ff}.arc-pad.two .p2 .pl{color:#ff4fd8}.arc-pad.two .p2{justify-content:flex-end}.arc-pad.two .p2 .pl{left:auto;right:4px}
+.arc-pad.two button{max-width:none;flex:1 1 30%;min-height:46px;font-size:15px}.arc-pad.two .p1 button{border-color:#3fe0ff}.arc-pad.two .p2 button{border-color:#ff4fd8}
+.arc-hud .hp1,.arc-hud .hp2{font-weight:900}
+
+/* two-player: room for the longer scoreline and two sets of buttons */
+@media (pointer:fine){.arc-game.two #arcCanvas{max-height:calc(100dvh - 340px)}}
+@media (pointer:coarse){.arc-game.two #arcCanvas{max-height:calc(100dvh - 420px)}}
+@media (orientation:landscape) and (max-height:520px){
+ .arc-game.two #arcCanvas{max-height:calc(100dvh - 165px)}
+ .arc-game.two .arc-hud{font-size:11px;gap:6px}
+ .arc-pad.two .arc-grp{display:grid!important;grid-template-columns:repeat(2,46px);gap:4px;padding-top:14px;max-width:none}
+ .arc-pad.two button{min-height:34px!important;width:46px!important;font-size:11px!important;padding:0;border-width:2px}
+}
