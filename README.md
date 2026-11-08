@@ -53,6 +53,7 @@ jobs:
 ## Reading aloud (text-to-speech)
 - Uses the browser's built-in voices (`js/speech.js`, same approach as the ResearchGap app): English voices only, British preferred, female/male chosen by voice name, spoken sentence by sentence with a safety timer.
 - Four roles with their own voice (when the device has several), speed and pitch: 🗺️ tour guide, 📣 announcer, ❓ question reader, 🧑‍🏫 teacher. Maths is made speakable (fractions, units, ×, ÷, =, capitals).
+- **Voice for each job:** in 🎙️ Voices each role can use *Automatic* (follows female/male) or any voice on the device (English UK first, then other English, then other languages). Saved per player by voice name; if that voice isn't on the current device, Automatic is used and the window says so.
 - 🔊/🔇 at the top mutes announcements (toasts and answer feedback). 🎙️ Voices: female/male, speed, read-aloud buttons on/off, tour narration on/off, try each voice (`js/voices.js`). Saved per player (browser and progress file).
 - 🔊 read-aloud buttons on questions, explainers, worked methods, Learn steps and Example Studio; listening to a Learn step counts as active reading.
 - Tours narrate each step and move on by themselves, with ⏸ pause (or P) and 🔇 narration off.

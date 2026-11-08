@@ -10,14 +10,18 @@ const Speech=(()=>{
   announce:{label:'📣 Announcer',rate:1.1,pitch:1.2,slot:1,sample:'GOAL! What a strike! Plus twenty points!'},
   question:{label:'❓ Question reader',rate:.95,pitch:1.0,slot:2,sample:'Find the missing number: three quarters equals what over twelve?'},
   teach:{label:'🧑‍🏫 Teacher',rate:.9,pitch:.95,slot:3,sample:'Whatever you do to the bottom, do to the top. Let’s work it out step by step.'}};
- let voices=[],token=0,current=null,timer=0,queue=[];
+ let voices=[],all=[],token=0,current=null,timer=0,queue=[],listeners=[];
  const set=()=>(typeof stats!=='undefined'&&stats.speech)||{announce:true,icons:true,tour:true,gender:'female',rate:1};
- function load(){if(ok)voices=speechSynthesis.getVoices().filter(v=>/^en[-_]/i.test(v.lang));}
+ function load(){if(!ok)return;all=speechSynthesis.getVoices().slice();voices=all.filter(v=>/^en[-_]/i.test(v.lang));listeners.forEach(f=>{try{f()}catch(e){}});}
  if(ok){load();speechSynthesis.onvoiceschanged=load;}
  // Voices of the chosen gender (British first). Falls back to any English voice if the device has none of that gender.
  function pool(g){const want=g==='male'?v=>MAL.test(v.name)&&!FEM.test(v.name):v=>FEM.test(v.name);let p=voices.filter(want);if(!p.length)p=voices.filter(v=>!(g==='male'?FEM:MAL).test(v.name));if(!p.length)p=voices.slice();
   return p.sort((a,b)=>(/en[-_]GB/i.test(b.lang)-/en[-_]GB/i.test(a.lang))||(b.localService-a.localService));}
- const voiceFor=role=>{const p=pool(set().gender);return p.length?p[ROLES[role].slot%p.length]:null;};
+ // Automatic choice for a role: a different voice of the chosen gender for each role (when the device has several).
+ const autoVoice=role=>{const p=pool(set().gender);return p.length?p[ROLES[role].slot%p.length]:null;};
+ // A voice picked by name for a role (saved per player); if it isn't on this device, the automatic choice is used.
+ const chosen=role=>{const n=(set().voice||{})[role];return n?all.find(v=>v.name===n)||null:null;};
+ const voiceFor=role=>chosen(role)||autoVoice(role);
  // Make maths and app text sound right.
  const SMALL={2:'half',3:'third',4:'quarter',5:'fifth',6:'sixth',7:'seventh',8:'eighth',9:'ninth',10:'tenth',12:'twelfth'};
  const WORDS=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve'];
@@ -48,5 +52,5 @@ const Speech=(()=>{
  function announce(text){if(!set().announce||!text)return;if(current&&current.role!=='announce')return;
   if(current){if(queue.length<2)queue.push(text);return;}say(text,'announce',()=>{const n=queue.shift();if(n)announce(n);});}
  const speaking=role=>!!current&&(!role||current.role===role);
- return{ok,ROLES,say,stop,announce,speaking,voiceFor,speakable,voices:()=>voices,pool};
+ return{ok,ROLES,say,stop,announce,speaking,voiceFor,autoVoice,chosen,speakable,voices:()=>voices,allVoices:()=>all,pool,onVoices:f=>listeners.push(f)};
 })();

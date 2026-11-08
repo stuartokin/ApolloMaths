@@ -12,8 +12,14 @@ const Voices=(()=>{
    <label class="chk"><input type="checkbox" data-v="tour"${s.tour?' checked':''}> 🗺️ <b>Tour narration</b> — the guided tour reads each step and moves on by itself</label></fieldset>
   <fieldset><legend>Voice</legend><div class="vc-row">${opt('vGender','female',s.gender,'👩 Female voices')}${opt('vGender','male',s.gender,'👨 Male voices')}</div>
    <div class="vc-row">${opt('vRate','0.8',String(s.rate),'🐢 Slower')}${opt('vRate','1',String(s.rate),'Normal')}${opt('vRate','1.2',String(s.rate),'🐇 Faster')}</div></fieldset>
-  <fieldset><legend>Try each voice</legend><div class="vc-try">${Object.entries(Speech.ROLES).map(([k,r])=>{const v=Speech.voiceFor(k);return `<div class="vc-role"><button class="secondary" data-try="${k}" type="button">▶ ${r.label}</button><small>${v?esc(v.name):'Device default voice'}</small></div>`;}).join('')}</div>
-   <p class="mini">Each job gets its own voice when your device has several. Voices come from your device, so they differ between computers, tablets and browsers.${Speech.voices().length?` This device has ${Speech.voices().length} English voice${Speech.voices().length>1?'s':''}.`:''}</p></fieldset>`;}
+  <fieldset><legend>Voice for each job</legend><div class="vc-try">${Object.entries(Speech.ROLES).map(([k,r])=>roleRow(k,r)).join('')}</div>
+   <div class="actions"><button class="ghost" data-autoall type="button">Set all to Automatic</button></div>
+   <p class="mini"><b>Automatic</b> uses the female/male choice above and gives each job a different voice when your device has several. Or pick any voice your device has — some sound much more natural than others (on Windows try the “Online (Natural)” voices in Edge; on iPad and Mac, the “Enhanced” or “Premium” ones). Voices come from the device, so a voice chosen on one device may not exist on another — then Automatic is used there.${Speech.allVoices().length?` This device has ${Speech.allVoices().length} voice${Speech.allVoices().length>1?'s':''} (${Speech.voices().length} English).`:''}</p></fieldset>`;}
+ // One row: role name, a list of every voice on this device (English UK first), and a try button.
+ function roleRow(k,r){const s=S(),cur=(s.voice||{})[k]||'',all=Speech.allVoices(),auto=Speech.autoVoice(k),missing=cur&&!all.some(v=>v.name===cur);
+  const grp=(label,list)=>list.length?`<optgroup label="${label}">${list.map(v=>`<option value="${esc(v.name)}"${v.name===cur?' selected':''}>${esc(v.name)} (${esc(v.lang)})</option>`).join('')}</optgroup>`:'';
+  const gb=all.filter(v=>/^en[-_]GB/i.test(v.lang)),en=all.filter(v=>/^en[-_]/i.test(v.lang)&&!/^en[-_]GB/i.test(v.lang)),other=all.filter(v=>!/^en[-_]/i.test(v.lang));
+  return `<div class="vc-role"><label for="vSel-${k}"><b>${r.label}</b></label><div class="vc-pick"><select id="vSel-${k}" data-role="${k}"><option value=""${cur&&!missing?'':' selected'}>Automatic${auto?` — ${esc(auto.name)}`:''}</option>${grp('English (UK)',gb)}${grp('English (other)',en)}${grp('Other languages',other)}</select><button class="secondary" data-try="${k}" type="button" aria-label="Try the ${r.label} voice">▶</button></div>${missing?`<small class="vc-miss">“${esc(cur)}” isn’t on this device — using Automatic here.</small>`:''}</div>`;}
  function open(){render();const d=dlg();if(d.showModal){if(!d.open)d.showModal();}else d.setAttribute('open','');}
  // ---------- 🔊 read-aloud buttons ----------
  // Text of an element without its buttons (so “Read aloud” / “Next” labels aren’t read out).
@@ -34,8 +40,9 @@ const Voices=(()=>{
   Speech.say(t,ROLE[kind]||'teach',()=>{if(activeBtn===b)reset();});}
  function init(){apply();get('muteBtn').addEventListener('click',()=>{S().announce=!S().announce;if(!S().announce)Speech.stop();save();apply();});
   get('voiceBtn').addEventListener('click',open);
-  dlg().addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.close!==undefined){Speech.stop();dlg().close();}if(b.dataset.try)Speech.say(Speech.ROLES[b.dataset.try].sample,b.dataset.try);});
-  dlg().addEventListener('change',e=>{const t=e.target,s=S();if(t.dataset.v){s[t.dataset.v]=t.checked;}else if(t.name==='vGender'){s.gender=t.value;}else if(t.name==='vRate'){s.rate=+t.value;}save();apply();render();
+  dlg().addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.close!==undefined){Speech.stop();dlg().close();}if(b.dataset.try)Speech.say(Speech.ROLES[b.dataset.try].sample,b.dataset.try);if(b.dataset.autoall!==undefined){Object.keys(S().voice).forEach(k=>S().voice[k]='');save();render();toast('🎙️ All voices set to Automatic.');}});
+  Speech.onVoices(()=>{if(dlg().open)render();});
+  dlg().addEventListener('change',e=>{const t=e.target,s=S();if(t.dataset.role){s.voice[t.dataset.role]=t.value;save();render();Speech.say(Speech.ROLES[t.dataset.role].sample,t.dataset.role);return;}if(t.dataset.v){s[t.dataset.v]=t.checked;}else if(t.name==='vGender'){s.gender=t.value;}else if(t.name==='vRate'){s.rate=+t.value;}save();apply();render();
    if(t.name==='vGender')Speech.say(t.value==='male'?'Hello! This is a male voice.':'Hello! This is a female voice.','tour');});
   document.addEventListener('click',e=>{const b=e.target.closest('[data-say]');if(b){e.preventDefault();readAloud(b);}});
   dlg().addEventListener('close',()=>Speech.stop());}

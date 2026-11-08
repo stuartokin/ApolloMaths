@@ -301,3 +301,7 @@ body.no-say .say-btn{display:none!important}
 .tb-auto{font-size:12px!important;color:#555d72;margin:-4px 0 8px!important;font-weight:800}
 dialog.tour-front[open]{position:fixed;inset:0;margin:auto;z-index:91}
 .tour-hole{z-index:92}.tour-bub{z-index:93}
+.vc-pick{display:flex;gap:6px;align-items:center}.vc-pick select{flex:1;min-width:0;min-height:44px;border:2px solid var(--dark);border-radius:10px;padding:6px;font-size:14px;font-weight:700;background:#fff}.vc-pick button{min-width:48px;min-height:44px}.vc-miss{color:#b3261e!important;font-weight:800}
+.vc-try{grid-template-columns:1fr!important}
+.vc-body fieldset{min-width:0}.vc-pick select{max-width:100%;width:100%}.vc-role{min-width:0}
+.vc-body .chk{display:block!important;padding-left:30px;text-indent:-30px;line-height:1.45}.vc-body .chk input{margin:0 8px 0 0;vertical-align:-4px;text-indent:0}.vc-row .chk{display:inline-block!important;padding-left:0;text-indent:0;margin-right:14px}
