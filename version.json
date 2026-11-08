@@ -1,7 +1,24 @@
 {
- "version": "2.19",
+ "version": "2.20",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.20",
+   "date": "9 November 2026",
+   "kids": [
+    "🚀 Starlane Trader: sit inside a 3D cockpit with side windows and a rear-view mirror",
+    "🪐 Planets with oceans, continents, clouds and glowing atmospheres — and they turn!",
+    "🛸 Four kinds of space station, and every ship looks a little different",
+    "💥 Damaged ships smoke and spark — and your canopy cracks if you take hits",
+    "↺ Restart from your last save, or start a whole new career"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🚀 Starlane Trader: tidier pause menu with Restart (back to last save, or new commander — with a warning if not saved); optional 3D cockpit; textured, rotating planets with atmospheres; four station designs with lights; unique ship fittings; visible damage on ships and on your own canopy."
+   ]
+  },
   {
    "v": "2.19",
    "date": "9 November 2026",
@@ -131,15 +148,6 @@
    "tags": [],
    "items": [
     "✨ Natural-sounding voices are now used automatically wherever the device has them (for example Edge’s “Online (Natural)” voices on Windows, or Enhanced/Premium voices on iPad and Mac) — mixing female and male, or sharing a voice, if there aren’t four."
-   ]
-  },
-  {
-   "v": "2.10",
-   "date": "8 November 2026",
-   "kids": [],
-   "tags": [],
-   "items": [
-    "🎙️ Choose any voice your device has for each job — tour guide, announcer, question reader and teacher (🎙️ Voices → Voice for each job). Choices are saved; if a voice isn’t on another device, Automatic is used there."
    ]
   }
  ]

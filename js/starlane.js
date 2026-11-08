@@ -121,14 +121,15 @@ const SL=(()=>{
    let x,y,tries=0;do{x=ri(r,4,251);y=ri(r,4,123);tries++;}while(tries<40&&sys.some(s=>Math.abs(s.x-x)<5&&Math.abs(s.y-y)<4));
    sys.push({i,name:nm,x,y,gov,eco,tech,pop:Math.max(.1,Math.round(pop*10)/10),species,desc,radius:2000+ri(r,0,5000),prod:Math.round(((eco^7)+3)*(gov+4)*Math.max(.1,pop)*80),seed:Math.floor(r()*2**31)});}
   return sys;}
+ const box=(cx,cy,cz,sx,sy,sz)=>hull([[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]].map(([a,b,c])=>[cx+a*sx/2,cy+b*sy/2,cz+c*sz/2]));
  // what each system looks like (separate random stream, so names, economies and missions are unchanged)
  const STARCOL=[['#ffe45e','yellow'],['#ff8a1c','orange'],['#ff2d55','red dwarf'],['#9fd8ff','blue-white'],['#ffffff','white']];
  function features(s){const r=rng((s.seed^0x5bd1e995)>>>0);const kind=r()<.24?'gas':r()<.5?'crater':'rocky';const rings=kind==='gas'?r()<.7:r()<.14;const moons=kind==='gas'?ri(r,1,3):ri(r,0,2);
-  const stars=r()<.7?1:r()<.8?2:3;const cols=Array.from({length:stars},()=>ri(r,0,4));const belt=r()<.3,meteors=r()<.2;
-  const parts=[kind==='gas'?'Gas giant':kind==='crater'?'Cratered world':'Rocky world',rings?'with rings':'',moons?`${moons} moon${moons>1?'s':''}`:'no moons',stars===1?`${STARCOL[cols[0]][1]} star`:stars===2?'binary star':'triple star',belt?'asteroid belt':'',meteors?'meteor showers':''].filter(Boolean);
-  return{kind,rings,moons,stars,cols,belt,meteors,text:parts.join(' · ')};}
+  const stars=r()<.7?1:r()<.8?2:3;const cols=Array.from({length:stars},()=>ri(r,0,4));const belt=r()<.3,meteors=r()<.2;const station=ri(r,0,3);
+  const parts=[kind==='gas'?'Gas giant':kind==='crater'?'Cratered world':'Rocky world',rings?'with rings':'',moons?`${moons} moon${moons>1?'s':''}`:'no moons',stars===1?`${STARCOL[cols[0]][1]} star`:stars===2?'binary star':'triple star',belt?'asteroid belt':'',meteors?'meteor showers':'',['octagon station','ring station','spire station','twin-hub station'][station]].filter(Boolean);
+  return{kind,rings,moons,stars,cols,belt,meteors,station,text:parts.join(' · ')};}
  const dist=(a,b)=>Math.round(Math.hypot((a.x-b.x),(a.y-b.y)*1.6)*.22*10)/10;
- return{STARCOL,features,V,add,sub,mul,dot,cross,len,norm,rot,ortho,toLocal,toWorld,steer,rng,ri,rp,hull,MODELS,asteroidModel,SHIPS,GOODS,ECON,GOV,GOVDESC,marketPrices,EQUIP,LASERS,RANKS,rankOf,legalName,makeGalaxy,dist};
+ return{box,ring,STARCOL,features,V,add,sub,mul,dot,cross,len,norm,rot,ortho,toLocal,toWorld,steer,rng,ri,rp,hull,MODELS,asteroidModel,SHIPS,GOODS,ECON,GOV,GOVDESC,marketPrices,EQUIP,LASERS,RANKS,rankOf,legalName,makeGalaxy,dist};
 })();
 
 function makeStarlane(env){
@@ -138,14 +139,15 @@ function makeStarlane(env){
  const FX=Retro.fx();
  const ACTIONS=[['rollL','Roll left',['ArrowLeft','a'],1],['rollR','Roll right',['ArrowRight','d'],1],['up','Nose up',['ArrowUp','w'],1],['down','Nose down',['ArrowDown','s'],1],['fast','Speed up',['r','+','='],1],['slow','Slow down',['f','-'],1],['fire','Fire laser',[' '],1],
   ['missile','Fire missile',['m']],['ecm','E.C.M.',['e']],['bomb','Shock pulse',['b']],['jump','Jump drive',['j']],['dock','Docking computer',['c']],['hyper','Hyperspace',['h']],['time','Speed up time',['t']],['view','Next view',['v']],['cam','Outside camera',['o']],['chart','Galaxy chart',['g']],['cargo','Cargo hold',['i']],['missions','Missions',['k']],['pod','Escape capsule',['x']]];
- const optDefaults=()=>({lit:false,tips:true,cuts:true,keys:Object.fromEntries(ACTIONS.map(a=>[a[0],a[2].slice()]))});
+ const optDefaults=()=>({cockpit:false,lit:false,tips:true,cuts:true,keys:Object.fromEntries(ACTIONS.map(a=>[a[0],a[2].slice()]))});
  function fixOpt(){C.opt=Object.assign(optDefaults(),C.opt||{});C.opt.keys=Object.assign(optDefaults().keys,C.opt.keys||{});}
  // ---------------- commander (saved with the player's progress) ----------------
  function newCommander(){const start=GAL.find(s=>s.gov>=5&&s.tech>=6&&s.eco>=4)||GAL.find(s=>s.gov>=4)||GAL[0];
   return{v:1,opt:optDefaults(),flight:null,sys:start.i,credits:100,fuel:7,cargo:{},cap:20,equip:{},front:'pulse',rear:null,missiles:3,legal:0,killPts:0,kills:0,day:1,missions:[],gov:{},news:[],visited:{[start.i]:1},target:null,invert:false,done:0,market:null,board:null};}
  let C=(()=>{const s=env.store&&env.store.get();return s&&s.v===1&&GAL[s.sys]?JSON.parse(JSON.stringify(s)):newCommander();})();
  fixOpt();
- const persist=()=>{if(env.store)env.store.set(JSON.parse(JSON.stringify(C)));};
+ let lastSaved='',lastSaveClock=0;
+ const persist=()=>{lastSaved=JSON.stringify(C);try{lastSaveClock=clock;}catch(e){lastSaveClock=0;}if(env.store)env.store.set(JSON.parse(lastSaved));};
  const sysOf=i=>{const s=GAL[i];return C.gov[i]!==undefined?{...s,gov:C.gov[i]}:s;};
  const here=()=>sysOf(C.sys);
  const cargoT=()=>Object.entries(C.cargo).reduce((a,[k,n])=>a+(GOODS[k][1]==='t'?n:0),0);
@@ -160,24 +162,45 @@ function makeStarlane(env){
  // flight world
  let suns=[],moons=[],feat=null,CAM={pos:V(),r:V(1,0,0),u:V(0,1,0),f:V(0,0,1)},camMode='cockpit',timeScale=1,exitT=0,hyp=[],scene=null,hover=null,tip=null,remap=null,menuTab='main',helpTab=0,saveNote='',apFinal=false,P,planet,station,sun,ships=[],dust=[],booms=[],spawnT=0,laserT=0,firing=false,laserShow=0,dockComp=false,jump=false,massLock=false,ecmT=0,dockMusic=null,lastHit=0;
  const SAFE=16000;
+ function bodyTex(kind,seed){const r=rng(seed>>>0),f=[],cl=[];let base,atmo=null,bands=null;
+  if(kind==='gas'){base=rp(r,['#c9935a','#b98a6a','#8fa8c8','#c8b07a']);bands=Array.from({length:7},(_,i)=>({lat:-1.1+i*.37+(r()-.5)*.1,w:.06+r()*.07,col:rp(r,['#e2b882','#9a6a3c','#d9c39a','#7d5a3a','#a9c0dc'])}));f.push({lon:r()*6.28,lat:(r()-.5)*.8,size:.16,col:'#b8553a',alpha:.85});atmo='rgba(255,220,160,.35)';}
+  else if(kind==='rocky'){base=rp(r,['#1d5fa8','#245a8c','#2f6f7a']);for(let i=0;i<10;i++)f.push({lon:r()*6.28,lat:(r()-.5)*2,size:.16+r()*.24,col:rp(r,['#3f8f4a','#5f8a3a','#8a7a4a','#6b5a3a']),alpha:.92});f.push({lon:0,lat:1.5,size:.38,col:'#eef4ff',alpha:.9},{lon:0,lat:-1.5,size:.32,col:'#eef4ff',alpha:.9});for(let i=0;i<9;i++)cl.push({lon:r()*6.28,lat:(r()-.5)*2.2,size:.1+r()*.17,col:'#ffffff',alpha:.42});atmo='rgba(140,200,255,.5)';}
+  else{base=rp(r,['#8d857c','#7a746c','#9a8f86']);for(let i=0;i<16;i++)f.push({lon:r()*6.28,lat:(r()-.5)*2.6,size:.05+r()*.14,col:'#5f5a54',alpha:.8,rim:true});if(r()<.25)atmo='rgba(220,170,140,.28)';}
+  return{base,f,cl,atmo,bands};}
+ // stations: the docking drum is the same everywhere; the rest varies by system
+ const ST_PARTS={};
+ function stationParts(kind){if(ST_PARTS[kind])return ST_PARTS[kind];const out=[],B=SL.box,H=SL.hull;
+  if(kind===1){for(let i=0;i<16;i++){const a0=i/16*Math.PI*2,a1=(i+.92)/16*Math.PI*2,pts=[];for(const a of[a0,a1])for(const rr of[760,880])for(const z of[-120,-40])pts.push([Math.cos(a)*rr,Math.sin(a)*rr,z]);out.push({m:H(pts),col:'#c8d0ff'});}
+   for(let i=0;i<4;i++){const a=i*Math.PI/2+Math.PI/4,c=[Math.cos(a)*530,Math.sin(a)*530,-80];out.push({m:H([[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]].map(([x,y,z])=>{const ax=x*230,ay=y*22;return[c[0]+Math.cos(a)*ax-Math.sin(a)*ay,c[1]+Math.sin(a)*ax+Math.cos(a)*ay,c[2]+z*22];})),col:'#9aa3c7'});}}
+  else if(kind===2){out.push({m:H([...SL.ring(20,1050,0,-660),...SL.ring(20,440,0,-560),...SL.ring(20,440,0,-760)]),col:'#c8d0ff'});out.push({m:H([...SL.ring(8,150,0,-330),...SL.ring(8,150,0,-570)]),col:'#9aa3c7'});out.push({m:H([...SL.ring(6,48,0,-760),...SL.ring(6,10,0,-1600)]),col:'#e6e9f2'});for(const sx of[1,-1])out.push({m:B(sx*760,0,-700,120,70,180),col:'#ffb020'});}
+  else if(kind===3){const ico=(cx,R)=>{const t=(1+Math.sqrt(5))/2;return H([[-1,t,0],[1,t,0],[-1,-t,0],[1,-t,0],[0,-1,t],[0,1,t],[0,-1,-t],[0,1,-t],[t,0,-1],[t,0,1],[-t,0,-1],[-t,0,1]].map(p=>add(mul(norm(p),R),[cx,0,-120])));};
+   for(const sx of[1,-1]){out.push({m:ico(sx*1000,270),col:'#c8d0ff'});out.push({m:B(sx*560,0,-120,520,50,50),col:'#9aa3c7'});}for(const sy of[1,-1]){out.push({m:B(0,sy*470,-160,40,360,40),col:'#9aa3c7'});out.push({m:B(0,sy*760,-160,700,12,320),col:'#3f6fd6'});}}
+  out.forEach(p=>p.c=p.m.pts.reduce((a,q)=>add(a,mul(q,1/p.m.pts.length)),V()));return ST_PARTS[kind]=out;}
  function buildSystem(deep){const s=here(),r=rng(s.seed+C.day*31);ships=[];booms=[];moons=[];suns=[];feat=SL.features(s);
   if(deep){planet=null;station=null;sun=null;return;}
   const R=(4200+s.radius*.35)*(feat.kind==='gas'?2.1:1);const tilt=(r()-.5)*.9,po={r:V(1,0,0),u:norm(V(Math.sin(tilt),Math.cos(tilt),0)),f:V(0,0,1)};ortho(po);
-  planet={pos:V(0,0,0),R,o:po,spin:.02,kind:feat.kind,rings:feat.rings?{a:R*1.45,b:R*2.25}:null};
+  planet={pos:V(0,0,0),R,o:po,spin:.035,kind:feat.kind,rings:feat.rings?{a:R*1.45,b:R*2.25}:null,tex:bodyTex(feat.kind,s.seed^0x1234)};
   const sd=norm(V(r()*2-1,(r()-.5)*.6,r()*2-1));const spos=mul(sd,R*(feat.rings?2.7:1.75));const sf=norm(sub(planet.pos,spos));
-  const so={f:sf,u:norm(cross(sf,V(1,0,0.3))),r:V(1,0,0)};ortho(so);station={type:'station',m:MODELS.station,pos:spos,o:so,spin:.32,energy:9999};
+  const so={f:sf,u:norm(cross(sf,V(1,0,0.3))),r:V(1,0,0)};ortho(so);station={type:'station',m:MODELS.station,pos:spos,o:so,spin:.32,energy:9999,kind:feat.station||0,parts:stationParts(feat.station||0)};
   for(let k=0;k<feat.stars;k++){const d=norm(V(r()*2-1,(r()-.5)*.5,r()*2-1));suns.push({pos:mul(d,R*(42+k*25)),R:R*(k?2.4:4.5)*(feat.kind==='gas'?.6:1),col:SL.STARCOL[feat.cols[k]][0]});}sun=suns[0];
-  for(let k=0;k<feat.moons;k++){let d;do{d=norm(V(r()*2-1,(r()-.5)*.5,r()*2-1));}while(dot(d,sd)>.6);moons.push({pos:mul(d,R*(3.4+k*1.9)),R:R*(.14+r()*.14),o:{r:V(1,0,0),u:V(0,1,0),f:V(0,0,1)},crater:r()<.5});}
+  for(let k=0;k<feat.moons;k++){let d;do{d=norm(V(r()*2-1,(r()-.5)*.5,r()*2-1));}while(dot(d,sd)>.6);moons.push({pos:mul(d,R*(3.4+k*1.9)),R:R*(.14+r()*.14),o:{r:V(1,0,0),u:V(0,1,0),f:V(0,0,1)},crater:r()<.5,tex:bodyTex('crater',s.seed+k*977)});}
   if(feat.belt){for(let k=0;k<9;k++){const a=k/9*Math.PI*2+r(),d=add(mul(so.r,Math.cos(a)*(5000+r()*3000)),mul(so.u,Math.sin(a)*(5000+r()*3000)));spawn('asteroid',add(add(spos,d),mul(sf,-(1500+r()*4000))),{speed:8});}}}
  function placeAtArrival(){const s=station;const d=norm(sub(s.pos,planet.pos));const side=norm(cross(d,V(0,1,0)));
   const pos=add(add(planet.pos,mul(d,planet.R*13)),mul(side,planet.R*2));const f=norm(sub(s.pos,pos));const o={f,u:V(0,1,0),r:V(1,0,0)};ortho(o);P.pos=pos;P.o=o;}
- function newPlayer(){const lasers=C.front||'pulse';P={pos:V(),o:{r:V(1,0,0),u:V(0,1,0),f:V(0,0,1)},speed:0,throttle:.3,max:330,shF:100,shA:100,energy:100,cabin:20,heat:0,roll:0,pitch:0,cool:0};}
+ function newPlayer(){const lasers=C.front||'pulse';P={hull:0,cracks:[],pos:V(),o:{r:V(1,0,0),u:V(0,1,0),f:V(0,0,1)},speed:0,throttle:.3,max:330,shF:100,shA:100,energy:100,cabin:20,heat:0,roll:0,pitch:0,cool:0};}
  function initDust(){dust=Array.from({length:110},()=>add(P.pos,V((Math.random()-.5)*3000,(Math.random()-.5)*3000,(Math.random()-.5)*3000)));}
  function moveDust(){for(let i=0;i<dust.length;i++){const rel=sub(dust[i],P.pos);if(len(rel)>1700){const fwd=P.speed>40?mul(P.o.f,700+Math.random()*900):V();dust[i]=add(add(P.pos,fwd),V((Math.random()-.5)*2600,(Math.random()-.5)*2600,(Math.random()-.5)*2600));}}}
  // ---------------- ships in the local bubble ----------------
+ function shipParts(type,sid){const T=SHIPS[type];if(!T||!T.model||['canister','missile','capsule'].includes(type))return{parts:[],ant:null,rearZ:-30};const m=MODELS[T.model],pts=m.pts,rr=rng(sid);
+  const wing=pts.reduce((a,p)=>p[0]>a[0]?p:a),top=pts.reduce((a,p)=>p[1]>a[1]?p:a),zmin=Math.min(...pts.map(p=>p[2])),acc=rp(rr,['#ffe45e','#3fe0ff','#ff8a1c','#e6e9f2','#9dff2e','#ff4fd8']),parts=[];
+  if(rr()<.6)for(const sx of[1,-1])parts.push({m:SL.box(sx*wing[0]*.9,wing[1]-2,wing[2]+20,5,5,40),col:acc});
+  if(rr()<.5)for(const sx of[1,-1])parts.push({m:SL.box(sx*wing[0]*.5,-8,zmin+18,12,12,34),col:T.color});
+  if(rr()<.45)parts.push({m:SL.box(0,top[1]+12,zmin*.55,3,24,34),col:acc});
+  const ant=rr()<.5?[[0,top[1],top[2]],[0,top[1]+38,top[2]-10]]:null;if(!parts.length&&!ant)for(const sx of[1,-1])parts.push({m:SL.box(sx*wing[0]*.9,wing[1]-2,wing[2]+20,5,5,40),col:acc});
+  parts.forEach(p=>p.c=p.m.pts.reduce((a,q)=>add(a,mul(q,1/p.m.pts.length)),V()));return{parts,ant,rearZ:zmin};}
  function spawn(type,pos,opts={}){const T=SHIPS[type],m=type==='asteroid'?SL.asteroidModel(Math.floor(Math.random()*1e9)):MODELS[T.model];
   const f=opts.f||norm(V(Math.random()-.5,Math.random()-.5,Math.random()-.5)),o={f,u:V(0,1,0),r:V(1,0,0)};if(Math.abs(dot(f,o.u))>.95)o.u=V(1,0,0);ortho(o);
-  const sh={type,T,m,pos,o,speed:opts.speed!==undefined?opts.speed:T.speed*.5,energy:(opts.energy||T.energy),max:opts.energy||T.energy,angry:!!opts.angry,target:opts.target||null,cool:Math.random(),missiles:T.missiles||0,mission:opts.mission||null,name:opts.name||T.name,bounty:opts.bounty!==undefined?opts.bounty:T.bounty,spinA:(Math.random()-.5)*.8,spinB:(Math.random()-.5)*.6,life:opts.life||0,breakT:0,legalClean:opts.clean!==undefined?opts.clean:T.role!=='pirate',cargo:opts.cargo};
+  const sh={type,T,m,pos,o,speed:opts.speed!==undefined?opts.speed:T.speed*.5,energy:(opts.energy||T.energy),max:opts.energy||T.energy,angry:!!opts.angry,target:opts.target||null,cool:Math.random(),missiles:T.missiles||0,mission:opts.mission||null,name:opts.name||T.name,bounty:opts.bounty!==undefined?opts.bounty:T.bounty,spinA:(Math.random()-.5)*.8,spinB:(Math.random()-.5)*.6,life:opts.life||0,breakT:0,legalClean:opts.clean!==undefined?opts.clean:T.role!=='pirate',cargo:opts.cargo,sid:Math.floor(Math.random()*1e9),dmg:0};Object.assign(sh,shipParts(type,sh.sid));
   ships.push(sh);return sh;}
  function aroundPlayer(d,spread=1){const dir=norm(add(mul(P.o.f,.3+Math.random()*.6),V((Math.random()-.5)*2*spread,(Math.random()-.5)*spread,(Math.random()-.5)*2*spread)));return add(P.pos,mul(dir,d));}
  function spawnTick(dt){spawnT-=dt;if(spawnT>0||!planet)return;spawnT=8+Math.random()*8;const s=here(),n=ships.filter(x=>['pirate','trader','police','alien'].includes(x.T.role)).length;if(n>=6)return;
@@ -228,8 +251,10 @@ function makeStarlane(env){
   else{buildSystem(false);placeAtArrival();C.visited[C.sys]=1;missionSpawns();msg(`WELCOME TO ${here().name.toUpperCase()}`,4,'#3fe0ff');}
   P.speed=150;P.throttle=.5;mode='flight';}
  // ---------------- combat ----------------
- function hurt(d,fromDir,collision){const front=dot(fromDir,P.o.f)>0;if(front){P.shF-=d;if(P.shF<0){P.energy+=P.shF;P.shF=0;}}else{P.shA-=d;if(P.shA<0){P.energy+=P.shA;P.shA=0;}}
-  lastHit=.25;FX.shake(Math.min(8,2+d*.2));env.noise(.15,.05,1800);if(P.energy<=0)die();}
+ function hurt(d,fromDir,collision){const e0=P.energy;const front=dot(fromDir,P.o.f)>0;if(front){P.shF-=d;if(P.shF<0){P.energy+=P.shF;P.shF=0;}}else{P.shA-=d;if(P.shA<0){P.energy+=P.shA;P.shA=0;}}
+  lastHit=.25;FX.shake(Math.min(8,2+d*.2));env.noise(.15,.05,1800);if(P.energy<e0){P.hull=Math.min(1,(P.hull||0)+(e0-P.energy)*.012);P.cracks=P.cracks||[];while(P.cracks.length<Math.floor(P.hull*9))P.cracks.push(makeCrack());}if(P.energy<=0)die();}
+ function makeCrack(){const side=Math.floor(Math.random()*4);let x,y;if(side===0){x=40+Math.random()*(W-80);y=6+Math.random()*30;}else if(side===1){x=6+Math.random()*50;y=40+Math.random()*(VH-90);}else if(side===2){x=W-6-Math.random()*50;y=40+Math.random()*(VH-90);}else{x=Math.random()<.5?20+Math.random()*90:W-20-Math.random()*90;y=VH-10-Math.random()*40;}
+  const lines=[];for(let k=0;k<3;k++){const pts=[[x,y]];let a=Math.atan2(VH/2-y,W/2-x)+(Math.random()-.5)*1.6,px=x,py=y;for(let n=0;n<4;n++){const l=10+Math.random()*22;px+=Math.cos(a)*l;py+=Math.sin(a)*l;a+=(Math.random()-.5)*.9;pts.push([px,py]);}lines.push(pts);}return lines;}
  function die(){if(mode!=='flight')return;mode='dead';deathT=0;stopMusic();env.noise(1.2,.1,400);FX.shake(14);for(let i=0;i<4;i++)booms.push({pos:add(P.pos,mul(P.o.f,40)),t:0,lines:[]});}
  function boom(sh){FX.shake(5);env.noise(.6,.08,700);const lines=sh.m.edges.slice(0,30).map(e=>{const a=add(sh.pos,toWorld(sh.o,sh.m.pts[e.a])),b=add(sh.pos,toWorld(sh.o,sh.m.pts[e.b]));const c=mul(add(a,b),.5),v=mul(norm(sub(c,sh.pos)),60+Math.random()*120);return{a:sub(a,c),b:sub(b,c),c,v};});booms.push({pos:sh.pos,t:0,lines,col:sh.T.color});}
  function kill(sh,byPlayer){sh.dead=true;boom(sh);
@@ -293,7 +318,7 @@ function makeStarlane(env){
   if(planet){planet.o.r=rot(planet.o.r,planet.o.u,planet.spin*dt);planet.o.f=rot(planet.o.f,planet.o.u,planet.spin*dt);}
   // other ships
   for(const sh of ships)if(!sh.dead)ai(sh,dt);ships=ships.filter(s=>!s.dead&&len(sub(s.pos,P.pos))<60000);
-  spawnTick(dt);
+  spawnTick(dt);for(const sm of smokes){sm.t+=dt;sm.pos=add(sm.pos,mul(sm.v,dt));}smokes=smokes.filter(sm=>sm.t<1.6);if(camMode==='ext'&&P.hull>.5)damageFx(P.pos,P.o,-90,P.hull,dt,P);
   // hyperspace countdown
   if(hyperT>0){const before=Math.ceil(hyperT);hyperT-=dt;if(Math.ceil(hyperT)!==before&&hyperT>0)env.beep(500,.08,'square',.03);if(hyperT<=0){hyperT=0;doHyper();}}
   moveDust();
@@ -310,7 +335,9 @@ function makeStarlane(env){
    const want=dot(P.o.u,s.o.u)>=0?s.o.u:mul(s.o.u,-1),err=Math.atan2(dot(cross(P.o.u,want),P.o.f),dot(P.o.u,want)),turn=Math.max(-1.6*dt,Math.min(1.6*dt,err))-s.spin*dt;
    P.o.u=rot(P.o.u,P.o.f,turn);P.o.r=rot(P.o.r,P.o.f,turn);ortho(P.o);}
   steer(P.o,aim,1.2*dt);}
- function ai(sh,dt){const T=sh.T,toP=sub(P.pos,sh.pos),dP=len(toP);
+ let smokes=[];
+ function damageFx(pos,o,rearZ,dmg,dt,who){if(dmg>.55){who.smT=(who.smT||0)-dt;if(who.smT<=0){who.smT=.13;smokes.push({pos:add(pos,toWorld(o,[0,0,rearZ])),v:add(mul(o.f,-30),V((Math.random()-.5)*20,25,(Math.random()-.5)*20)),t:0,r:16+Math.random()*14});}}if(dmg>.35&&Math.random()<dt*2.2)booms.push({pos:add(pos,V((Math.random()-.5)*60,(Math.random()-.5)*40,(Math.random()-.5)*60)),t:.6,spark:true});}
+ function ai(sh,dt){const T=sh.T,toP=sub(P.pos,sh.pos),dP=len(toP);if(T.role!=='rock'&&T.role!=='cargo'&&T.role!=='missile'){sh.dmg=Math.max(0,Math.min(1,1-sh.energy/sh.max));damageFx(sh.pos,sh.o,sh.rearZ||-30,sh.dmg,dt,sh);}
   if(T.role==='rock'||T.role==='cargo'){sh.o.f=rot(sh.o.f,sh.o.u,sh.spinA*dt);sh.o.r=rot(sh.o.r,sh.o.u,sh.spinA*dt);sh.o.u=rot(sh.o.u,sh.o.f,sh.spinB*dt);ortho(sh.o);sh.pos=add(sh.pos,mul(sh.o.f,sh.speed*dt*.2));if(sh.drift)sh.pos=add(sh.pos,mul(sh.drift,dt));
    if(T.role==='cargo'&&dP<sh.m.rad+40){if(has('scoop')&&cargoT()<C.cap){sh.dead=true;const k=sh.cargo!==undefined?sh.cargo:ri(Math.random,0,11);C.cargo[k]=(C.cargo[k]||0)+1;msg(`SCOOPED 1${GOODS[k][1]} ${GOODS[k][0].toUpperCase()}`,2,'#3cff6a');env.beep(1200,.15,'triangle',.04,1.5);}
     else if(dP<sh.m.rad+25){sh.dead=true;boom(sh);hurt(6,norm(toP).map(x=>-x));msg(has('scoop')?'CARGO HOLD FULL':'NO FUEL SCOOPS — CANISTER DESTROYED',2);}}
@@ -335,43 +362,61 @@ function makeStarlane(env){
  function setCam(){if(camMode==='ext'&&P){CAM.pos=add(add(P.pos,mul(P.o.f,-440)),mul(P.o.u,150));CAM.f=norm(sub(add(P.pos,mul(P.o.f,260)),CAM.pos));CAM.u=P.o.u.slice();ortho(CAM);return;}
   const o=P.o;CAM.pos=P.pos;if(view==='rear'){CAM.f=mul(o.f,-1);CAM.u=o.u;CAM.r=mul(o.r,-1);}else if(view==='left'){CAM.f=mul(o.r,-1);CAM.u=o.u;CAM.r=o.f;}else if(view==='right'){CAM.f=o.r;CAM.u=o.u;CAM.r=mul(o.f,-1);}else{CAM.f=o.f;CAM.u=o.u;CAM.r=o.r;}}
  function cam(p){const d=sub(p,CAM.pos);return[dot(d,CAM.r),dot(d,CAM.u),dot(d,CAM.f)];}
- const proj=c=>[CX+FOC*c[0]/c[2],CY-FOC*c[1]/c[2]];
+ let PX=CX,PY=CY,PF=FOC;const proj=c=>[PX+PF*c[0]/c[2],PY-PF*c[1]/c[2]];
+ const hsh=(a,b)=>{const x=Math.sin(a*12.9898+b*78.233)*43758.5453;return x-Math.floor(x);};
+ const pathPoly=(ctx,pts)=>{ctx.beginPath();pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.closePath();};
  function seg(ctx,a,b){const N=4;if(a[2]<N&&b[2]<N)return;if(a[2]<N){const t=(N-a[2])/(b[2]-a[2]);a=[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,N];}else if(b[2]<N){const t=(N-b[2])/(a[2]-b[2]);b=[b[0]+(a[0]-b[0])*t,b[1]+(a[1]-b[1])*t,N];}
   const p=proj(a),q=proj(b);if(Math.max(Math.abs(p[0]),Math.abs(p[1]),Math.abs(q[0]),Math.abs(q[1]))>2e4)return;ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1]);}
  // ---- optional 3D lighting: solid faces shaded by the light from the main star ----
  let lightOverride=null;const RGB={};const rgb=c=>RGB[c]||(RGB[c]=[1,3,5].map(i=>parseInt(c.slice(i,i+2),16)));
  const shade=(c,k)=>{const v=rgb(c);return`rgb(${Math.min(255,v[0]*k)|0},${Math.min(255,v[1]*k)|0},${Math.min(255,v[2]*k)|0})`;};
  const lightAt=pos=>lightOverride||(suns.length?norm(sub(suns[0].pos,pos)):norm(V(.4,.8,.45)));
- function drawModel(ctx,m,pos,o,col,extra){if(C.opt.lit)return drawModelLit(ctx,m,pos,o,col,extra);return drawWire(ctx,m,pos,o,col,extra);}
- function drawModelLit(ctx,m,pos,o,col,extra){const cm=toLocal(o,sub(CAM.pos,pos)),c0=cam(pos);if(c0[2]<-m.rad)return;const pr=c0[2]>0?FOC*m.rad/c0[2]:99;
+ function drawModel(ctx,m,pos,o,col,extra,fx){if(C.opt.lit)return drawModelLit(ctx,m,pos,o,col,extra,fx);return drawWire(ctx,m,pos,o,col,extra,fx);}
+ function drawModelLit(ctx,m,pos,o,col,extra,fx){const cm=toLocal(o,sub(CAM.pos,pos)),c0=cam(pos);if(c0[2]<-m.rad)return;const pr=c0[2]>0?PF*m.rad/c0[2]:99;
   if(pr<1.6){if(c0[2]>0){const p=proj(c0);ctx.fillStyle=col;ctx.fillRect(p[0]-1,p[1]-1,2,2);}return;}
-  const pts=m.pts.map(p=>cam(add(pos,toWorld(o,p))));if(pts.some(p=>p[2]<8))return drawWire(ctx,m,pos,o,col,extra);
+  const pts=m.pts.map(p=>cam(add(pos,toWorld(o,p))));if(pts.some(p=>p[2]<8))return drawWire(ctx,m,pos,o,col,extra,fx);
   const L=toLocal(o,lightAt(pos)),sc=pts.map(proj),vis=m.faces.map(f=>dot(f.n,cm)-f.d>0);ctx.lineJoin='round';
-  m.faces.forEach((f,i)=>{if(!vis[i])return;const k=.2+.95*Math.max(0,dot(f.n,L));ctx.fillStyle=shade(col,k);ctx.beginPath();f.v.forEach((vi,j)=>{const q=sc[vi];if(j)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1]);});ctx.closePath();ctx.fill();ctx.strokeStyle=shade(col,k*.55);ctx.lineWidth=1;ctx.stroke();});
+  m.faces.forEach((f,i)=>{if(!vis[i])return;const k=.2+.95*Math.max(0,dot(f.n,L)),q=f.v.map(vi=>sc[vi]);ctx.fillStyle=shade(col,k);pathPoly(ctx,q);ctx.fill();ctx.strokeStyle=shade(col,k*.55);ctx.lineWidth=1;ctx.stroke();
+   let area=0;for(let j=0;j<q.length;j++){const a=q[j],b=q[(j+1)%q.length];area+=a[0]*b[1]-b[0]*a[1];}area=Math.abs(area)/2;const cx=q.reduce((a,v)=>a+v[0],0)/q.length,cy=q.reduce((a,v)=>a+v[1],0)/q.length;
+   if(area>160){ctx.strokeStyle=shade(col,k*.4);ctx.lineWidth=.8;pathPoly(ctx,q.map(v=>[cx+(v[0]-cx)*.76,cy+(v[1]-cy)*.76]));ctx.stroke();if(area>900&&q.length>=4){ctx.beginPath();ctx.moveTo((q[0][0]+q[1][0])/2,(q[0][1]+q[1][1])/2);ctx.lineTo((q[2][0]+q[3%q.length][0])/2,(q[2][1]+q[3%q.length][1])/2);ctx.stroke();}}
+   if(fx&&fx.windows&&area>500){for(let w=0;w<q.length;w++){const a=q[w],b=q[(w+1)%q.length],mx=cx+((a[0]+b[0])/2-cx)*.62,my=cy+((a[1]+b[1])/2-cy)*.62;ctx.fillStyle=`rgba(255,231,160,${.55+.45*Math.sin(clock*1.3+w+i)})`;ctx.fillRect(mx-1.5,my-1.5,3,3);}}
+   if(fx&&fx.dmg>0&&hsh(fx.seed,i)<fx.dmg*.85){ctx.fillStyle='rgba(28,14,6,.6)';pathPoly(ctx,q.map(v=>[cx+(v[0]-cx)*(.4+hsh(i,fx.seed)*.5),cy+(v[1]-cy)*(.4+hsh(fx.seed,i+3)*.5)]));ctx.fill();}});
   if(extra)extra(vis,pts);}
- function drawWire(ctx,m,pos,o,col,extra){const cm=toLocal(o,sub(CAM.pos,pos)),c0=cam(pos);if(c0[2]<-m.rad)return;const pr=c0[2]>0?FOC*m.rad/c0[2]:99;
+ function drawWire(ctx,m,pos,o,col,extra,fx){const cm=toLocal(o,sub(CAM.pos,pos)),c0=cam(pos);if(c0[2]<-m.rad)return;const pr=c0[2]>0?PF*m.rad/c0[2]:99;
   if(pr<1.6){if(c0[2]>0){const p=proj(c0);ctx.fillStyle=col;ctx.fillRect(p[0]-1,p[1]-1,2,2);}return;}
   const vis=m.faces.map(f=>dot(f.n,cm)-f.d>0),pts=m.pts.map(p=>cam(add(pos,toWorld(o,p))));ctx.strokeStyle=col;ctx.lineWidth=1.4;ctx.beginPath();
-  for(const e of m.edges)if(e.f.some(i=>vis[i]))seg(ctx,pts[e.a],pts[e.b]);ctx.stroke();if(extra)extra(vis,pts);}
- function drawStation(ctx,s){s=s||station;drawModel(ctx,s.m,s.pos,s.o,'#e6e9f2',vis=>{const front=s.m.faces.findIndex(f=>f.n[2]>.99);if(front<0||!vis[front])return;
-   const c=[[-110,-36],[110,-36],[110,36],[-110,36]].map(([x,y])=>cam(add(s.pos,toWorld(s.o,[x,y,331]))));if(C.opt.lit&&c.every(q=>q[2]>8)){const q=c.map(proj);ctx.fillStyle='#04060d';ctx.beginPath();q.forEach((v,i)=>i?ctx.lineTo(v[0],v[1]):ctx.moveTo(v[0],v[1]));ctx.closePath();ctx.fill();}ctx.strokeStyle='#3fe0ff';ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<4;i++)seg(ctx,c[i],c[(i+1)%4]);ctx.stroke();});}
+  const dm=fx&&fx.dmg||0;m.edges.forEach((e,i)=>{if(e.f.some(j=>vis[j])&&!(dm>.3&&hsh(fx.seed,i)<(dm-.3)*.6))seg(ctx,pts[e.a],pts[e.b]);});ctx.stroke();if(extra)extra(vis,pts);}
+ function drawStation(ctx,s,low){s=s||station;const items=[{z:cam(s.pos)[2],d:()=>drawStationHull(ctx,s)}];if(!low)for(const p of s.parts||[]){const c=cam(add(s.pos,toWorld(s.o,p.c)));items.push({z:c[2],d:()=>drawModel(ctx,p.m,s.pos,s.o,p.col,null,{windows:true})});}
+  items.sort((a,b)=>b.z-a.z).forEach(it=>it.d());
+  for(const[x,col]of[[-135,Math.floor(clock*2)%2?'#ff2d55':'#4a1020'],[135,Math.floor(clock*2)%2?'#2a5a30':'#3cff6a']]){const c=cam(add(s.pos,toWorld(s.o,[x,0,334])));if(c[2]>5){const q=proj(c),rr=Math.max(1.5,PF*9/c[2]);ctx.fillStyle=col;ctx.beginPath();ctx.arc(q[0],q[1],rr,0,Math.PI*2);ctx.fill();}}}
+ function drawStationHull(ctx,s){drawModel(ctx,s.m,s.pos,s.o,'#e6e9f2',vis=>{const front=s.m.faces.findIndex(f=>f.n[2]>.99);if(front<0||!vis[front])return;
+   const c=[[-110,-36],[110,-36],[110,36],[-110,36]].map(([x,y])=>cam(add(s.pos,toWorld(s.o,[x,y,331]))));if(C.opt.lit&&c.every(q=>q[2]>8)){const q=c.map(proj);ctx.fillStyle='#04060d';pathPoly(ctx,q);ctx.fill();}ctx.strokeStyle='#3fe0ff';ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<4;i++)seg(ctx,c[i],c[(i+1)%4]);ctx.stroke();},{windows:true});}
  // a circle on a sphere's surface, hiding the far side (and anything behind another body)
  function circ(ctx,body,a,b,cen,rr,occ){const eye=norm(sub(CAM.pos,body.pos));let prev=null;for(let i=0;i<=48;i++){const t=i/48*Math.PI*2,pt=add(cen,add(mul(a,Math.cos(t)*rr),mul(b,Math.sin(t)*rr)));
    let ok=occ?!hidden(pt,body):dot(norm(sub(pt,body.pos)),eye)>0.02;const cc=cam(pt);if(ok&&prev)seg(ctx,prev,cc);prev=ok?cc:null;}}
  function hidden(pt,body){const v=sub(pt,CAM.pos),L=len(v),dir=mul(v,1/L),t=dot(sub(body.pos,CAM.pos),dir);if(t<=0||t>=L)return false;return len(sub(add(CAM.pos,mul(dir,t)),body.pos))<body.R;}
- function drawBody(ctx,b,col,detail,surf){const c=cam(b.pos);if(c[2]<=10)return null;const d=len(sub(b.pos,CAM.pos));const p=proj(c),r=FOC*b.R/Math.sqrt(Math.max(1,d*d-b.R*b.R));if(r<1){ctx.fillStyle=col;ctx.fillRect(p[0],p[1],2,2);return null;}
+ function drawBody(ctx,b,col,detail,surf){const c=cam(b.pos);if(c[2]<=10)return null;const d=len(sub(b.pos,CAM.pos));const p=proj(c),r=PF*b.R/Math.sqrt(Math.max(1,d*d-b.R*b.R));if(r<1){ctx.fillStyle=col;ctx.fillRect(p[0],p[1],2,2);return null;}
   if(C.opt.lit){const L=lightAt(b.pos),Lc=[dot(L,CAM.r),dot(L,CAM.u),dot(L,CAM.f)],k=-Lc[2],hx=p[0]+Lc[0]*r*.55,hy=p[1]-Lc[1]*r*.55,base=surf||'#4a8fd6';const g=ctx.createRadialGradient(hx,hy,r*.05,p[0]-Lc[0]*r*.3,p[1]+Lc[1]*r*.3,r*1.15);
    g.addColorStop(0,shade(base,1.25*(.35+.65*Math.max(0,(k+1)/2)+.3)));g.addColorStop(.55,shade(base,.55+.25*Math.max(0,k)));g.addColorStop(1,'#03050c');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p[0],p[1],r,0,Math.PI*2);ctx.fill();ctx.globalAlpha=.35;}
   ctx.strokeStyle=col;ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(p[0],p[1],r,0,Math.PI*2);ctx.stroke();if(r>6&&detail){ctx.beginPath();detail();ctx.stroke();}ctx.globalAlpha=1;return r;}
- function drawPlanet(ctx){const pl=planet,o=pl.o;ctx.lineWidth=1.1;
+ function blobs(ctx,b,p,r,list,spin){const o=b.o,eye=norm(sub(CAM.pos,b.pos));for(const f of list){const lon=f.lon+spin,cl=Math.cos(f.lat),n=add(add(mul(o.r,cl*Math.cos(lon)),mul(o.f,cl*Math.sin(lon))),mul(o.u,Math.sin(f.lat)));const fc=dot(n,eye);if(fc<.03)continue;const c=cam(add(b.pos,mul(n,b.R)));if(c[2]<=5)continue;const q=proj(c),rr=f.size*r,ang=Math.atan2(q[1]-p[1],q[0]-p[0]);
+   ctx.globalAlpha=f.alpha*Math.min(1,fc*3);ctx.fillStyle=f.col;ctx.beginPath();ctx.ellipse(q[0],q[1],Math.max(.5,rr*(.25+.75*fc)),rr,ang,0,Math.PI*2);ctx.fill();if(f.rim){ctx.strokeStyle='rgba(255,255,255,.25)';ctx.lineWidth=1;ctx.stroke();}}ctx.globalAlpha=1;}
+ function texBody(ctx,b,T){const c=cam(b.pos);if(c[2]<=10)return false;const d=len(sub(b.pos,CAM.pos)),p=proj(c),r=PF*b.R/Math.sqrt(Math.max(1,d*d-b.R*b.R));if(r<2){ctx.fillStyle=T.base;ctx.fillRect(p[0]-1,p[1]-1,2,2);return true;}
+  const L=lightAt(b.pos),Lc=[dot(L,CAM.r),dot(L,CAM.u),dot(L,CAM.f)];ctx.save();ctx.beginPath();ctx.arc(p[0],p[1],r,0,Math.PI*2);ctx.clip();ctx.fillStyle=T.base;ctx.fillRect(p[0]-r,p[1]-r,2*r,2*r);
+  if(T.bands)for(const bd of T.bands){ctx.strokeStyle=bd.col;ctx.lineWidth=Math.max(1,bd.w*r);ctx.globalAlpha=.8;ctx.beginPath();circ(ctx,b,b.o.r,b.o.f,add(b.pos,mul(b.o.u,Math.sin(bd.lat)*b.R)),Math.cos(bd.lat)*b.R);ctx.stroke();}ctx.globalAlpha=1;
+  blobs(ctx,b,p,r,T.f,0);blobs(ctx,b,p,r,T.cl,clock*.05);
+  const hx=p[0]+Lc[0]*r*.6,hy=p[1]-Lc[1]*r*.6,g=ctx.createRadialGradient(hx,hy,r*.08,hx,hy,r*2.1);g.addColorStop(0,'rgba(255,255,240,.2)');g.addColorStop(.38,'rgba(0,0,0,0)');g.addColorStop(.6,'rgba(0,0,0,.55)');g.addColorStop(1,'rgba(0,0,0,.95)');ctx.fillStyle=g;ctx.fillRect(p[0]-r,p[1]-r,2*r,2*r);
+  if(Lc[2]>0){ctx.fillStyle=`rgba(0,0,0,${Math.min(.75,Lc[2]*.75)})`;ctx.fillRect(p[0]-r,p[1]-r,2*r,2*r);}ctx.restore();
+  if(T.atmo){const g2=ctx.createRadialGradient(p[0],p[1],r*.94,p[0],p[1],r*1.13);g2.addColorStop(0,T.atmo);g2.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g2;ctx.beginPath();ctx.arc(p[0],p[1],r*1.13,0,Math.PI*2);ctx.fill();}return true;}
+ function drawPlanet(ctx,low){const pl=planet,o=pl.o;ctx.lineWidth=1.1;if(C.opt.lit&&!low&&pl.tex){texBody(ctx,pl,pl.tex);if(pl.rings&&cam(pl.pos)[2]>0){ctx.strokeStyle='rgba(230,200,140,.55)';ctx.lineWidth=3;ctx.beginPath();for(const rr of[pl.rings.a,(pl.rings.a+pl.rings.b)/2,pl.rings.b])circ(ctx,pl,o.r,o.f,pl.pos,rr,true);ctx.stroke();ctx.strokeStyle='rgba(200,170,120,.3)';ctx.lineWidth=6;ctx.beginPath();circ(ctx,pl,o.r,o.f,pl.pos,(pl.rings.a*2+pl.rings.b)/3,true);ctx.stroke();}return;}
   const surf=pl.kind==='gas'?'#d9a066':pl.kind==='crater'?'#9a8f86':'#3f86c9';const r=drawBody(ctx,pl,'#3fe0ff',()=>{ctx.strokeStyle='rgba(63,224,255,.75)';
    if(pl.kind==='gas'){for(const lat of[-.62,-.35,-.12,.12,.35,.62])circ(ctx,pl,o.r,o.f,add(pl.pos,mul(o.u,Math.sin(lat)*pl.R)),Math.cos(lat)*pl.R);}
    else if(pl.kind==='crater'){circ(ctx,pl,o.r,o.f,add(pl.pos,mul(o.u,pl.R*.8)),pl.R*.6);circ(ctx,pl,o.u,o.f,add(pl.pos,mul(o.r,pl.R*.86)),pl.R*.5);}
    else{circ(ctx,pl,o.r,o.f,pl.pos,pl.R);circ(ctx,pl,o.u,o.f,pl.pos,pl.R);}},surf);
   if(pl.rings&&cam(pl.pos)[2]>0){ctx.strokeStyle=C.opt.lit?'rgba(230,200,140,.55)':'rgba(255,228,94,.75)';ctx.lineWidth=C.opt.lit?3:1.2;ctx.beginPath();for(const rr of[pl.rings.a,(pl.rings.a+pl.rings.b)/2,pl.rings.b])circ(ctx,pl,o.r,o.f,pl.pos,rr,true);ctx.stroke();}}
- function drawMoon(ctx,mn){drawBody(ctx,mn,'#c8d0ff',()=>{ctx.strokeStyle='rgba(200,208,255,.6)';if(mn.crater)circ(ctx,mn,mn.o.r,mn.o.f,add(mn.pos,mul(mn.o.u,mn.R*.75)),mn.R*.55);else circ(ctx,mn,mn.o.u,mn.o.f,mn.pos,mn.R);},'#a9adb8');}
- function drawSun(ctx,sn){const c=cam(sn.pos);if(c[2]<=10)return;const p=proj(c),r=FOC*sn.R/c[2];if(r<1.2){ctx.fillStyle=sn.col;ctx.fillRect(p[0]-1,p[1]-1,3,3);return;}
-  if(C.opt.lit){const g=ctx.createRadialGradient(p[0],p[1],0,p[0],p[1],r*2);g.addColorStop(0,'#ffffff');g.addColorStop(.35,sn.col);g.addColorStop(.5,shade(sn.col,.6));g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p[0],p[1],r*2,0,Math.PI*2);ctx.fill();return;}
+ function drawMoon(ctx,mn,low){if(C.opt.lit&&!low&&mn.tex){texBody(ctx,mn,mn.tex);return;}drawBody(ctx,mn,'#c8d0ff',()=>{ctx.strokeStyle='rgba(200,208,255,.6)';if(mn.crater)circ(ctx,mn,mn.o.r,mn.o.f,add(mn.pos,mul(mn.o.u,mn.R*.75)),mn.R*.55);else circ(ctx,mn,mn.o.u,mn.o.f,mn.pos,mn.R);},'#a9adb8');}
+ function drawSun(ctx,sn){const c=cam(sn.pos);if(c[2]<=10)return;const p=proj(c),r=PF*sn.R/c[2];if(r<1.2){ctx.fillStyle=sn.col;ctx.fillRect(p[0]-1,p[1]-1,3,3);return;}
+  if(C.opt.lit){ctx.strokeStyle=sn.col;for(let k=0;k<14;k++){const a=k/14*Math.PI*2+clock*.15,l=r*(1.6+.5*Math.sin(clock*3+k*1.7));ctx.globalAlpha=.25;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(p[0]+Math.cos(a)*r,p[1]+Math.sin(a)*r);ctx.lineTo(p[0]+Math.cos(a)*l,p[1]+Math.sin(a)*l);ctx.stroke();}ctx.globalAlpha=1;const g=ctx.createRadialGradient(p[0],p[1],0,p[0],p[1],r*2);g.addColorStop(0,'#ffffff');g.addColorStop(.35,sn.col);g.addColorStop(.5,shade(sn.col,.6));g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p[0],p[1],r*2,0,Math.PI*2);ctx.fill();return;}
   for(let y=-r;y<=r;y+=3){const w=Math.sqrt(r*r-y*y)*(.85+Math.random()*.15);ctx.fillStyle=Math.abs(y)<r*.5?sn.col:'#ff8a1c';ctx.globalAlpha=Math.abs(y)<r*.5?1:.75;ctx.fillRect(p[0]-w,p[1]+y,w*2,1.6);}ctx.globalAlpha=1;}
  // ---------------- hyperspace streaks (and the reverse on arrival) ----------------
  function hypInit(){hyp=Array.from({length:520},()=>[(Math.random()-.5)*2.4,(Math.random()-.5)*2.4,Math.random()]);}
@@ -388,32 +433,59 @@ function makeStarlane(env){
  const tipAt=(x,y,w,h,title,body)=>tips.push({x,y,w,h,title,body});
  const KN={ArrowUp:'↑',ArrowDown:'↓',ArrowLeft:'←',ArrowRight:'→',' ':'Space',Enter:'Enter',Escape:'Esc'};
  const keyName=id=>(C.opt.keys[id]||[]).map(k=>KN[k]||(k.length===1?k.toUpperCase():k)).join(' / ')||'—';
- function renderFlight(ctx){setCam();ctx.save();ctx.beginPath();ctx.rect(0,0,W,VH);ctx.clip();ctx.fillStyle='#000';ctx.fillRect(0,0,W,VH);const[sx,sy]=FX.offset();ctx.translate(sx,sy);
-  const streak=Math.min(380,(jump?7000:P.speed)*.09);ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=1;
-  for(const d of dust){const c=cam(d);if(c[2]<=8)continue;const p=proj(c);if(p[0]<-20||p[0]>W+20||p[1]<-20||p[1]>VH+20)continue;const s=c[2]<400?2.2:c[2]<1000?1.5:1;ctx.fillStyle='#fff';ctx.fillRect(p[0],p[1],s,s);
+ // everything in space, drawn from the current camera (used for the main view, side windows and the mirror)
+ function drawShip(ctx,sh,low){const fx={dmg:sh.dmg||0,seed:sh.sid||1},parts=low?[]:(sh.parts||[]),zc=cam(sh.pos)[2];const pz=parts.map(p=>({p,z:cam(add(sh.pos,toWorld(sh.o,p.c)))[2]}));
+  for(const q of pz)if(q.z>zc)drawModel(ctx,q.p.m,sh.pos,sh.o,q.p.col,null,fx);drawModel(ctx,sh.m,sh.pos,sh.o,sh.T.color,null,fx);for(const q of pz)if(q.z<=zc)drawModel(ctx,q.p.m,sh.pos,sh.o,q.p.col,null,fx);
+  if(!low&&sh.ant){ctx.strokeStyle=sh.T.color;ctx.lineWidth=1;ctx.beginPath();seg(ctx,cam(add(sh.pos,toWorld(sh.o,sh.ant[0]))),cam(add(sh.pos,toWorld(sh.o,sh.ant[1]))));ctx.stroke();}
+  if(!['rock','cargo'].includes(sh.T.role)&&!(sh.dmg>.7&&Math.random()<.35)){const e=cam(add(sh.pos,toWorld(sh.o,[0,0,(sh.rearZ||-30)-4])));if(e[2]>5){const q=proj(e);ctx.fillStyle=sh.type==='missile'?'rgba(255,138,28,.9)':'rgba(63,224,255,.75)';ctx.beginPath();ctx.arc(q[0],q[1],Math.max(1.2,PF*7/e[2]),0,Math.PI*2);ctx.fill();}}}
+ function drawWorld(ctx,low){const streak=Math.min(380,(jump?7000:P.speed)*.09);ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=1;
+  for(const d of dust){const c=cam(d);if(c[2]<=8)continue;const p=proj(c);if(p[0]<-20||p[0]>W+20||p[1]<-20||p[1]>VH+20)continue;const sz=c[2]<400?2.2:c[2]<1000?1.5:1;ctx.fillStyle='#fff';ctx.fillRect(p[0],p[1],sz,sz);
    if(streak>25){const t=cam(add(d,mul(P.o.f,streak)));if(t[2]>8){const q=proj(t);ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1]);ctx.stroke();}}}
-  for(const sn of suns)drawSun(ctx,sn);for(const mn of moons)drawMoon(ctx,mn);if(planet)drawPlanet(ctx);
-  const objs=[...ships.filter(s=>!s.dead).map(s=>({s,z:cam(s.pos)[2]})),...(station?[{s:station,z:cam(station.pos)[2]}]:[]),...(camMode==='ext'?[{s:'me',z:cam(P.pos)[2]}]:[])].sort((a,b)=>b.z-a.z);
-  for(const{s}of objs){if(s===station)drawStation(ctx);else if(s==='me'){drawModel(ctx,MODELS.kestrel,P.pos,P.o,'#ffe45e');const e=cam(add(P.pos,mul(P.o.f,-96)));if(e[2]>5){const p=proj(e);ctx.fillStyle=`rgba(63,224,255,${.4+P.throttle*.6})`;ctx.beginPath();ctx.arc(p[0],p[1],3+P.throttle*5,0,Math.PI*2);ctx.fill();}}
-   else{drawModel(ctx,s.m,s.pos,s.o,s.T.color);if(s.shot>0){const c=cam(s.pos);if(c[2]>0){const p=proj(c),t=cam(P.pos);const q=t[2]>5?proj(t):[CX+(Math.random()-.5)*300,VH];ctx.strokeStyle='#ff2d55';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1]);ctx.stroke();}}}}
-  for(const b of booms){if(b.spark){const c=cam(b.pos);if(c[2]>0){const p=proj(c);ctx.strokeStyle='#ffe45e';ctx.beginPath();for(let i=0;i<6;i++){const a=Math.random()*6.3,l=4+Math.random()*10;ctx.moveTo(p[0],p[1]);ctx.lineTo(p[0]+Math.cos(a)*l,p[1]+Math.sin(a)*l);}ctx.stroke();}continue;}
-   ctx.strokeStyle=b.col||'#fff';ctx.globalAlpha=Math.max(0,1-b.t/2.2);ctx.beginPath();for(const l of b.lines||[]){const c=add(l.c,mul(l.v,b.t));seg(ctx,cam(add(c,l.a)),cam(add(c,l.b)));}ctx.stroke();
-   const c=cam(b.pos);if(c[2]>0&&b.t<1){const p=proj(c),r=FOC*60*(.4+b.t)/c[2];ctx.fillStyle='#fff';for(let i=0;i<14;i++){const a=Math.random()*6.3,d=Math.random()*r;ctx.fillRect(p[0]+Math.cos(a)*d,p[1]+Math.sin(a)*d,2,2);}}ctx.globalAlpha=1;}
+  for(const sn of suns)drawSun(ctx,sn);for(const mn of moons)drawMoon(ctx,mn,low);if(planet)drawPlanet(ctx,low);
+  const objs=[...ships.filter(x=>!x.dead).map(x=>({s:x,z:cam(x.pos)[2]})),...(station?[{s:station,z:cam(station.pos)[2]}]:[]),...(camMode==='ext'?[{s:'me',z:cam(P.pos)[2]}]:[])].sort((a,b)=>b.z-a.z);
+  for(const{s:o}of objs){if(o===station)drawStation(ctx,null,low);else if(o==='me'){drawModel(ctx,MODELS.kestrel,P.pos,P.o,'#ffe45e',null,{dmg:P.hull||0,seed:7});const e=cam(add(P.pos,mul(P.o.f,-96)));if(e[2]>5){const q=proj(e);ctx.fillStyle=`rgba(63,224,255,${.4+P.throttle*.6})`;ctx.beginPath();ctx.arc(q[0],q[1],3+P.throttle*5,0,Math.PI*2);ctx.fill();}}
+   else{drawShip(ctx,o,low);if(o.shot>0&&!low){const c=cam(o.pos);if(c[2]>0){const q=proj(c),t=cam(P.pos);const q2=t[2]>5?proj(t):[PX+(Math.random()-.5)*300,VH];ctx.strokeStyle='#ff2d55';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(q[0],q[1]);ctx.lineTo(q2[0],q2[1]);ctx.stroke();}}}}
+  for(const sm of smokes){const c=cam(sm.pos);if(c[2]<=5)continue;const q=proj(c),rr=PF*sm.r*(1+sm.t*1.5)/c[2];ctx.fillStyle=`rgba(150,150,160,${.32*(1-sm.t/1.6)})`;ctx.beginPath();ctx.arc(q[0],q[1],rr,0,Math.PI*2);ctx.fill();}
+  for(const b of booms){if(b.spark){const c=cam(b.pos);if(c[2]>0){const q=proj(c);ctx.strokeStyle='#ffe45e';ctx.lineWidth=1;ctx.beginPath();for(let i=0;i<6;i++){const a=Math.random()*6.3,l=4+Math.random()*10;ctx.moveTo(q[0],q[1]);ctx.lineTo(q[0]+Math.cos(a)*l,q[1]+Math.sin(a)*l);}ctx.stroke();}continue;}
+   ctx.strokeStyle=b.col||'#fff';ctx.lineWidth=1;ctx.globalAlpha=Math.max(0,1-b.t/2.2);ctx.beginPath();for(const l of b.lines||[]){const c=add(l.c,mul(l.v,b.t));seg(ctx,cam(add(c,l.a)),cam(add(c,l.b)));}ctx.stroke();
+   const c=cam(b.pos);if(c[2]>0&&b.t<1){const q=proj(c),rr=PF*60*(.4+b.t)/c[2];ctx.fillStyle='#fff';for(let i=0;i<14;i++){const a=Math.random()*6.3,dd=Math.random()*rr;ctx.fillRect(q[0]+Math.cos(a)*dd,q[1]+Math.sin(a)*dd,2,2);}}ctx.globalAlpha=1;}}
+ // the 3D cockpit: window frame, side windows and a rear-view mirror
+ function viewCam(kind){const o=P.o;CAM.pos=P.pos;if(kind==='left'){CAM.f=mul(o.r,-1);CAM.u=o.u;CAM.r=o.f;}else if(kind==='right'){CAM.f=o.r;CAM.u=o.u;CAM.r=mul(o.f,-1);}else{CAM.f=mul(o.f,-1);CAM.u=o.u;CAM.r=o.r;}}
+ function drawCockpit(ctx){const Lw=[[0,34],[94,54],[36,VH],[0,VH]],Rw=Lw.map(([x,y])=>[W-x,y]);
+  for(const[poly,side,cx]of[[Lw,'left',36],[Rw,'right',W-36]]){ctx.save();pathPoly(ctx,poly);ctx.clip();ctx.fillStyle='#000';ctx.fillRect(0,0,W,VH);viewCam(side);PX=cx;PY=VH*.55;PF=150;drawWorld(ctx,true);ctx.restore();ctx.fillStyle='rgba(120,180,255,.06)';pathPoly(ctx,poly);ctx.fill();}
+  const metal=(poly,a,b)=>{const g=ctx.createLinearGradient(0,0,0,VH);g.addColorStop(0,a);g.addColorStop(1,b);ctx.fillStyle=g;pathPoly(ctx,poly);ctx.fill();ctx.strokeStyle='#5d6aa3';ctx.lineWidth=1.2;ctx.stroke();};
+  metal([[0,0],[W,0],[W,34],[W-94,54],[94,54],[0,34]],'#323a5e','#151b33');metal([[94,54],[116,54],[58,VH],[36,VH]],'#2c3456','#0c1122');metal([[W-94,54],[W-116,54],[W-58,VH],[W-36,VH]],'#2c3456','#0c1122');
+  metal([[36,VH],[W-36,VH],[W-74,VH-13],[74,VH-13]],'#1c2240','#0a0e1e');
+  ctx.fillStyle='#8a94c8';for(let x=40;x<W-30;x+=46){ctx.beginPath();ctx.arc(x,8,1.6,0,Math.PI*2);ctx.fill();}
+  ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(150,70);ctx.lineTo(260,70);ctx.moveTo(W-140,90);ctx.lineTo(W-230,120);ctx.stroke();
+  const mx=320,my=6,mw=160,mh=40;ctx.fillStyle='#5d6aa3';ctx.fillRect(CX-3,0,6,my+2);ctx.save();ctx.beginPath();if(ctx.roundRect)ctx.roundRect(mx,my,mw,mh,9);else ctx.rect(mx,my,mw,mh);ctx.clip();ctx.fillStyle='#000';ctx.fillRect(mx,my,mw,mh);viewCam('mirror');PX=CX;PY=my+mh/2;PF=48;drawWorld(ctx,true);ctx.restore();
+  ctx.strokeStyle='#8a94c8';ctx.lineWidth=3;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(mx,my,mw,mh,9);else ctx.rect(mx,my,mw,mh);ctx.stroke();ctx.fillStyle='rgba(255,255,255,.08)';ctx.fillRect(mx+6,my+4,mw*.4,5);
+  PX=CX;PY=CY;PF=FOC;setCam();}
+ // your own ship's damage: cracks at the edges of the canopy, smoke and sparks — never over the middle or the controls
+ function drawHullDamage(ctx){if(!P||!P.hull)return;ctx.save();ctx.beginPath();ctx.rect(0,0,W,VH);ctx.clip();ctx.lineCap='round';
+  for(const cr of P.cracks||[])for(const line of cr){ctx.strokeStyle='rgba(220,235,255,.55)';ctx.lineWidth=1.3;pathOpen(ctx,line);ctx.stroke();ctx.strokeStyle='rgba(255,255,255,.18)';ctx.lineWidth=3;pathOpen(ctx,line.slice(0,2));ctx.stroke();}
+  if(P.hull>.45){for(let k=0;k<4;k++){const side=k%2,t=(clock*.35+k*.27)%1,x=side?W-60-k*12:60+k*12,y=VH-20-t*110,rr=14+t*30;ctx.fillStyle=`rgba(140,140,150,${.22*(1-t)*Math.min(1,(P.hull-.45)*3)})`;ctx.beginPath();ctx.arc(x,y,rr,0,Math.PI*2);ctx.fill();}}
+  if(lastHit>.12&&P.cracks&&P.cracks.length){const cr=P.cracks[Math.floor(Math.random()*P.cracks.length)][0][0];ctx.strokeStyle='#ffe45e';ctx.lineWidth=1.5;ctx.beginPath();for(let i=0;i<7;i++){const a=Math.random()*6.3,l=6+Math.random()*16;ctx.moveTo(cr[0],cr[1]);ctx.lineTo(cr[0]+Math.cos(a)*l,cr[1]+Math.sin(a)*l);}ctx.stroke();}
+  ctx.restore();}
+ const pathOpen=(ctx,pts)=>{ctx.beginPath();pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));};
+ function renderFlight(ctx){setCam();ctx.save();ctx.beginPath();ctx.rect(0,0,W,VH);ctx.clip();ctx.fillStyle='#000';ctx.fillRect(0,0,W,VH);const[sx,sy]=FX.offset();ctx.translate(sx,sy);
+  drawWorld(ctx,false);
   if(laserShow>0){const L=LASERS[view==='rear'?'pulse':C.front]||LASERS.pulse;ctx.strokeStyle=L.col;ctx.lineWidth=3;ctx.beginPath();
    if(camMode==='ext'){const a=cam(add(P.pos,mul(P.o.f,100))),b=cam(add(P.pos,mul(P.o.f,3500)));seg(ctx,a,b);}else if(view==='front'||view==='rear'){ctx.moveTo(150,VH);ctx.lineTo(CX,CY+4);ctx.moveTo(650,VH);ctx.lineTo(CX,CY+4);}ctx.stroke();}
   ctx.restore();
+  const cockpit=C.opt.cockpit&&camMode==='cockpit'&&view==='front';if(cockpit)drawCockpit(ctx);
   if(hyperT>0&&hyperT<1.6){drawStreaks(ctx,(1.6-hyperT)*.18,.5);}
   if(exitT>0){const k=exitT/1.6;drawStreaks(ctx,1.6*k*k,k);if(exitT>1.35){ctx.fillStyle=`rgba(255,255,255,${(exitT-1.35)*3})`;ctx.fillRect(0,0,W,VH);}}
   // sights and view name
   if(camMode==='ext'){const t=cam(add(P.pos,mul(P.o.f,2600)));if(t[2]>5){const p=proj(t);ctx.strokeStyle='#ffe45e';ctx.lineWidth=1.5;ctx.strokeRect(p[0]-9,p[1]-9,18,18);}}
   else if(view==='front'||view==='rear'){ctx.strokeStyle='#ffe45e';ctx.lineWidth=2;ctx.beginPath();for(const[a,b,c,d]of[[CX-26,CY,CX-8,CY],[CX+8,CY,CX+26,CY],[CX,CY-22,CX,CY-7],[CX,CY+7,CX,CY+22]]){ctx.moveTo(a,b);ctx.lineTo(c,d);}ctx.stroke();}
-  text(ctx,camMode==='ext'?'Outside View':{front:'Front View',rear:'Rear View',left:'Left View',right:'Right View'}[view],CX,8,'#c8d0ff',16,'center');
-  if(timeScale>1)text(ctx,`TIME ×${timeScale}`,W-12,8,'#3cff6a',16,'right');
-  if(hyperT>0)text(ctx,String(Math.ceil(hyperT)),18,8,'#3fe0ff',30);
+  if(!cockpit)text(ctx,camMode==='ext'?'Outside View':{front:'Front View',rear:'Rear View',left:'Left View',right:'Right View'}[view],CX,8,'#c8d0ff',16,'center');
+  if(timeScale>1)text(ctx,`TIME ×${timeScale}`,W-12,cockpit?40:8,'#3cff6a',16,'right');
+  if(hyperT>0)text(ctx,String(Math.ceil(hyperT)),cockpit?130:18,cockpit?60:8,'#3fe0ff',30);
   if(dockComp)text(ctx,'DOCKING COMPUTERS ON',CX,VH-56,'#3fe0ff',20,'center');
   msgs.forEach((m,i)=>text(ctx,m.t,CX,VH-110+i*22-(dockComp?28:0),m.c,16,'center'));
-  if(lastHit>0){ctx.fillStyle=`rgba(255,45,85,${lastHit})`;ctx.fillRect(0,0,W,VH);}
-  dashboard(ctx);touchControls(ctx);}
+  drawHullDamage(ctx);if(lastHit>0){ctx.fillStyle=`rgba(255,45,85,${lastHit*.6})`;ctx.fillRect(0,0,W,VH);}
+  dashboard(ctx);if(P.hull>.6&&Math.random()<.04){ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(10+Math.floor(Math.random()*3)*260,VH+48,180,40);}touchControls(ctx);}
  // ---------------- the flight deck ----------------
  function bar(ctx,x,y,label,v,col,warn,tipTitle,tipBody){text(ctx,label,x,y-1,'#9aa3c7',12);ctx.fillStyle='#0d1126';ctx.fillRect(x+26,y,150,10);ctx.strokeStyle='#2a3266';ctx.strokeRect(x+26,y,150,10);ctx.fillStyle=warn&&v<.25?'#ff2d55':col;ctx.fillRect(x+26,y,150*Math.max(0,Math.min(1,v)),10);if(tipTitle)tipAt(x,y-3,178,16,tipTitle,tipBody);}
  function consoleKeys(ctx){const Y=VH+5,list=deckKeys(),w=(W-16)/list.length;
@@ -588,7 +660,7 @@ function makeStarlane(env){
  function makeScene(kind){const parked=[];PADS_.forEach(([x,z],i)=>{if(i===2||Math.random()<.25)return;const k=PARK[(i+Math.floor(Math.random()*5))%5];parked.push({m:MODELS[k],pos:V(x,HG.yF+34,z),o:{r:V(-1,0,0),u:V(0,1,0),f:V(0,0,-1)},col:SHIPS[k].color});});
   return{kind,t:0,parked,traffic:[{m:MODELS.hauler,off:Math.random()*6,col:SHIPS.hauler.color},{m:MODELS.warden,off:Math.random()*6,col:SHIPS.warden.color}],clank:false};}
  function lookAt(pos,target,up){CAM.pos=pos;CAM.f=norm(sub(target,pos));CAM.u=up||V(0,1,0);ortho(CAM);}
- function glow(ctx,pos,back,k){const e=cam(add(pos,back));if(e[2]>5){const p=proj(e),r=Math.max(2,FOC*14/e[2])*(.6+k);ctx.fillStyle='rgba(63,224,255,.7)';ctx.beginPath();ctx.arc(p[0],p[1],r,0,Math.PI*2);ctx.fill();}}
+ function glow(ctx,pos,back,k){const e=cam(add(pos,back));if(e[2]>5){const p=proj(e),r=Math.max(2,PF*14/e[2])*(.6+k);ctx.fillStyle='rgba(63,224,255,.7)';ctx.beginPath();ctx.arc(p[0],p[1],r,0,Math.PI*2);ctx.fill();}}
  function renderScene(ctx){const sc=scene,t=sc.t,s=station,me=MODELS.kestrel;ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
   const outside=(sc.kind==='dock'&&t<DOCK_OUT)||(sc.kind==='launch'&&t>=LAUNCH_IN);
   if(outside){const k=sc.kind==='dock'?t/DOCK_OUT:(t-LAUNCH_IN)/LAUNCH_OUT;for(const[x,y,b]of bgStars){ctx.fillStyle=`rgba(255,255,255,${.3+b*.7})`;ctx.fillRect(x,y,b>.8?2:1,b>.8?2:1);}
@@ -613,18 +685,33 @@ function makeStarlane(env){
  function restoreFlight(){const f=C.flight;newPlayer();buildSystem(false);Object.assign(P,{pos:f.pos,o:f.o,speed:f.speed,throttle:f.throttle,shF:f.shF,shA:f.shA,energy:Math.max(20,f.energy)});initDust();mode='flight';missionSpawns();msg('RESUMING YOUR SAVED FLIGHT',3,'#3cff6a');}
  // ---------------- pause menu: resume, save, settings, controls, help ----------------
  function openMenu(){overlay='menu';menuTab='main';remap=null;saveNote='';}
+ function restartFromSave(){const sv=lastSaved?JSON.parse(lastSaved):null;if(!sv)return;C=sv;fixOpt();stopMusic();scene=null;dockComp=false;timeScale=1;overlay=null;if(C.flight&&C.flight.sys===C.sys)restoreFlight();else{mode='docked';tab='status';}syncScore();msg('BACK TO YOUR LAST SAVE',3,'#3cff6a');}
  const HELP=[['DOCKING','Every station spins. Its docking slot is the glowing rectangle on the side facing the planet.\n1. Fly to the front of the station (the compass points at it when you are close; the scanner shows it as a white square).\n2. Slow right down and point straight at the slot.\n3. Roll so the slot looks flat (level) — keep rolling gently to match its spin.\n4. Fly in slowly. Wrong angle, wrong spin or too fast = a crash!\nEasy way: buy a DOCKING COMPUTER (tech level 9+) and press DOCK near the station.'],
   ['TRADING','Buy goods where they are cheap and sell where they are dear.\n• Farming worlds (Agricultural) sell food, spices and plants cheaply and pay well for machines and computers.\n• Factory worlds (Industrial) are the opposite.\n• Look at the DATA screen to see a system’s economy before you go.\n• Illegal goods (⚠) pay well but customs may catch you — then the police come after you.\n• A bigger cargo bay means bigger profits.'],
   ['COMBAT','Put the enemy in your sights and fire. Lasers get hot — let them cool.\n• Shields (FS front, AS rear) protect you and recharge from your energy banks.\n• Missiles home in on the ship in your sights. E.C.M. destroys missiles fired at you.\n• Destroying pirates earns a bounty. Attacking traders or police makes you an Offender — police will attack you!\n• Lawless systems (Anarchy, Warlord) have the most pirates.'],
   ['TRAVEL','• JUMP drive: zooms across a system. It won’t work near ships, stations or planets (mass lock).\n• TIME button: speeds up long trips (it stops if danger appears).\n• HYPERSPACE: choose a destination on the MAP, then press HYPER. It uses fuel (light years).\n• Refuel at stations, or buy fuel scoops and fly near a star (watch the cabin temperature!).\n• Watch out for moons, rings and multiple stars — some systems are very different!'],
   ['MISSIONS','Stations have a bulletin board (MISSIONS tab):\n• Courier — deliver a package by a deadline.\n• Supply run — bring goods back to that station.\n• Wanted — hunt a named pirate, then collect the reward.\n• Freedom / Expansion — help change how a planet is ruled. Deliver the goods, defeat the patrols, and the planet’s government changes for good (see Galactic News)!\nPress MISN in the cockpit to see your missions at any time.']];
  function panel(ctx,title){btns=[];tips=[];ctx.fillStyle='#03050f';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#3fe0ff';ctx.lineWidth=2;ctx.strokeRect(8,8,W-16,H-16);text(ctx,title,CX,18,'#3fe0ff',20,'center');}
- function renderMenu(ctx){panel(ctx,'PAUSED');const tabsM=[['main','GAME'],['controls','CONTROLS'],['help','HOW TO PLAY']];tabsM.forEach(([k,l],i)=>button(ctx,B(30+i*170,50,160,32,l,()=>{menuTab=k;remap=null;},{fs:13}),menuTab===k));button(ctx,B(W-190,50,160,32,'▶ RESUME',()=>{overlay=null;},{fs:13,bg:'rgba(30,80,50,.9)'}));
-  if(menuTab==='main'){button(ctx,B(CX-150,104,300,46,'▶ RESUME',()=>{overlay=null;},{fs:18,bg:'rgba(30,80,50,.9)'}));button(ctx,B(CX-150,160,300,46,'💾 SAVE GAME',()=>saveGame(),{fs:18}));if(saveNote)text(ctx,saveNote,CX,214,'#3cff6a',14,'center');
-   const tg=[['3D lighting',C.opt.lit,()=>{C.opt.lit=!C.opt.lit;persist();},'Solid ships, stations and planets lit by the sun (off = classic wireframe)'],['Hover help',C.opt.tips,()=>{C.opt.tips=!C.opt.tips;persist();},'Shows what controls and gauges do when you hover (or tap)'],['Cut scenes',C.opt.cuts,()=>{C.opt.cuts=!C.opt.cuts;persist();},'Watch your ship dock and launch'],['Invert pitch',C.invert,()=>{C.invert=!C.invert;persist();},'Up/down reversed, like a flight simulator']];
-   tg.forEach(([l,on,fn,d],i)=>{const y=226+i*50;text(ctx,l,150,y+6,'#e6e9f2',17);text(ctx,d,150,y+28,'#9aa3c7',12,'left',false);button(ctx,B(600,y,120,34,on?'ON':'OFF',fn,{bg:on?'rgba(30,80,50,.9)':'rgba(60,30,40,.9)'}));});
-   text(ctx,`${here().name} · Day ${C.day} · ${Math.floor(C.credits)} Cr · ${rankOf(C.killPts)} · ${legalName(C.legal)}`,CX,440,'#9aa3c7',14,'center');
-   text(ctx,'Press P (or Esc) to pause and resume at any time.',CX,464,'#9aa3c7',13,'center');}
+ function unsaved(){return JSON.stringify(C)!==lastSaved||((mode==='flight')&&clock-lastSaveClock>3);}
+ function renderMenu(ctx){panel(ctx,'PAUSED');const tabsM=[['main','GAME'],['controls','CONTROLS'],['help','HOW TO PLAY']];tabsM.forEach(([k,l],i)=>button(ctx,B(40+i*245,52,230,34,l,()=>{menuTab=k;remap=null;},{fs:14}),menuTab===k||(k==='main'&&menuTab==='restart')));
+  if(menuTab==='main'){[['▶  RESUME',()=>{overlay=null;},'rgba(30,80,50,.92)'],['💾  SAVE GAME',()=>saveGame(),'rgba(30,38,80,.92)'],['↺  RESTART',()=>{menuTab='restart';},'rgba(90,40,30,.92)']].forEach(([l,fn,bg],i)=>button(ctx,B(40+i*245,104,230,46,l,fn,{fs:17,bg})));
+   text(ctx,saveNote||(unsaved()?'You have progress that isn’t saved yet.':'Everything is saved.'),CX,158,saveNote?'#3cff6a':unsaved()?'#ffb020':'#9aa3c7',13,'center');
+   const tg=[['3D lighting',C.opt.lit,()=>{C.opt.lit=!C.opt.lit;persist();},'Solid, textured ships, stations and planets lit by the sun.'],
+    ['3D cockpit',C.opt.cockpit,()=>{C.opt.cockpit=!C.opt.cockpit;persist();},'Sit inside the cockpit: window frame, side windows and a rear-view mirror.'],
+    ['Hover help',C.opt.tips,()=>{C.opt.tips=!C.opt.tips;persist();},'Explains each control and gauge when you hover over it (or tap it).'],
+    ['Cut scenes',C.opt.cuts,()=>{C.opt.cuts=!C.opt.cuts;persist();},'Watch your ship land inside the station and fly out again.'],
+    ['Invert pitch',C.invert,()=>{C.invert=!C.invert;persist();},'Up and down swapped, like a flight simulator.']];
+   tg.forEach(([l,on,fn,d],i)=>{const y=184+i*54;ctx.fillStyle=i%2?'rgba(255,255,255,.025)':'rgba(255,255,255,.05)';ctx.fillRect(40,y-6,720,50);text(ctx,l,60,y,'#e6e9f2',17);wrap(ctx,d,60,y+22,540,15,'#9aa3c7',12);button(ctx,B(630,y,110,34,on?'ON':'OFF',fn,{bg:on?'rgba(30,80,50,.92)':'rgba(60,30,40,.92)'}));});
+   text(ctx,`${here().name} · Day ${C.day} · ${Math.floor(C.credits)} Cr · ${rankOf(C.killPts)} · ${legalName(C.legal)}`,CX,470,'#c8d0ff',14,'center');
+   text(ctx,'P or Esc pauses and resumes at any time.',CX,494,'#9aa3c7',12,'center');}
+  else if(menuTab==='restart'){text(ctx,'START OVER?',CX,108,'#ffe45e',22,'center');
+   if(unsaved()){ctx.fillStyle='rgba(255,176,32,.12)';ctx.fillRect(90,142,620,66);ctx.strokeStyle='#ffb020';ctx.strokeRect(90,142,620,66);wrap(ctx,'⚠ You have progress that isn’t saved yet. If you restart now, it will be lost. Save first if you want to keep it.',110,152,580,18,'#ffd27a',14);
+    button(ctx,B(CX-120,214,240,36,'💾 SAVE FIRST',()=>{saveGame();},{fs:14}));}
+   const y0=unsaved()?272:160;
+   button(ctx,B(90,y0,300,70,'⏪ BACK TO MY LAST SAVE',()=>{restartFromSave();},{fs:15}));wrap(ctx,'Carry on from the last time you saved (or docked).',90,y0+78,300,16,'#9aa3c7',12);
+   button(ctx,B(410,y0,300,70,'🆕 NEW COMMANDER',()=>{const go=()=>{C=newCommander();overlay=null;mode='docked';tab='status';scene=null;persist();syncScore();msg('A NEW CAREER BEGINS — 100 CREDITS',3,'#3cff6a');};if(typeof Family!=='undefined')Family.guard('Start a new Starlane commander',go);else go();},{fs:15,bg:'rgba(90,40,30,.92)'}));
+   wrap(ctx,'Start again from scratch: 100 credits, a basic ship, day 1.',410,y0+78,300,16,'#9aa3c7',12);
+   button(ctx,B(CX-100,y0+140,200,38,'✕ CANCEL',()=>{menuTab='main';},{fs:14}));}
   else if(menuTab==='controls'){text(ctx,'Click a key to change it, then press the new key.',CX,94,'#9aa3c7',13,'center');
    ACTIONS.forEach(([id,l],i)=>{const col=i<10?0:1,row=i%10,x=40+col*370,y=116+row*34;text(ctx,l,x,y+7,'#e6e9f2',14);button(ctx,B(x+180,y,170,28,remap===id?'press a key…':keyName(id),()=>{remap=id;},{fs:12,bg:remap===id?'rgba(255,228,94,.9)':undefined,fg:remap===id?'#10142b':undefined}));});
    button(ctx,B(40,462,200,32,'RESET ALL KEYS',()=>{C.opt.keys=optDefaults().keys;persist();},{fs:12,border:'#ff2d55'}));
@@ -706,7 +793,7 @@ function makeStarlane(env){
   if(mode==='dockScene'||mode==='dockAnim'){mode='docked';persist();return;}
   if(mode==='flight'){if(planet&&!interdicted)saveGame();else{finishDock();mode='docked';}return;}if(mode==='docked')persist();};
  G._dbg={get C(){return C;},get P(){return P;},get mode(){return mode;},get station(){return station;},get ships(){return ships;},get scene(){return scene;},get planet(){return planet;},get moons(){return moons;},get suns(){return suns;},get timeScale(){return timeScale;},get overlay(){return overlay;},get tips(){return tips;},
-  set:(k,v)=>{({mode:()=>mode=v,tab:()=>tab=v,overlay:()=>overlay=v,view:()=>view=v,camMode:()=>camMode=v})[k]();},launch,startHyper,toggleDock,spawn,buy,buyEq,accept,board,arrive:()=>arrive(),flight,kill:sh=>kill(sh,true),dock:()=>docked(),saveGame,get tab(){return tab;}};
+  set:(k,v)=>{({mode:()=>mode=v,tab:()=>tab=v,overlay:()=>overlay=v,view:()=>view=v,camMode:()=>camMode=v})[k]();},launch,startHyper,toggleDock,spawn,buy,buyEq,accept,board,arrive:()=>arrive(),flight,kill:sh=>kill(sh,true),dock:()=>docked(),saveGame,hurt:(d)=>hurt(d,P.o.f),get tab(){return tab;}};
  if(C.flight&&C.flight.sys===C.sys&&GAL[C.sys])restoreFlight();
  if(env.store)persist();
  const legend=['sparrow','raven','hauler','warden'].map(k=>({name:SHIPS[k].name.toUpperCase(),pts:SHIPS[k].role.toUpperCase(),color:SHIPS[k].color,draw:(c,x,y,tt)=>{const m=MODELS[k],a=tt*1.2,o={r:[Math.cos(a),0,-Math.sin(a)],u:[0,1,0],f:[Math.sin(a),0,Math.cos(a)]};c.strokeStyle=SHIPS[k].color;c.lineWidth=1.2;c.beginPath();

@@ -127,7 +127,7 @@ const Family=(()=>{
  // ---------------- Parent dashboard: fair play & safety ----------------
  function dashboardHTML(){const f=fam(),I=(typeof stats!=='undefined'&&stats.integrity)||{log:[]};let dev=[];try{dev=JSON.parse(localStorage.getItem(DLOG)||'[]');}catch(e){}
   const evts=[...(I.log||[]).map(e=>({...e,who:''})),...dev.filter(e=>!(I.log||[]).some(x=>x.t===e.t))].sort((a,b)=>b.t-a.t).slice(0,15);
-  return `<h3>🛡️ Fair play &amp; safety</h3>
+  return `<h3>🛡️ Fair play &amp; safety <span class="mini">(this device · signed in: ${esc((Storage.current()||{}).name||'')})</span></h3>
    <p>${f?`✅ Family codes are set up (since ${new Date(f.at).toLocaleDateString('en-GB')}).`:'⚠️ <b>Family codes are not set up yet.</b> Until they are, the old shared codes still open the games and settings.'}${I.lock?`<br>🔒 Games locked: <b>${esc(I.lock)}</b>`:''}</p>
    <div class="actions" style="justify-content:flex-start;flex-wrap:wrap"><button class="primary" data-fam="setup" type="button">${f?'Change family codes':'👪 Set up family codes'}</button>
     ${f?`<button class="secondary" data-fam="admin" type="button">🔐 Advanced settings</button>`:''}${I.lock?`<button class="secondary" data-fam="unlockArcade" type="button">🔓 Unlock the games</button>`:f?`<button class="ghost" data-fam="lockNow" type="button">🔒 Lock the games now</button>`:''}
