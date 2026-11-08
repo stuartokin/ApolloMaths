@@ -334,3 +334,14 @@ dialog.tour-front[open]{position:fixed;inset:0;margin:auto;z-index:91}
  .arc-pad.two .arc-grp{display:grid!important;grid-template-columns:repeat(2,46px);gap:4px;padding-top:14px;max-width:none}
  .arc-pad.two button{min-height:34px!important;width:46px!important;font-size:11px!important;padding:0;border-width:2px}
 }
+
+/* ---- New version announcements ---- */
+.updchip{background:#ffe45e!important;color:#10142b!important;font-weight:900;animation:updPulse 1.6s ease-in-out infinite}
+@keyframes updPulse{50%{box-shadow:0 0 0 6px rgba(255,228,94,.35)}}
+.updatedlg{max-width:520px;width:calc(100vw - 24px);border:0;border-radius:22px;padding:18px 20px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.updatedlg::backdrop{background:rgba(10,14,40,.55)}
+.up-hero{text-align:center}.up-big{font-size:54px;animation:updBounce 1s ease-in-out infinite}.up-hero h2{margin:4px 0}
+@keyframes updBounce{50%{transform:translateY(-6px) scale(1.06)}}
+.up-head{background:linear-gradient(90deg,#ff4fd8,#ffe45e);color:#10142b;font-weight:900;border-radius:12px;padding:8px 12px;margin:8px 0;text-align:center}
+.up-list{margin:8px 0 10px;padding-left:20px;font-weight:700;line-height:1.5}
+.up-steps{background:#f3f6ff;border-radius:14px;padding:10px 14px;margin:8px 0}.up-steps ol{margin:6px 0 0;padding-left:20px;line-height:1.6}.up-steps button{margin-left:6px;padding:4px 10px;min-height:0}

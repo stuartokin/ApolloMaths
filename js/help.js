@@ -13,6 +13,6 @@ const Help=(()=>{
   get('appVersion').textContent='Version '+APP_VERSION;
   // Tell everyone once when there is a new version on this device.
   let seen='';try{seen=localStorage.getItem('apollo-maths-version')||''}catch(e){}
-  if(seen!==APP_VERSION){try{localStorage.setItem('apollo-maths-version',APP_VERSION)}catch(e){}if(seen)setTimeout(()=>toast(`🆕 Version ${APP_VERSION}: ${versionHistory[0].items[0].slice(0,90)}… Tap ❓ Help to see what’s new.`),1200);}}
+  if(seen!==APP_VERSION){try{localStorage.setItem('apollo-maths-version',APP_VERSION)}catch(e){}if(seen)setTimeout(()=>{if(typeof Update!=='undefined')Update.showWhatsNew(seen);else toast(`🆕 Version ${APP_VERSION} — tap ❓ Help to see what’s new.`);},1500);}}
  return{init,open};
 })();
