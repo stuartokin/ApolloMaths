@@ -6,17 +6,18 @@ const Learn=(()=>{
  let tp=null,mode='lesson',step=0,active=0,need=0,state='reading',tries=0,order=[],disabled=[],lessonPts=0,paidToday=false,ex=null,exShown=0,exActive=0,exPaid=false,last=Date.now(),tickId=null;
  const dlg=()=>get('learn');
  const day=k=>{const key=dayKey()+'|'+k;return (stats.learn.days[key] ||= {lessons:0,examples:0});};
- const isActive=()=>document.visibilityState==='visible'&&Date.now()-(window.lastInputAt||0)<LEARN.idleAfter*1000;
+ // Listening to the step being read aloud counts as active reading too.
+ const isActive=()=>document.visibilityState==='visible'&&(Date.now()-(window.lastInputAt||0)<LEARN.idleAfter*1000||Speech.speaking('teach'));
  const shuffle=n=>{const a=[...Array(n).keys()];for(let i=n-1;i>0;i--){const j=R(0,i);[a[i],a[j]]=[a[j],a[i]]}return a;};
  function logLearnEv(type,pts,extra={}){stats.learn.events.push({t:Date.now(),type,tp,pts,...extra});if(stats.learn.events.length>1500)stats.learn.events.splice(0,stats.learn.events.length-1500);
   if(pts>0){stats.points+=pts;stats.learnPts+=pts;}save();updateStats();}
  // ---------- lessons ----------
  function open(k){tp=k;mode='lesson';step=0;lessonPts=0;paidToday=day(k).lessons>=LEARN.lessonsPerDay;learnMode=true;startStep();show();}
- function startStep(){const s=learnMissions[tp][step];need=readSecs(s);active=0;state='reading';tries=0;order=shuffle(s.check.options.length);disabled=[];render();}
+ function startStep(){Speech.stop();Voices.reset();const s=learnMissions[tp][step];need=readSecs(s);active=0;state='reading';tries=0;order=shuffle(s.check.options.length);disabled=[];render();}
  function render(){const d=dlg(),steps=learnMissions[tp],s=steps[step];
   d.querySelector('.ln-title').textContent=`📘 ${topics[tp].label}`;
   d.querySelector('.ln-body').innerHTML=mode==='done'?doneView():mode==='example'?exView():`<div class="ln-dots">${steps.map((_,i)=>`<span class="${i<step?'ok':i===step?'now':''}"></span>`).join('')}<small>Step ${step+1} of ${steps.length}</small></div>
-   <h3>${esc(s.title)}</h3><div class="ln-content">${renderBlocks(personalise(s.blocks))}</div>
+   <h3>${esc(s.title)} <button class="say-btn" data-say="lesson" type="button" aria-label="Read this step aloud" title="Read aloud">🔊</button></h3><div class="ln-content">${renderBlocks(personalise(s.blocks))}</div>
    <div class="gate" id="lnGate"></div>
    <div class="ln-check"><b>🤔 Quick check: ${fracHTML(personalise(s.check.q))}</b><div class="ln-opts">${order.map((o,i)=>`<button class="ln-opt${disabled.includes(o)?' wrong':''}${state!=='reading'&&state!=='ready'&&o===0?' right':''}" data-opt="${o}" type="button"${state!=='ready'||disabled.includes(o)?' disabled':''}>${fracHTML(personalise(s.check.options[o]))}</button>`).join('')}</div><div class="ln-fb" id="lnFb" aria-live="polite"></div></div>
    <div class="actions"><button class="primary${state==='right'?' next-ready':''}${state==='right'||state==='shown'?'':' hidden'}" data-next type="button">${step+1<steps.length?'Next step ➡️':'Finish lesson 🏁'}</button></div>
@@ -39,10 +40,10 @@ const Learn=(()=>{
   <div class="actions"><button class="primary" data-examples type="button">🎲 Study worked examples</button><button class="secondary" data-practise="${tp}" type="button">⚽ Practise ${esc(topics[tp].label)}</button><button class="ghost" data-close type="button">Close</button></div></div>`;}
  // ---------- Example Studio ----------
  function openExamples(k){tp=k;learnMode=true;newExample();show();}
- function newExample(){const arr=bank[tp],g=R(0,arr.length-1);ex={...personalise(arr[g]()),g};exShown=0;exActive=0;exPaid=false;mode='example';render();}
+ function newExample(){Speech.stop();Voices.reset();const arr=bank[tp],g=R(0,arr.length-1);ex={...personalise(arr[g]()),g};exShown=0;exActive=0;exPaid=false;mode='example';render();}
  function exView(){const left=Math.max(0,Math.ceil(LEARN.exampleStepSecs-exActive)),all=exShown>=ex.s.length,cap=day(tp).examples>=LEARN.examplesPerTopicDay;
   return `<p class="section-note">🎲 <b>Example Studio</b> — read the question, have a go, then reveal the worked steps one at a time.${cap?' (Today’s example points for this topic are used up — examples still help!)':` +${LEARN.example} ⚡ when you study every step (up to ${LEARN.examplesPerTopicDay} a day per topic).`}</p>
-   <div class="ex-q">${fracHTML(ex.q).replace(/\n/g,'<br>')}</div>${ex.fig?`<div class="figure">${renderFigure(ex.fig)}</div>`:''}
+   <button class="say-btn say-txt" data-say="example" type="button">🔊 Read aloud</button><div class="ex-q">${fracHTML(ex.q).replace(/\n/g,'<br>')}</div>${ex.fig?`<div class="figure">${renderFigure(ex.fig)}</div>`:''}
    <div class="ex-try"><input id="exTry" placeholder="Have a go first (optional)" autocomplete="off" inputmode="${ex.kind?'text':'decimal'}"><button class="ghost" data-extry type="button">Check</button><span id="exTryFb"></span></div>
    <ol class="ex-steps">${ex.s.slice(0,exShown).map(x=>`<li>${fracHTML(x)}</li>`).join('')}</ol>
    ${all?`<div class="feedback good">Answer: <b>${fracHTML(fmtAns(ex))}</b></div>`:`<button class="secondary" data-exstep type="button" id="exStepBtn"${exActive<LEARN.exampleStepSecs?' disabled':''}>${exActive<LEARN.exampleStepSecs?`Read… ${left}s`:`Show step ${exShown+1} of ${ex.s.length} ▶`}</button>`}
@@ -66,6 +67,6 @@ const Learn=(()=>{
   if(ds.extry!==undefined){const r=judge(ex,get('exTry').value);get('exTryFb').textContent=r==='ok'?' ✅ Correct — now check the method!':r==='empty'?' Type an answer first.':' ❌ Not yet — reveal the steps to see how.';return;}
   if(ds.twin!==undefined){const g=ex.g;close();practiseLike(tp,g);return;}
   if(ds.practise){close();pickTopic(ds.practise);}}
- function init(){const d=dlg();d.addEventListener('click',onClick);d.addEventListener('close',()=>{clearInterval(tickId);learnMode=false;});}
+ function init(){const d=dlg();d.addEventListener('click',onClick);d.addEventListener('close',()=>{clearInterval(tickId);learnMode=false;if(Speech.speaking('teach')){Speech.stop();Voices.reset();}});}
  return{init,open,openExamples};
 })();

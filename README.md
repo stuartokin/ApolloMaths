@@ -50,9 +50,16 @@ jobs:
 - The PIN and words are stored on each device as salted SHA-256 hashes. This is family-level protection: the code is public and browser developer tools could still change things.
 - Rules live in `js/data/arcade-rules.js`; the game in `js/arcade.js`; Admin in `js/admin.js`.
 
+## Reading aloud (text-to-speech)
+- Uses the browser's built-in voices (`js/speech.js`, same approach as the ResearchGap app): English voices only, British preferred, female/male chosen by voice name, spoken sentence by sentence with a safety timer.
+- Four roles with their own voice (when the device has several), speed and pitch: 🗺️ tour guide, 📣 announcer, ❓ question reader, 🧑‍🏫 teacher. Maths is made speakable (fractions, units, ×, ÷, =, capitals).
+- 🔊/🔇 at the top mutes announcements (toasts and answer feedback). 🎙️ Voices: female/male, speed, read-aloud buttons on/off, tour narration on/off, try each voice (`js/voices.js`). Saved per player (browser and progress file).
+- 🔊 read-aloud buttons on questions, explainers, worked methods, Learn steps and Example Studio; listening to a Learn step counts as active reading.
+- Tours narrate each step and move on by themselves, with ⏸ pause (or P) and 🔇 narration off.
+
 ## Welcome screen and guided tours
 - The first time a player opens the app (after choosing/designing their player), a welcome screen offers a **🚀 player tour** or a **👪 grown-ups' tour**, or *Maybe later*. Ticking **Don't ask me again** stops it; finishing the player tour also stops it. This is saved with the player's progress (browser and progress file).
-- Tours spotlight each real part of the page with a speech bubble (Next/Back/Skip, arrow keys, Esc). Player tour: name/clock/Help, My player, Kit Shop, Today's plan, answering questions, help buttons, Focus Zone, game modes and timed tests, printing, topics, Match centre, medals, leaderboard, saving. Grown-ups' tour: Parent dashboard, timed tests and printouts, Focus areas, progress files, players, hidden games/Admin (contact for passcodes), Help.
+- Tours spotlight each real part of the page with a speech bubble (Next/Back/Skip, arrow keys, Esc). Player tour: name/clock/Help, My player, Kit Shop, Today's plan, answering questions, help buttons, Focus Zone, game modes and timed tests, printing, topics, Match centre, medals, leaderboard, saving. Grown-ups' tour: opens the Parent dashboard and explains Overview, Focus areas (the five, suggestions, choosing, saving), Learning, Question types & mistakes, Time, Mocks and Settings (skipped if the dashboard is PIN-locked); then timed tests and printouts, progress files, players, voices, hidden games/Admin (contact for passcodes), Help.
 - Both tours can be rerun from the top of **❓ Help** (`js/tour.js`).
 
 ## Session clock and saved arcade time

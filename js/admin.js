@@ -86,5 +86,6 @@ const Admin=(()=>{
  function guard(what,fn){const st=store();if(!st[what]||!st.pinHash||isUnlocked()){fn();return;}after=fn;tab='rules';err='';open();}
  function init(){const d=dlg();d.addEventListener('click',onClick);d.addEventListener('change',e=>{if(e.target.id==='admWho'){who=e.target.value;render();}});
   d.addEventListener('keydown',e=>{if(e.key==='Enter'){if(get('pinIn')&&e.target.id==='pinIn')checkPin();else if(e.target.id==='pinNew2')setPin();}});}
- return{init,open,secret,guard};
+ const locked=what=>{const st=store();return !!(st[what]&&st.pinHash&&!isUnlocked());};
+ return{init,open,secret,guard,locked};
 })();

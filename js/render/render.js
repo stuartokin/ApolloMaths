@@ -118,7 +118,7 @@ function renderBlocks(blocks){return blocks.map(b=>{
  return '';}).join('');}
 
 // ---- Explainer (structured object from js/data/explainers.js) ----
-function renderExplainer(e){return `<b class="xhead">🧒 EXPLAIN IT SIMPLY</b>
+function renderExplainer(e){return `<b class="xhead">🧒 EXPLAIN IT SIMPLY</b> <button class="say-btn say-txt" data-say="explain" type="button">🔊 Read aloud</button>
 <div class="xrow"><span class="xi">🎯</span><div><b>What is it asking?</b><br>${fracHTML(e.asking)}</div></div>
 ${e.keys.length?`<div class="xrow"><span class="xi">🔑</span><div><b>Watch the key word${e.keys.length>1?'s':''}</b><ul>${e.keys.map(k=>`<li><b>${esc(k.word)}</b> — ${fracHTML(k.means)}</li>`).join('')}</ul></div></div>`:''}
 <div class="xrow"><span class="xi">💡</span><div><b>The big idea</b><br>${fracHTML(e.idea)}</div></div>

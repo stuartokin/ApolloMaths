@@ -80,8 +80,9 @@ const Parent=(()=>{
   if(ds.printmock){Printer.paperMock(25);return;}
   if(ds.addpaper){const sc=Math.floor(+get('pmScore').value),tot=Math.floor(+get('pmTotal').value);if(!(tot>=1&&tot<=100&&sc>=0&&sc<=tot)){toast('Please enter a score between 0 and the total.');return;}stats.paperMocks.push({t:Date.now(),score:sc,total:tot});save();toast(`📝 Paper mock saved: ${sc}/${tot}`);render();return;}
   if(ds.saveexam){const n=get('exName').value.trim().slice(0,40),dt=get('exDate').value;if(!n||!/^\d{4}-\d{2}-\d{2}$/.test(dt)){toast('Please enter an exam name and date.');return;}stats.exam={name:n,date:dt};save();drawPlan();toast('📅 Exam date saved.');render();}}
+ function tourShow(t){const d=dlg();tab=t;viewId=null;pending=null;parentOpen=true;render();if(!d.open)d.show();d.classList.add('tour-front');d.querySelector('.pd-body').scrollTop=0;}
+ function tourHide(){const d=dlg();if(d.classList.contains('tour-front')){d.classList.remove('tour-front');if(d.open)d.close();}}
  function open(t='overview'){tab=t;viewId=null;pending=null;parentOpen=true;render();const d=dlg();if(d.showModal){if(!d.open)d.showModal();}else d.setAttribute('open','');}
  function close(){const d=dlg();if(d.close)d.close();else d.removeAttribute('open');}
  function init(){const d=dlg();d.addEventListener('click',onClick);d.addEventListener('close',()=>{parentOpen=false;});d.addEventListener('change',e=>{if(e.target.id==='pdWho'){viewId=e.target.value;pending=null;render();return;}const k=e.target.dataset&&e.target.dataset.fz;if(k){if(e.target.checked){if(pending.length>=5){e.target.checked=false;toast('You can choose 5 Focus areas — untick one first.');return;}pending.push(k);}else pending=pending.filter(x=>x!==k);get('fzCount').innerHTML=`<b>${pending.length} of 5</b> chosen`;}});}
- return{init,open,exportCsv};
-})();
+ return{init,open,exportCsv,tourShow,tourHide};})();

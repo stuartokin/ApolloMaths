@@ -282,3 +282,22 @@ body.touring{overflow:auto}
 .hp-tour{background:#fff;border:3px solid var(--dark);border-radius:14px;padding:10px 12px;margin-bottom:10px;box-shadow:3px 3px 0 var(--dark)}.hp-tour .actions{margin-top:6px}
 @media(max-width:700px){.tour-bub{padding:11px 13px;border-width:3px;box-shadow:5px 5px 0 var(--dark)}.tour-bub h3{font-size:17px;margin:4px 0}.tour-bub p{font-size:14px;margin-bottom:9px;line-height:1.42}.tb-skip{margin-top:4px}}
 .tour-bub{overflow:auto}
+
+/* ---- Read aloud & voices ---- */
+.qwrap{display:flex;gap:10px;align-items:flex-start}.qwrap .question{flex:1}
+.say-btn{border:3px solid var(--dark);background:#fff;border-radius:50%;min-width:44px;min-height:44px;font-size:20px;cursor:pointer;box-shadow:3px 3px 0 var(--dark);flex:0 0 auto;line-height:1}
+.say-btn.say-txt{border-radius:30px;font-size:14px;font-weight:900;padding:6px 12px;margin-left:8px;vertical-align:middle}
+.say-btn.speaking{background:#ffe45e;animation:nextPulse 1.2s infinite}
+h3 .say-btn{min-width:38px;min-height:38px;font-size:17px;margin-left:6px;vertical-align:middle}
+body.no-say .say-btn{display:none!important}
+.voices{border:4px solid var(--dark);border-radius:24px;padding:0;background:#fffaf0;color:var(--ink);box-shadow:10px 10px 0 var(--dark);width:min(640px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:hidden}
+.voices[open]{display:flex;flex-direction:column}.voices::backdrop{background:rgba(18,22,37,.6)}.voices .lk-head{background:#5b3cc4}
+.vc-body{padding:12px 16px 18px;overflow:auto;min-height:0}.vc-body fieldset{border:3px solid var(--dark);border-radius:14px;background:#fff;margin:0 0 12px;padding:8px 12px}.vc-body legend{font-weight:950;padding:0 6px}
+.vc-body .chk{display:flex;gap:8px;align-items:flex-start;margin:7px 0;font-size:14px}.vc-row{display:flex;gap:6px 18px;flex-wrap:wrap}
+.vc-try{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:8px}.vc-role{display:flex;flex-direction:column;gap:3px}.vc-role small{color:#555d72;font-size:11px}
+@media(max-width:700px){.voices{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;border:none;box-shadow:none}}
+
+.tb-tools{display:flex;align-items:center;gap:2px}.tb-tool{border:2px solid var(--dark);background:#fff;border-radius:10px;min-width:38px;min-height:38px;font-size:16px;cursor:pointer;margin-left:4px}
+.tb-auto{font-size:12px!important;color:#555d72;margin:-4px 0 8px!important;font-weight:800}
+dialog.tour-front[open]{position:fixed;inset:0;margin:auto;z-index:91}
+.tour-hole{z-index:92}.tour-bub{z-index:93}
