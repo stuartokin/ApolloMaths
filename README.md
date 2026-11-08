@@ -67,6 +67,10 @@ jobs:
 - Tours spotlight each real part of the page with a speech bubble (Next/Back/Skip, arrow keys, Esc). Player tour: name/clock/Help, My player, Kit Shop, Today's plan, answering questions, help buttons, Focus Zone, game modes and timed tests, printing, topics, Match centre, medals, leaderboard, saving. Grown-ups' tour: opens the Parent dashboard and explains Overview, Focus areas (the five, suggestions, choosing, saving), Learning, Question types & mistakes, Time, Mocks and Settings (skipped if the dashboard is PIN-locked); then timed tests and printouts, progress files, players, voices, hidden games/Admin (contact for passcodes), Help.
 - Both tours can be rerun from the top of **❓ Help** (`js/tour.js`).
 
+## New-version announcements
+- `version.json` (generated from the version history in `js/data/help.js` by `node tools/make-version.js`) holds the latest version and child-friendly highlights, tagged `games`, `shop` or `look`. When online, the app checks it on opening, every 30 minutes and when it comes back online; if newer, it shows what’s new and how to save and update. **Upload `version.json` with every release.**
+- The service worker always asks the website for fresh files and never caches `version.json`, so “Update now” picks up the new version straight away.
+
 ## Hover help
 - `js/tips.js` holds plain-English explanations for every Admin, Parent dashboard and Voices setting and the main buttons. Hover (or keyboard focus) shows them on a computer; on touch screens a small ⓘ appears beside each setting.
 

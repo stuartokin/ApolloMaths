@@ -1,0 +1,126 @@
+{
+ "version": "2.16",
+ "date": "8 November 2026",
+ "releases": [
+  {
+   "v": "2.16",
+   "date": "8 November 2026",
+   "kids": [
+    "🔔 The app now tells you when there’s a new version — and what’s new!"
+   ],
+   "tags": [],
+   "items": [
+    "🔔 When online, the app checks for a new version and shows what has changed, with simple steps to save and update."
+   ]
+  },
+  {
+   "v": "2.15",
+   "date": "8 November 2026",
+   "kids": [
+    "🧩 A brand-new puzzle game in the secret arcade…",
+    "👥 Play with a friend, brother or sister — two-player modes!",
+    "🏆 Top-5 high-score tables with your name"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "ⓘ Hover help: hover over (or tap ⓘ beside) any setting in Admin, the Parent dashboard and Voices, and the main buttons, to see what it does.",
+    "🤫 The secret surprise now has two-player modes and one more game…"
+   ]
+  },
+  {
+   "v": "2.14",
+   "date": "8 November 2026",
+   "kids": [
+    "✅ Hints and methods now show every single step",
+    "🎱 🧱 🐸 Three more secret surprises…"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "✅ Quality check of every question, hint, worked method and lesson. Hints and methods now show EVERY step of the working — for example, in ratio questions, “divide the total by the number of parts” is always shown with the actual sum.",
+    "🤫 Three more surprises for players who put the work in…"
+   ]
+  },
+  {
+   "v": "2.13",
+   "date": "8 November 2026",
+   "kids": [
+    "🎨 Loads more ways to make your player look like you — hair, skin tones, head coverings and more"
+   ],
+   "tags": [
+    "look"
+   ],
+   "items": [
+    "🎨 More ways to make your player look like you: boy or girl, 10 skin tones, 13 hair styles (including afro, braids, locs, two puffs, bob and bun), 11 hair colours, eye shapes, and head coverings (hijab, patka, dastar, kippah, headwrap).",
+    "💾 The save bar shows your progress file’s name and when it was last saved — hover over it (or the Save button) to see where it is. New “Save as…” and “⬇️ Export (.json)” buttons.",
+    "📄 Links to Tiffin School’s official sample maths questions and admissions page (Help and the bottom of the page).",
+    "🤖 A clear note that the app was made with AI and isn’t affiliated with Tiffin School."
+   ]
+  },
+  {
+   "v": "2.12",
+   "date": "8 November 2026",
+   "kids": [
+    "🕹️ The secret surprise got a full arcade makeover!"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🤫 The secret surprise got a proper arcade makeover…"
+   ]
+  },
+  {
+   "v": "2.11",
+   "date": "8 November 2026",
+   "kids": [],
+   "tags": [],
+   "items": [
+    "✨ Natural-sounding voices are now used automatically wherever the device has them (for example Edge’s “Online (Natural)” voices on Windows, or Enhanced/Premium voices on iPad and Mac) — mixing female and male, or sharing a voice, if there aren’t four."
+   ]
+  },
+  {
+   "v": "2.10",
+   "date": "8 November 2026",
+   "kids": [],
+   "tags": [],
+   "items": [
+    "🎙️ Choose any voice your device has for each job — tour guide, announcer, question reader and teacher (🎙️ Voices → Voice for each job). Choices are saved; if a voice isn’t on another device, Automatic is used there."
+   ]
+  },
+  {
+   "v": "2.9",
+   "date": "7 November 2026",
+   "kids": [],
+   "tags": [],
+   "items": [
+    "🔊 Reading aloud: tap 🔊 to hear a question, an explainer, a worked method, a Learn step or an example read out. Different voices for the tour, announcements, questions and teaching — choose female or male voices and the speed in 🎙️ Voices.",
+    "📣 Announcements (celebrations, tips and answer feedback) can be read out — the 🔊 / 🔇 button at the top turns them on or off.",
+    "🗺️ The tours now read themselves aloud and move on automatically, with a pause button. The grown-ups’ tour now opens the Parent dashboard and explains each tab, especially the Focus areas."
+   ]
+  },
+  {
+   "v": "2.8",
+   "date": "7 November 2026",
+   "kids": [],
+   "tags": [],
+   "items": [
+    "🎓 A guided tour of the app — one for players and one for grown-ups — offered with a welcome screen the first time, and always available from ❓ Help. Choose “Don’t ask me again” to stop the welcome screen (saved with your progress)."
+   ]
+  },
+  {
+   "v": "2.7",
+   "date": "7 November 2026",
+   "kids": [],
+   "tags": [],
+   "items": [
+    "⏱️ A clock at the top shows this session’s time and the total time in the app. If the app is refreshed or reopened within 15 minutes (parents can change this), the session carries on.",
+    "Hidden games: unplayed time is saved for next time (a parent setting), and one session can include several games.",
+    "Fixed: dates in the history could be lost after a page reload."
+   ]
+  }
+ ]
+}
