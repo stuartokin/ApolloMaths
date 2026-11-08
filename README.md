@@ -67,6 +67,13 @@ jobs:
 - Tours spotlight each real part of the page with a speech bubble (Next/Back/Skip, arrow keys, Esc). Player tour: name/clock/Help, My player, Kit Shop, Today's plan, answering questions, help buttons, Focus Zone, game modes and timed tests, printing, topics, Match centre, medals, leaderboard, saving. Grown-ups' tour: opens the Parent dashboard and explains Overview, Focus areas (the five, suggestions, choosing, saving), Learning, Question types & mistakes, Time, Mocks and Settings (skipped if the dashboard is PIN-locked); then timed tests and printouts, progress files, players, voices, hidden games/Admin (contact for passcodes), Help.
 - Both tours can be rerun from the top of **❓ Help** (`js/tour.js`).
 
+## Family codes and fair play (js/family.js)
+No server and nothing written to GitHub — each family sets their own codes in the app.
+- **Grown-up setup** (yellow banner, or Parent dashboard → Settings → Fair play & safety): parent passphrase (three words / 10+ characters, or a 6+ digit PIN; PBKDF2-SHA-256, 200,000 rounds), the child's secret word and number code (starting 00, for number-pad tablets), and a one-time recovery code. Stored scrambled in `stats.family`, so it travels with the child's progress file. If an older device Admin PIN exists, it is required first. Once set up, the old shared codes stop working and Admin opens from **🔐 Advanced settings** behind the passphrase.
+- **Needs the passphrase:** Advanced settings, reset, deleting a player, a new Starlane commander, loading older progress, unlocking the games.
+- **Fair play:** one tab at a time (Web Locks + BroadcastChannel, with "Use it here instead"); arcade time used can only go up (per-browser record `apollo-maths-ledger:<player>`); device-clock checks (backwards jumps, and the website's `Date` header when online; optional "games only when online"); hand-edited files detected (a check value `sig` in saved files — files from before 2.19 still load); new players start with the games locked; 5 automatic backups per player in IndexedDB with restore; events logged for the Parent dashboard.
+- **Honest limit:** everything runs in the browser — it stops easy and accidental routes and makes deliberate ones visible; device parental controls (see Help) close the rest.
+
 ## Starlane Trader (js/starlane.js)
 An original space-trading game in the style of the 1984 wireframe classics — original names, ships, systems, goods and text; the classic *mechanics* are recreated from published research (Mark Moxon's annotated 6502 source at bbcelite.com).
 - **Galaxy:** 160 procedurally generated systems (seed 20261108) with economy, government, tech level, population, species, description and market; distances tuned so every system is reachable within 7 light years.
@@ -82,6 +89,7 @@ An original space-trading game in the style of the 1984 wireframe classics — o
 - **Hyperspace:** streaking-stars effect, spooling up in the last second of the countdown, and the reverse on arrival.
 - **Cut scenes:** docking (outside approach, then hangar landing among parked ships) and launch (hangar lift-off, then flying out of the spinning station). Tap or any key skips; can be switched off.
 - **Varied systems:** from a separate random stream per system (the galaxy itself is unchanged): rocky / cratered / gas-giant planets, rings, 0–3 moons, single / binary / triple stars of different colours, asteroid belts, meteor showers. Shown on the DATA screen.
+- **3D lighting (v2.19, off by default):** solid, sun-lit ships, stations, planets, moons and suns (pause menu → GAME). New 🪐 icon.
 - **Saving:** the commander lives in `stats.arcade.saves.starlane`. SAVE in the pause menu works docked or in flight (resumes at the same spot); stopping or running out of time also saves in flight; being destroyed rolls back to the last save.
 
 ## New-version announcements

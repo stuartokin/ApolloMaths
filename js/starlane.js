@@ -138,7 +138,7 @@ function makeStarlane(env){
  const FX=Retro.fx();
  const ACTIONS=[['rollL','Roll left',['ArrowLeft','a'],1],['rollR','Roll right',['ArrowRight','d'],1],['up','Nose up',['ArrowUp','w'],1],['down','Nose down',['ArrowDown','s'],1],['fast','Speed up',['r','+','='],1],['slow','Slow down',['f','-'],1],['fire','Fire laser',[' '],1],
   ['missile','Fire missile',['m']],['ecm','E.C.M.',['e']],['bomb','Shock pulse',['b']],['jump','Jump drive',['j']],['dock','Docking computer',['c']],['hyper','Hyperspace',['h']],['time','Speed up time',['t']],['view','Next view',['v']],['cam','Outside camera',['o']],['chart','Galaxy chart',['g']],['cargo','Cargo hold',['i']],['missions','Missions',['k']],['pod','Escape capsule',['x']]];
- const optDefaults=()=>({tips:true,cuts:true,keys:Object.fromEntries(ACTIONS.map(a=>[a[0],a[2].slice()]))});
+ const optDefaults=()=>({lit:false,tips:true,cuts:true,keys:Object.fromEntries(ACTIONS.map(a=>[a[0],a[2].slice()]))});
  function fixOpt(){C.opt=Object.assign(optDefaults(),C.opt||{});C.opt.keys=Object.assign(optDefaults().keys,C.opt.keys||{});}
  // ---------------- commander (saved with the player's progress) ----------------
  function newCommander(){const start=GAL.find(s=>s.gov>=5&&s.tech>=6&&s.eco>=4)||GAL.find(s=>s.gov>=4)||GAL[0];
@@ -338,26 +338,40 @@ function makeStarlane(env){
  const proj=c=>[CX+FOC*c[0]/c[2],CY-FOC*c[1]/c[2]];
  function seg(ctx,a,b){const N=4;if(a[2]<N&&b[2]<N)return;if(a[2]<N){const t=(N-a[2])/(b[2]-a[2]);a=[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,N];}else if(b[2]<N){const t=(N-b[2])/(a[2]-b[2]);b=[b[0]+(a[0]-b[0])*t,b[1]+(a[1]-b[1])*t,N];}
   const p=proj(a),q=proj(b);if(Math.max(Math.abs(p[0]),Math.abs(p[1]),Math.abs(q[0]),Math.abs(q[1]))>2e4)return;ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1]);}
- function drawModel(ctx,m,pos,o,col,extra){const cm=toLocal(o,sub(CAM.pos,pos)),c0=cam(pos);if(c0[2]<-m.rad)return;const pr=c0[2]>0?FOC*m.rad/c0[2]:99;
+ // ---- optional 3D lighting: solid faces shaded by the light from the main star ----
+ let lightOverride=null;const RGB={};const rgb=c=>RGB[c]||(RGB[c]=[1,3,5].map(i=>parseInt(c.slice(i,i+2),16)));
+ const shade=(c,k)=>{const v=rgb(c);return`rgb(${Math.min(255,v[0]*k)|0},${Math.min(255,v[1]*k)|0},${Math.min(255,v[2]*k)|0})`;};
+ const lightAt=pos=>lightOverride||(suns.length?norm(sub(suns[0].pos,pos)):norm(V(.4,.8,.45)));
+ function drawModel(ctx,m,pos,o,col,extra){if(C.opt.lit)return drawModelLit(ctx,m,pos,o,col,extra);return drawWire(ctx,m,pos,o,col,extra);}
+ function drawModelLit(ctx,m,pos,o,col,extra){const cm=toLocal(o,sub(CAM.pos,pos)),c0=cam(pos);if(c0[2]<-m.rad)return;const pr=c0[2]>0?FOC*m.rad/c0[2]:99;
+  if(pr<1.6){if(c0[2]>0){const p=proj(c0);ctx.fillStyle=col;ctx.fillRect(p[0]-1,p[1]-1,2,2);}return;}
+  const pts=m.pts.map(p=>cam(add(pos,toWorld(o,p))));if(pts.some(p=>p[2]<8))return drawWire(ctx,m,pos,o,col,extra);
+  const L=toLocal(o,lightAt(pos)),sc=pts.map(proj),vis=m.faces.map(f=>dot(f.n,cm)-f.d>0);ctx.lineJoin='round';
+  m.faces.forEach((f,i)=>{if(!vis[i])return;const k=.2+.95*Math.max(0,dot(f.n,L));ctx.fillStyle=shade(col,k);ctx.beginPath();f.v.forEach((vi,j)=>{const q=sc[vi];if(j)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1]);});ctx.closePath();ctx.fill();ctx.strokeStyle=shade(col,k*.55);ctx.lineWidth=1;ctx.stroke();});
+  if(extra)extra(vis,pts);}
+ function drawWire(ctx,m,pos,o,col,extra){const cm=toLocal(o,sub(CAM.pos,pos)),c0=cam(pos);if(c0[2]<-m.rad)return;const pr=c0[2]>0?FOC*m.rad/c0[2]:99;
   if(pr<1.6){if(c0[2]>0){const p=proj(c0);ctx.fillStyle=col;ctx.fillRect(p[0]-1,p[1]-1,2,2);}return;}
   const vis=m.faces.map(f=>dot(f.n,cm)-f.d>0),pts=m.pts.map(p=>cam(add(pos,toWorld(o,p))));ctx.strokeStyle=col;ctx.lineWidth=1.4;ctx.beginPath();
   for(const e of m.edges)if(e.f.some(i=>vis[i]))seg(ctx,pts[e.a],pts[e.b]);ctx.stroke();if(extra)extra(vis,pts);}
  function drawStation(ctx,s){s=s||station;drawModel(ctx,s.m,s.pos,s.o,'#e6e9f2',vis=>{const front=s.m.faces.findIndex(f=>f.n[2]>.99);if(front<0||!vis[front])return;
-   const c=[[-110,-36],[110,-36],[110,36],[-110,36]].map(([x,y])=>cam(add(s.pos,toWorld(s.o,[x,y,331]))));ctx.strokeStyle='#3fe0ff';ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<4;i++)seg(ctx,c[i],c[(i+1)%4]);ctx.stroke();});}
+   const c=[[-110,-36],[110,-36],[110,36],[-110,36]].map(([x,y])=>cam(add(s.pos,toWorld(s.o,[x,y,331]))));if(C.opt.lit&&c.every(q=>q[2]>8)){const q=c.map(proj);ctx.fillStyle='#04060d';ctx.beginPath();q.forEach((v,i)=>i?ctx.lineTo(v[0],v[1]):ctx.moveTo(v[0],v[1]));ctx.closePath();ctx.fill();}ctx.strokeStyle='#3fe0ff';ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<4;i++)seg(ctx,c[i],c[(i+1)%4]);ctx.stroke();});}
  // a circle on a sphere's surface, hiding the far side (and anything behind another body)
  function circ(ctx,body,a,b,cen,rr,occ){const eye=norm(sub(CAM.pos,body.pos));let prev=null;for(let i=0;i<=48;i++){const t=i/48*Math.PI*2,pt=add(cen,add(mul(a,Math.cos(t)*rr),mul(b,Math.sin(t)*rr)));
    let ok=occ?!hidden(pt,body):dot(norm(sub(pt,body.pos)),eye)>0.02;const cc=cam(pt);if(ok&&prev)seg(ctx,prev,cc);prev=ok?cc:null;}}
  function hidden(pt,body){const v=sub(pt,CAM.pos),L=len(v),dir=mul(v,1/L),t=dot(sub(body.pos,CAM.pos),dir);if(t<=0||t>=L)return false;return len(sub(add(CAM.pos,mul(dir,t)),body.pos))<body.R;}
- function drawBody(ctx,b,col,detail){const c=cam(b.pos);if(c[2]<=10)return null;const d=len(sub(b.pos,CAM.pos));const p=proj(c),r=FOC*b.R/Math.sqrt(Math.max(1,d*d-b.R*b.R));if(r<1){ctx.fillStyle=col;ctx.fillRect(p[0],p[1],2,2);return null;}
-  ctx.strokeStyle=col;ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(p[0],p[1],r,0,Math.PI*2);ctx.stroke();if(r>6&&detail){ctx.beginPath();detail();ctx.stroke();}return r;}
+ function drawBody(ctx,b,col,detail,surf){const c=cam(b.pos);if(c[2]<=10)return null;const d=len(sub(b.pos,CAM.pos));const p=proj(c),r=FOC*b.R/Math.sqrt(Math.max(1,d*d-b.R*b.R));if(r<1){ctx.fillStyle=col;ctx.fillRect(p[0],p[1],2,2);return null;}
+  if(C.opt.lit){const L=lightAt(b.pos),Lc=[dot(L,CAM.r),dot(L,CAM.u),dot(L,CAM.f)],k=-Lc[2],hx=p[0]+Lc[0]*r*.55,hy=p[1]-Lc[1]*r*.55,base=surf||'#4a8fd6';const g=ctx.createRadialGradient(hx,hy,r*.05,p[0]-Lc[0]*r*.3,p[1]+Lc[1]*r*.3,r*1.15);
+   g.addColorStop(0,shade(base,1.25*(.35+.65*Math.max(0,(k+1)/2)+.3)));g.addColorStop(.55,shade(base,.55+.25*Math.max(0,k)));g.addColorStop(1,'#03050c');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p[0],p[1],r,0,Math.PI*2);ctx.fill();ctx.globalAlpha=.35;}
+  ctx.strokeStyle=col;ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(p[0],p[1],r,0,Math.PI*2);ctx.stroke();if(r>6&&detail){ctx.beginPath();detail();ctx.stroke();}ctx.globalAlpha=1;return r;}
  function drawPlanet(ctx){const pl=planet,o=pl.o;ctx.lineWidth=1.1;
-  const r=drawBody(ctx,pl,'#3fe0ff',()=>{ctx.strokeStyle='rgba(63,224,255,.75)';
+  const surf=pl.kind==='gas'?'#d9a066':pl.kind==='crater'?'#9a8f86':'#3f86c9';const r=drawBody(ctx,pl,'#3fe0ff',()=>{ctx.strokeStyle='rgba(63,224,255,.75)';
    if(pl.kind==='gas'){for(const lat of[-.62,-.35,-.12,.12,.35,.62])circ(ctx,pl,o.r,o.f,add(pl.pos,mul(o.u,Math.sin(lat)*pl.R)),Math.cos(lat)*pl.R);}
    else if(pl.kind==='crater'){circ(ctx,pl,o.r,o.f,add(pl.pos,mul(o.u,pl.R*.8)),pl.R*.6);circ(ctx,pl,o.u,o.f,add(pl.pos,mul(o.r,pl.R*.86)),pl.R*.5);}
-   else{circ(ctx,pl,o.r,o.f,pl.pos,pl.R);circ(ctx,pl,o.u,o.f,pl.pos,pl.R);}});
-  if(pl.rings&&cam(pl.pos)[2]>0){ctx.strokeStyle='rgba(255,228,94,.75)';ctx.lineWidth=1.2;ctx.beginPath();for(const rr of[pl.rings.a,(pl.rings.a+pl.rings.b)/2,pl.rings.b])circ(ctx,pl,o.r,o.f,pl.pos,rr,true);ctx.stroke();}}
- function drawMoon(ctx,mn){drawBody(ctx,mn,'#c8d0ff',()=>{ctx.strokeStyle='rgba(200,208,255,.6)';if(mn.crater)circ(ctx,mn,mn.o.r,mn.o.f,add(mn.pos,mul(mn.o.u,mn.R*.75)),mn.R*.55);else circ(ctx,mn,mn.o.u,mn.o.f,mn.pos,mn.R);});}
+   else{circ(ctx,pl,o.r,o.f,pl.pos,pl.R);circ(ctx,pl,o.u,o.f,pl.pos,pl.R);}},surf);
+  if(pl.rings&&cam(pl.pos)[2]>0){ctx.strokeStyle=C.opt.lit?'rgba(230,200,140,.55)':'rgba(255,228,94,.75)';ctx.lineWidth=C.opt.lit?3:1.2;ctx.beginPath();for(const rr of[pl.rings.a,(pl.rings.a+pl.rings.b)/2,pl.rings.b])circ(ctx,pl,o.r,o.f,pl.pos,rr,true);ctx.stroke();}}
+ function drawMoon(ctx,mn){drawBody(ctx,mn,'#c8d0ff',()=>{ctx.strokeStyle='rgba(200,208,255,.6)';if(mn.crater)circ(ctx,mn,mn.o.r,mn.o.f,add(mn.pos,mul(mn.o.u,mn.R*.75)),mn.R*.55);else circ(ctx,mn,mn.o.u,mn.o.f,mn.pos,mn.R);},'#a9adb8');}
  function drawSun(ctx,sn){const c=cam(sn.pos);if(c[2]<=10)return;const p=proj(c),r=FOC*sn.R/c[2];if(r<1.2){ctx.fillStyle=sn.col;ctx.fillRect(p[0]-1,p[1]-1,3,3);return;}
+  if(C.opt.lit){const g=ctx.createRadialGradient(p[0],p[1],0,p[0],p[1],r*2);g.addColorStop(0,'#ffffff');g.addColorStop(.35,sn.col);g.addColorStop(.5,shade(sn.col,.6));g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p[0],p[1],r*2,0,Math.PI*2);ctx.fill();return;}
   for(let y=-r;y<=r;y+=3){const w=Math.sqrt(r*r-y*y)*(.85+Math.random()*.15);ctx.fillStyle=Math.abs(y)<r*.5?sn.col:'#ff8a1c';ctx.globalAlpha=Math.abs(y)<r*.5?1:.75;ctx.fillRect(p[0]-w,p[1]+y,w*2,1.6);}ctx.globalAlpha=1;}
  // ---------------- hyperspace streaks (and the reverse on arrival) ----------------
  function hypInit(){hyp=Array.from({length:520},()=>[(Math.random()-.5)*2.4,(Math.random()-.5)*2.4,Math.random()]);}
@@ -544,7 +558,7 @@ function makeStarlane(env){
   return`${GAL[m.sys].name}: ${m.delivered?'✓':'deliver'} ${m.qty}t ${GOODS[m.good][0]} · patrols ${Math.min(m.kills,m.need)}/${m.need} · by ${left}`;}
  function accept(o){if(C.missions.length>=4){msg('YOU CAN ONLY TAKE 4 MISSIONS AT ONCE',2.5,'#ff2d55');return;}C.missions.push({...o});C.board.offers=C.board.offers.filter(x=>x!==o);selMis=0;msg('MISSION ACCEPTED',2,'#3cff6a');env.beep(1000,.2,'triangle',.05,1.5);persist();}
  function resetBox(ctx){ctx.fillStyle='rgba(0,0,0,.8)';ctx.fillRect(0,0,W,H);text(ctx,'Start a brand-new commander?',CX,200,'#ffe45e',22,'center');text(ctx,'Your credits, cargo, equipment and missions will be lost.',CX,236,'#e6e9f2',15,'center');
-  button(ctx,B(CX-220,290,200,50,'YES, START AGAIN',()=>{C=newCommander();overlay=null;tab='status';persist();syncScore();},{bg:'rgba(255,45,85,.85)'}));button(ctx,B(CX+20,290,200,50,'NO, KEEP PLAYING',()=>{overlay=null;}));}
+  button(ctx,B(CX-220,290,200,50,'YES, START AGAIN',()=>{const go=()=>{C=newCommander();overlay=null;tab='status';persist();syncScore();};if(typeof Family!=='undefined')Family.guard('Start a new Starlane commander',go);else go();},{bg:'rgba(255,45,85,.85)'}));button(ctx,B(CX+20,290,200,50,'NO, KEEP PLAYING',()=>{overlay=null;}));}
  // ---------------- charts ----------------
  function chart(ctx,x,y,w,h){const local=chartMode==='local',cur=GAL[C.sys];
   const sx=local?w/64:w/256,sy=local?h/40:h/128,ox=local?cur.x-32:0,oy=local?cur.y-20:0;const pt=s=>[x+(s.x-ox)*sx,y+(s.y-oy)*sy];
@@ -586,7 +600,7 @@ function makeStarlane(env){
   else{let shipPos,o;if(sc.kind==='dock'){const k=t-DOCK_OUT,kz=easeOut(k/2.4),ky=easeOut((k-2.4)/.9);shipPos=V(0,-80+(HG.yF+34+80)*ky,-300+2500*kz);o={r:V(1,0,0),u:V(0,1,0),f:V(0,0,1)};lookAt(V(560,150,3150),V(0,-110,1300));
     if(k>3.25&&!sc.clank){sc.clank=true;env.beep(140,.25,'square',.06,.6);env.noise(.2,.05,900);}}
    else{const ky=easeOut(t/.9),kz=easeIn((t-.9)/2.1);shipPos=V(0,HG.yF+34+(-80-HG.yF-34)*ky,2200-2900*kz);o={r:V(-1,0,0),u:V(0,1,0),f:V(0,0,-1)};lookAt(add(shipPos,V(260,160,780)),add(shipPos,V(0,-30,-520)));}
-   drawHangar(ctx);for(const p of sc.parked)drawModel(ctx,p.m,p.pos,p.o,p.col);drawModel(ctx,me,shipPos,o,'#ffe45e');glow(ctx,shipPos,mul(o.f,-96),sc.kind==='launch'&&t>.9?1:.2);}
+   lightOverride=norm(V(.25,1,-.35));drawHangar(ctx);for(const p of sc.parked)drawModel(ctx,p.m,p.pos,p.o,p.col);drawModel(ctx,me,shipPos,o,'#ffe45e');glow(ctx,shipPos,mul(o.f,-96),sc.kind==='launch'&&t>.9?1:.2);lightOverride=null;}
   text(ctx,sc.kind==='dock'?`DOCKING AT ${here().name.toUpperCase()} STATION`:`LAUNCHING FROM ${here().name.toUpperCase()} STATION`,CX,18,'#3fe0ff',20,'center');
   text(ctx,'Tap or press any key to skip',CX,H-28,'rgba(255,255,255,.55)',13,'center');}
  function endLaunchScene(){const s=station;scene=null;P.pos=add(s.pos,mul(s.o.f,2100));P.o={f:s.o.f.slice(),u:s.o.u.slice(),r:s.o.r.slice()};P.speed=170;P.throttle=.45;initDust();mode='flight';msg(`LEAVING ${here().name.toUpperCase()} STATION`,3,'#3fe0ff');}
@@ -607,10 +621,10 @@ function makeStarlane(env){
  function panel(ctx,title){btns=[];tips=[];ctx.fillStyle='#03050f';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#3fe0ff';ctx.lineWidth=2;ctx.strokeRect(8,8,W-16,H-16);text(ctx,title,CX,18,'#3fe0ff',20,'center');}
  function renderMenu(ctx){panel(ctx,'PAUSED');const tabsM=[['main','GAME'],['controls','CONTROLS'],['help','HOW TO PLAY']];tabsM.forEach(([k,l],i)=>button(ctx,B(30+i*170,50,160,32,l,()=>{menuTab=k;remap=null;},{fs:13}),menuTab===k));button(ctx,B(W-190,50,160,32,'▶ RESUME',()=>{overlay=null;},{fs:13,bg:'rgba(30,80,50,.9)'}));
   if(menuTab==='main'){button(ctx,B(CX-150,104,300,46,'▶ RESUME',()=>{overlay=null;},{fs:18,bg:'rgba(30,80,50,.9)'}));button(ctx,B(CX-150,160,300,46,'💾 SAVE GAME',()=>saveGame(),{fs:18}));if(saveNote)text(ctx,saveNote,CX,214,'#3cff6a',14,'center');
-   const tg=[['Hover help',C.opt.tips,()=>{C.opt.tips=!C.opt.tips;persist();},'Shows what controls and gauges do when you hover (or tap)'],['Cut scenes',C.opt.cuts,()=>{C.opt.cuts=!C.opt.cuts;persist();},'Watch your ship dock and launch'],['Invert pitch',C.invert,()=>{C.invert=!C.invert;persist();},'Up/down reversed, like a flight simulator']];
-   tg.forEach(([l,on,fn,d],i)=>{const y=246+i*52;text(ctx,l,150,y+6,'#e6e9f2',17);text(ctx,d,150,y+28,'#9aa3c7',12,'left',false);button(ctx,B(600,y,120,34,on?'ON':'OFF',fn,{bg:on?'rgba(30,80,50,.9)':'rgba(60,30,40,.9)'}));});
-   text(ctx,`${here().name} · Day ${C.day} · ${Math.floor(C.credits)} Cr · ${rankOf(C.killPts)} · ${legalName(C.legal)}`,CX,412,'#9aa3c7',14,'center');
-   text(ctx,'Press P (or Esc) to pause and resume at any time.',CX,436,'#9aa3c7',13,'center');}
+   const tg=[['3D lighting',C.opt.lit,()=>{C.opt.lit=!C.opt.lit;persist();},'Solid ships, stations and planets lit by the sun (off = classic wireframe)'],['Hover help',C.opt.tips,()=>{C.opt.tips=!C.opt.tips;persist();},'Shows what controls and gauges do when you hover (or tap)'],['Cut scenes',C.opt.cuts,()=>{C.opt.cuts=!C.opt.cuts;persist();},'Watch your ship dock and launch'],['Invert pitch',C.invert,()=>{C.invert=!C.invert;persist();},'Up/down reversed, like a flight simulator']];
+   tg.forEach(([l,on,fn,d],i)=>{const y=226+i*50;text(ctx,l,150,y+6,'#e6e9f2',17);text(ctx,d,150,y+28,'#9aa3c7',12,'left',false);button(ctx,B(600,y,120,34,on?'ON':'OFF',fn,{bg:on?'rgba(30,80,50,.9)':'rgba(60,30,40,.9)'}));});
+   text(ctx,`${here().name} · Day ${C.day} · ${Math.floor(C.credits)} Cr · ${rankOf(C.killPts)} · ${legalName(C.legal)}`,CX,440,'#9aa3c7',14,'center');
+   text(ctx,'Press P (or Esc) to pause and resume at any time.',CX,464,'#9aa3c7',13,'center');}
   else if(menuTab==='controls'){text(ctx,'Click a key to change it, then press the new key.',CX,94,'#9aa3c7',13,'center');
    ACTIONS.forEach(([id,l],i)=>{const col=i<10?0:1,row=i%10,x=40+col*370,y=116+row*34;text(ctx,l,x,y+7,'#e6e9f2',14);button(ctx,B(x+180,y,170,28,remap===id?'press a key…':keyName(id),()=>{remap=id;},{fs:12,bg:remap===id?'rgba(255,228,94,.9)':undefined,fg:remap===id?'#10142b':undefined}));});
    button(ctx,B(40,462,200,32,'RESET ALL KEYS',()=>{C.opt.keys=optDefaults().keys;persist();},{fs:12,border:'#ff2d55'}));
@@ -698,6 +712,6 @@ function makeStarlane(env){
  const legend=['sparrow','raven','hauler','warden'].map(k=>({name:SHIPS[k].name.toUpperCase(),pts:SHIPS[k].role.toUpperCase(),color:SHIPS[k].color,draw:(c,x,y,tt)=>{const m=MODELS[k],a=tt*1.2,o={r:[Math.cos(a),0,-Math.sin(a)],u:[0,1,0],f:[Math.sin(a),0,Math.cos(a)]};c.strokeStyle=SHIPS[k].color;c.lineWidth=1.2;c.beginPath();
    const pts=m.pts.map(p=>{const w=toWorld(o,p);const z=w[2]+320,s=70/z;return[x+w[0]*s*1.2,y-(w[1]*Math.cos(.4)-w[2]*Math.sin(.4))*s*1.2];});for(const e of m.edges){c.moveTo(...pts[e.a]);c.lineTo(...pts[e.b]);}c.stroke();}}));
  return Retro.intro(G,{title:'STARLANE TRADER',color:'#3fe0ff',sub:'TRADE - FIGHT - EXPLORE THE GALAXY',tableTitle:'SHIPS YOU WILL MEET',legend,stars:true,bg:'#000',hi:env.hi,hint:C.flight?'RESUMING YOUR SAVED FLIGHT - PRESS FIRE':C.day>1||C.credits!==100?`WELCOME BACK, COMMANDER - DAY ${C.day} - ${Math.floor(C.credits)} CR`:'A NEW COMMANDER WITH 100 CREDITS - PRESS FIRE'});}
-GAME_LIST.push({id:'starlane',name:'Starlane Trader',icon:'🚀',desc:'Trade, fight and explore a whole galaxy. Your career is saved!',two:'none'});
+GAME_LIST.push({id:'starlane',name:'Starlane Trader',icon:'🪐',desc:'Trade, fight and explore a whole galaxy. Your career is saved!',two:'none'});
 Object.assign(PADS,{starlane:[]});
 Object.assign(GAMES,{starlane:makeStarlane});

@@ -49,7 +49,7 @@ const Storage=(()=>{
  const status=()=>({...meta,auto:!!handle&&meta.state!=='reconnect'&&meta.state!=='error',canPick,localOK});
  function emit(){if(pid)lsSet(kMeta(pid),meta);onStatus(status());}
  function set(p){Object.assign(meta,p);emit();}
- function pack(){const p=current();return JSON.stringify({app:APP_ID,version:VERSION,savedAt:new Date().toISOString(),profile:{name:p?p.name:'Player'},...getData()},null,1);}
+ function pack(){const p=current(),d=getData();return JSON.stringify({app:APP_ID,version:VERSION,savedAt:new Date().toISOString(),profile:{name:p?p.name:'Player'},...d,sig:typeof Family!=='undefined'?Family.sig(d.stats):undefined},null,1);}
  function unpack(text){let o;try{o=JSON.parse(text)}catch(e){throw new Error('That file isn’t a progress file (it can’t be read).')}
   if(!o||o.app!==APP_ID||!o.stats||typeof o.stats!=='object')throw new Error('That file isn’t a Maths Missions progress file.');
   if(o.version>VERSION)throw new Error('That file was saved by a newer version of the app.');

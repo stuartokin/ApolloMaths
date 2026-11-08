@@ -350,3 +350,15 @@ dialog.tour-front[open]{position:fixed;inset:0;margin:auto;z-index:91}
 .arc-game.nopad #arcCanvas{max-height:calc(100dvh - 240px)!important}
 @media (pointer:fine){.arc-game.nopad #arcCanvas{max-height:calc(100dvh - 270px)!important}}
 .arc-game.nopad .arc-pad{display:none}
+
+/* ---- Family codes & fair play ---- */
+.famdlg{max-width:520px;width:calc(100vw - 24px);border:0;border-radius:20px;padding:18px 20px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.famdlg::backdrop{background:rgba(10,14,40,.6)}
+.famdlg label{display:block;font-weight:800;margin:10px 0 2px}.famdlg label .mini{font-weight:600}
+.famdlg input:not([type=checkbox]){width:100%;box-sizing:border-box;padding:10px 12px;border:2px solid #c8d0ff;border-radius:12px;font-size:16px;margin-top:4px}
+.famdlg label.chk{display:flex;gap:8px;align-items:center;font-weight:700}.famdlg .plerr{color:#d6234a;font-weight:800;min-height:1em}
+.fam-rec{background:#fff8d6;border:2px dashed #e0b400;border-radius:14px;padding:10px 14px;margin:10px 0}.fam-code{font:900 26px/1.2 "Courier New",monospace;letter-spacing:2px;text-align:center;color:#10142b}
+.fam-tab{width:100%;border-collapse:collapse;margin:8px 0}.fam-tab td,.fam-tab th{padding:6px;border-bottom:1px solid #e3e7f5;text-align:left}
+.fam-log{list-style:none;padding:0;margin:6px 0;max-height:220px;overflow:auto}.fam-log li{padding:4px 0;border-bottom:1px solid #eef1fb}
+.fambanner{display:flex;gap:10px;align-items:center;justify-content:space-between;background:#fff4c2;border:2px solid #e0b400;border-radius:16px;padding:10px 14px;margin:10px 0;font-weight:700}
+.tabblock{position:fixed;inset:0;z-index:9999;background:rgba(10,14,40,.94);display:none;align-items:center;justify-content:center;text-align:center;color:#fff;padding:24px}.tabblock.on{display:flex}.tabblock>div{max-width:440px}

@@ -1,7 +1,25 @@
 {
- "version": "2.18",
+ "version": "2.19",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.19",
+   "date": "9 November 2026",
+   "kids": [
+    "🪐 Starlane Trader has a new icon — and an optional solid 3D look with real lighting (turn it on in its pause menu)",
+    "🔐 A grown-up now chooses your secret codes for the games",
+    "💾 Your progress is backed up automatically"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "👪 Family codes: a grown-up sets a passphrase (or 6+ digit PIN) and the child’s secret word and 00 number code — stored scrambled in the child’s profile; old shared codes stop working; one-time recovery code.",
+    "🛡️ Fair play: one tab at a time, game time can’t be reduced by older files, device-clock checks, hand-edited files detected, new players start locked, 5 automatic backups with restore, and a log in the Parent dashboard.",
+    "📱 Help: new “Keeping it fair” and “Parental controls on your devices” guides.",
+    "🪐 Starlane Trader: new icon and an optional 3D lighting mode."
+   ]
+  },
   {
    "v": "2.18",
    "date": "9 November 2026",
@@ -122,17 +140,6 @@
    "tags": [],
    "items": [
     "🎙️ Choose any voice your device has for each job — tour guide, announcer, question reader and teacher (🎙️ Voices → Voice for each job). Choices are saved; if a voice isn’t on another device, Automatic is used there."
-   ]
-  },
-  {
-   "v": "2.9",
-   "date": "7 November 2026",
-   "kids": [],
-   "tags": [],
-   "items": [
-    "🔊 Reading aloud: tap 🔊 to hear a question, an explainer, a worked method, a Learn step or an example read out. Different voices for the tour, announcements, questions and teaching — choose female or male voices and the speed in 🎙️ Voices.",
-    "📣 Announcements (celebrations, tips and answer feedback) can be read out — the 🔊 / 🔇 button at the top turns them on or off.",
-    "🗺️ The tours now read themselves aloud and move on automatically, with a pause button. The grown-ups’ tour now opens the Parent dashboard and explains each tab, especially the Focus areas."
    ]
   }
  ]

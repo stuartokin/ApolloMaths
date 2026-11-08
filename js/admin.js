@@ -12,7 +12,7 @@ const Admin=(()=>{
  const fmtM=s=>Math.round(s/60)+' min';
  const isUnlocked=()=>Date.now()<unlockedUntil;
  // ---- secret words ----
- function secret(text){const raw=String(text||'').trim();if(validCode(raw)){const st=store(),h=wordHash(raw);if(h===(st.adminNumHash||DEFAULT_WORDS.adminNum))return'admin';if(h===(st.kidNumHash||DEFAULT_WORDS.kidNum))return'kid';return null;}
+ function secret(text){const raw=String(text||'').trim();const fr=typeof Family!=='undefined'?Family.secret(raw):undefined;if(fr!==undefined)return fr;if(validCode(raw)){const st=store(),h=wordHash(raw);if(h===(st.adminNumHash||DEFAULT_WORDS.adminNum))return'admin';if(h===(st.kidNumHash||DEFAULT_WORDS.kidNum))return'kid';return null;}
   const h=wordHash(text);if(!h||normWord(text).length<4)return null;const st=store();
   if(h===(st.adminHash||DEFAULT_WORDS.admin))return'admin';if(h===(st.kidHash||DEFAULT_WORDS.kid))return'kid';return null;}
  // ---- PIN ----
@@ -49,7 +49,7 @@ const Admin=(()=>{
   const row=(c)=>`<tr>${c.map(x=>`<td>${x}</td>`).join('')}</tr>`;
   return `${pick2()}<p class="mini">High scores — ${[["player","Invaders (my player)"],["classic","Invaders (classic)"],...GAME_LIST.slice(1).map(g=>[g.id,g.name])].map(([k,n])=>`${n}: <b>${(s.arcade.high[k]||0).toLocaleString('en-GB')}</b>`).join(' · ')}</p><h3>By day</h3><div class="tablewrap"><table class="ptable"><thead><tr><th>Day</th><th>Sessions</th><th>Minutes</th><th>Best score</th></tr></thead><tbody>${Object.keys(days).sort().reverse().map(k=>row([new Date(k+'T12:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}),days[k].n,Math.round(days[k].secs/60),days[k].best])).join('')||'<tr><td colspan="4" class="muted">No games yet.</td></tr>'}</tbody></table></div>
   <h3>Recent games</h3><div class="tablewrap"><table class="ptable"><thead><tr><th>When</th><th>Game</th><th>Time</th><th>Score</th><th>Level</th><th>Ended</th></tr></thead><tbody>${P.slice(-30).reverse().map(p=>row([new Date(p.t).toLocaleString('en-GB',{weekday:'short',hour:'2-digit',minute:'2-digit'}),(GAME_LIST.find(g=>g.id===p.game)||GAME_LIST[0]).name+(p.game==='invaders'||!p.game?(p.theme==='classic'?' (classic)':' (my player)'):''),Math.round(p.secs/60*10)/10+' min',p.score.toLocaleString('en-GB'),p.wave,{time:'Time up',gameover:'Game over',stopped:'Stopped'}[p.end]||p.end])).join('')||'<tr><td colspan="6" class="muted">No games yet.</td></tr>'}</tbody></table></div>`;}
- function wordsTab(){return `<p class="mini">Secret words are typed into the answer box and sent with SHOOT (or typed anywhere on a computer). Spaces and capitals don’t matter. They are stored scrambled <b>on this device</b> — on another device, set them again (or the defaults apply).</p>
+ function wordsTab(){if(typeof Family!=='undefined'&&Family.ready())return `<div class="arc-card"><h3>👪 Family codes are in use</h3><p>The child’s secret word, number code and your parent passphrase are now set in the <b>Parent dashboard → Settings → Fair play &amp; safety</b>. The old codes no longer work.</p><button class="primary" data-fam="setup" type="button">Change family codes</button></div>`;return `<p class="mini">Secret words are typed into the answer box and sent with SHOOT (or typed anywhere on a computer). Spaces and capitals don’t matter. They are stored scrambled <b>on this device</b> — on another device, set them again (or the defaults apply).</p>
   <label class="adm-line">Arcade word (for ${esc(cur()?cur().name:'the player')})<span><input id="wKid" autocomplete="off" placeholder="New arcade word"><button class="secondary" data-adm="kid" type="button">Save</button></span></label>
   <label class="adm-line">Admin word (yours)<span><input id="wAdmin" autocomplete="off" placeholder="New admin word"><button class="secondary" data-adm="adminword" type="button">Save</button></span></label>
   <p class="mini"><b>Number codes</b> work on tablets that only show a number keypad. They must start with <b>00</b> and be 6–10 digits long (a real answer never starts with 00).</p>
@@ -80,12 +80,13 @@ const Admin=(()=>{
   else if(a==='newpin'){const v=get('wPin').value;if(!/^\d{4,8}$/.test(v)){toast('Use 4 to 8 digits.');return;}const st=store();st.salt=Math.random().toString(36).slice(2)+Date.now().toString(36);st.pinHash=pinHash(v,st.salt);put(st);toast('🔐 New PIN saved.');render();}
   else if(a==='locks'){const st=store();st.lockParent=get('lParent').checked;st.lockReset=get('lReset').checked;put(st);toast('🔒 Locks saved.');}
   else if(a==='play'){close();Arcade.open({admin:true});}}
- function open(t='rules'){tab=t;err='';render();const d=dlg();if(d.showModal){if(!d.open)d.showModal();}else d.setAttribute('open','');setTimeout(()=>{const i=get('pinIn')||get('pinNew');if(i)i.focus();},50);}
+ function open(t='rules'){if(typeof Family!=='undefined'&&Family.ready()&&!isUnlocked()){Family.ask('Open advanced settings').then(ok=>{if(ok){unlockedUntil=Date.now()+15*60000;open(t);}});return;}tab=t;err='';render();const d=dlg();if(d.showModal){if(!d.open)d.showModal();}else d.setAttribute('open','');setTimeout(()=>{const i=get('pinIn')||get('pinNew');if(i)i.focus();},50);}
  function close(){const d=dlg();if(d.close)d.close();else d.removeAttribute('open');}
  // Ask for the PIN before something locked (Parent dashboard / reset). Runs fn straight away if unlocked or not locked.
- function guard(what,fn){const st=store();if(!st[what]||!st.pinHash||isUnlocked()){fn();return;}after=fn;tab='rules';err='';open();}
+ function guard(what,fn){if(typeof Family!=='undefined'&&Family.ready()){const st0=store();if(what==='lockReset'||st0[what])Family.ask(what==='lockReset'?'Clear this player’s progress':'Open the Parent dashboard').then(ok=>{if(ok)fn();});else fn();return;}const st=store();if(!st[what]||!st.pinHash||isUnlocked()){fn();return;}after=fn;tab='rules';err='';open();}
  function init(){const d=dlg();d.addEventListener('click',onClick);d.addEventListener('change',e=>{if(e.target.id==='admWho'){who=e.target.value;render();}});
   d.addEventListener('keydown',e=>{if(e.key==='Enter'){if(get('pinIn')&&e.target.id==='pinIn')checkPin();else if(e.target.id==='pinNew2')setPin();}});}
- const locked=what=>{const st=store();return !!(st[what]&&st.pinHash&&!isUnlocked());};
- return{init,open,secret,guard,locked};
+ const locked=what=>{if(typeof Family!=='undefined'&&Family.ready())return what==='lockParent'?!!store().lockParent&&!Family.unlocked():false;const st=store();return !!(st[what]&&st.pinHash&&!isUnlocked());};
+ const hasPin=()=>!!store().pinHash,pinOk=v=>{const st=store();return !!st.pinHash&&pinHash(v,st.salt)===st.pinHash;};
+ return{init,open,secret,guard,locked,hasPin,pinOk};
 })();
