@@ -52,6 +52,7 @@ const SL=(()=>{
  MODELS.mine=scaleModel(hull([...ring(6,14,0,0),...[[0,0,30],[0,0,-30],[30,0,0],[-30,0,0],[0,30,0],[0,-30,0]]]),1.4);
  // the alien disc: flat octagon with domes above and below
  MODELS.vorn=scaleModel(hull([...ring(8,64,0,0).map(p=>[p[0],0,p[1]]),...ring(8,28,0,0).map(p=>[p[0],13,p[1]]),...ring(8,28,0,0).map(p=>[p[0],-13,p[1]])]),2);
+ MODELS.mother=scaleModel(MODELS.vorn,2.8);
  function asteroidModel(seed){const r=rng(seed),t=(1+Math.sqrt(5))/2,b=[[-1,t,0],[1,t,0],[-1,-t,0],[1,-t,0],[0,-1,t],[0,1,t],[0,-1,-t],[0,1,-t],[t,0,-1],[t,0,1],[-t,0,-1],[-t,0,1]];
   const s=80+r()*100;return hull(b.map(p=>mul(norm(p),s*(.78+r()*.4))));}
 
@@ -67,6 +68,8 @@ const SL=(()=>{
   canister:{name:'Cargo canister',role:'cargo',model:'canister',speed:0,turn:.6,energy:12,laser:0,bounty:0,cargo:0,color:'#ffe45e',kill:0},
   missile:{name:'Missile',role:'missile',model:'missile',speed:700,turn:2.6,energy:5,laser:0,bounty:0,cargo:0,color:'#ff8a1c',kill:0},
   mine:{name:'Pirate mine',role:'mine',model:'mine',speed:0,turn:.5,energy:8,laser:0,bounty:25,cargo:0,color:'#ff2d55',kill:0},
+  beacon:{name:'Strange beacon',role:'beacon',model:'capsule',speed:0,turn:.5,energy:9999,laser:0,bounty:0,cargo:0,color:'#b45bd6',kill:0},
+  mother:{name:'Vorn Mothership',role:'alien',model:'mother',speed:140,turn:.6,energy:900,laser:16,bounty:1500,cargo:3,color:'#9dff2e',kill:20,relic:true},
   capsule:{name:'Escape capsule',role:'cargo',model:'capsule',speed:120,turn:.5,energy:8,laser:0,bounty:0,cargo:0,color:'#fff',kill:0},
  };
 
@@ -97,6 +100,7 @@ const SL=(()=>{
   {id:'energy',name:'Extra energy unit (faster recharge)',price:1500,tech:8},
   {id:'dock',name:'Docking computer (automatic docking)',price:1500,tech:9},
   {id:'rearlaser',name:'Rear pulse laser',price:400,tech:3},
+  {id:'hidden',name:'Hidden cargo compartment (hides illegal goods)',price:1500,tech:4},
   {id:'mining',name:'Mining laser (splits asteroids)',price:800,tech:10,laser:'mining'},
   {id:'military',name:'Military laser (front)',price:6000,tech:11,laser:'military'},
  ];
@@ -139,13 +143,13 @@ function makeStarlane(env){
  const W=800,H=600,VH=400,CX=400,CY=200,FOC=380,GSEED=20261108,COUNT=160,GAL=SL.makeGalaxy(GSEED,COUNT);
  const G={W,H,score:0,lives:1,level:1,levelName:'Rank',over:false,preferFull:true};
  const FX=Retro.fx();
- const ACTIONS=[['rollL','Roll left',['ArrowLeft','a'],1],['rollR','Roll right',['ArrowRight','d'],1],['up','Nose up',['ArrowUp','w'],1],['down','Nose down',['ArrowDown','s'],1],['fast','Speed up',['r','+','='],1],['slow','Slow down',['f','-'],1],['fire','Fire laser',[' '],1],
-  ['missile','Fire missile',['m']],['ecm','E.C.M.',['e']],['bomb','Shock pulse',['b']],['jump','Jump drive',['j']],['dock','Docking computer',['c']],['hyper','Hyperspace',['h']],['time','Speed up time',['t']],['view','Next view',['v']],['cam','Outside camera',['o']],['chart','Galaxy chart',['g']],['cargo','Cargo hold',['i']],['missions','Missions',['k']],['pod','Escape capsule',['x']],['tips','Hover help on/off',['F1']]];
- const optDefaults=()=>({cockpit:true,lit:true,tips:true,cuts:true,keys:Object.fromEntries(ACTIONS.map(a=>[a[0],a[2].slice()]))});
- function fixOpt(){C.opt=Object.assign(optDefaults(),C.opt||{});C.opt.keys=Object.assign(optDefaults().keys,C.opt.keys||{});if(!(C.optVer>=2)){C.opt.lit=true;C.opt.cockpit=true;C.optVer=2;}if(C.hull===undefined)C.hull=0;C.medals=C.medals||{};C.log=C.log||[];C.rescued=C.rescued||0;}
+ const ACTIONS=[['rollL','Roll left',['ArrowLeft','a'],1],['rollR','Roll right',['ArrowRight','d'],1],['yawL','Turn left',['q'],1],['yawR','Turn right',['e'],1],['up','Nose up',['ArrowUp','w'],1],['down','Nose down',['ArrowDown','s'],1],['fast','Speed up',['r','+','='],1],['slow','Slow down',['f','-'],1],['fire','Fire laser',[' '],1],
+  ['missile','Fire missile',['m']],['ecm','E.C.M.',['u']],['bomb','Shock pulse',['b']],['jump','Jump drive',['j']],['dock','Docking computer',['c']],['hyper','Hyperspace',['h']],['time','Speed up time',['t']],['view','Next view',['v']],['cam','Outside camera',['o']],['chart','Galaxy chart',['g']],['cargo','Cargo hold',['i']],['missions','Missions',['k']],['pod','Escape capsule',['x']],['tips','Hover help on/off',['F1']],['rlock','Roll lock on/off',['l']],['spin','Match station spin',['y']],['scan','Next radar target',['n']],['mfd','Cockpit screens on/off',['F2']]];
+ const optDefaults=()=>({voice:true,aiName:'NOVA',redAlert:true,mfd:true,maths:true,cockpit:true,lit:true,tips:true,cuts:true,keys:Object.fromEntries(ACTIONS.map(a=>[a[0],a[2].slice()]))});
+ function fixOpt(){C.opt=Object.assign(optDefaults(),C.opt||{});C.opt.keys=Object.assign(optDefaults().keys,C.opt.keys||{});if(!(C.optVer>=2)){C.opt.lit=true;C.opt.cockpit=true;C.optVer=2;}if(!(C.optVer>=3)){if((C.opt.keys.ecm||[]).join()==='e')C.opt.keys.ecm=['u'];C.optVer=3;}C.paid=C.paid||{};C.ship=C.ship||'kestrel';if(C.hull===undefined)C.hull=0;C.medals=C.medals||{};C.log=C.log||[];C.rescued=C.rescued||0;}
  // ---------------- commander (saved with the player's progress) ----------------
  function newCommander(){const start=GAL.find(s=>s.gov>=5&&s.tech>=6&&s.eco>=4)||GAL.find(s=>s.gov>=4)||GAL[0];
-  return{v:1,optVer:2,hull:0,medals:{},log:[],rescued:0,opt:optDefaults(),flight:null,sys:start.i,credits:100,fuel:7,cargo:{},cap:20,equip:{},front:'pulse',rear:null,missiles:3,legal:0,killPts:0,kills:0,day:1,missions:[],gov:{},news:[],visited:{[start.i]:1},target:null,invert:false,done:0,market:null,board:null};}
+  return{v:1,optVer:3,paid:{},ship:'kestrel',hull:0,medals:{},log:[],rescued:0,opt:optDefaults(),flight:null,sys:start.i,credits:100,fuel:7,cargo:{},cap:20,equip:{},front:'pulse',rear:null,missiles:3,legal:0,killPts:0,kills:0,day:1,missions:[],gov:{},news:[],visited:{[start.i]:1},target:null,invert:false,done:0,market:null,board:null};}
  let C=(()=>{const s=env.store&&env.store.get();return s&&s.v===1&&GAL[s.sys]?JSON.parse(JSON.stringify(s)):newCommander();})();
  fixOpt();
  let lastSaved='',lastSaveClock=0;
@@ -165,15 +169,33 @@ function makeStarlane(env){
  // subtle hints about what a system makes and needs
  function tradeHint(s){const H=['Huge orbital foundries and robot factories cover the land; the cities buy almost all their food from off-world.','Busy factory towns hum day and night, though the farms struggle to feed everyone.','Old, run-down factories rattle along; workers here can rarely afford luxuries.','Factories and farms sit side by side, but industry is what keeps the lights on.','Wide farmlands and fishing seas dominate, with only a few small workshops.','Rich, fertile valleys export food and spices; machines and computers must be shipped in.','Patchwork farms grow most of what the people eat; good tools are hard to come by.','Simple farming villages depend on the land; anything high-tech is rare and precious.'];
   return H[s.eco]+(s.tech>=10?' Its universities are famous for advanced technology.':s.tech<=3?' Spare parts and medicines are always in short supply.':'');}
+ // ---------------- your ship's assistant (voice + subtitles; can be muted and renamed) ----------------
+ const aiGap={};
+ function say(id,text,gap=15){const now=performance.now()/1000;if(aiGap[id]&&now-aiGap[id]<gap)return;aiGap[id]=now;const name=(C.opt.aiName||'NOVA').toUpperCase();aiLine={name,text,until:now+Math.max(4,text.length/14)};
+  if(C.opt.voice&&env.sound!==false&&window.Speech&&Speech.ok)try{Speech.say(text,'tour');}catch(e){}}
+ function drawAI(ctx,y){if(!aiLine)return;const now=performance.now()/1000;if(now>aiLine.until){aiLine=null;return;}ctx.font='bold 13px "Courier New",monospace';const t=`${aiLine.name}: ${aiLine.text}`,w=Math.min(W-40,ctx.measureText(t).width+24);ctx.fillStyle='rgba(8,20,40,.85)';ctx.strokeStyle='#3fe0ff';ctx.lineWidth=1.5;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(CX-w/2,y,w,26,8);else ctx.rect(CX-w/2,y,w,26);ctx.fill();ctx.stroke();text(ctx,t.length>96?t.slice(0,95)+'…':t,CX,y+6,'#bdf3ff',13,'center');}
+ // ---------------- maths challenges (from the app's own question bank) ----------------
+ function makeMathQ(){if(typeof bank==='undefined')return null;const topics=Object.keys(bank);for(let t=0;t<40;t++){const list=bank[topics[Math.floor(Math.random()*topics.length)]];if(!list||!list.length)continue;let q;try{q=list[Math.floor(Math.random()*list.length)]();}catch(e){continue;}
+   if(!q||typeof q.q!=='string'||q.fig||q.table||!Number.isFinite(+q.a)||q.q.length>230)continue;const a=+q.a,dp=(String(q.a).split('.')[1]||'').length,fm=v=>dp?(+v).toFixed(dp):String(Math.round(v));
+   const set=new Set([fm(a)]);const d=[1,2,5,10,Math.max(1,Math.round(a*.1)),Math.max(1,Math.round(a*.5)),3];let k=0;while(set.size<4&&k<40){const v=a+(Math.random()<.5?-1:1)*d[k%d.length]*(dp?Math.pow(10,-dp)*10:1);if(v>=0||a<0)set.add(fm(v));k++;}
+   const opts=[...set].sort(()=>Math.random()-.5);return{q:q.q.replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' '),opts,ans:fm(a),u:q.u||''};}return null;}
+ function openMath(kind,after){const q=makeMathQ();if(!q){after(false);return;}mathQ={...q,kind,after,picked:null};overlay='maths';say('maths'+kind,kind==='hyper'?'The navigation computer needs a calculation. Solve it to save fuel!':'Crack the canister code by solving this.',20);}
+ function renderMath(ctx){btns=[];ctx.fillStyle='rgba(2,4,14,.9)';ctx.fillRect(0,0,W,H);const m=mathQ;ctx.fillStyle='#0b1028';ctx.strokeStyle='#ffe45e';ctx.lineWidth=3;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(60,70,680,430,16);else ctx.rect(60,70,680,430);ctx.fill();ctx.stroke();
+  text(ctx,m.kind==='hyper'?'🧮 NAVIGATION CALCULATION':'🔐 CRACK THE CANISTER CODE',CX,88,'#ffe45e',20,'center');text(ctx,m.kind==='hyper'?'Get it right to save 30% of the fuel for this jump.':'Get it right to open the canister of treasure.',CX,116,'#9aa3c7',13,'center');
+  const y=wrap(ctx,m.q,90,150,620,22,'#e6e9f2',16);m.opts.forEach((o,i)=>{const bx=90+(i%2)*315,by=Math.max(y+20,260)+Math.floor(i/2)*64;const right=o===m.ans,picked=m.picked===o;button(ctx,B(bx,by,300,52,`${i+1})  ${o} ${m.u}`.trim(),()=>{if(m.picked===null)pickMath(o);},{fs:16,bg:m.picked!==null?(right?'rgba(30,120,60,.95)':picked?'rgba(140,30,40,.95)':undefined):undefined}));});
+  if(m.picked!==null){text(ctx,m.picked===m.ans?'✅ Correct — brilliant!':`❌ Not quite — the answer was ${m.ans} ${m.u}`,CX,430,m.picked===m.ans?'#3cff6a':'#ff8a1c',16,'center');button(ctx,B(CX-100,456,200,36,'CONTINUE ▶',()=>finishMath(),{fs:14}));}
+  else text(ctx,'Press 1–4 or tap an answer. (Use a scratch pad if it helps!)',CX,470,'#9aa3c7',12,'center');}
+ function pickMath(o){mathQ.picked=o;const ok=o===mathQ.ans;env.beep(ok?1200:200,.25,'triangle',.05,ok?1.5:.6);say('mres',ok?'Correct! Well done, commander.':`Not quite. The answer was ${mathQ.ans}.`,1);}
+ function finishMath(){const m=mathQ;mathQ=null;overlay=null;m.after(m.picked===m.ans);}
  // medals
- const MEDALS={launch:'🚀 First flight',dock:'🛬 First docking',kill:'🎯 First pirate',mission:'📦 First mission',rich1:'💰 1,000 credits',rich10:'💎 10,000 credits',explorer:'🧭 Visited 10 systems',hero:'🗳️ Changed a government',rescue:'🛟 Rescued a survivor',miner:'⛏️ Cleared a hazard',daredevil:'🕳️ Escaped a black hole'};
+ const MEDALS={story:'⭐ Defeated the Vorn mothership',launch:'🚀 First flight',dock:'🛬 First docking',kill:'🎯 First pirate',mission:'📦 First mission',rich1:'💰 1,000 credits',rich10:'💎 10,000 credits',explorer:'🧭 Visited 10 systems',hero:'🗳️ Changed a government',rescue:'🛟 Rescued a survivor',miner:'⛏️ Cleared a hazard',daredevil:'🕳️ Escaped a black hole'};
  function medal(id){if(!C.medals||C.medals[id])return;C.medals[id]=C.day;msg(`🏅 MEDAL: ${MEDALS[id].toUpperCase()}`,4,'#ffe45e');env.beep(880,.15,'triangle',.05,1.5);setTimeout(()=>env.beep(1320,.25,'triangle',.05,1.2),160);}
  // ---------------- messages ----------------
  let msgs=[];const msg=(t,d=3,c='#ffe45e')=>{msgs=msgs.filter(m=>m.t!==t);msgs.push({t,d,c});if(msgs.length>3)msgs.shift();};
  // ---------------- state ----------------
  let mode='docked',tab='status',sel=0,selEq=0,selMis=0,chartMode='galaxy',anim=0,view='front',paused=false,overlay=null,clock=0,deathT=0,hyperT=0,hyperTo=null,interdicted=false,podArm=0;
  // flight world
- let arrival=[],hazards=[],bh=null,suns=[],moons=[],feat=null,CAM={pos:V(),r:V(1,0,0),u:V(0,1,0),f:V(0,0,1)},camMode='cockpit',timeScale=1,exitT=0,hyp=[],scene=null,hover=null,tip=null,remap=null,menuTab='main',helpTab=0,saveNote='',apFinal=false,P,planet,station,sun,ships=[],dust=[],booms=[],spawnT=0,laserT=0,firing=false,laserShow=0,dockComp=false,jump=false,massLock=false,ecmT=0,dockMusic=null,lastHit=0;
+ let hyperBonus=false,rollLock=false,lockRate=0,radarTgt=null,ptrXY=null,redOn=false,lastHitT=-99,aiLine=null,dataSel='target',yardMode='equip',mathQ=null,storm=0,flareT=0,nextEvent=120,policeScan=false,stationAlarm=false,arrival=[],hazards=[],bh=null,suns=[],moons=[],feat=null,CAM={pos:V(),r:V(1,0,0),u:V(0,1,0),f:V(0,0,1)},camMode='cockpit',timeScale=1,exitT=0,hyp=[],scene=null,hover=null,tip=null,remap=null,menuTab='main',helpTab=0,saveNote='',apFinal=false,P,planet,station,sun,ships=[],dust=[],booms=[],spawnT=0,laserT=0,firing=false,laserShow=0,dockComp=false,jump=false,massLock=false,ecmT=0,dockMusic=null,lastHit=0;
  const SAFE=16000;
  function bodyTex(kind,seed){const r=rng(seed>>>0),f=[],cl=[];let base,atmo=null,bands=null;
   if(kind==='gas'){base=rp(r,['#c9935a','#b98a6a','#8fa8c8','#c8b07a']);bands=Array.from({length:7},(_,i)=>({lat:-1.1+i*.37+(r()-.5)*.1,w:.06+r()*.07,col:rp(r,['#e2b882','#9a6a3c','#d9c39a','#7d5a3a','#a9c0dc'])}));f.push({lon:r()*6.28,lat:(r()-.5)*.8,size:.16,col:'#b8553a',alpha:.85});atmo='rgba(255,220,160,.35)';}
@@ -205,7 +227,7 @@ function makeStarlane(env){
  function arrivalPos(){const s=station;const d=norm(sub(s.pos,planet.pos));const side=norm(cross(d,V(0,1,0)));return add(add(planet.pos,mul(d,planet.R*13)),mul(side,planet.R*2));}
  function placeAtArrival(){const s=station;
   const pos=arrivalPos();const f=norm(sub(s.pos,pos));const o={f,u:V(0,1,0),r:V(1,0,0)};ortho(o);P.pos=pos;P.o=o;}
- function newPlayer(){const lasers=C.front||'pulse';P={hull:0,cracks:[],pos:V(),o:{r:V(1,0,0),u:V(0,1,0),f:V(0,0,1)},speed:0,throttle:.3,max:330,shF:100,shA:100,energy:100,cabin:20,heat:0,roll:0,pitch:0,cool:0};}
+ function newPlayer(){const lasers=C.front||'pulse';P={hull:0,cracks:[],yaw:0,pos:V(),o:{r:V(1,0,0),u:V(0,1,0),f:V(0,0,1)},speed:0,throttle:.3,max:shipCls().speed,shF:100,shA:100,energy:100,cabin:20,heat:0,roll:0,pitch:0,cool:0};}
  function initDust(){dust=Array.from({length:110},()=>add(P.pos,V((Math.random()-.5)*3000,(Math.random()-.5)*3000,(Math.random()-.5)*3000)));}
  function moveDust(){for(let i=0;i<dust.length;i++){const rel=sub(dust[i],P.pos);if(len(rel)>1700){const fwd=P.speed>40?mul(P.o.f,700+Math.random()*900):V();dust[i]=add(add(P.pos,fwd),V((Math.random()-.5)*2600,(Math.random()-.5)*2600,(Math.random()-.5)*2600));}}}
  // ---------------- ships in the local bubble ----------------
@@ -228,26 +250,29 @@ function makeStarlane(env){
   if((inSafe&&r<.6)||(C.legal>=50&&r<.7)){spawn('warden',station&&inSafe?add(station.pos,mul(station.o.f,520)):aroundPlayer(6000),{angry:C.legal>=50,target:C.legal>=50?'player':null,f:station&&inSafe?station.o.f:undefined,speed:300});if(C.legal>=50)msg('POLICE ARE AFTER YOU!',3,'#ff2d55');return;}
   if(feat&&feat.meteors&&r<.75&&!inSafe){const a=spawn('asteroid',aroundPlayer(6000,1.2),{speed:0});a.drift=mul(norm(add(P.o.r,mul(P.o.u,Math.random()-.5))),-900);msg('METEOR SHOWER!',2,'#ff8a1c');return;}
   if(r<.68&&!inSafe){spawn('asteroid',aroundPlayer(5000,2),{speed:10});return;}
-  if(r<.78&&!inSafe&&Math.random()<.35){const c=spawn('capsule',aroundPlayer(4500,1.4),{speed:0});c.rescue=true;msg('SOS BEACON — AN ESCAPE CAPSULE IS NEARBY',3.5,'#3fe0ff');return;}
+  if(r<.78&&!inSafe&&Math.random()<.35){const c=spawn('capsule',aroundPlayer(4500,1.4),{speed:0});c.rescue=true;msg('SOS BEACON — AN ESCAPE CAPSULE IS NEARBY',3.5,'#3fe0ff');say('sos','Distress beacon detected. An escape capsule is nearby — fly into it slowly to rescue the survivor.',30);return;}
   if(r<.72&&!inSafe){const tr=spawn('hauler',aroundPlayer(5200),{});for(let i=0;i<2;i++){const p=spawn('sparrow',add(tr.pos,V(300*(i?1:-1),80,-200)),{angry:true,target:tr});p.distress=tr;}tr.distress=true;msg('MAYDAY! A TRADER IS UNDER ATTACK!',4,'#ff8a1c');}}
  // mission ships waiting in a system
- function missionSpawns(){for(const m of C.missions){if(m.sys!==C.sys)continue;
+ function missionSpawns(){for(const m of C.missions){if(m.type==='story'){if(m.stage===1&&C.sys===m.a){const b=spawn('beacon',add(station.pos,mul(station.o.f,6000)),{speed:0});b.hazard=true;msg('STRANGE SIGNAL DETECTED NEAR THE STATION',4,'#b45bd6');say('beacon','I am picking up a strange signal about six kilometres from the station. Fly close to it.',5);}
+    if(m.stage===3&&C.sys===m.c){const M=spawn('mother',aroundPlayer(9000),{angry:true,target:'player',mission:'story'});M.hazard=true;for(let i=0;i<3;i++)spawn('vorn',add(M.pos,V((i-1)*700,300,0)),{angry:true,target:'player'});msg('VORN MOTHERSHIP DETECTED!',5,'#9dff2e');say('mother','There it is — the Vorn mothership! Shields up, commander. This is it.',5);}continue;}
+   if(m.sys!==C.sys)continue;
    if(m.type==='bounty'&&!m.killed){const L=spawn('raven',aroundPlayer(9000),{angry:true,target:'player',energy:320,name:m.target,bounty:0,mission:m.id});L.leader=true;for(let i=0;i<2;i++)spawn('sparrow',add(L.pos,V(i?400:-400,100,0)),{angry:true,target:'player',mission:null});msg(`WANTED PIRATE ${m.target.toUpperCase()} IS HERE!`,4,'#ff2d55');}
    if(m.type==='political'&&m.kills<m.need){for(let i=0;i<m.need-m.kills;i++)spawn('raven',aroundPlayer(8000+i*500),{angry:true,target:'player',name:m.patrol,mission:m.id,bounty:60});msg(`${m.patrol.toUpperCase()} SHIPS DETECTED`,4,'#ff8a1c');}}}
  // ---------------- launching, docking, hyperspace ----------------
- function launch(){newPlayer();P.hull=C.hull||0;while(P.cracks.length<Math.floor(P.hull*9))P.cracks.push(makeCrack());medal('launch');buildSystem(false);P.pos=add(station.pos,mul(station.o.f,420));P.o={f:station.o.f.slice(),u:station.o.u.slice(),r:station.o.r.slice()};P.speed=120;P.throttle=.4;initDust();spawnT=6;dockComp=false;jump=false;
+ function launch(){newPlayer();rollLock=false;lockRate=0;radarTgt=null;policeScan=false;stationAlarm=false;P.hull=C.hull||0;while(P.cracks.length<Math.floor(P.hull*9))P.cracks.push(makeCrack());medal('launch');buildSystem(false);setTimeout(()=>{const f=SL.features(here());say('launch',`Systems online. ${f.obstacle?{field:'Warning: a dense asteroid field lies between us and the jump point.',mines:'Warning: pirate mines around the station approach.',blackhole:'Warning: a black hole in this system. Keep your distance.'}[f.obstacle]:'Have a good flight, commander.'}`,5);},800);P.pos=add(station.pos,mul(station.o.f,420));P.o={f:station.o.f.slice(),u:station.o.u.slice(),r:station.o.r.slice()};P.speed=120;P.throttle=.4;initDust();spawnT=6;dockComp=false;jump=false;
   // illegal cargo may be spotted by customs as you leave
-  const ill=Object.keys(C.cargo).filter(k=>GOODS[k][6]&&C.cargo[k]>0);if(ill.length&&here().gov>=3&&Math.random()<.5){C.legal+=6*ill.length;msg('CUSTOMS SCANNED YOUR CARGO — LEGAL STATUS: '+legalName(C.legal).toUpperCase(),4,'#ff2d55');}
+  const ill=Object.keys(C.cargo).filter(k=>GOODS[k][6]&&C.cargo[k]>0);if(ill.length&&here().gov>=3&&Math.random()<(has('hidden')?.12:.5)){C.legal+=6*ill.length;msg('CUSTOMS SCANNED YOUR CARGO — LEGAL STATUS: '+legalName(C.legal).toUpperCase(),4,'#ff2d55');}
   if(C.opt.cuts){scene=makeScene('launch');mode='launchScene';env.beep(160,2.6,'sawtooth',.035,3);}else{mode='launch';anim=0;env.beep(200,1.2,'sawtooth',.04,3);}timeScale=1;camMode='cockpit';view='front';missionSpawns();}
  function docked(auto){stopMusic();timeScale=1;dockComp=false;if(C.opt.cuts){scene=makeScene('dock');mode='dockScene';}else{mode='dockAnim';anim=0;}env.beep(600,.9,'triangle',.05,.4);
   // arriving: complete deliveries, refresh the board, save
   C.visited[C.sys]=1;finishDock();}
- function finishDock(){P&&(P.speed=0);C.flight=null;if(P)C.hull=P.hull||0;const s=here();const done=[];const report=[];medal('dock');if(C.pendingRescue){const rw=C.pendingRescue*150;C.credits+=rw;C.rescued+=C.pendingRescue;report.push({ok:true,t:`🛟 ${C.pendingRescue} survivor${C.pendingRescue>1?'s':''} handed to the station medics`,r:rw});C.pendingRescue=0;medal('rescue');}
+ function finishDock(){P&&(P.speed=0);C.flight=null;if(P)C.hull=P.hull||0;const s=here();const done=[];const report=[];medal('dock');if(C.newData){const rw=C.newData*25;C.credits+=rw;report.push({ok:true,t:`🧭 Exploration data for ${C.newData} new system${C.newData>1?'s':''} sold to the cartographers`,r:rw});C.newData=0;}if(C.pendingRescue){const rw=C.pendingRescue*150;C.credits+=rw;C.rescued+=C.pendingRescue;report.push({ok:true,t:`🛟 ${C.pendingRescue} survivor${C.pendingRescue>1?'s':''} handed to the station medics`,r:rw});C.pendingRescue=0;medal('rescue');}
   for(const m of C.missions){if(m.type==='courier'&&m.dest===C.sys){C.credits+=m.reward;done.push(m);report.push({ok:true,t:`📦 ${m.title} — delivered`,r:m.reward});}
    if(m.type==='bounty'&&m.killed&&m.from===C.sys){C.credits+=m.reward;done.push(m);report.push({ok:true,t:`🎯 ${m.title} — bounty paid`,r:m.reward});}
    if(m.type==='political'&&m.sys===C.sys&&!m.delivered&&(C.cargo[m.good]||0)>=m.qty){C.cargo[m.good]-=m.qty;m.delivered=true;report.push({ok:true,t:`🗳️ ${m.qty}t ${GOODS[m.good][0]} delivered for “${m.title}”${m.kills<m.need?` — now defeat ${m.need-m.kills} more patrol ship${m.need-m.kills>1?'s':''}`:''}`,r:0});}
    if(m.type==='political'&&m.delivered&&m.kills>=m.need&&!m.won){m.won=true;const old=GOV[sysOf(m.sys).gov];C.gov[m.sys]=m.newGov;C.credits+=m.reward;done.push(m);
     C.news.unshift({day:C.day,t:`${GAL[m.sys].name}: ${old} replaced by a ${GOV[m.newGov]} after help from Commander ${(env.names&&env.names[0])||'Pilot'}.`});C.news=C.news.slice(0,20);report.push({ok:true,t:`🗳️ ${m.title} — ${GAL[m.sys].name} is now a ${GOV[m.newGov]}!`,r:m.reward});medal('hero');}}
+  for(const m of C.missions)if(m.type==='story'&&C.sys===m.b){if(m.stage===2){m.stage=3;report.push({ok:true,t:`⭐ The charts are decoded! The Vorn mothership hides at ${GAL[m.c].name}. Destroy it!`,r:0});}else if(m.stage===4){C.credits+=m.reward;done.push(m);C.storyDone=true;report.push({ok:true,t:'⭐ The Vorn Signal — you saved the galaxy!',r:m.reward});medal('story');}}
   for(const m of C.missions)if(!done.includes(m)&&m.deadline&&C.day>m.deadline)report.push({ok:false,t:`❌ ${m.title} — too late (deadline was day ${m.deadline})`,r:0});
   C.missions=C.missions.filter(m=>!done.includes(m)&&!(m.deadline&&C.day>m.deadline&&(m.failed=true)));C.done+=done.length;if(done.length)medal('mission');
   for(const x of report)C.log.unshift({day:C.day,...x});C.log=C.log.slice(0,30);arrival=report;if(C.credits>=1000)medal('rich1');if(C.credits>=10000)medal('rich10');if(Object.keys(C.visited).length>=10)medal('explorer');
@@ -262,29 +287,32 @@ function makeStarlane(env){
    crash(30+P.speed*.2,!facing?'WRONG ANGLE!':!level?'MATCH THE SLOT’S ROTATION!':!slow?'TOO FAST TO DOCK!':'MISSED THE SLOT!');
    P.pos=add(s.pos,mul(s.o.f,front+s.m.rad*.2+80));P.speed=0;P.throttle=0;return;}
   crash(40+P.speed*.2,'COLLISION WITH THE STATION!');P.pos=add(s.pos,mul(norm(d),s.m.rad+90));P.speed=0;P.throttle=0;}
- function startHyper(){if(!C.target&&C.target!==0){msg('CHOOSE A DESTINATION ON THE CHART FIRST',3);return;}if(C.target===C.sys){msg('YOU ARE ALREADY THERE',2);return;}
+ function startHyper(skipMath){if(!C.target&&C.target!==0){msg('CHOOSE A DESTINATION ON THE CHART FIRST',3);return;}if(C.target===C.sys){msg('YOU ARE ALREADY THERE',2);return;}
   const d=SL.dist(GAL[C.sys],GAL[C.target]);if(d>C.fuel+1e-6){msg(`NOT ENOUGH FUEL (NEED ${d} LY)`,3,'#ff2d55');return;}if(hyperT>0){hyperT=0;msg('HYPERSPACE CANCELLED',2);return;}
+  if(!skipMath&&C.opt.maths&&Math.random()<.45){openMath('hyper',ok=>{hyperBonus=ok;startHyper(true);});return;}
   hyperT=5;hyperTo=C.target;hypInit();msg(`HYPERSPACE TO ${GAL[C.target].name.toUpperCase()}`,2,'#3fe0ff');}
  function doHyper(){const d=SL.dist(GAL[C.sys],GAL[hyperTo]);const alien=Math.random()<.03+(here().gov<=1?.02:0);mode='hyper';anim=0;timeScale=1;C.flight=null;if(!hyp.length)hypInit();env.beep(90,3.4,'sawtooth',.05,8);
-  if(alien){C.fuel=Math.max(0,C.fuel-d/2);interdicted=true;}else{C.fuel=Math.max(0,C.fuel-d);C.sys=hyperTo;interdicted=false;}
+  if(alien){C.fuel=Math.max(0,C.fuel-d/2);interdicted=true;}else{C.fuel=Math.max(0,C.fuel-d*(hyperBonus?.7:1));if(hyperBonus)msg(`PERFECT CALCULATION — SAVED ${(d*.3).toFixed(1)} LY OF FUEL`,4,'#3cff6a');hyperBonus=false;C.sys=hyperTo;interdicted=false;}
   C.day+=1+Math.round(d/2.5);C.legal=Math.floor(C.legal*.6);C.target=interdicted?hyperTo:null;stopMusic();}
  function arrive(){initDust();if(interdicted){buildSystem(true);P.pos=V(0,0,0);P.o={r:V(1,0,0),u:V(0,1,0),f:V(0,0,1)};for(let i=0;i<3;i++){const v=spawn('vorn',add(P.pos,V((i-1)*900,200,4000)),{angry:true,target:'player'});}msg('INTERDICTED! ALIEN VORN RAIDERS!',5,'#9dff2e');msg('DESTROY THEM, THEN HYPERSPACE ON',5,'#9dff2e');}
-  else{buildSystem(false);placeAtArrival();C.visited[C.sys]=1;missionSpawns();msg(`WELCOME TO ${here().name.toUpperCase()}`,4,'#3fe0ff');}
+  else{buildSystem(false);placeAtArrival();const fresh=!C.visited[C.sys];C.visited[C.sys]=1;if(fresh)C.newData=(C.newData||0)+1;missionSpawns();setTimeout(()=>{const t=here(),ev=sysEvent(C.sys,C.day),f=SL.features(t);say('arrive',`Welcome to ${t.name}, a ${GOV[t.gov].toLowerCase()}.${ev?' News: '+t.name+' is '+ev.text+'.':''}${f.obstacle?' Hazard ahead: '+{field:'an asteroid field',mines:'a pirate minefield',blackhole:'a black hole'}[f.obstacle]+'.':''}${fresh?' New system charted.':''}`,3);if(C.fuel<1.5)setTimeout(()=>say('fuel','Fuel is low. Refuel at the station.',60),5000);},1800);msg(`WELCOME TO ${here().name.toUpperCase()}`,4,'#3fe0ff');}
   P.speed=150;P.throttle=.5;mode='flight';}
  // ---------------- combat ----------------
- function hurt(d,fromDir,collision){const e0=P.energy;const front=dot(fromDir,P.o.f)>0;if(front){P.shF-=d;if(P.shF<0){P.energy+=P.shF;P.shF=0;}}else{P.shA-=d;if(P.shA<0){P.energy+=P.shA;P.shA=0;}}
+ function hurt(d,fromDir,collision){d=d/shipCls().shield;const e0=P.energy;lastHitT=clock;const front=dot(fromDir,P.o.f)>0;if(front){P.shF-=d;if(P.shF<0){P.energy+=P.shF;P.shF=0;}}else{P.shA-=d;if(P.shA<0){P.energy+=P.shA;P.shA=0;}}
   lastHit=.25;FX.shake(Math.min(8,2+d*.2));env.noise(.15,.05,1800);if(P.energy<e0){P.hull=Math.min(1,(P.hull||0)+(e0-P.energy)*.012);P.cracks=P.cracks||[];while(P.cracks.length<Math.floor(P.hull*9))P.cracks.push(makeCrack());}if(P.energy<=0)die();}
  function makeCrack(){const side=Math.floor(Math.random()*4);let x,y;if(side===0){x=40+Math.random()*(W-80);y=6+Math.random()*30;}else if(side===1){x=6+Math.random()*50;y=40+Math.random()*(VH-90);}else if(side===2){x=W-6-Math.random()*50;y=40+Math.random()*(VH-90);}else{x=Math.random()<.5?20+Math.random()*90:W-20-Math.random()*90;y=VH-10-Math.random()*40;}
   const lines=[];for(let k=0;k<3;k++){const pts=[[x,y]];let a=Math.atan2(VH/2-y,W/2-x)+(Math.random()-.5)*1.6,px=x,py=y;for(let n=0;n<4;n++){const l=10+Math.random()*22;px+=Math.cos(a)*l;py+=Math.sin(a)*l;a+=(Math.random()-.5)*.9;pts.push([px,py]);}lines.push(pts);}return lines;}
  function die(){if(mode!=='flight')return;mode='dead';deathT=0;stopMusic();env.noise(1.2,.1,400);FX.shake(14);for(let i=0;i<4;i++)booms.push({pos:add(P.pos,mul(P.o.f,40)),t:0,lines:[]});}
  function boom(sh){FX.shake(5);env.noise(.6,.08,700);const lines=sh.m.edges.slice(0,30).map(e=>{const a=add(sh.pos,toWorld(sh.o,sh.m.pts[e.a])),b=add(sh.pos,toWorld(sh.o,sh.m.pts[e.b]));const c=mul(add(a,b),.5),v=mul(norm(sub(c,sh.pos)),60+Math.random()*120);return{a:sub(a,c),b:sub(b,c),c,v};});booms.push({pos:sh.pos,t:0,lines,col:sh.T.color});}
- function kill(sh,byPlayer){sh.dead=true;boom(sh);if(byPlayer&&sh.hazard){C.cleared=(C.cleared||0)+1;if(C.cleared>=5)medal('miner');if(sh.type==='mine'&&!ships.some(x=>!x.dead&&x.type==='mine'))msg('MINEFIELD CLEARED!',3,'#3cff6a');}if(byPlayer&&['pirate','alien'].includes(sh.T.role))setTimeout(()=>medal('kill'),400);
+ function kill(sh,byPlayer){sh.dead=true;boom(sh);if(sh.mission==='story'){const m=C.missions.find(x=>x.type==='story');if(m&&m.stage===3){m.stage=4;msg('THE VORN MOTHERSHIP IS DESTROYED!',5,'#3cff6a');say('won',`Incredible flying! Return to ${GAL[m.b].name} for your reward.`,5);persist();}}if(byPlayer&&sh.hazard){C.cleared=(C.cleared||0)+1;if(C.cleared>=5)medal('miner');if(sh.type==='mine'&&!ships.some(x=>!x.dead&&x.type==='mine'))msg('MINEFIELD CLEARED!',3,'#3cff6a');}if(byPlayer&&['pirate','alien'].includes(sh.T.role))setTimeout(()=>medal('kill'),400);
   if(byPlayer){const T=sh.T;C.kills+=T.kill?1:0;C.killPts+=T.kill;
    if(sh.bounty&&!sh.legalClean){C.credits+=sh.bounty;msg(`BOUNTY +${sh.bounty} CR`,3,'#3cff6a');}
    if(sh.legalClean&&['trader','police'].includes(T.role)){C.legal+=T.role==='police'?40:12;msg('LEGAL STATUS: '+legalName(C.legal).toUpperCase(),3,'#ff2d55');}
    if(sh.mission){const m=C.missions.find(x=>x.id===sh.mission);if(m){if(m.type==='bounty'&&sh.leader){m.killed=true;msg(`${m.target.toUpperCase()} DESTROYED! RETURN TO ${GAL[m.from].name.toUpperCase()} FOR THE REWARD`,5,'#3cff6a');}if(m.type==='political'){m.kills++;msg(`${m.patrol.toUpperCase()} SHIP DOWN (${Math.min(m.kills,m.need)}/${m.need})`,3,'#3cff6a');}}}
    if(T.role==='alien'&&ships.filter(x=>x.T.role==='alien'&&!x.dead).length===0)msg('ALL VORN DESTROYED — YOU CAN HYPERSPACE ON',5,'#3cff6a');
-   if(T.role==='rock'&&C.front==='mining'){for(let i=0;i<2;i++)spawn('canister',add(sh.pos,V(Math.random()*80,Math.random()*80,Math.random()*80)),{speed:0,cargo:4});}
+   if(T.role==='rock'&&C.front==='mining'){for(let i=0;i<2;i++)spawn('canister',add(sh.pos,V(Math.random()*80,Math.random()*80,Math.random()*80)),{speed:0,cargo:Math.random()<.25?12:4});}
+  else if(T.role==='rock'&&byPlayer&&Math.random()<.35)spawn('canister',add(sh.pos,V(30,30,30)),{speed:0,cargo:4});
+  if(byPlayer&&T.role==='pirate'&&C.opt.maths&&Math.random()<.3){const lc=spawn('canister',add(sh.pos,V(-40,20,0)),{speed:0,cargo:13});lc.locked=true;msg('A LOCKED CANISTER DRIFTS FREE!',3,'#ffe45e');say('locked','That pirate dropped a locked canister. Scoop it and I will need your help cracking the code.',30);}
    syncScore();}
   const n=sh.T.cargo?ri(Math.random,0,sh.T.cargo):0;for(let i=0;i<n;i++)spawn('canister',add(sh.pos,V((Math.random()-.5)*120,(Math.random()-.5)*120,(Math.random()-.5)*120)),{speed:0,cargo:sh.T.relic?16:undefined});
   // distress rescue
@@ -312,15 +340,28 @@ function makeStarlane(env){
  // ---------------- flight update ----------------
  function flight(dt){const I=controls();
   // rotation: roll and pitch build up smoothly, like the classic
-  const wantR=dockComp?0:I.roll,wantP=dockComp?0:I.pitch;P.roll+=(wantR*1.6-P.roll)*Math.min(1,dt*6);P.pitch+=(wantP*1.1-P.pitch)*Math.min(1,dt*6);
-  if(!dockComp){if(P.roll){P.o.r=rot(P.o.r,P.o.f,-P.roll*dt);P.o.u=rot(P.o.u,P.o.f,-P.roll*dt);}if(P.pitch){P.o.f=rot(P.o.f,P.o.r,-P.pitch*dt);P.o.u=rot(P.o.u,P.o.r,-P.pitch*dt);}ortho(P.o);}
+  const cls=shipCls(),wantR=dockComp?0:I.roll,wantP=dockComp?0:I.pitch,wantY=dockComp?0:I.yaw;
+  if(rollLock&&!dockComp){if(I.roll)lockRate=Math.max(-1.6,Math.min(1.6,lockRate+I.roll*dt*.5));P.roll=lockRate;}else P.roll+=(wantR*1.6*cls.turn-P.roll)*Math.min(1,dt*6);
+  P.pitch+=(wantP*1.1*cls.turn-P.pitch)*Math.min(1,dt*6);P.yaw=(P.yaw||0)+(wantY*.8*cls.turn-(P.yaw||0))*Math.min(1,dt*6);
+  if(!dockComp){if(P.roll){P.o.r=rot(P.o.r,P.o.f,-P.roll*dt);P.o.u=rot(P.o.u,P.o.f,-P.roll*dt);}if(P.pitch){P.o.f=rot(P.o.f,P.o.r,-P.pitch*dt);P.o.u=rot(P.o.u,P.o.r,-P.pitch*dt);}if(Math.abs(P.yaw)>1e-4){P.o.f=rot(P.o.f,P.o.u,P.yaw*dt);P.o.r=rot(P.o.r,P.o.u,P.yaw*dt);}ortho(P.o);}
   if(I.thr)P.throttle=Math.max(0,Math.min(1,P.throttle+I.thr*dt*.8));
   // mass lock
   const nearShip=ships.some(s=>!s.dead&&!['cargo','rock'].includes(s.T.role)&&len(sub(s.pos,P.pos))<7000)||moons.some(m=>len(sub(m.pos,P.pos))<m.R*1.6),nearStation=station&&len(sub(station.pos,P.pos))<SAFE*.75,nearPlanet=planet&&len(sub(planet.pos,P.pos))<planet.R*1.4;
   const ahead=ships.some(x=>!x.dead&&(x.T.role==='rock'||x.T.role==='mine')&&len(sub(x.pos,P.pos))<4500&&dot(sub(x.pos,P.pos),P.o.f)>0),nearBH=bh&&len(sub(bh.pos,P.pos))<bh.pull;
   massLock=nearShip||nearStation||nearPlanet||ahead||nearBH;if(jump&&massLock){jump=false;msg(ahead?'OBSTACLE AHEAD — JUMP DRIVE OFF':nearBH?'GRAVITY WELL — JUMP DRIVE OFF':'MASS LOCKED',1.8,'#ff8a1c');}
+  {const hostiles=ships.filter(x=>!x.dead&&x.angry&&x.target==='player'&&len(sub(x.pos,P.pos))<8000);const missileIn=ships.some(x=>!x.dead&&x.type==='missile'&&x.target==='player');const on=hostiles.length>0||missileIn||clock-lastHitT<3;
+   if(on&&!redOn){if(C.opt.redAlert){env.beep(660,.25,'square',.05,.8);setTimeout(()=>env.beep(520,.3,'square',.05,.8),280);}say('red',missileIn?'Red alert! Incoming missile!'+(has('ecm')?' Use the E.C.M. now!':' Turn hard to evade!'):`Red alert! ${hostiles.length>1?hostiles.length+' hostile ships':'A hostile ship'} closing in!`,12);}
+   redOn=on;if(missileIn)say('missile','Incoming missile!'+(has('ecm')?' E.C.M. now!':' Evade!'),8);
+   if(P.shF<25&&P.shA<25&&on)say('shields','Shields critical! Get out of there!',15);if(P.energy<35)say('energy','Energy low — avoid combat until it recharges.',25);
+   const mine=ships.find(x=>!x.dead&&x.type==='mine'&&len(sub(x.pos,P.pos))<1800);if(mine)say('mine','Mine ahead! Shoot it or steer around.',10);
+   if(station&&!dockComp){const d=len(sub(station.pos,P.pos));if(d<3000&&P.speed>140)say('slow','Approaching the station. Slow down below 60 to dock.',25);if(d<2200&&!rollLock)say('spinhint','Tip: press Y to match the station’s spin, then line up with the slot.',90);}
+   if(C.legal>=50&&station&&!stationAlarm&&len(sub(station.pos,P.pos))<SAFE){stationAlarm=true;for(let k=0;k<2;k++)spawn('warden',add(station.pos,mul(station.o.f,600+k*200)),{angry:true,target:'player'});msg('STATION DEFENCES LAUNCHED!',3,'#ff2d55');say('police','The station has launched police ships — we are wanted here!',20);}
+   const cop=ships.find(x=>!x.dead&&x.T.role==='police'&&len(sub(x.pos,P.pos))<1400);const ill=Object.keys(C.cargo).filter(k=>GOODS[k][6]&&C.cargo[k]>0);
+   if(cop&&ill.length&&!policeScan){policeScan=true;if(Math.random()<(has('hidden')?.12:.45)){C.legal+=8*ill.length;msg('POLICE SCANNED YOUR CARGO! LEGAL STATUS: '+legalName(C.legal).toUpperCase(),4,'#ff2d55');say('scan','The police scanned our hold and found illegal goods.',20);}else say('scan','A police ship scanned us — nothing found.',20);}}
+  if(storm>0)storm-=dt;if(flareT>0){flareT-=dt;if(flareT<=0){const sh=(P.shF+P.shA)/200;hurt(28*(1-sh)+4,P.o.f);FX.shake(8);msg('SOLAR FLARE HIT!',2.5,'#ffb020');}}
+  if(!(station&&len(sub(station.pos,P.pos))<SAFE)&&!jump){nextEvent-=dt;if(nextEvent<=0){nextEvent=150+Math.random()*150;if(Math.random()<.5){flareT=10;msg('SOLAR FLARE WARNING!',4,'#ffb020');say('flare','Solar flare in ten seconds! Keep your shields charged.',5);}else{storm=18;msg('ION STORM — SCANNER UNRELIABLE',4,'#b45bd6');say('storm','Ion storm! Our scanner will be unreliable for a while.',5);}}}
   if(bh){const v=sub(bh.pos,P.pos),d=len(v);if(d<bh.R){msg('PULLED INTO THE BLACK HOLE!',3,'#b45bd6');P.energy=0;die();return;}
-   if(d<bh.pull){P.drift=add(P.drift||V(),mul(norm(v),Math.min(1600,4.5e9/(d*d))*dt));if(!P.bhWarn||clock-P.bhWarn>6){P.bhWarn=clock;msg('GRAVITY WELL! A BLACK HOLE IS PULLING YOU IN',2.5,'#b45bd6');}if(d<bh.R*2.6)P.nearBH=clock;}
+   if(d<bh.pull){P.drift=add(P.drift||V(),mul(norm(v),Math.min(1600,4.5e9/(d*d))*dt));if(!P.bhWarn||clock-P.bhWarn>6){P.bhWarn=clock;msg('GRAVITY WELL! A BLACK HOLE IS PULLING YOU IN',2.5,'#b45bd6');say('bh','Gravity well! Turn away and use full thrust!',12);}if(d<bh.R*2.6)P.nearBH=clock;}
    if(P.nearBH&&clock-P.nearBH>4&&d>bh.R*4){P.nearBH=0;medal('daredevil');}}
   if(P.drift){P.pos=add(P.pos,mul(P.drift,dt));P.drift=mul(P.drift,Math.pow(.5,dt));}
   // docking computer
@@ -364,9 +405,11 @@ function makeStarlane(env){
  let smokes=[];
  function damageFx(pos,o,rearZ,dmg,dt,who){if(dmg>.55){who.smT=(who.smT||0)-dt;if(who.smT<=0){who.smT=.13;smokes.push({pos:add(pos,toWorld(o,[0,0,rearZ])),v:add(mul(o.f,-30),V((Math.random()-.5)*20,25,(Math.random()-.5)*20)),t:0,r:16+Math.random()*14});}}if(dmg>.35&&Math.random()<dt*2.2)booms.push({pos:add(pos,V((Math.random()-.5)*60,(Math.random()-.5)*40,(Math.random()-.5)*60)),t:.6,spark:true});}
  function ai(sh,dt){const T=sh.T,toP=sub(P.pos,sh.pos),dP=len(toP);
+  if(T.role==='beacon'){sh.o.f=rot(sh.o.f,sh.o.u,dt*1.2);sh.o.r=rot(sh.o.r,sh.o.u,dt*1.2);ortho(sh.o);if(dP<450){sh.dead=true;const m=C.missions.find(x=>x.type==='story');if(m&&m.stage===1){m.stage=2;msg('VORN STAR CHARTS DOWNLOADED!',4,'#b45bd6');say('charts',`The beacon held Vorn star charts! Take them to ${GAL[m.b].name} — their scientists can decode them.`,5);persist();}}return;}
   if(T.role==='mine'){sh.o.r=rot(sh.o.r,sh.o.u,dt*.8);sh.o.f=rot(sh.o.f,sh.o.u,dt*.8);ortho(sh.o);if(dP<380){sh.dead=true;boom(sh);FX.shake(10);hurt(30+(380-dP)*.08,mul(norm(toP),-1));msg('BOOM! YOU HIT A PIRATE MINE!',2.5,'#ff2d55');}return;}
   if(sh.type==='capsule'&&sh.rescue){sh.o.f=rot(sh.o.f,sh.o.u,dt*.6);sh.o.r=rot(sh.o.r,sh.o.u,dt*.6);ortho(sh.o);if(dP<sh.m.rad+90){sh.dead=true;C.pendingRescue=(C.pendingRescue||0)+1;msg('SURVIVOR RESCUED! REWARD WHEN YOU DOCK',3.5,'#3cff6a');env.beep(1200,.3,'triangle',.05,1.6);}return;}if(T.role!=='rock'&&T.role!=='cargo'&&T.role!=='missile'){sh.dmg=Math.max(0,Math.min(1,1-sh.energy/sh.max));damageFx(sh.pos,sh.o,sh.rearZ||-30,sh.dmg,dt,sh);}
   if(T.role==='rock'||T.role==='cargo'){sh.o.f=rot(sh.o.f,sh.o.u,sh.spinA*dt);sh.o.r=rot(sh.o.r,sh.o.u,sh.spinA*dt);sh.o.u=rot(sh.o.u,sh.o.f,sh.spinB*dt);ortho(sh.o);sh.pos=add(sh.pos,mul(sh.o.f,sh.speed*dt*.2));if(sh.drift)sh.pos=add(sh.pos,mul(sh.drift,dt));
+   if(T.role==='cargo'&&sh.locked&&dP<sh.m.rad+60){sh.dead=true;openMath('vault',ok=>{if(ok){const g=Math.random()<.5?12:13,n=3+Math.floor(Math.random()*4);C.cargo[g]=(C.cargo[g]||0)+n;msg(`CODE CRACKED! +${n}${GOODS[g][1]} ${GOODS[g][0].toUpperCase()}`,4,'#3cff6a');}else msg('WRONG CODE — THE CANISTER SELF-DESTRUCTED',3,'#ff8a1c');});return;}
    if(T.role==='cargo'&&dP<sh.m.rad+40){if(has('scoop')&&cargoT()<C.cap){sh.dead=true;const k=sh.cargo!==undefined?sh.cargo:ri(Math.random,0,11);C.cargo[k]=(C.cargo[k]||0)+1;msg(`SCOOPED 1${GOODS[k][1]} ${GOODS[k][0].toUpperCase()}`,2,'#3cff6a');env.beep(1200,.15,'triangle',.04,1.5);}
     else if(dP<sh.m.rad+25){sh.dead=true;boom(sh);hurt(6,norm(toP).map(x=>-x));msg(has('scoop')?'CARGO HOLD FULL':'NO FUEL SCOOPS — CANISTER DESTROYED',2);}}
    if(T.role==='rock'&&dP<sh.m.rad+25){hurt(25+P.speed*.1,mul(norm(toP),-1));sh.energy-=30;if(sh.energy<=0)kill(sh,false);P.speed*=.3;}
@@ -475,7 +518,7 @@ function makeStarlane(env){
    if(streak>25){const t=cam(add(d,mul(P.o.f,streak)));if(t[2]>8){const q=proj(t);ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1]);ctx.stroke();}}}
   for(const sn of suns)drawSun(ctx,sn);if(bh)drawBlackHole(ctx);for(const mn of moons)drawMoon(ctx,mn,low);if(planet)drawPlanet(ctx,low);
   const objs=[...ships.filter(x=>!x.dead).map(x=>({s:x,z:cam(x.pos)[2]})),...(station?[{s:station,z:cam(station.pos)[2]}]:[]),...(camMode==='ext'?[{s:'me',z:cam(P.pos)[2]}]:[])].sort((a,b)=>b.z-a.z);
-  for(const{s:o}of objs){if(o===station)drawStation(ctx,null,low);else if(o==='me'){drawModel(ctx,MODELS.kestrel,P.pos,P.o,'#ffe45e',null,{dmg:P.hull||0,seed:7});const e=cam(add(P.pos,mul(P.o.f,-96)));if(e[2]>5){const q=proj(e);ctx.fillStyle=`rgba(63,224,255,${.4+P.throttle*.6})`;ctx.beginPath();ctx.arc(q[0],q[1],3+P.throttle*5,0,Math.PI*2);ctx.fill();}}
+  for(const{s:o}of objs){if(o===station)drawStation(ctx,null,low);else if(o==='me'){drawModel(ctx,MODELS[shipCls().model]||MODELS.kestrel,P.pos,P.o,'#ffe45e',null,{dmg:P.hull||0,seed:7});const e=cam(add(P.pos,mul(P.o.f,-96)));if(e[2]>5){const q=proj(e);ctx.fillStyle=`rgba(63,224,255,${.4+P.throttle*.6})`;ctx.beginPath();ctx.arc(q[0],q[1],3+P.throttle*5,0,Math.PI*2);ctx.fill();}}
    else{drawShip(ctx,o,low);if(o.shot>0&&!low){const c=cam(o.pos);if(c[2]>0){const q=proj(c),t=cam(P.pos);const q2=t[2]>5?proj(t):[PX+(Math.random()-.5)*300,VH];ctx.strokeStyle='#ff2d55';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(q[0],q[1]);ctx.lineTo(q2[0],q2[1]);ctx.stroke();}}}}
   for(const sm of smokes){const c=cam(sm.pos);if(c[2]<=5)continue;const q=proj(c),rr=PF*sm.r*(1+sm.t*1.5)/c[2];ctx.fillStyle=`rgba(150,150,160,${.32*(1-sm.t/1.6)})`;ctx.beginPath();ctx.arc(q[0],q[1],rr,0,Math.PI*2);ctx.fill();}
   for(const b of booms){if(b.spark){const c=cam(b.pos);if(c[2]>0){const q=proj(c);ctx.strokeStyle='#ffe45e';ctx.lineWidth=1;ctx.beginPath();for(let i=0;i<6;i++){const a=Math.random()*6.3,l=4+Math.random()*10;ctx.moveTo(q[0],q[1]);ctx.lineTo(q[0]+Math.cos(a)*l,q[1]+Math.sin(a)*l);}ctx.stroke();}continue;}
@@ -493,10 +536,19 @@ function makeStarlane(env){
   const mx=320,my=6,mw=160,mh=40;ctx.fillStyle='#5d6aa3';ctx.fillRect(CX-3,0,6,my+2);ctx.save();ctx.beginPath();if(ctx.roundRect)ctx.roundRect(mx,my,mw,mh,9);else ctx.rect(mx,my,mw,mh);ctx.clip();ctx.fillStyle='#000';ctx.fillRect(mx,my,mw,mh);viewCam('mirror');PX=CX;PY=my+mh/2;PF=48;drawWorld(ctx,true);ctx.restore();
   ctx.strokeStyle='#8a94c8';ctx.lineWidth=3;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(mx,my,mw,mh,9);else ctx.rect(mx,my,mw,mh);ctx.stroke();ctx.fillStyle='rgba(255,255,255,.08)';ctx.fillRect(mx+6,my+4,mw*.4,5);
   PX=CX;PY=CY;PF=FOC;setCam();}
- function drawMFDs(ctx){const y=touchSeen?62:VH-104,w=200,h=82;const box=(x,title)=>{ctx.fillStyle='rgba(6,14,24,.82)';ctx.strokeStyle='#2fa36b';ctx.lineWidth=1.5;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y,w,h,8);else ctx.rect(x,y,w,h);ctx.fill();ctx.stroke();ctx.fillStyle='rgba(60,255,106,.06)';for(let k=y+3;k<y+h;k+=3)ctx.fillRect(x+2,k,w-4,1);text(ctx,title,x+8,y+5,'#3cff6a',11);};
-  const lx=110,rx=W-110-w;box(lx,`HOLD ${cargoT()}/${C.cap}t · ${Math.floor(C.credits)} Cr`);const items=Object.entries(C.cargo).filter(([k,n])=>n>0);if(!items.length)text(ctx,'Empty',lx+8,y+24,'#9aa3c7',11,'left',false);items.slice(0,3).forEach(([k,n],i)=>text(ctx,`${GOODS[k][0].slice(0,18)} ${n}${GOODS[k][1]}`,lx+8,y+22+i*14,'#c8ffd8',11,'left',false));if(items.length>3)text(ctx,`+${items.length-3} more (HOLD key)`,lx+8,y+64,'#9aa3c7',10,'left',false);
-  box(rx,`MISSION ${C.missions.length?'1/'+C.missions.length:''}`);const m=C.missions[0];if(!m)text(ctx,'No missions — see a station board',rx+8,y+24,'#9aa3c7',11,'left',false);else{text(ctx,m.title.slice(0,26),rx+8,y+22,'#ffe45e',11);ctx.font='11px "Courier New",monospace';const words=missionStatus(m).split(' ');let line='',yy=y+38;for(const wd of words){const t=line?line+' '+wd:wd;if(ctx.measureText(t).width>w-16&&line){text(ctx,line,rx+8,yy,'#c8ffd8',11,'left',false);line=wd;yy+=13;if(yy>y+h-10)break;}else line=t;}if(yy<=y+h-10)text(ctx,line,rx+8,yy,'#c8ffd8',11,'left',false);}
+ function drawMFDs(ctx){const y=touchSeen?62:VH-104,w=200,h=82;btns.push({x:110+w-22,y:y+2,w:20,h:16,fn:()=>{C.opt.mfd=false;persist();}});btns.push({x:W-110-22,y:y+2,w:20,h:16,fn:()=>{C.opt.mfd=false;persist();}});const box=(x,title)=>{ctx.fillStyle='rgba(6,14,24,.82)';ctx.strokeStyle='#2fa36b';ctx.lineWidth=1.5;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y,w,h,8);else ctx.rect(x,y,w,h);ctx.fill();ctx.stroke();ctx.fillStyle='rgba(60,255,106,.06)';for(let k=y+3;k<y+h;k+=3)ctx.fillRect(x+2,k,w-4,1);text(ctx,title,x+8,y+5,'#3cff6a',11);};
+  const lx=110,rx=W-110-w;box(lx,`HOLD ${cargoT()}/${C.cap}t · ${Math.floor(C.credits)} Cr`);const items=Object.entries(C.cargo).filter(([k,n])=>n>0);if(!items.length)text(ctx,'Empty',lx+8,y+24,'#9aa3c7',11,'left',false);{const mk=C.market&&C.market.sys===C.sys?C.market.p:null;items.slice(0,3).forEach(([k,n],i)=>{text(ctx,`${GOODS[k][0].slice(0,15)} ${n}${GOODS[k][1]}`,lx+8,y+22+i*14,'#c8ffd8',11,'left',false);if(C.paid[k])text(ctx,`paid ${C.paid[k].toFixed(1)}`,lx+w-8,y+22+i*14,'#9aa3c7',10,'right',false);});}if(items.length>3)text(ctx,`+${items.length-3} more (HOLD key)`,lx+8,y+64,'#9aa3c7',10,'left',false);
+  text(ctx,'✕',lx+w-16,y+4,'#9aa3c7',12);text(ctx,'✕',rx+w-16,y+4,'#9aa3c7',12);box(rx,`MISSION ${C.missions.length?'1/'+C.missions.length:''}`);const m=C.missions[0];if(!m)text(ctx,'No missions — see a station board',rx+8,y+24,'#9aa3c7',11,'left',false);else{text(ctx,m.title.slice(0,26),rx+8,y+22,'#ffe45e',11);ctx.font='11px "Courier New",monospace';const words=missionStatus(m).split(' ');let line='',yy=y+38;for(const wd of words){const t=line?line+' '+wd:wd;if(ctx.measureText(t).width>w-16&&line){text(ctx,line,rx+8,yy,'#c8ffd8',11,'left',false);line=wd;yy+=13;if(yy>y+h-10)break;}else line=t;}if(yy<=y+h-10)text(ctx,line,rx+8,yy,'#c8ffd8',11,'left',false);}
   tipAt(lx,y,w,h,'Cargo screen',()=>'What is in your hold, and your credits. Press HOLD for the full list.');tipAt(rx,y,w,h,'Mission screen',()=>'Your first active mission and what to do next. Press MISN for all of them.');}
+ function tgtInfo(o){if(o===station)return{name:`${here().name} Station`,lines:['Space station · safe zone',`Spin ${Math.round(o.spin*57)}°/s — press Y to match it`],col:'#ffffff'};const T=o.T,role=T.role;
+  const kind={pirate:'Pirate',trader:'Trader',police:'Police',alien:'Vorn alien',rock:'Asteroid',cargo:o.rescue?'Escape capsule — survivor aboard!':o.locked?'Locked canister (needs a code)':'Cargo canister',mine:'Pirate mine',missile:'Missile'}[role]||role;
+  const l=[`${kind}${o.angry&&o.target==='player'?' · HOSTILE':''}`];if(o.bounty&&!o.legalClean)l.push(`Wanted · bounty ${o.bounty} Cr`);if(o.max&&!['rock','cargo'].includes(role))l.push(`Damage ${Math.round((1-o.energy/o.max)*100)}% · speed ${Math.round(o.speed||0)}`);
+  if(o.parts&&o.parts.length)l.push(`Fittings: ${o.parts.length} extra parts${o.ant?' + antenna':''}`);return{name:T.name,lines:l,col:o.angry?'#ff2d55':T.color};}
+ function drawTarget(ctx,cockpit){const tgt=radarTgt;if(tgt&&(tgt.dead||(tgt!==station&&!ships.includes(tgt))))radarTgt=null;if(!radarTgt)return;const d=len(sub(tgt.pos,P.pos)),c=cam(tgt.pos),I=tgtInfo(tgt);
+  if(c[2]>5){const q=proj(c),rr=Math.max(12,PF*(tgt.m?tgt.m.rad:40)/c[2]*1.2),k=rr*.4;ctx.strokeStyle=I.col;ctx.lineWidth=2;ctx.beginPath();for(const[sx,sy]of[[-1,-1],[1,-1],[1,1],[-1,1]]){const x=q[0]+sx*rr,y=q[1]+sy*rr;ctx.moveTo(x,y-sy*k);ctx.lineTo(x,y);ctx.lineTo(x-sx*k,y);}ctx.stroke();}
+  const x=W-262,y=cockpit?64:34,h=26+I.lines.length*15+16;ctx.fillStyle='rgba(6,10,24,.86)';ctx.strokeStyle=I.col;ctx.lineWidth=1.5;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y,250,h,8);else ctx.rect(x,y,250,h);ctx.fill();ctx.stroke();
+  text(ctx,'◎ '+I.name,x+8,y+6,I.col,13);I.lines.forEach((t,i)=>text(ctx,t,x+8,y+24+i*15,'#c8d0ff',11,'left',false));text(ctx,`Distance ${d<1000?Math.round(d)+' m':(d/1000).toFixed(1)+' km'}`,x+8,y+24+I.lines.length*15,'#ffe45e',11,'left',false);
+  button(ctx,B(x+222,y+4,22,20,'✕',()=>{radarTgt=null;},{fs:11}));}
  // your own ship's damage: cracks at the edges of the canopy, smoke and sparks — never over the middle or the controls
  function drawHullDamage(ctx){if(!P||!P.hull)return;ctx.save();ctx.beginPath();ctx.rect(0,0,W,VH);ctx.clip();ctx.lineCap='round';
   for(const cr of P.cracks||[])for(const line of cr){ctx.strokeStyle='rgba(220,235,255,.55)';ctx.lineWidth=1.3;pathOpen(ctx,line);ctx.stroke();ctx.strokeStyle='rgba(255,255,255,.18)';ctx.lineWidth=3;pathOpen(ctx,line.slice(0,2));ctx.stroke();}
@@ -504,12 +556,19 @@ function makeStarlane(env){
   if(lastHit>.12&&P.cracks&&P.cracks.length){const cr=P.cracks[Math.floor(Math.random()*P.cracks.length)][0][0];ctx.strokeStyle='#ffe45e';ctx.lineWidth=1.5;ctx.beginPath();for(let i=0;i<7;i++){const a=Math.random()*6.3,l=6+Math.random()*16;ctx.moveTo(cr[0],cr[1]);ctx.lineTo(cr[0]+Math.cos(a)*l,cr[1]+Math.sin(a)*l);}ctx.stroke();}
   ctx.restore();}
  const pathOpen=(ctx,pts)=>{ctx.beginPath();pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));};
- function renderFlight(ctx){setCam();ctx.save();ctx.beginPath();ctx.rect(0,0,W,VH);ctx.clip();ctx.fillStyle='#000';ctx.fillRect(0,0,W,VH);const[sx,sy]=FX.offset();ctx.translate(sx,sy);
+ function renderFlight(ctx){const[jx,jy]=FX.offset();ctx.save();ctx.translate(jx*.6,jy*.6);renderFlight2(ctx);ctx.restore();}
+ function renderFlight2(ctx){setCam();ctx.save();ctx.beginPath();ctx.rect(0,0,W,VH);ctx.clip();ctx.fillStyle='#000';ctx.fillRect(0,0,W,VH);const[sx,sy]=FX.offset();ctx.translate(sx,sy);
   drawWorld(ctx,false);
   if(laserShow>0){const L=LASERS[view==='rear'?'pulse':C.front]||LASERS.pulse;ctx.strokeStyle=L.col;ctx.lineWidth=3;ctx.beginPath();
    if(camMode==='ext'){const a=cam(add(P.pos,mul(P.o.f,100))),b=cam(add(P.pos,mul(P.o.f,3500)));seg(ctx,a,b);}else if(view==='front'||view==='rear'){ctx.moveTo(150,VH);ctx.lineTo(CX,CY+4);ctx.moveTo(650,VH);ctx.lineTo(CX,CY+4);}ctx.stroke();}
   ctx.restore();
-  const cockpit=C.opt.cockpit&&camMode==='cockpit'&&view==='front';if(cockpit){drawCockpit(ctx);drawMFDs(ctx);}
+  const cockpit=C.opt.cockpit&&camMode==='cockpit'&&view==='front';if(cockpit){drawCockpit(ctx);if(C.opt.mfd)drawMFDs(ctx);else button(ctx,B(110,touchSeen?62:VH-40,150,26,'▣ SHOW SCREENS',()=>{C.opt.mfd=true;persist();},{fs:11}));}
+  drawTarget(ctx,cockpit);
+  if(station&&len(sub(station.pos,P.pos))<15000&&!dockComp){const y=cockpit?64:34;button(ctx,B(12+(cockpit?100:0),y,128,26,rollLock?'🔒 ROLL LOCKED':'🔓 ROLL LOCK',toggleRollLock,{fs:11,bg:rollLock?'rgba(30,80,50,.9)':undefined}));button(ctx,B(146+(cockpit?100:0),y,128,26,'⟳ MATCH SPIN',matchSpin,{fs:11}));
+   const diff=Math.abs((rollLock?lockRate:P.roll)+station.spin)*57;text(ctx,`Your roll ${Math.round(-(rollLock?lockRate:P.roll)*57)}°/s · station spin ${Math.round(station.spin*57)}°/s${diff<2?' ✓ MATCHED':''}`,12+(cockpit?100:0),y+30,diff<2?'#3cff6a':'#9aa3c7',11,'left',false);}
+  else if(rollLock)text(ctx,`🔒 ROLL LOCK ${Math.round(-lockRate*57)}°/s (L to release)`,12+(cockpit?100:0),cockpit?64:34,'#3fe0ff',12);
+  if(redOn&&C.opt.redAlert){const a=.35+.35*Math.sin(clock*9);ctx.strokeStyle=`rgba(255,30,60,${a})`;ctx.lineWidth=8;ctx.strokeRect(4,4,W-8,VH-8);}
+  drawAI(ctx,cockpit?(radarTgt?196:96):(radarTgt?160:40));
   if(hyperT>0&&hyperT<1.6){drawStreaks(ctx,(1.6-hyperT)*.18,.5);}
   if(exitT>0){const k=exitT/1.6;drawStreaks(ctx,1.6*k*k,k);if(exitT>1.35){ctx.fillStyle=`rgba(255,255,255,${(exitT-1.35)*3})`;ctx.fillRect(0,0,W,VH);}}
   // sights and view name
@@ -548,7 +607,7 @@ function makeStarlane(env){
    {key:'tips',label:()=>'TIPS',fn:()=>{C.opt.tips=!C.opt.tips;persist();msg(C.opt.tips?'HOVER HELP ON':'HOVER HELP OFF',1.5,'#3fe0ff');},led:()=>C.opt.tips?'#3fe0ff':null,title:'Hover help',body:()=>`Turns these hover explanations on or off (now ${C.opt.tips?'on':'off'}). Experienced pilots can switch them off.`},
    {key:'menu',label:()=>'MENU',fn:()=>openMenu(),led:()=>null,title:'Pause menu',body:()=>'Pause, save the game, change controls and settings, and read how to dock and trade. (Key: P)'}];}
  function dashboard(ctx){const Y=VH;const g=ctx.createLinearGradient(0,Y,0,H);g.addColorStop(0,'#0b0f22');g.addColorStop(1,'#04060f');ctx.fillStyle=g;ctx.fillRect(0,Y,W,H-Y);ctx.strokeStyle='#3b4a8f';ctx.lineWidth=2;ctx.strokeRect(2,Y+2,W-4,H-Y-4);
-  consoleKeys(ctx);const G0=Y+48;
+  consoleKeys(ctx);const G0=Y+48;if(redOn&&C.opt.redAlert&&Math.floor(clock*3)%2){ctx.fillStyle='#ff1e3c';ctx.shadowColor='#ff1e3c';ctx.shadowBlur=16;ctx.fillRect(CX-70,Y+38,140,14);ctx.shadowBlur=0;text(ctx,'RED ALERT',CX,Y+39,'#fff',11,'center');}
   const L=[['FS',P.shF/100,'#3cff6a',1,'Front shield',()=>`Protects you from hits ahead. ${Math.round(P.shF)}%. Recharges from your energy.`],['AS',P.shA/100,'#3cff6a',1,'Aft (rear) shield',()=>`Protects you from behind. ${Math.round(P.shA)}%.`],
    ['FU',C.fuel/7,'#ffe45e',1,'Fuel',()=>`${C.fuel.toFixed(1)} light years of hyperspace fuel (7 max). Refuel at a station or scoop it from a star.`],['CT',(P.cabin-20)/235,'#ff8a1c',0,'Cabin temperature',()=>`Rises near stars. Too hot and you lose energy! ${Math.round(P.cabin)}°.`],
    ['LT',P.heat,'#ff8a1c',0,'Laser temperature',()=>`Firing heats the laser; full = overheated, wait for it to cool. ${Math.round(P.heat*100)}%.`],['AL',planet?Math.min(1,(P.alt||0)/(planet.R*3)):0,'#3fe0ff',0,'Altitude',()=>planet?`Height above the planet: ${Math.round(P.alt||0)} units. Zero means crash!`:'No planet here.']];
@@ -559,12 +618,14 @@ function makeStarlane(env){
   tipAt(W-190,G0+70,180,76,'Energy banks',()=>`${Math.round(P.energy)}% energy. Shields and lasers use it. If it runs out, your ship is destroyed!`);
   // the 3D elliptical scanner
   const sx=400,sy=Y+122,rx=150,ry=56,range=10000;ctx.strokeStyle='#ff2d55';ctx.lineWidth=1.2;ctx.beginPath();ctx.ellipse(sx,sy,rx,ry,0,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=.4;ctx.beginPath();ctx.ellipse(sx,sy,rx*.5,ry*.5,0,0,Math.PI*2);ctx.moveTo(sx-rx,sy);ctx.lineTo(sx+rx,sy);ctx.moveTo(sx,sy-ry);ctx.lineTo(sx,sy+ry);ctx.moveTo(sx,sy);ctx.lineTo(sx-rx*.7,sy-ry*.7);ctx.moveTo(sx,sy);ctx.lineTo(sx+rx*.7,sy-ry*.7);ctx.stroke();ctx.globalAlpha=1;
-  const blip=(pos,col,big)=>{const l=toLocal(P.o,sub(pos,P.pos));if(len(l)>range)return false;const x=sx+l[0]/range*rx,y=sy-l[2]/range*ry,h=l[1]/range*ry*1.4;ctx.strokeStyle=col;ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y-h);ctx.stroke();ctx.fillRect(x-(big?5:3),y-h-(big?3:2),big?10:6,big?5:3);return true;};
-  if(station&&!blip(station.pos,'#ffffff',true)){const l=toLocal(P.o,sub(station.pos,P.pos)),a=Math.atan2(l[2],l[0]),x=sx+Math.cos(a)*rx,y=sy-Math.sin(a)*ry;if(Math.floor(clock*2)%2){ctx.fillStyle='#ffffff';ctx.fillRect(x-6,y-6,12,12);}text(ctx,'S',x,y-6,'#10142b',11,'center');}
+  const blipHits=[];const blip=(pos,col,big,obj)=>{const l=toLocal(P.o,sub(pos,P.pos));if(len(l)>range)return false;let x=sx+l[0]/range*rx,y=sy-l[2]/range*ry;const h=l[1]/range*ry*1.4;if(storm>0){x+=(Math.random()-.5)*26;y+=(Math.random()-.5)*14;}if(obj){blipHits.push({x,y:y-h,o:obj});if(obj===radarTgt){ctx.strokeStyle='#ffe45e';ctx.lineWidth=1.5;ctx.strokeRect(x-7,y-h-6,14,10);}}ctx.strokeStyle=col;ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y-h);ctx.stroke();ctx.fillRect(x-(big?5:3),y-h-(big?3:2),big?10:6,big?5:3);return true;};
+  if(station&&!blip(station.pos,'#ffffff',true,station)){const l=toLocal(P.o,sub(station.pos,P.pos)),a=Math.atan2(l[2],l[0]),x=sx+Math.cos(a)*rx,y=sy-Math.sin(a)*ry;if(Math.floor(clock*2)%2){ctx.fillStyle='#ffffff';ctx.fillRect(x-6,y-6,12,12);}text(ctx,'S',x,y-6,'#10142b',11,'center');}
   const rim=(pos,col,label,shape)=>{const l=toLocal(P.o,sub(pos,P.pos)),a=Math.atan2(l[2],l[0]),inside=len(l)<range,k=inside?len(l)/range:1,x=sx+Math.cos(a)*rx*k,y=sy-Math.sin(a)*ry*k;ctx.fillStyle=col;ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.beginPath();
    if(shape==='star'){for(let i=0;i<10;i++){const rr=i%2?2.5:6,t=i/10*Math.PI*2-Math.PI/2;i?ctx.lineTo(x+Math.cos(t)*rr,y+Math.sin(t)*rr):ctx.moveTo(x+Math.cos(t)*rr,y+Math.sin(t)*rr);}ctx.closePath();ctx.fill();}else if(shape==='ring'){ctx.arc(x,y,5,0,Math.PI*2);ctx.stroke();}else{ctx.arc(x,y,shape==='big'?6:3.5,0,Math.PI*2);ctx.fill();}if(label)text(ctx,label,x,y-15,col,10,'center');};
   for(const sn of suns)rim(sn.pos,sn.col,'','star');for(const mn of moons)rim(mn.pos,'#a9adb8','','dot');if(planet)rim(planet.pos,'#3fe0ff','P','big');if(bh)rim(bh.pos,'#b45bd6','BH','ring');
-  for(const s of ships)if(!s.dead)blip(s.pos,s.type==='missile'?'#ff8a1c':s.type==='mine'?'#ff2d55':s.rescue?'#3fe0ff':s.angry?'#ff2d55':s.T.color);
+  for(const s of ships)if(!s.dead&&!(storm>0&&Math.random()<.3))blip(s.pos,s.type==='missile'?'#ff8a1c':s.type==='mine'?'#ff2d55':s.rescue?'#3fe0ff':s.angry?'#ff2d55':s.T.color,false,s);
+  btns.push({x:sx-rx,y:sy-ry-24,w:rx*2,h:ry*2+30,fn:(px,py)=>{let best=null,bd=22;for(const b of blipHits){const d=Math.hypot(b.x-px,b.y-py);if(d<bd){bd=d;best=b.o;}}if(best){radarTgt=best;env.beep(1100,.05,'square',.03);}else nextTarget();}});
+  if(storm>0){ctx.fillStyle='rgba(180,91,214,.18)';for(let k=0;k<40;k++)ctx.fillRect(sx-rx+Math.random()*rx*2,sy-ry+Math.random()*ry*2,2,1);}
   tipAt(sx-rx,sy-ry,rx*2,ry*2,'3D scanner',()=>`Everything within ${range/1000}k units. Top of the oval = ahead. Sticks show above/below you. White = station (flashing square on the rim when far away), red = enemies and mines, orange = missiles. Around the edge: ★ stars, P the planet, grey dots = moons, BH = black hole.`);
   // compass, condition light, indicators
   const cx=W-232,cy=Y+68;ctx.strokeStyle='#5d6aa3';ctx.beginPath();ctx.arc(cx,cy,17,0,Math.PI*2);ctx.stroke();const tgt=station&&len(sub(station.pos,P.pos))<SAFE*1.6?station.pos:planet?planet.pos:null;
@@ -610,9 +671,15 @@ function makeStarlane(env){
   return out;}
  const board=()=>{if(!C.board||C.board.day!==C.day||C.board.sys!==C.sys)C.board={day:C.day,sys:C.sys,offers:genBoard().filter(o=>!C.missions.some(m=>m.id===o.id))};return C.board.offers;};
  // ---------------- buying and selling ----------------
- function buy(i,n){const mk=market(),g=GOODS[i];let k=0;while(k<n&&mk[i].qty>0&&C.credits>=mk[i].price&&(g[1]!=='t'||cargoT()<C.cap)){C.credits=Math.round((C.credits-mk[i].price)*10)/10;mk[i].qty--;C.cargo[i]=(C.cargo[i]||0)+1;k++;}
-  if(!k)msg(mk[i].qty<=0?'NONE IN STOCK':C.credits<mk[i].price?'NOT ENOUGH CREDITS':'CARGO HOLD FULL',2,'#ff2d55');else env.beep(900,.05,'square',.03);syncScore();}
- function sellG(i,n){const mk=market();let k=0;while(k<n&&(C.cargo[i]||0)>0){C.credits=Math.round((C.credits+mk[i].price)*10)/10;C.cargo[i]--;mk[i].qty++;k++;}if(k)env.beep(700,.05,'square',.03);syncScore();}
+ function buy(i,n){const mk=market(),g=GOODS[i];let k=0;const had=C.cargo[i]||0,pr=mk[i].price;while(k<n&&mk[i].qty>0&&C.credits>=mk[i].price&&(g[1]!=='t'||cargoT()<C.cap)){C.credits=Math.round((C.credits-mk[i].price)*10)/10;mk[i].qty--;C.cargo[i]=(C.cargo[i]||0)+1;k++;}
+  if(!k)msg(mk[i].qty<=0?'NONE IN STOCK':C.credits<mk[i].price?'NOT ENOUGH CREDITS':'CARGO HOLD FULL',2,'#ff2d55');else{env.beep(900,.05,'square',.03);C.paid[i]=Math.round((((C.paid[i]||0)*had)+pr*k)/(had+k)*10)/10;}syncScore();}
+ function sellG(i,n){const mk=market();let k=0;if(C.paid[i]&&mk[i].price<C.paid[i]&&(C.cargo[i]||0)>0)say('loss'+i,`Careful — we paid ${C.paid[i].toFixed(1)} for ${GOODS[i][0]}, so selling at ${mk[i].price.toFixed(1)} is a loss.`,30);while(k<n&&(C.cargo[i]||0)>0){C.credits=Math.round((C.credits+mk[i].price)*10)/10;C.cargo[i]--;mk[i].qty++;k++;}if(!C.cargo[i])delete C.paid[i];if(k)env.beep(700,.05,'square',.03);syncScore();}
+ const SHIPCLS={kestrel:{name:'Kestrel',price:0,speed:330,cargo:20,shield:1,turn:1,model:'kestrel',tech:1,desc:'Your trusty all-rounder.'},courier:{name:'Swift courier',price:5000,speed:410,cargo:25,shield:.9,turn:1.15,model:'sparrow',tech:4,desc:'Very fast, light shields — great for missions.'},
+  falcon:{name:'Falcon fighter',price:6500,speed:400,cargo:12,shield:1.6,turn:1.3,model:'raven',tech:6,desc:'Agile with strong shields — for bounty hunters.'},mule:{name:'Mule freighter',price:8000,speed:260,cargo:60,shield:1.3,turn:.75,model:'hauler',tech:5,desc:'Slow but carries 60 tonnes — the trader’s choice.'},
+  warden:{name:'Warden gunship',price:14000,speed:360,cargo:30,shield:2.2,turn:1,model:'warden',tech:9,desc:'Heavily armoured police design. Tough!'}};
+ const shipCls=()=>SHIPCLS[C.ship]||SHIPCLS.kestrel;
+ function buyShip(id){const n=SHIPCLS[id],o=shipCls();if(id===C.ship)return;if(n.tech>here().tech){msg(`NEEDS A TECH ${n.tech} SHIPYARD`,2.5,'#ff2d55');return;}const bay=C.cap>o.cargo,cap=n.cargo+(bay?15:0);if(cargoT()>cap){msg('SELL SOME CARGO FIRST — IT WON’T FIT',2.5,'#ff2d55');return;}
+  const cost=Math.max(0,n.price-Math.round(o.price*.6));if(C.credits<cost){msg(`YOU NEED ${cost} CR (AFTER TRADE-IN)`,2.5,'#ff2d55');return;}C.credits=Math.round((C.credits-cost)*10)/10;C.ship=id;C.cap=cap;C.hull=0;msg(`YOU NOW FLY A ${n.name.toUpperCase()}!`,3.5,'#3cff6a');say('ship',`Congratulations on your new ${n.name}, commander.`,1);syncScore();persist();}
  const repairCost=frac=>Math.ceil(Math.min(frac,C.hull)*1100);
  function repair(frac){if(!(C.hull>0)){msg('YOUR SHIP IS NOT DAMAGED',2);return;}const f=Math.min(frac,C.hull),cost=repairCost(f);if(C.credits<cost){msg(`REPAIR COSTS ${cost} CR — NOT ENOUGH CREDITS`,2.5,'#ff2d55');return;}C.credits=Math.round((C.credits-cost)*10)/10;C.hull=Math.max(0,Math.round((C.hull-f)*100)/100);msg(C.hull?`REPAIRED — HULL NOW ${Math.round((1-C.hull)*100)}%`:'FULLY REPAIRED!',2.5,'#3cff6a');env.beep(700,.3,'triangle',.05,1.5);syncScore();persist();}
  function buyEq(e){const t=here().tech;if(e.tech>t){msg('NOT SOLD AT THIS TECH LEVEL',2);return;}
@@ -639,27 +706,28 @@ function makeStarlane(env){
     const md=Object.keys(C.medals||{});text(ctx,`MEDALS (${md.length}/${Object.keys(MEDALS).length})`,560,290,'#b45bd6',14);md.slice(0,7).forEach((k,i)=>text(ctx,MEDALS[k],560,310+i*17,'#ffe45e',12,'left',false));if(!md.length)text(ctx,'Fly, trade and fight to earn them!',560,310,'#9aa3c7',12,'left',false);}
    button(ctx,B(560,58,220,30,`Pitch: ${C.invert?'INVERTED':'NORMAL'}`,()=>{C.invert=!C.invert;persist();},{fs:12}));
    button(ctx,B(560,94,220,30,'New commander…',()=>{overlay='reset';},{fs:12,border:'#ff2d55'}));}
-  else if(tab==='market'){frame(ctx,`${s.name.toUpperCase()} MARKET PRICES`);const mk=market();text(ctx,'PRODUCT',24,50,'#b45bd6',15);text(ctx,'UNIT',300,50,'#b45bd6',15);text(ctx,'PRICE',380,50,'#b45bd6',15);text(ctx,'FOR SALE',480,50,'#b45bd6',15);text(ctx,'IN HOLD',620,50,'#b45bd6',15);
+  else if(tab==='market'){frame(ctx,`${s.name.toUpperCase()} MARKET PRICES`);const mk=market();{let best=-1,bv=0;mk.forEach((x,i)=>{if(GOODS[i][6]||!x.qty)return;const v=GOODS[i][2]/Math.max(1,x.price);if(v>bv){bv=v;best=i;}});if(best>=0&&bv>1.15)say('mkt'+C.sys+'-'+C.day,`Tip: ${GOODS[best][0]} is cheap here today — worth buying if another system needs it.`,9999);}text(ctx,'PRODUCT',24,50,'#b45bd6',14);text(ctx,'UNIT',262,50,'#b45bd6',14);text(ctx,'PRICE',312,50,'#b45bd6',14);text(ctx,'FOR SALE',398,50,'#b45bd6',14);text(ctx,'IN HOLD',498,50,'#b45bd6',14);text(ctx,'PAID',590,50,'#b45bd6',14);text(ctx,'PROFIT/UNIT',668,50,'#b45bd6',14);
    GOODS.forEach((g,i)=>{const y=72+i*23,on=sel===i;btns.push({x:14,y:y-2,w:W-28,h:22,fn:()=>{sel=i;}});if(on){ctx.fillStyle='rgba(60,255,106,.18)';ctx.fillRect(14,y-2,W-28,22);}
-    const col=g[6]?'#ff8a1c':on?'#3cff6a':'#e6e9f2';text(ctx,g[0]+(g[6]?' ⚠':''),24,y,col,15);text(ctx,g[1],310,y,col,15);text(ctx,mk[i].price.toFixed(1),380,y,col,15);text(ctx,mk[i].qty?`${mk[i].qty}${g[1]}`:'—',490,y,col,15);text(ctx,C.cargo[i]?`${C.cargo[i]}${g[1]}`:'',630,y,col,15);});
+    const col=g[6]?'#ff8a1c':on?'#3cff6a':'#e6e9f2';text(ctx,g[0]+(g[6]?' ⚠':''),24,y,col,14);text(ctx,g[1],266,y,col,14);text(ctx,mk[i].price.toFixed(1),312,y,col,14);text(ctx,mk[i].qty?`${mk[i].qty}${g[1]}`:'—',398,y,col,14);text(ctx,C.cargo[i]?`${C.cargo[i]}${g[1]}`:'',498,y,col,14);
+    if(C.cargo[i]){const pd=C.paid[i];text(ctx,pd?pd.toFixed(1):'free',590,y,'#9aa3c7',14);if(pd){const pf=mk[i].price-pd;text(ctx,(pf>=0?'+':'')+pf.toFixed(1),668,y,pf>=0?'#3cff6a':'#ff2d55',14);}}});
    text(ctx,`Cash: ${C.credits.toFixed(1)} Cr     Hold: ${cargoT()}/${C.cap}t`,24,466,'#ffe45e',15);if(GOODS[sel][6])text(ctx,'⚠ Illegal goods: customs may catch you',440,466,'#ff8a1c',13);
    const bw=146;[['BUY 1',()=>buy(sel,1)],['BUY 10',()=>buy(sel,10)],['BUY MAX',()=>buy(sel,999)],['SELL 1',()=>sellG(sel,1)],['SELL ALL',()=>sellG(sel,999)]].forEach(([l,fn],i)=>button(ctx,B(20+i*(bw+6),484,bw,38,l,fn,{bg:i<3?'rgba(30,80,50,.9)':'rgba(80,40,30,.9)'})));}
-  else if(tab==='shipyard'){frame(ctx,`${s.name.toUpperCase()} SHIPYARD — TECH LEVEL ${s.tech}`);const list=EQUIP;text(ctx,'EQUIPMENT',24,50,'#b45bd6',15);text(ctx,'PRICE',640,50,'#b45bd6',15);
-   list.forEach((e,i)=>{const y=74+i*27,ok=e.tech<=s.tech,on=selEq===i,own=(e.laser&&C.front===e.laser)||(e.id==='rearlaser'&&C.rear)||(e.id==='cargo'&&C.cap>=35)||C.equip[e.id];btns.push({x:14,y:y-3,w:W-28,h:25,fn:()=>{selEq=i;}});
-    if(on){ctx.fillStyle='rgba(60,255,106,.18)';ctx.fillRect(14,y-3,W-28,25);}const col=!ok?'#4a4f63':own?'#3fe0ff':on?'#3cff6a':'#e6e9f2';
+  else if(tab==='shipyard'){frame(ctx,`${s.name.toUpperCase()} SHIPYARD — TECH LEVEL ${s.tech}`);button(ctx,B(300,45,110,22,'EQUIPMENT',()=>{yardMode='equip';},{fs:11}),yardMode==='equip');button(ctx,B(416,45,110,22,'🚀 SHIPS',()=>{yardMode='ships';},{fs:11}),yardMode==='ships');if(yardMode==='ships')renderShips(ctx);else{const list=EQUIP;text(ctx,'EQUIPMENT',24,50,'#b45bd6',15);text(ctx,'PRICE',640,50,'#b45bd6',15);
+   list.forEach((e,i)=>{const y=72+i*25,ok=e.tech<=s.tech,on=selEq===i,own=(e.laser&&C.front===e.laser)||(e.id==='rearlaser'&&C.rear)||(e.id==='cargo'&&C.cap>=35)||C.equip[e.id];btns.push({x:14,y:y-3,w:W-28,h:23,fn:()=>{selEq=i;}});
+    if(on){ctx.fillStyle='rgba(60,255,106,.18)';ctx.fillRect(14,y-3,W-28,23);}const col=!ok?'#4a4f63':own?'#3fe0ff':on?'#3cff6a':'#e6e9f2';
     text(ctx,e.name+(own?' ✓':'')+(!ok?`  (needs tech ${e.tech})`:''),24,y,col,15);text(ctx,e.id==='fuel'?`${(Math.max(0,7-C.fuel)*e.price).toFixed(1)}`:e.price.toFixed(1),640,y,col,15);});
    text(ctx,`Cash: ${C.credits.toFixed(1)} Cr   Missiles: ${C.missiles}/4   Fuel: ${C.fuel.toFixed(1)} LY   Hull: ${Math.round((1-(C.hull||0))*100)}%`,24,462,'#ffe45e',15);
    button(ctx,B(20,484,180,38,EQUIP[selEq].id==='fuel'?'⛽ FILL TANK':'🛒 BUY',()=>buyEq(EQUIP[selEq]),{bg:'rgba(30,80,50,.9)'}));button(ctx,B(208,484,150,38,'⛽ REFUEL',()=>buyEq(EQUIP[0])));
-   if(C.hull>0){button(ctx,B(366,484,200,38,`🔧 FIX 25% · ${repairCost(.25)} Cr`,()=>repair(.25),{fs:12}));button(ctx,B(574,484,206,38,`🔧 FULL REPAIR · ${repairCost(1)} Cr`,()=>repair(1),{fs:12,bg:'rgba(30,80,50,.9)'}));}else text(ctx,'🔧 Hull 100% — no repairs needed',380,496,'#3cff6a',13);}
+   if(C.hull>0){button(ctx,B(366,484,200,38,`🔧 FIX 25% · ${repairCost(.25)} Cr`,()=>repair(.25),{fs:12}));button(ctx,B(574,484,206,38,`🔧 FULL REPAIR · ${repairCost(1)} Cr`,()=>repair(1),{fs:12,bg:'rgba(30,80,50,.9)'}));}else text(ctx,'🔧 Hull 100% — no repairs needed',380,496,'#3cff6a',13);}}
   else if(tab==='missions'){frame(ctx,`${s.name.toUpperCase()} BULLETIN BOARD`);const offers=board();text(ctx,'OFFERS',24,50,'#b45bd6',15);
-   if(!offers.length)text(ctx,'No new requests today. Try another station.',24,74,'#9aa3c7',15);
+   if(!offers.length)text(ctx,'No new requests today. Try another station.',24,74,'#9aa3c7',15);{const so=storyOffer();if(so)button(ctx,B(W-300,46,280,24,'⭐ STORY: THE VORN SIGNAL',()=>{accept(so);say('story','A story mission! Let’s find out what that signal is.',5);},{fs:11,bg:'rgba(90,60,140,.9)'}));}
    offers.forEach((o,i)=>{const y=74+i*30,on=selMis===i;btns.push({x:14,y:y-4,w:W-28,h:28,fn:()=>{selMis=i;}});if(on){ctx.fillStyle='rgba(60,255,106,.18)';ctx.fillRect(14,y-4,W-28,28);}text(ctx,o.title,24,y,on?'#3cff6a':'#e6e9f2',15);text(ctx,`${o.reward} Cr`,690,y,'#ffe45e',15);});
    const o=offers[selMis];if(o){wrap(ctx,o.text,24,74+offers.length*30+6,750,18,'#c8d0ff',14);button(ctx,B(560,74+offers.length*30+50,210,34,'✅ ACCEPT',()=>accept(o),{bg:'rgba(30,80,50,.9)'}));}
    const y0=300;text(ctx,`YOUR MISSIONS (${C.missions.length}/4)`,24,y0,'#b45bd6',15);text(ctx,`Completed so far: ${(C.log||[]).filter(x=>x.ok).length} · 💰 ${C.credits.toFixed(1)} Cr`,W-24,y0,'#9aa3c7',13,'right');if(!C.missions.length)text(ctx,'None yet — accept one above.',24,y0+24,'#9aa3c7',14);
    C.missions.slice(0,4).forEach((m,i)=>{const y=y0+24+i*38;text(ctx,m.title,24,y,'#e6e9f2',14);text(ctx,missionStatus(m),24,y+17,'#9aa3c7',12,'left',false);
     if(m.type==='supply'&&m.sys===C.sys&&(C.cargo[m.good]||0)>=m.qty)button(ctx,B(560,y,100,30,'DELIVER',()=>{C.cargo[m.good]-=m.qty;C.credits+=m.reward;C.missions=C.missions.filter(x=>x!==m);C.done++;msg(`DELIVERED: +${m.reward} CR`,3,'#3cff6a');syncScore();persist();},{fs:12,bg:'rgba(30,80,50,.9)'}));
     button(ctx,B(670,y,100,30,'ABANDON',()=>{C.missions=C.missions.filter(x=>x!==m);persist();},{fs:12,border:'#ff2d55'}));});}
-  else if(tab==='data'){const t=C.target!==null&&C.target!==undefined?sysOf(C.target):s;frame(ctx,`DATA ON ${t.name.toUpperCase()}`);
+  else if(tab==='data'){const hasT=C.target!==null&&C.target!==undefined&&C.target!==C.sys,t=hasT&&dataSel==='target'?sysOf(C.target):s;frame(ctx,`DATA ON ${t.name.toUpperCase()}`);button(ctx,B(560,50,110,26,'THIS SYSTEM',()=>{dataSel='here';},{fs:11}),t===s);button(ctx,B(674,50,110,26,hasT?'TARGET':'NO TARGET',()=>{if(hasT)dataSel='target';},{fs:11}),t!==s);
    const L=[['Distance:',t.i===C.sys?'You are here':`${SL.dist(GAL[C.sys],GAL[t.i])} Light Years`],['Economy:',ECON[t.eco]],['Government:',GOV[t.gov]],['Tech Level:',String(t.tech)],['Turnover:',`${t.prod} MCr`],['Radius:',`${t.radius} km`],['Population:',`${t.pop} Billion`]];
    L.forEach(([a,b],i)=>{text(ctx,a,30,60+i*28,'#3cff6a',17);text(ctx,b,230,60+i*28,'#fff',17);});text(ctx,`(${t.species})`,30,262,'#ffe45e',16);let yy=wrap(ctx,t.desc,30,286,740,19,'#e6e9f2',15);yy=wrap(ctx,tradeHint(t),30,yy+2,740,17,'#c8d0ff',13);
    const ev=sysEvent(t.i,C.day);if(ev)yy=wrap(ctx,`📰 Local news: ${t.name} is ${ev.text}.`,30,yy+4,740,17,'#ffb020',13);
@@ -671,6 +739,11 @@ function makeStarlane(env){
    lines.forEach((l,i)=>text(ctx,l,CX,90+i*30,'#e6e9f2',17,'center'));button(ctx,B(CX-150,250,300,80,'🚀 LAUNCH',launch,{fs:26,bg:'rgba(255,45,85,.85)'}));
    wrap(ctx,'Flying: steer with the arrow keys or W A S D (or drag on a tablet). R / F or the slider change speed. Space fires. J = jump drive, C = docking computer, H = hyperspace, M = missile, E = E.C.M., G = chart, 1 / 2 = front / rear view.',60,360,680,20,'#9aa3c7',14);}
   const lm=msgs[msgs.length-1];if(lm){ctx.fillStyle='rgba(5,8,22,.95)';ctx.fillRect(10,H-74,W-20,20);text(ctx,lm.t,CX,H-72,lm.c,14,'center');}tabsBar(ctx);if(overlay==='reset')resetBox(ctx);}
+ function renderShips(ctx){const cur=shipCls(),tech=here().tech;text(ctx,`You fly: ${cur.name} · trade-in value ${Math.round(cur.price*.6)} Cr`,24,76,'#3fe0ff',14);
+  Object.entries(SHIPCLS).forEach(([id,c],i)=>{const y=100+i*72,own=id===C.ship,ok=c.tech<=tech,cost=Math.max(0,c.price-Math.round(cur.price*.6));ctx.fillStyle=own?'rgba(63,224,255,.1)':'rgba(255,255,255,.04)';ctx.fillRect(14,y-4,W-28,64);
+   text(ctx,c.name+(own?'  ✓ YOURS':''),24,y,own?'#3fe0ff':ok?'#e6e9f2':'#4a4f63',16);text(ctx,c.desc,24,y+20,'#9aa3c7',12,'left',false);text(ctx,`Speed ${c.speed} · Cargo ${c.cargo}t · Shields ×${c.shield} · Handling ×${c.turn}`,24,y+38,'#c8d0ff',12,'left',false);
+   if(!own){if(ok)button(ctx,B(590,y+8,190,40,`BUY · ${cost} Cr`,()=>buyShip(id),{fs:13,bg:C.credits>=cost?'rgba(30,80,50,.92)':undefined}));else text(ctx,`needs tech ${c.tech}`,600,y+18,'#4a4f63',13);}});
+  if(C.hull>0)button(ctx,B(20,484,260,38,`🔧 FULL REPAIR · ${repairCost(1)} Cr`,()=>repair(1),{fs:12,bg:'rgba(30,80,50,.9)'}));}
  function renderArrival(ctx){btns=[];ctx.fillStyle='rgba(2,4,14,.88)';ctx.fillRect(0,0,W,H);const h=Math.min(440,150+arrival.length*48);const y0=(H-h)/2;ctx.fillStyle='#0b1028';ctx.strokeStyle='#3cff6a';ctx.lineWidth=3;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(90,y0,620,h,16);else ctx.rect(90,y0,620,h);ctx.fill();ctx.stroke();
   const good=arrival.filter(a=>a.ok&&a.r).reduce((t,a)=>t+a.r,0);text(ctx,arrival.some(a=>a.ok)?'🎉 MISSION REPORT':'📋 ARRIVAL REPORT',CX,y0+18,'#3cff6a',24,'center');let y=y0+60;
   for(const a of arrival.slice(0,6)){y=wrap(ctx,a.t,120,y,480,18,a.ok?'#e6e9f2':'#ff8a1c',15);if(a.r)text(ctx,`+${a.r} Cr`,690,y-18,'#ffe45e',16,'right');y+=10;}
@@ -678,9 +751,13 @@ function makeStarlane(env){
  function wrap(ctx,t,x,y,w,lh,col,size){ctx.font=`${size}px "Courier New",monospace`;const words=t.split(' ');let line='',yy=y;for(const wd of words){const test=line?line+' '+wd:wd;if(ctx.measureText(test).width>w&&line){text(ctx,line,x,yy,col,size,'left',false);line=wd;yy+=lh;}else line=test;}if(line)text(ctx,line,x,yy,col,size,'left',false);return yy+lh;}
  function missionStatus(m){const left=m.deadline?`day ${m.deadline}${C.day>m.deadline?' — LATE!':''}`:'';if(m.type==='courier')return`Take the package to ${GAL[m.dest].name} by ${left}`;
   if(m.type==='supply')return`Bring ${m.qty}t ${GOODS[m.good][0]} to ${GAL[m.sys].name} (you have ${C.cargo[m.good]||0}t) by ${left}`;
+  if(m.type==='story')return[``,`Find the strange signal near ${GAL[m.a].name}`,`Take the Vorn star charts to ${GAL[m.b].name} to be decoded`,`Destroy the Vorn mothership at ${GAL[m.c].name}!`,`Return to ${GAL[m.b].name} for your reward`][m.stage];
   if(m.type==='bounty')return m.killed?`Done! Return to ${GAL[m.from].name} for ${m.reward} Cr`:`Hunt ${m.target} at ${GAL[m.sys].name} by ${left}`;
   return`${GAL[m.sys].name}: ${m.delivered?'✓':'deliver'} ${m.qty}t ${GOODS[m.good][0]} · patrols ${Math.min(m.kills,m.need)}/${m.need} · by ${left}`;}
- function accept(o){if(C.missions.length>=4){msg('YOU CAN ONLY TAKE 4 MISSIONS AT ONCE',2.5,'#ff2d55');return;}C.missions.push({...o});C.board.offers=C.board.offers.filter(x=>x!==o);selMis=0;msg('MISSION ACCEPTED',2,'#3cff6a');env.beep(1000,.2,'triangle',.05,1.5);persist();}
+ function storyOffer(){if(C.storyDone||C.missions.some(m=>m.type==='story')||(C.done||0)<2)return null;const here0=GAL[C.sys],near=GAL.filter(g=>g.i!==C.sys&&SL.dist(here0,g)<=7);if(!near.length)return null;const A=near[Math.floor(here0.seed%near.length)];
+  const techs=GAL.filter(g=>sysOf(g.i).tech>=8&&g.i!==A.i).sort((a,b)=>SL.dist(a,A)-SL.dist(b,A));const Bs=techs[0]||A;const Cs=GAL.filter(g=>g.i!==Bs.i&&g.i!==A.i&&SL.dist(g,Bs)<=14).sort((a,b)=>SL.dist(b,Bs)-SL.dist(a,Bs))[0]||A;
+  return{id:'story',type:'story',stage:1,a:A.i,b:Bs.i,c:Cs.i,reward:4000,title:'⭐ The Vorn Signal',text:`A strange signal has been detected near ${A.name}. Fly there and investigate — something big is out there. (A story mission in several parts. Reward: 4000 Cr.)`};}
+ function accept(o){if(C.missions.length>=4){msg('YOU CAN ONLY TAKE 4 MISSIONS AT ONCE',2.5,'#ff2d55');return;}C.missions.push({...o});if(C.board&&C.board.offers)C.board.offers=C.board.offers.filter(x=>x!==o);selMis=0;msg('MISSION ACCEPTED',2,'#3cff6a');env.beep(1000,.2,'triangle',.05,1.5);persist();}
  function resetBox(ctx){ctx.fillStyle='rgba(0,0,0,.8)';ctx.fillRect(0,0,W,H);text(ctx,'Start a brand-new commander?',CX,200,'#ffe45e',22,'center');text(ctx,'Your credits, cargo, equipment and missions will be lost.',CX,236,'#e6e9f2',15,'center');
   button(ctx,B(CX-220,290,200,50,'YES, START AGAIN',()=>{const go=()=>{C=newCommander();overlay=null;tab='status';persist();syncScore();};if(typeof Family!=='undefined')Family.guard('Start a new Starlane commander',go);else go();},{bg:'rgba(255,45,85,.85)'}));button(ctx,B(CX+20,290,200,50,'NO, KEEP PLAYING',()=>{overlay=null;}));}
  // ---------------- charts ----------------
@@ -701,7 +778,7 @@ function makeStarlane(env){
   button(ctx,B(x+w-190,y+6,180,28,local?'GALAXY VIEW':'SHORT-RANGE VIEW',()=>{chartMode=local?'galaxy':'local';},{fs:12}));}
  function renderOverlay(ctx){btns=[];renderFlight(ctx);btns=[];ctx.fillStyle='rgba(0,0,0,.92)';ctx.fillRect(0,0,W,VH);text(ctx,chartMode==='galaxy'?'GALACTIC CHART':'SHORT-RANGE CHART',CX,6,'#3fe0ff',18,'center');chart(ctx,10,30,780,350);
   button(ctx,B(10,30+356-36,120,30,'DATA',()=>{overlay='data';},{fs:12}));button(ctx,B(W-130,4,120,26,'✕ CLOSE',()=>{overlay=null;},{fs:12}));
-  if(overlay==='data'){const t=C.target!==null&&C.target!==undefined?sysOf(C.target):here();ctx.fillStyle='rgba(0,0,0,.95)';ctx.fillRect(0,0,W,VH);text(ctx,`DATA ON ${t.name.toUpperCase()}`,CX,10,'#3fe0ff',18,'center');
+  if(overlay==='data'){const hasT=C.target!==null&&C.target!==undefined&&C.target!==C.sys,t=hasT&&dataSel==='target'?sysOf(C.target):here();ctx.fillStyle='rgba(0,0,0,.95)';ctx.fillRect(0,0,W,VH);text(ctx,`DATA ON ${t.name.toUpperCase()}`,CX,10,'#3fe0ff',18,'center');button(ctx,B(20,8,110,24,'THIS SYSTEM',()=>{dataSel='here';},{fs:11}),t===here());button(ctx,B(136,8,110,24,'TARGET',()=>{if(hasT)dataSel='target';},{fs:11}),t!==here());
    [['Economy',ECON[t.eco]],['Government',GOV[t.gov]],['Tech Level',t.tech],['Population',t.pop+' Billion'],['Species',t.species]].forEach(([a,b],i)=>{text(ctx,a+':',30,46+i*26,'#3cff6a',16);text(ctx,String(b),220,46+i*26,'#fff',16);});wrap(ctx,t.desc,30,184,740,20,'#e6e9f2',15);
    button(ctx,B(W-130,4,120,26,'◀ CHART',()=>{overlay='chart';},{fs:12}));}}
  // ---------------- quick tunnels (used when cut scenes are switched off) ----------------
@@ -755,7 +832,10 @@ function makeStarlane(env){
   text(ctx,sc.kind==='dock'?`DOCKING AT ${here().name.toUpperCase()} STATION`:`LAUNCHING FROM ${here().name.toUpperCase()} STATION`,CX,18,'#3fe0ff',20,'center');
   text(ctx,'Tap or press any key to skip',CX,H-28,'rgba(255,255,255,.55)',13,'center');}
  function endLaunchScene(){const s=station;scene=null;P.pos=add(s.pos,mul(s.o.f,2100));P.o={f:s.o.f.slice(),u:s.o.u.slice(),r:s.o.r.slice()};P.speed=170;P.throttle=.45;initDust();mode='flight';msg(`LEAVING ${here().name.toUpperCase()} STATION`,3,'#3fe0ff');}
- function showArrival(){if(arrival.length){overlay='arrival';env.beep(523,.15,'triangle',.05);setTimeout(()=>env.beep(659,.15,'triangle',.05),150);setTimeout(()=>env.beep(784,.3,'triangle',.05),300);}}
+ function toggleRollLock(){rollLock=!rollLock;lockRate=rollLock?P.roll:0;msg(rollLock?`ROLL LOCKED AT ${Math.round(-lockRate*57)}°/S`:'ROLL LOCK OFF',2,'#3fe0ff');}
+ function matchSpin(){if(!station||len(sub(station.pos,P.pos))>15000){msg('MATCH SPIN WORKS NEAR A STATION',2);return;}rollLock=true;lockRate=-station.spin;msg('ROLL MATCHED TO THE STATION’S SPIN',2.5,'#3cff6a');say('matched','Roll matched to the station. Now line up with the slot and fly in slowly.',10);}
+ function nextTarget(){const list=[...ships.filter(x=>!x.dead),...(station?[station]:[])].sort((a,b)=>len(sub(a.pos,P.pos))-len(sub(b.pos,P.pos)));if(!list.length)return;const i=list.indexOf(radarTgt);radarTgt=list[(i+1)%list.length];}
+ function showArrival(){const t=here();setTimeout(()=>{const done=arrival.filter(a=>a.ok&&a.r).reduce((a,b)=>a+b.r,0);say('docked',done?`Mission complete! ${done} credits paid into your account.`:`Docked at ${t.name}. ${C.hull>0?'Our hull is damaged — the shipyard can repair it.':'All systems normal.'}`,4);},600);if(arrival.length){overlay='arrival';env.beep(523,.15,'triangle',.05);setTimeout(()=>env.beep(659,.15,'triangle',.05),150);setTimeout(()=>env.beep(784,.3,'triangle',.05),300);}}
  function endDockScene(){scene=null;mode='docked';tab='status';showArrival();env.engine&&env.engine.stop&&env.engine.stop();}
  function skipScene(){if(mode==='dockScene')endDockScene();else if(mode==='launchScene')endLaunchScene();}
  // ---------------- saving (docked or in flight) ----------------
@@ -776,14 +856,13 @@ function makeStarlane(env){
  function renderMenu(ctx){panel(ctx,'PAUSED');const tabsM=[['main','GAME'],['controls','CONTROLS'],['help','HOW TO PLAY']];tabsM.forEach(([k,l],i)=>button(ctx,B(40+i*245,52,230,34,l,()=>{menuTab=k;remap=null;},{fs:14}),menuTab===k||(k==='main'&&menuTab==='restart')));
   if(menuTab==='main'){[['▶  RESUME',()=>{overlay=null;},'rgba(30,80,50,.92)'],['💾  SAVE GAME',()=>saveGame(),'rgba(30,38,80,.92)'],['↺  RESTART',()=>{menuTab='restart';},'rgba(90,40,30,.92)']].forEach(([l,fn,bg],i)=>button(ctx,B(40+i*245,104,230,46,l,fn,{fs:17,bg})));
    text(ctx,saveNote||(unsaved()?'You have progress that isn’t saved yet.':'Everything is saved.'),CX,158,saveNote?'#3cff6a':unsaved()?'#ffb020':'#9aa3c7',13,'center');
-   const tg=[['3D lighting',C.opt.lit,()=>{C.opt.lit=!C.opt.lit;persist();},'Solid, textured ships, stations and planets lit by the sun.'],
-    ['3D cockpit',C.opt.cockpit,()=>{C.opt.cockpit=!C.opt.cockpit;persist();},'Sit inside the cockpit: window frame, side windows and a rear-view mirror.'],
-    ['Hover help (cockpit)',C.opt.tips,()=>{C.opt.tips=!C.opt.tips;persist();},'Explains controls and gauges when you hover or tap. Also the TIPS key on the deck, or F1.'],
-    ['Cut scenes',C.opt.cuts,()=>{C.opt.cuts=!C.opt.cuts;persist();},'Watch your ship land inside the station and fly out again.'],
-    ['Invert pitch',C.invert,()=>{C.invert=!C.invert;persist();},'Up and down swapped, like a flight simulator.']];
-   tg.forEach(([l,on,fn,d],i)=>{const y=184+i*54;ctx.fillStyle=i%2?'rgba(255,255,255,.025)':'rgba(255,255,255,.05)';ctx.fillRect(40,y-6,720,50);text(ctx,l,60,y,'#e6e9f2',17);wrap(ctx,d,60,y+22,540,15,'#9aa3c7',12);button(ctx,B(630,y,110,34,on?'ON':'OFF',fn,{bg:on?'rgba(30,80,50,.92)':'rgba(60,30,40,.92)'}));});
-   text(ctx,`${here().name} · Day ${C.day} · ${Math.floor(C.credits)} Cr · ${rankOf(C.killPts)} · ${legalName(C.legal)}`,CX,470,'#c8d0ff',14,'center');
-   text(ctx,'P or Esc pauses and resumes at any time.',CX,494,'#9aa3c7',12,'center');}
+   const T=(k,l,d)=>[l,k==='invert'?C.invert:C.opt[k],()=>{if(k==='invert')C.invert=!C.invert;else C.opt[k]=!C.opt[k];persist();},d];
+   const tg=[T('lit','3D lighting','Solid, textured, sunlit ships and planets.'),T('cockpit','3D cockpit','Window frame, side windows, mirror.'),T('tips','Hover help','Explains controls (TIPS key / F1).'),T('cuts','Cut scenes','Docking and launch movies.'),
+    T('voice','Assistant voice','Spoken tips and alerts (subtitles stay).'),T('redAlert','Red alert light','Flashing alarm when under attack.'),T('maths','Maths challenges','Solve sums for bonuses in flight.'),T('invert','Invert pitch','Up/down swapped, like a flight sim.')];
+   tg.forEach(([l,on,fn,d],i)=>{const x=40+(i%2)*365,y=172+Math.floor(i/2)*64;ctx.fillStyle='rgba(255,255,255,.045)';ctx.fillRect(x,y-6,355,58);text(ctx,l,x+10,y,'#e6e9f2',15);wrap(ctx,d,x+10,y+22,236,14,'#9aa3c7',11);button(ctx,B(x+262,y+2,84,30,on?'ON':'OFF',fn,{bg:on?'rgba(30,80,50,.92)':'rgba(60,30,40,.92)',fs:13}));});
+   text(ctx,`Assistant: ${C.opt.aiName||'NOVA'}`,60,436,'#3fe0ff',15);button(ctx,B(300,430,150,28,'✎ RENAME',()=>{const n=window.prompt('Give your ship’s assistant a name:',C.opt.aiName||'NOVA');if(n&&n.trim()){C.opt.aiName=n.trim().slice(0,14);persist();say('hello',`Hello commander. I’m ${C.opt.aiName}. Ready when you are.`,1);}},{fs:12}));button(ctx,B(460,430,150,28,'🔊 TEST VOICE',()=>say('test',`${C.opt.aiName||'NOVA'} here. Voice check complete.`,1),{fs:12}));
+   text(ctx,`${here().name} · Day ${C.day} · ${Math.floor(C.credits)} Cr · ${rankOf(C.killPts)} · ${legalName(C.legal)}`,CX,474,'#c8d0ff',14,'center');
+   text(ctx,'P or Esc pauses · F2 cockpit screens · L roll lock · Y match spin · N next target',CX,496,'#9aa3c7',11,'center');}
   else if(menuTab==='restart'){text(ctx,'START OVER?',CX,108,'#ffe45e',22,'center');
    if(unsaved()){ctx.fillStyle='rgba(255,176,32,.12)';ctx.fillRect(90,142,620,66);ctx.strokeStyle='#ffb020';ctx.strokeRect(90,142,620,66);wrap(ctx,'⚠ You have progress that isn’t saved yet. If you restart now, it will be lost. Save first if you want to keep it.',110,152,580,18,'#ffd27a',14);
     button(ctx,B(CX-120,214,240,36,'💾 SAVE FIRST',()=>{saveGame();},{fs:14}));}
@@ -797,9 +876,9 @@ function makeStarlane(env){
    button(ctx,B(40,462,200,32,'RESET ALL KEYS',()=>{C.opt.keys=optDefaults().keys;persist();},{fs:12,border:'#ff2d55'}));
    wrap(ctx,'Also: keys 1–4 pick front/rear/left/right views, P pauses. Mouse wheel = speed. Touch: drag on the left to steer, FIRE button, speed slider. Gamepad: left stick steers, triggers change speed, A fire, B missile, X E.C.M., Y jump, LB dock, RB hyperspace, Start = map.',260,462,510,16,'#9aa3c7',12);}
   else{HELP.forEach(([l],i)=>button(ctx,B(30+i*150,96,140,30,l,()=>{helpTab=i;},{fs:12}),helpTab===i));const[hd,body]=HELP[helpTab];text(ctx,hd,40,142,'#ffe45e',18);let y=172;for(const para of body.split('\n'))y=wrap(ctx,para,40,y,720,20,'#e6e9f2',15)+4;}}
- function renderCargo(ctx){panel(ctx,'CARGO HOLD');const mk=C.market&&C.market.sys===C.sys?C.market.p:null;let y=60;text(ctx,'GOODS',40,y,'#b45bd6',15);text(ctx,'AMOUNT',380,y,'#b45bd6',15);text(ctx,mk?'PRICE HERE':'',540,y,'#b45bd6',15);y+=26;
+ function renderCargo(ctx){panel(ctx,'CARGO HOLD');const mk=C.market&&C.market.sys===C.sys?C.market.p:null;let y=60;text(ctx,'GOODS',40,y,'#b45bd6',15);text(ctx,'AMOUNT',330,y,'#b45bd6',15);text(ctx,'YOU PAID',420,y,'#b45bd6',15);text(ctx,mk?'PRICE HERE':'',560,y,'#b45bd6',15);text(ctx,mk?'PROFIT':'',650,y,'#b45bd6',15);y+=26;
   const items=Object.entries(C.cargo).filter(([k,n])=>n>0);if(!items.length){text(ctx,'Empty — buy goods at a station market.',40,y,'#9aa3c7',15);y+=26;}
-  items.forEach(([k,n])=>{const g=GOODS[k];text(ctx,g[0]+(g[6]?' ⚠':''),40,y,g[6]?'#ff8a1c':'#e6e9f2',15);text(ctx,`${n}${g[1]}`,380,y,'#e6e9f2',15);if(mk)text(ctx,mk[k].price.toFixed(1),540,y,'#e6e9f2',15);y+=24;});
+  items.forEach(([k,n])=>{const g=GOODS[k];text(ctx,g[0]+(g[6]?' ⚠':''),40,y,g[6]?'#ff8a1c':'#e6e9f2',15);text(ctx,`${n}${g[1]}`,330,y,'#e6e9f2',15);text(ctx,C.paid[k]?`paid ${C.paid[k].toFixed(1)}`:'free',420,y,'#9aa3c7',14);if(mk){text(ctx,mk[k].price.toFixed(1),560,y,'#e6e9f2',15);if(C.paid[k]){const pf=(mk[k].price-C.paid[k])*n;text(ctx,(pf>=0?'+':'')+pf.toFixed(1)+' Cr',650,y,pf>=0?'#3cff6a':'#ff2d55',14);}}y+=24;});
   y+=10;text(ctx,`Hold: ${cargoT()}/${C.cap}t   Fuel: ${C.fuel.toFixed(1)} LY   Missiles: ${C.missiles}/4   Credits: ${C.credits.toFixed(1)} Cr`,40,y,'#ffe45e',15);y+=34;
   text(ctx,'EQUIPMENT',40,y,'#b45bd6',15);y+=24;const eq=[`Front ${C.front} laser`,...(C.rear?['Rear pulse laser']:[]),...EQUIP.filter(e=>C.equip[e.id]).map(e=>e.name.split(' (')[0])];wrap(ctx,eq.join(' · '),40,y,720,20,'#c8d0ff',15);
   button(ctx,B(CX-100,H-70,200,40,'✕ CLOSE',()=>{overlay=null;}));}
@@ -811,15 +890,16 @@ function makeStarlane(env){
  const held=id=>(C.opt.keys[id]||[]).some(k=>K[k]||(k.length===1&&K[k.toUpperCase()]));
  function controls(){const inv=C.invert?-1:1;let roll=(held('rollR')?1:0)-(held('rollL')?1:0),pitch=((held('up')?1:0)-(held('down')?1:0))*inv,thr=(held('fast')||K.PageUp?1:0)-(held('slow')||K.PageDown?1:0),fire=held('fire')||fireTouch;
   if(stick){roll+=pad.x*1.2;pitch+=-pad.y*1.2*inv;}
-  if(gp){const a=gp.axes||[],b=i=>gp.buttons[i]&&gp.buttons[i].pressed;if(Math.abs(a[0]||0)>.15)roll+=a[0];if(Math.abs(a[1]||0)>.15)pitch+=-(a[1])*inv;if(b(7))thr+=1;if(b(6))thr-=1;if(b(0))fire=true;}
-  return{roll:Math.max(-1,Math.min(1,roll)),pitch:Math.max(-1,Math.min(1,pitch)),thr,fire};}
+  let yaw=(held('yawR')?1:0)-(held('yawL')?1:0);
+  if(gp){const a=gp.axes||[],b=i=>gp.buttons[i]&&gp.buttons[i].pressed;if(Math.abs(a[2]||0)>.2)yaw+=a[2];if(Math.abs(a[0]||0)>.15)roll+=a[0];if(Math.abs(a[1]||0)>.15)pitch+=-(a[1])*inv;if(b(7))thr+=1;if(b(6))thr-=1;if(b(0))fire=true;}
+  return{roll:Math.max(-1,Math.min(1,roll)),pitch:Math.max(-1,Math.min(1,pitch)),yaw:Math.max(-1,Math.min(1,yaw)),thr,fire};}
  let gpPrev=[];
  function pollPad(){gp=null;try{const pads=navigator.getGamepads?navigator.getGamepads():[];gp=[...pads].find(p=>p&&p.connected)||null;}catch(e){}if(!gp)return;const press=i=>gp.buttons[i]&&gp.buttons[i].pressed&&!gpPrev[i];
   if(mode==='flight'&&!overlay){if(press(1))fireMissile();if(press(2))ecm();if(press(3))toggleJump();if(press(4))toggleDock();if(press(5))startHyper();if(press(8))nextView();}if(press(9)){if(overlay)overlay=null;else if(mode==='flight'){overlay='chart';chartMode='galaxy';}}gpPrev=gp.buttons.map(b=>b.pressed);}
  const hypV=t=>t<1?.05+t*.9:.95+(t-1)*1.2;
  G.update=(dt)=>{clock+=dt;FX.update(dt);msgs.forEach(m=>m.d-=dt);msgs=msgs.filter(m=>m.d>0);if(lastHit>0)lastHit-=dt*2;if(laserShow>0)laserShow-=dt;pollPad();
   for(const b of booms)b.t+=dt;booms=booms.filter(b=>b.t<(b.spark?.8:2.4));
-  if(overlay==='menu')return;
+  if(overlay==='menu'||overlay==='maths')return;
   if(mode==='dockScene'||mode==='launchScene'){scene.t+=dt;if(station){station.o.r=rot(station.o.r,station.o.f,station.spin*dt);station.o.u=rot(station.o.u,station.o.f,station.spin*dt);ortho(station.o);}
    if(mode==='dockScene'&&scene.t>DOCK_OUT+DOCK_IN)endDockScene();else if(mode==='launchScene'&&scene.t>LAUNCH_IN+LAUNCH_OUT)endLaunchScene();return;}
   if(mode==='launch'){anim+=dt;if(anim>1.6){mode='flight';msg(`LEAVING ${here().name.toUpperCase()} STATION`,3,'#3fe0ff');}return;}
@@ -830,12 +910,12 @@ function makeStarlane(env){
   if(hyperT>0&&hyperT<1.6)hypMove((1.6-hyperT)*.18,dt);
   if(mode==='flight'&&!overlay){for(let i=0;i<timeScale&&mode==='flight';i++)flight(dt);}};
  G.render=ctx=>{btns=[];tips=[];
-  if(mode==='docked'){renderDocked(ctx);if(overlay==='arrival')renderArrival(ctx);if(overlay==='menu')renderMenu(ctx);drawTip(ctx);return;}
+  if(mode==='docked'){renderDocked(ctx);drawAI(ctx,H-84);if(overlay==='arrival')renderArrival(ctx);if(overlay==='menu')renderMenu(ctx);drawTip(ctx);return;}
   if(mode==='dockScene'||mode==='launchScene'){renderScene(ctx);if(overlay==='menu')renderMenu(ctx);return;}
   if(mode==='launch'||mode==='dockAnim'){tunnel(ctx,anim*(mode==='launch'?1:-1)+5,6,'#3fe0ff');dashboard(ctx);btns=[];text(ctx,mode==='launch'?'LAUNCHING…':'DOCKING…',CX,VH-40,'#3fe0ff',18,'center');return;}
   if(mode==='hyper'){ctx.fillStyle='#000';ctx.fillRect(0,0,W,VH);const g=ctx.createRadialGradient(CX,CY,4,CX,CY,220);g.addColorStop(0,`rgba(160,200,255,${Math.min(.5,anim*.15)})`);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,VH);drawStreaks(ctx,hypV(anim),1);
    if(anim>3.3){ctx.fillStyle=`rgba(255,255,255,${(anim-3.3)*3.3})`;ctx.fillRect(0,0,W,VH);}dashboard(ctx);btns=[];text(ctx,'HYPERSPACE',CX,VH-34,'#c8d0ff',16,'center');if(overlay==='menu')renderMenu(ctx);return;}
-  if(overlay==='chart'||overlay==='data')renderOverlay(ctx);else renderFlight(ctx);
+  if(overlay==='chart'||overlay==='data')renderOverlay(ctx);else renderFlight(ctx);if(overlay==='maths'&&mathQ){renderMath(ctx);return;}
   if(overlay==='cargo')renderCargo(ctx);else if(overlay==='missions')renderMissionsOv(ctx);else if(overlay==='menu')renderMenu(ctx);
   if(mode==='dead'){ctx.fillStyle=`rgba(0,0,0,${Math.min(.75,deathT/3)})`;ctx.fillRect(0,0,W,H);text(ctx,'GAME OVER',CX,VH/2-30,'#ff2d55',36,'center');text(ctx,'Your ship was destroyed. Next time you carry on from your last save.',CX,VH/2+20,'#e6e9f2',15,'center');}
   drawTip(ctx);};
@@ -847,6 +927,7 @@ function makeStarlane(env){
   if(mode==='dockScene'||mode==='launchScene'){if(overlay!=='menu')skipScene();return;}
   if(overlay==='menu')return;
   if(overlay==='reset'){if(k==='Escape')overlay=null;return;}
+  if(overlay==='maths'&&mathQ){const n='1234'.indexOf(k);if(n>=0&&mathQ.picked===null&&mathQ.opts[n])pickMath(mathQ.opts[n]);else if((k==='Enter'||k===' ')&&mathQ.picked!==null)finishMath();return;}
   if(mode==='docked'){const n='1234567'.indexOf(k);if(n>=0){tab=TABS[n][0];sel=0;return;}
    if(tab==='market'){if(k==='ArrowUp')sel=(sel+GOODS.length-1)%GOODS.length;else if(k==='ArrowDown')sel=(sel+1)%GOODS.length;else if(k==='ArrowRight'||k==='+'||k==='=')buy(sel,1);else if(k==='ArrowLeft'||k==='-')sellG(sel,1);else if(k==='Enter')buy(sel,999);return;}
    if(tab==='shipyard'){if(k==='ArrowUp')selEq=(selEq+EQUIP.length-1)%EQUIP.length;else if(k==='ArrowDown')selEq=(selEq+1)%EQUIP.length;else if(k==='Enter'||k===' ')buyEq(EQUIP[selEq]);return;}
@@ -857,7 +938,7 @@ function makeStarlane(env){
   const act=ACTIONS.find(a=>!a[3]&&(C.opt.keys[a[0]]||[]).includes(k));
   if(overlay){if(k==='Tab')chartMode=chartMode==='galaxy'?'local':'galaxy';else if(act&&['chart','cargo','missions'].includes(act[0]))overlay=null;return;}
   if('1234'.includes(k)&&k.length===1){view=['front','rear','left','right'][+k-1];camMode='cockpit';return;}
-  if(!act)return;({tips:()=>{C.opt.tips=!C.opt.tips;persist();msg(C.opt.tips?'HOVER HELP ON':'HOVER HELP OFF',1.5,'#3fe0ff');},missile:fireMissile,ecm,bomb,jump:toggleJump,dock:toggleDock,hyper:startHyper,time:cycleTime,view:nextView,cam:()=>{camMode=camMode==='ext'?'cockpit':'ext';},chart:()=>{overlay='chart';chartMode='galaxy';},cargo:()=>{overlay='cargo';},missions:()=>{overlay='missions';},pod:ejectPod})[act[0]]();};
+  if(!act)return;({rlock:toggleRollLock,spin:matchSpin,scan:nextTarget,mfd:()=>{C.opt.mfd=!C.opt.mfd;persist();},tips:()=>{C.opt.tips=!C.opt.tips;persist();msg(C.opt.tips?'HOVER HELP ON':'HOVER HELP OFF',1.5,'#3fe0ff');},missile:fireMissile,ecm,bomb,jump:toggleJump,dock:toggleDock,hyper:startHyper,time:cycleTime,view:nextView,cam:()=>{camMode=camMode==='ext'?'cockpit':'ext';},chart:()=>{overlay='chart';chartMode='galaxy';},cargo:()=>{overlay='cargo';},missions:()=>{overlay='missions';},pod:ejectPod})[act[0]]();};
  const ptrs={};
  G.onPointer=(type,x,y,id,kind)=>{if(kind==='touch'||kind==='pen')touchSeen=true;if(kind==='mouse'){hover={x,y};if(type==='move'&&!ptrs[id])return;}
   if(type==='down'&&G.intro&&G.tap){G.tap();return;}
@@ -872,7 +953,7 @@ function makeStarlane(env){
  G.onEnd=why=>{stopMusic();if(mode==='dead')return;if(mode==='hyper')arrive();if(mode==='launchScene')endLaunchScene();if(mode==='launch')mode='flight';
   if(mode==='dockScene'||mode==='dockAnim'){mode='docked';persist();return;}
   if(mode==='flight'){if(planet&&!interdicted)saveGame();else{finishDock();mode='docked';}return;}if(mode==='docked')persist();};
- G._dbg={get C(){return C;},get P(){return P;},get mode(){return mode;},get station(){return station;},get ships(){return ships;},get scene(){return scene;},get planet(){return planet;},get moons(){return moons;},get suns(){return suns;},get timeScale(){return timeScale;},get overlay(){return overlay;},get bh(){return bh;},get tips(){return tips;},
+ G._dbg={get C(){return C;},get P(){return P;},get mode(){return mode;},get station(){return station;},get ships(){return ships;},get scene(){return scene;},get planet(){return planet;},get moons(){return moons;},get suns(){return suns;},get timeScale(){return timeScale;},get overlay(){return overlay;},get bh(){return bh;},get redOn(){return redOn;},get tgt(){return radarTgt;},get mathQ(){return mathQ;},get rollLock(){return rollLock;},get aiLine(){return aiLine;},buyShip,storyOffer,accept,missionSpawns,finish:()=>finishDock(),get tips(){return tips;},
   set:(k,v)=>{({mode:()=>mode=v,tab:()=>tab=v,overlay:()=>overlay=v,view:()=>view=v,camMode:()=>camMode=v})[k]();},launch,startHyper,toggleDock,spawn,buy,buyEq,accept,board,arrive:()=>arrive(),flight,kill:sh=>kill(sh,true),dock:()=>docked(),saveGame,hurt:(d)=>hurt(d,P.o.f),get tab(){return tab;}};
  if(C.flight&&C.flight.sys===C.sys&&GAL[C.sys])restoreFlight();
  if(env.store)persist();

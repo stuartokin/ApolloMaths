@@ -1,7 +1,24 @@
 {
- "version": "2.21",
+ "version": "2.22",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.22",
+   "date": "9 November 2026",
+   "kids": [
+    "🤖 Starlane Trader has a ship’s assistant — give it a name! It warns you and gives tips",
+    "🚨 Red alert lights when you’re under attack",
+    "⭐ A story adventure: The Vorn Signal — can you defeat the mothership?",
+    "🚀 Buy bigger ships, hide cargo from the police, and crack codes with maths",
+    "🎯 Tap anything on the radar to see what it is"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🚀 Starlane Trader: hide/show cockpit screens (✕, F2); named voice assistant with tips and alerts (mute in menu); red alert light (can be turned off); data on this system or the target; prices paid and profit/loss in the market, hold and cockpit; radar target details (tap a blip or N); turn left/right (Q/E — E.C.M. moved to U), roll lock (L) and match station spin (Y); cockpit shakes when hit; ships to buy; hidden cargo compartment and police scans; story campaign; station defences; ore from asteroids; solar flares and ion storms; exploration data; maths challenges for fuel and locked canisters."
+   ]
+  },
   {
    "v": "2.21",
    "date": "9 November 2026",
@@ -143,19 +160,6 @@
     "💾 The save bar shows your progress file’s name and when it was last saved — hover over it (or the Save button) to see where it is. New “Save as…” and “⬇️ Export (.json)” buttons.",
     "📄 Links to Tiffin School’s official sample maths questions and admissions page (Help and the bottom of the page).",
     "🤖 A clear note that the app was made with AI and isn’t affiliated with Tiffin School."
-   ]
-  },
-  {
-   "v": "2.12",
-   "date": "8 November 2026",
-   "kids": [
-    "🕹️ The secret surprise got a full arcade makeover!"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🤫 The secret surprise got a proper arcade makeover…"
    ]
   }
  ]
