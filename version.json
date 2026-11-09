@@ -1,7 +1,22 @@
 {
- "version": "2.34",
+ "version": "2.35",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.35",
+   "date": "9 November 2026",
+   "kids": [
+    "🎛️ Starlane MODERN: real switches, levers and knobs on the cockpit console — flip them with the mouse!",
+    "🖥️ In full screen the console now stretches right across, with your cargo and next mission on the side screens"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🚀 Starlane Trader (Modern, full screen on wide displays): console wings with a Cargo screen and a Mission screen (next step), and banks of 3D switches — toggle levers that stay set, spring-back levers, guarded red switches and rotary knobs for Time and View — clickable with hover help. The arcade’s own controls move to the top corners so nothing covers the console. In a smaller window the slide-up action bar is drawn as a row of switches."
+   ]
+  },
   {
    "v": "2.34",
    "date": "9 November 2026",
@@ -146,20 +161,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: every screen checked automatically for overlaps and fixed (35 screens); pause menu split into five tabs; station tips shown across the top; in-game maths favours the Focus topics (and covers more of them) and every answer is logged in the Parent dashboard (Activity tab)."
-   ]
-  },
-  {
-   "v": "2.25",
-   "date": "9 November 2026",
-   "kids": [
-    "🏆 Starlane Trader: a Career Record — your fortune, fame, infamy, exploring, ship, maths and medals (press Z)",
-    "🤖 Nova now gives you a spoken welcome briefing before your first flight"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🚀 Starlane Trader: Career Record with fortune, fame and infamy (hero–villain balance), combat, explorer, ship, missions and maths statistics, titles, a Commander score and all medals; 4 new medals; Nova’s spoken intro (replay from the pause menu or Status)."
    ]
   }
  ]

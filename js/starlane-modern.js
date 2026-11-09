@@ -180,7 +180,27 @@ const StarModern=(()=>{
  function quadGeo(p,uv){const g=new T.BufferGeometry(),P=[p[0],p[1],p[2],p[0],p[2],p[3]],U=[uv[0],uv[1],uv[2],uv[0],uv[2],uv[3]];g.setAttribute('position',new T.Float32BufferAttribute(P.flat(),3));g.setAttribute('uv',new T.Float32BufferAttribute(U.flat(),2));g.computeVertexNormals();return g;}
  function wallTex(){return texCache.wall||(texCache.wall=(()=>{const t=cv(256,256,(c,w,h)=>{c.fillStyle='#1c2233';c.fillRect(0,0,w,h);const r=rnd(77);for(let i=0;i<60;i++){c.fillStyle=`rgba(255,255,255,${r()*.035})`;c.fillRect(r()*w,r()*h,r()*80,r()*80);}c.strokeStyle='rgba(0,0,0,.6)';c.lineWidth=2;for(const[x,y,ww,hh]of[[8,8,112,70],[128,8,120,70],[8,86,240,74],[8,168,76,80],[92,168,156,80]]){c.strokeRect(x,y,ww,hh);}
    c.fillStyle='rgba(120,140,190,.25)';for(let i=0;i<14;i++)c.fillRect(14+((i*53)%228),20+((i*37)%220),3,3);});t.wrapS=t.wrapT=T.RepeatWrapping;return t;})());}
- function buildPit(A){const CX=A.CX,CY=A.CY,F=A.FOC,g=new T.Group(),dark=new T.MeshStandardMaterial({color:0x232a3d,metalness:.55,roughness:.5,side:T.DoubleSide,flatShading:true}),
+ // ---------------- console wings (widescreen): a screen and a bank of real switches on each side ----------------
+ let deckObjs=null,wingTex=[];
+ function buildDeck(A,g,deck,onC){deckObjs={};wingTex=[];const base=new T.MeshStandardMaterial({color:0x1a2030,metalness:.7,roughness:.4,side:T.DoubleSide}),chrome=new T.MeshStandardMaterial({color:0xc8d0e0,metalness:.95,roughness:.18,side:T.DoubleSide});
+  deck.wings.forEach((wg,i)=>{const[x0,x1]=wg.x,tex=new T.CanvasTexture(wg.cv);tex.encoding=T.sRGBEncoding;wingTex.push(tex);const P=[onC(x0,596),onC(x1,596),onC(x1,412),onC(x0,412)].map(q=>q.map(c=>c*.994));
+   g.add(new T.Mesh(quadGeo(P,[[0,0],[1,0],[1,1],[0,1]]),new T.MeshBasicMaterial({map:tex,toneMapped:false,side:T.DoubleSide})));
+   const P2=[onC(x0-5,600),onC(x1+5,600),onC(x1+5,407),onC(x0-5,407)].map(q=>q.map(c=>c*.997));g.add(new T.Mesh(quadGeo(P2,[[0,0],[1,0],[1,1],[0,1]]),new T.MeshStandardMaterial({color:0x0a0e18,metalness:.6,roughness:.3,side:T.DoubleSide})));});
+  for(const s of deck.sws){const cx=s.x+15,cy=s.y+24,P=onC(cx,cy),Px=onC(cx+8,cy),Py=onC(cx,cy-8);let tx=Px.map((v,k)=>v-P[k]),ty=Py.map((v,k)=>v-P[k]);const nl=v=>{const l=Math.hypot(...v)||1;return v.map(x=>x/l);};tx=nl(tx);ty=nl(ty);
+   let n=nl([tx[1]*ty[2]-tx[2]*ty[1],tx[2]*ty[0]-tx[0]*ty[2],tx[0]*ty[1]-tx[1]*ty[0]]);if(n[0]*-P[0]+n[1]*-P[1]+n[2]*-P[2]<0){n=n.map(x=>-x);tx=tx.map(x=>-x);}
+   const piv=new T.Group();piv.matrixAutoUpdate=false;piv.matrix.makeBasis(new T.Vector3(...tx),new T.Vector3(...ty),new T.Vector3(...n));piv.matrix.setPosition(...P.map(c=>c*.993));g.add(piv);
+   const sc=Math.hypot(...P)/80*.62;const plate=new T.Mesh(new T.BoxGeometry(5.4*sc,4.2*sc,.8*sc),base);plate.position.z=.4*sc;piv.add(plate);let o={kind:s.kind,sc};
+   if(s.kind==='knob'){const kn=new T.Group();kn.position.z=.8*sc;piv.add(kn);const cyl=new T.Mesh(new T.CylinderGeometry(1.9*sc,2.1*sc,1.6*sc,20),base);cyl.rotation.x=Math.PI/2;cyl.position.z=.8*sc;kn.add(cyl);
+    const ptr=new T.Mesh(new T.BoxGeometry(.45*sc,1.7*sc,.3*sc),new T.MeshBasicMaterial({color:0xffffff}));ptr.position.set(0,.85*sc,1.7*sc);kn.add(ptr);o.knob=kn;o.cap=ptr;}
+   else{const pv=new T.Group();pv.position.z=.8*sc;piv.add(pv);const lev=new T.Mesh(new T.CylinderGeometry(.3*sc,.42*sc,3.4*sc,10),chrome);lev.rotation.x=Math.PI/2;lev.position.z=1.7*sc;pv.add(lev);
+    const cap=new T.Mesh(new T.SphereGeometry(.85*sc,12,10),new T.MeshBasicMaterial({color:s.kind==='guard'?0xff2d55:0x2a3044}));cap.position.z=3.5*sc;pv.add(cap);o.lever=pv;o.cap=cap;
+    if(s.kind==='guard'){const cover=new T.Mesh(new T.BoxGeometry(3.2*sc,3.2*sc,.4*sc),new T.MeshStandardMaterial({color:0xff2d55,transparent:true,opacity:.35,side:T.DoubleSide}));cover.position.set(0,-1.2*sc,3.4*sc);cover.rotation.x=-.9;pv.parent.add(cover);o.cover=cover;}}
+   deckObjs[s.id]=o;}}
+ function updDeck(deck,clock){if(!deckObjs)return;wingTex.forEach(t=>t.needsUpdate=true);for(const s of deck.sws){const o=deckObjs[s.id];if(!o)continue;const lit=s.col?new T.Color(s.col):null;
+   if(o.knob){o.knob.rotation.z=-(s.pos||0)*Math.PI/2+Math.PI*.75;o.cap.material.color.set(s.hover?0xffe45e:lit||0xffffff);continue;}
+   const up=s.kind==='toggle'?!!s.on:(clock-(s.flash||-9))<.28;const want=up?-.55:.5;o.lever.rotation.x+=(want-o.lever.rotation.x)*.45;
+   if(s.kind!=='guard')o.cap.material.color.set(s.hover?0xffe45e:lit||0x2a3044);else o.cap.material.color.set(s.hover?0xffe45e:0xff2d55);if(o.cover)o.cover.rotation.x=s.hover?-2.2:-.9;}}
+ function buildPit(A,deck){const CX=A.CX,CY=A.CY,F=A.FOC,g=new T.Group(),dark=new T.MeshStandardMaterial({color:0x232a3d,metalness:.55,roughness:.5,side:T.DoubleSide,flatShading:true}),
    frame=new T.MeshStandardMaterial({color:0x3b4562,metalness:.8,roughness:.32,side:T.DoubleSide,flatShading:true}),trim=new T.MeshStandardMaterial({color:0x66749c,metalness:.9,roughness:.22,side:T.DoubleSide,flatShading:true}),
    wall=new T.MeshStandardMaterial({color:0xffffff,map:wallTex(),metalness:.45,roughness:.6,side:T.DoubleSide}),add=(geo,m)=>{const me=new T.Mesh(geo,m);g.add(me);return me;},
    box=(w,h,d,x,y,z,m)=>{const me=new T.Mesh(new T.BoxGeometry(w,h,d),m);me.position.set(x,y,z);g.add(me);return me;},glow=(c)=>new T.MeshBasicMaterial({color:c});
@@ -209,8 +229,9 @@ const StarModern=(()=>{
   box(60,12,40,0,-118,52,dark);add(beam([0,-112,52],[0,-80,60],2.2),trim);{const k2=new T.Mesh(new T.SphereGeometry(5,12,10),dark);k2.position.set(0,-78,61);g.add(k2);}
   add(beam([-146,-56,20],[-146,-40,30],1.8),trim);{const k3=new T.Mesh(new T.SphereGeometry(4.5,12,10),glow(0xff8a1c));k3.position.set(-146,-39,31);g.add(k3);pitGlow.push(k3);}
   pitLamp=new T.PointLight(0x3fe0ff,.85,520,1.4);pitLamp.position.set(0,70,10);g.add(pitLamp);
+  deckObjs=null;wingTex=[];if(deck&&deck.wings.length)buildDeck(A,g,deck,onC);
   root.add(g);return g;}
- function cockpit(A,on,red,clock,dash){if(!ready())return;if(!on){if(pit)pit.visible=false;return;}const key=A.W+'x'+A.VH+'x'+A.CY;if(!pit||pitKey!==key){if(pit)root.remove(pit);pitLights=[];pitGlow=[];pit=buildPit(A);pitKey=key;}pit.visible=true;
+ function cockpit(A,on,red,clock,dash,deck){if(!ready())return;if(!on){if(pit)pit.visible=false;return;}const key=A.W+'x'+A.VH+'x'+A.CY+'|'+(deck?deck.key:'');if(!pit||pitKey!==key){if(pit)root.remove(pit);pitLights=[];pitGlow=[];pit=buildPit(A,deck);pitKey=key;}pit.visible=true;if(deck)updDeck(deck,clock);
   if(dash&&dashTex){if(dashTex.image!==dash)dashTex.image=dash;dashTex.needsUpdate=true;}
   // head sway: the cabin shifts a little against acceleration and turns, then settles
   const P=A.P,acc=(P.speed-lastSpeed);lastSpeed=P.speed;const want=[-(P.yaw||0)*2.6+(P.roll||0)*.8,(P.pitch||0)*2.2-Math.max(-2,Math.min(2,acc*.05)),-Math.max(-3,Math.min(3,acc*.12))];for(let i=0;i<3;i++)sway[i]+=(want[i]-sway[i])*.08;
