@@ -5,8 +5,8 @@
 // atmospheres, a bloom glow, particle explosions, smoke and engine trails, and a deep starfield.
 // Starlane's world uses the opposite handedness to three.js, so positions are mirrored on one axis (M below).
 const StarModern=(()=>{
- let state='idle',T=null,R=null,scene=null,cam=null,cam2=null,comp=null,bloom=null,gl=null,quality={pr:1,bloom:true,views:true},slow=0,fast=0,lastSys=null,root=null;
- const objs=new Map(),geoCache=new WeakMap(),texCache={};let sunLights=[],bodies=[],nebula=null,cityMats=[],starField=null,fire=null,smoke=null,dustPts=null,bhGroup=null,stationGrp=null;
+ let state='idle',T=null,R=null,scene=null,cam=null,cam2=null,comp=null,bloom=null,gl=null,quality={pr:1,bloom:true,views:true,auto:true},slow=0,fast=0,lastSys=null,root=null;
+ const objs=new Map(),geoCache=new WeakMap(),texCache={};let boomLights=[],sunLights=[],bodies=[],nebula=null,cityMats=[],starField=null,fire=null,smoke=null,dustPts=null,bhGroup=null,stationGrp=null;
  const M=v=>[v[0],v[1],-v[2]];
  function load(){if(state!=='idle')return;state='loading';const s=document.createElement('script');s.src='js/vendor/three-bundle.js';s.onload=()=>{try{init();state='ready';}catch(e){console.error(e);state='failed';}};s.onerror=()=>{state='failed';};document.head.appendChild(s);}
  const ready=()=>state==='ready';
@@ -56,6 +56,7 @@ const StarModern=(()=>{
    const p=new T.Points(g,new T.PointsMaterial({size,map:tex,vertexColors:true,transparent:true,depthWrite:false,blending:add?T.AdditiveBlending:T.NormalBlending,sizeAttenuation:true}));p.frustumCulled=false;scene.add(p);return{p,n,list:[]};};
   fire=mk(2500,true,110,glowTex());smoke=mk(800,false,160,glowTex());
   const dg=new T.BufferGeometry();dg.setAttribute('position',new T.Float32BufferAttribute(new Float32Array(400*3),3));dustPts=new T.Points(dg,new T.PointsMaterial({size:2,sizeAttenuation:false,color:0xcfd8ff}));dustPts.frustumCulled=false;scene.add(dustPts);
+  for(let i=0;i<3;i++){const L=new T.PointLight(0xffa040,0,5000,1.6);L.userData.t=9;scene.add(L);boomLights.push(L);}
   comp=new T.EffectComposer(R);comp.addPass(new T.RenderPass(scene,cam));bloom=new T.UnrealBloomPass(new T.Vector2(800,400),.85,.45,.72);comp.addPass(bloom);}
  // ---------------- system bodies: suns, planet, moons, black hole ----------------
  function clearBodies(){for(const b of bodies){root.remove(b);b.traverse&&b.traverse(x=>{if(x.geometry)x.geometry.dispose();if(x.material){if(x.material.map)x.material.map.dispose();x.material.dispose();}});}bodies=[];for(const l of sunLights)scene.remove(l);sunLights=[];bhGroup=null;}
@@ -101,9 +102,20 @@ const StarModern=(()=>{
   else if(role==='rock'){g.add(new T.Mesh(geoOf(sh.m),new T.MeshStandardMaterial({color:new T.Color('#8a7a68'),roughness:1,metalness:.05,flatShading:true,map:panelTex()})));}
   else if(role==='mine'){g.add(new T.Mesh(geoOf(sh.m),metal('#ff2d55',{metal:.8,rough:.3})));const l=new T.Mesh(new T.SphereGeometry(6,8,6),new T.MeshBasicMaterial({color:0xff2d55}));l.userData.blink=1;g.add(l);}
   else{g.add(new T.Mesh(geoOf(sh.m),metal(col)));for(const p of sh.parts||[])g.add(new T.Mesh(geoOf(p.m),metal(p.col,{metal:.7})));
+   if(!['cargo','missile','beacon','derelict'].includes(role))detail(g,sh.m,col);
    if(sh.ant){const a=sh.ant;const lg=new T.BufferGeometry().setFromPoints([new T.Vector3(...a[0]),new T.Vector3(...a[1])]);g.add(new T.Line(lg,new T.LineBasicMaterial({color:col})));}
    if(!['cargo'].includes(role)){const e=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:sh.type==='missile'?0xff8a1c:0x3fe0ff,blending:T.AdditiveBlending,depthWrite:false,transparent:true}));e.position.set(0,0,(sh.rearZ||-30)-6);e.scale.set(60,60,1);e.userData.engine=true;g.add(e);}}
   root.add(g);return g;}
+ // engine nozzles with glowing cores, a glass canopy and navigation lights, sized from the model itself
+ let navLights=[];
+ function detail(g,m,col){const P0=m.pts,xs=P0.map(p=>p[0]),ys=P0.map(p=>p[1]),zs=P0.map(p=>p[2]),xmax=Math.max(...xs),ymax=Math.max(...ys),zmin=Math.min(...zs),zmax=Math.max(...zs),rad=m.rad;
+  const noz=new T.MeshStandardMaterial({color:0x2a2e38,metalness:.9,roughness:.35}),core=new T.MeshBasicMaterial({color:0x6fd8ff});
+  for(const sx of xmax>rad*.45?[-1,1]:[0]){const n=new T.Mesh(new T.CylinderGeometry(rad*.11,rad*.14,rad*.22,14,1,true),noz);n.rotation.x=Math.PI/2;n.position.set(sx*xmax*.28,0,zmin+rad*.04);g.add(n);
+   const cdisk=new T.Mesh(new T.CircleGeometry(rad*.1,14),core);cdisk.position.set(sx*xmax*.28,0,zmin-rad*.05);cdisk.rotation.y=Math.PI;g.add(cdisk);}
+  const can=new T.Mesh(new T.SphereGeometry(rad*.11,18,10,0,Math.PI*2,0,Math.PI/2),new T.MeshStandardMaterial({color:0x0c2236,metalness:.35,roughness:.3,transparent:true,opacity:.85,emissive:new T.Color(0x06182a)}));can.scale.set(1,.5,1.35);can.position.set(0,ymax*.5,zmax*.2);g.add(can);
+  for(const[sx,c]of[[-1,0xff2d55],[1,0x3cff6a]]){const L=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:c,blending:T.AdditiveBlending,depthWrite:false,transparent:true}));L.scale.set(rad*.16,rad*.16,1);L.position.set(sx*xmax*.98,0,0);g.add(L);}
+  const st=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:0xffffff,blending:T.AdditiveBlending,depthWrite:false,transparent:true}));st.scale.set(rad*.22,rad*.22,1);st.position.set(0,ymax*1.02,zmin*.6);st.userData.strobe=Math.random()*2;g.add(st);
+  const bub=new T.Mesh(new T.SphereGeometry(rad*1.25,24,16),new T.MeshBasicMaterial({color:0x5fd6ff,transparent:true,opacity:0,blending:T.AdditiveBlending,depthWrite:false}));bub.visible=false;bub.userData.bubble=true;g.add(bub);}
  function playerObj(A){const g=new T.Group();const m=A.playerModel();g.add(new T.Mesh(geoOf(m),metal('#ffd84a',{metal:.6})));const e=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:0x3fe0ff,blending:T.AdditiveBlending,depthWrite:false,transparent:true}));e.position.set(0,0,-98);e.scale.set(90,90,1);e.userData.engine=true;g.add(e);g.userData.model=m;root.add(g);return g;}
  // ---------------- particles ----------------
  const seenBoom=new WeakSet();
@@ -129,15 +141,16 @@ const StarModern=(()=>{
   // ships and station
   const live=new Set(),list=[...A.ships.filter(s=>!s.dead),...(A.station?[A.station]:[])];
   for(const sh of list){live.add(sh);let g=objs.get(sh);if(!g){g=shipObj(sh,A);objs.set(sh,g);}setBasis(g,sh.pos,sh.o);
-   g.children.forEach(x=>{if(x.userData.blink!==undefined)x.visible=Math.floor(A.clock*2+(x.userData.blink>0?1:0))%2===0;if(x.userData.engine){const s2=40+Math.min(1,(sh.speed||0)/300)*60;x.scale.set(s2,s2,1);x.visible=!(sh.dmg>.7&&Math.random()<.35);}});
+   g.children.forEach(x=>{if(x.userData.strobe!==undefined)x.visible=((A.clock+x.userData.strobe)%1.4)<.08;if(x.userData.bubble){const k=sh.hitFx!==undefined?1-(A.clock-sh.hitFx)/.35:0;x.visible=k>0;if(k>0)x.material.opacity=.35*k;}if(x.userData.blink!==undefined)x.visible=Math.floor(A.clock*2+(x.userData.blink>0?1:0))%2===0;if(x.userData.engine){const s2=40+Math.min(1,(sh.speed||0)/300)*60;x.scale.set(s2,s2,1);x.visible=!(sh.dmg>.7&&Math.random()<.35);}});
    if(sh.dmg>.35&&Math.random()<dt*6)burst(sh.pos,3,120,.4,[1,.8,.3]);}
   // the player's own ship (outside camera)
   if(A.camMode==='ext'){let g=objs.get('me');if(!g||g.userData.model!==A.playerModel()){if(g)root.remove(g);g=playerObj(A);objs.set('me',g);}live.add('me');setBasis(g,A.P.pos,A.P.o);g.children.forEach(x=>{if(x.userData.engine){const s2=50+A.P.throttle*90;x.scale.set(s2,s2,1);}});}
   for(const[o,g]of objs)if(!live.has(o)){root.remove(g);objs.delete(o);}
   // explosions, sparks and engine trails
-  for(const b of A.booms){if(seenBoom.has(b))continue;seenBoom.add(b);if(b.spark)burst(b.pos,8,260,.35,[1,.9,.5]);else{burst(b.pos,160,560,1.3,[1.6,.9,.3]);burst(b.pos,70,260,1.6,[1.8,1.6,1.1]);burst(b.pos,30,90,2.6,[.45,.45,.5],smoke);}}
+  for(const b of A.booms){if(seenBoom.has(b))continue;seenBoom.add(b);if(b.spark)burst(b.pos,8,260,.35,[1,.9,.5]);else{const L=boomLights.slice().sort((a,b)=>a.intensity-b.intensity)[0];if(L){L.position.set(...M(b.pos));L.intensity=9;L.userData.t=0;}burst(b.pos,160,560,1.3,[1.6,.9,.3]);burst(b.pos,70,260,1.6,[1.8,1.6,1.1]);burst(b.pos,30,90,2.6,[.45,.45,.5],smoke);}}
   trailT+=dt;if(trailT>.04){trailT=0;for(const sh of A.ships)if(!sh.dead&&sh.T&&!['rock','cargo','mine','beacon'].includes(sh.T.role)&&(sh.speed||0)>40){const e=A.toWorld(sh.o,[0,0,(sh.rearZ||-30)-10]);fire.list.push({p:[sh.pos[0]+e[0],sh.pos[1]+e[1],sh.pos[2]+e[2]],v:[0,0,0],t:0,life:.5,c:sh.type==='missile'?[1,.5,.1]:[.25,.7,1]});}
    if(A.camMode==='ext'&&A.P.throttle>.05){const e=A.toWorld(A.P.o,[0,0,-104]);fire.list.push({p:[A.P.pos[0]+e[0],A.P.pos[1]+e[1],A.P.pos[2]+e[2]],v:[0,0,0],t:0,life:.6,c:[.3,.75,1]});}}
+  for(const L of boomLights){if(L.intensity>0){L.userData.t+=dt;L.intensity=Math.max(0,9*(1-L.userData.t/.9));}}
   stepParticles(fire,dt,true);
   // damage smoke comes from Starlane's own smoke list
   {const P2=smoke.p.geometry.attributes.position,C2=smoke.p.geometry.attributes.color;stepParticles(smoke,dt,true);let k2=smoke.p.geometry.drawRange.count;for(const sm of A.smokes){if(k2>=smoke.n)break;const m=M(sm.pos),f2=.55*(1-sm.t/1.6);P2.setXYZ(k2,m[0],m[1],m[2]);C2.setXYZ(k2,f2,f2,f2*1.05);k2++;}smoke.p.geometry.setDrawRange(0,k2);P2.needsUpdate=true;C2.needsUpdate=true;}
@@ -145,7 +158,7 @@ const StarModern=(()=>{
   {const D=dustPts.geometry.attributes.position;let n=0;for(const d of A.dust){if(n>=400)break;const m=M(d);D.setXYZ(n++,m[0],m[1],m[2]);}dustPts.geometry.setDrawRange(0,n);D.needsUpdate=true;}
   bloom.enabled=quality.bloom;comp.render();ctx.drawImage(gl,0,0,W,VH);flare(ctx,A,W,VH);
   // keep it smooth: drop the glow, then the resolution, if frames get slow (and raise them again when there is room)
-  const ms=performance.now()-t0;if(ms>22){slow++;fast=0;}else if(ms<9){fast++;slow=0;}
+  const ms=performance.now()-t0;if(quality.auto===false){slow=fast=0;}else if(ms>22){slow++;fast=0;}else if(ms<9){fast++;slow=0;}
   if(slow>40){slow=0;if(quality.views)quality.views=false;else if(quality.bloom)quality.bloom=false;else quality.pr=Math.max(.6,quality.pr-.15);}if(fast>240){fast=0;if(quality.pr<1)quality.pr=Math.min(1,quality.pr+.15);else if(!quality.bloom)quality.bloom=true;else if(!quality.views)quality.views=true;}
   return true;}
  // lens flare from the brightest sun (hidden when a planet is in the way)
@@ -205,6 +218,9 @@ const StarModern=(()=>{
    ctx.save();v.clip(ctx);ctx.clip();if(v.mirror){ctx.translate(x+w,0);ctx.scale(-1,1);ctx.drawImage(gl,gx,gl.height-gy-gh,gw,gh,0,y,w,h);}else ctx.drawImage(gl,gx,gl.height-gy-gh,gw,gh,x,y,w,h);ctx.restore();}
   R.setScissorTest(false);R.setViewport(0,0,gl.width,gl.height);return true;}
  let pmul=1;
+ const PRESET={low:{pr:.6,bloom:false,views:false},medium:{pr:.8,bloom:true,views:false},high:{pr:1,bloom:true,views:true},ultra:{pr:1.35,bloom:true,views:true}};
+ function setQuality(q){if(q==='auto'){quality.auto=true;return;}quality.auto=false;Object.assign(quality,PRESET[q]||PRESET.high);}
+ function pregen(seed){try{terrain((seed^0x5151)>>>0);terrain(seed^0x5151);}catch(e){}}
  function profile(dev){if(dev==='phone'){Object.assign(quality,{pr:.6,bloom:false,views:false});pmul=.4;}else if(dev==='tablet'){Object.assign(quality,{pr:.8,views:false});pmul=.7;}else pmul=1;}
- return{cockpit,hangar,profile,load,ready,render,views,get state(){return state;},get quality(){return quality;}};
+ return{setQuality,pregen,cockpit,hangar,profile,load,ready,render,views,get state(){return state;},get quality(){return quality;}};
 })();

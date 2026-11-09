@@ -1,7 +1,24 @@
 {
- "version": "2.32",
+ "version": "2.33",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.33",
+   "date": "9 November 2026",
+   "kids": [
+    "🌌 Starlane: 8 galaxies to explore — buy a galactic hyperdrive!",
+    "🏁 Station races, 🧳 passengers and ⛏️ mining contracts",
+    "🏆 The weekly Navigator’s Cup — and when you get a puzzle wrong, you see how to work it out",
+    "✨ Glowing docking guides, a hyperspace tunnel, shield flashes and a cockpit that boots up",
+    "🔊 Every ship sounds different, and the music changes with the system"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🚀 Starlane Trader: smoother on slower machines (fixed-step timing, quality presets, FPS counter); worked explanations after wrong answers, adaptive weak-topic practice, repair and loading-bay puzzles, weekly Navigator’s Cup; docking corridor, target arrow, hyperspace tunnel, boot-up check, news ticker, ship detail, shield bubbles and explosion lighting; per-ship engine sounds and system music moods; 8 galaxies, economy events, and passenger, mining and race missions."
+   ]
+  },
   {
    "v": "2.32",
    "date": "9 November 2026",
@@ -142,21 +159,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: movable subtitles (drag, or top/bottom/left/right); laser target lock (3 s, broken by hits, 4 s recharge); amnesty missions to clear legal status; story-themed maths (navigation, codes, trading) plus a Traders’ Guild challenge after docking."
-   ]
-  },
-  {
-   "v": "2.23",
-   "date": "9 November 2026",
-   "kids": [
-    "🤖 Starlane Trader: your assistant now really talks — with tips in battle, when trading and choosing missions",
-    "✈️ Enemy fighters swoop past instead of crashing into you",
-    "🎮 Tidier pause and controls screens"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🚀 Starlane Trader: assistant voice fixed; separate voice and subtitle switches; battle, trading and mission tips; enemy fighters break off earlier and most close calls are near misses; controls page fits all keys."
    ]
   }
  ]

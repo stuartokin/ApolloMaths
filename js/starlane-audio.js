@@ -27,6 +27,9 @@ const StarAudio=(()=>{
   noise(1.1*size,.16*v,p,'lowpass',4200,90,{wet:true});osc('sine',110,28,.6*size,.25*v,p);if(style==='modern'){noise(.35,.08*v,p,'highpass',3000,800);setTimeout(()=>noise(.8,.05*v,p,'lowpass',900,80,{wet:true}),120);}}
  function flyby(l,rel=300){if(!A()||muteNow)return;const v=Math.min(1,rel/500);noise(.9,.07*v,l,'bandpass',2400,500,{q:1.2,a:.25,wet:true});osc('sawtooth',260+rel*.4,90,.9,.02*v,l,{a:.2});}
  function cabin(inside){if(!A())return;cab.frequency.setTargetAtTime(inside?5200:20000,now(),.2);}
+ function creak(){if(!A()||muteNow)return;noise(.6,.035,0,'bandpass',220,140,{q:9,a:.08});osc('sawtooth',70,55,.5,.012,0,{a:.1});}
+ function hullAlarm(){osc('square',880,0,.12,.03,0);setTimeout(()=>osc('square',880,0,.12,.03,0),180);setTimeout(()=>osc('square',660,0,.2,.03,0),360);}
+ function patter(){if(!A()||muteNow)return;for(let i=0;i<7;i++)setTimeout(()=>noise(.03,.05,Math.random()*1.6-.8,'highpass',5000,3000),i*40+Math.random()*60);}
  function hit(){if(style==='original'){noise(.15,.1,0,'lowpass',2000,300);return;}noise(.25,.14,0,'bandpass',1800,500,{q:3});osc('square',220,90,.2,.05,0);if(style==='modern')osc('sine',60,35,.3,.18,0);}
  function shieldHit(){osc('sine',520,260,.25,.06,0,{wet:true});}
  function pickup(){osc('triangle',660,1320,.18,.06,0);setTimeout(()=>osc('triangle',990,1980,.16,.05,0),90);}
@@ -37,11 +40,12 @@ const StarAudio=(()=>{
  function jump(){if(!A()||muteNow)return;noise(2.6,.08,0,'bandpass',300,6000,{q:1.5,a:1.2,wet:true});osc('sawtooth',60,900,2.8,.03,0,{a:1.4});}
  // ---------------- engine hum ----------------
  let eng=null;
- function engine(on,speed01=0,thr=0,boost=false){if(!A())return;if(!on){if(eng){const t=now();eng.g.gain.setTargetAtTime(0,t,.15);const e=eng;setTimeout(()=>{try{e.o1.stop();e.o2.stop();e.n.stop();}catch(x){}},600);eng=null;}return;}
+ const CLS={kestrel:[1,.5],courier:[1.35,.35],falcon:[1.2,.45],mule:[.68,.85],warden:[.85,.7]};let engCls='kestrel';
+ function engine(on,speed01=0,thr=0,boost=false,cls='kestrel'){if(cls!==engCls&&eng){engCls=cls;engine(false);}engCls=cls;if(!A())return;if(!on){if(eng){const t=now();eng.g.gain.setTargetAtTime(0,t,.15);const e=eng;setTimeout(()=>{try{e.o1.stop();e.o2.stop();e.n.stop();}catch(x){}},600);eng=null;}return;}
   if(!eng){const o1=ac.createOscillator(),o2=ac.createOscillator(),n=ac.createBufferSource(),f=ac.createBiquadFilter(),nf=ac.createBiquadFilter(),g=ac.createGain(),ng=ac.createGain();
    o1.type=style==='original'?'square':'sawtooth';o2.type='sawtooth';o2.detune.value=13;n.buffer=noiseBuf;n.loop=true;f.type='lowpass';f.Q.value=2;nf.type='bandpass';nf.Q.value=.7;g.gain.value=0;ng.gain.value=.5;
    o1.connect(f);o2.connect(f);n.connect(nf);nf.connect(ng);ng.connect(f);f.connect(g);g.connect(sfx);o1.start();o2.start();n.start();eng={o1,o2,n,f,nf,g};}
-  const t=now(),s=Math.max(0,Math.min(1,speed01)),base=boost?140:38+s*70;eng.o1.frequency.setTargetAtTime(base,t,.2);eng.o2.frequency.setTargetAtTime(base*1.01,t,.2);eng.f.frequency.setTargetAtTime(boost?3500:180+s*1400+thr*400,t,.2);eng.nf.frequency.setTargetAtTime(400+s*2500,t,.3);
+  const cm=CLS[engCls]||CLS.kestrel,t=now(),s=Math.max(0,Math.min(1,speed01)),base=(boost?140:38+s*70)*cm[0];eng.nf.Q.value=.7+cm[1];eng.o1.frequency.setTargetAtTime(base,t,.2);eng.o2.frequency.setTargetAtTime(base*1.01,t,.2);eng.f.frequency.setTargetAtTime(boost?3500:180+s*1400+thr*400,t,.2);eng.nf.frequency.setTargetAtTime(400+s*2500,t,.3);
   eng.g.gain.setTargetAtTime(muteNow?0:(style==='original'?.012:.02)+thr*.035+(boost?.03:0),t,.25);}
  // ---------------- hangar ambience ----------------
  let hang=null,clankT=null;
@@ -52,7 +56,8 @@ const StarAudio=(()=>{
  // ---------------- music ----------------
  let mState='off',timer=null,nextT=0,step=0,cg=null,tg=null,bg=null;
  const NOTE=n=>440*Math.pow(2,(n-69)/12);
- const CHORDS=[[57,60,64],[53,57,60],[48,52,55],[55,59,62]];   // Am F C G
+ const MOODS={normal:[[57,60,64],[53,57,60],[48,52,55],[55,59,62]],farm:[[48,52,55],[55,59,62],[57,60,64],[53,57,60]],danger:[[57,60,64],[50,53,57],[52,56,59],[57,60,64]]};let CHORDS=MOODS.normal,moodNow='normal';   // farm: C G Am F · danger: Am Dm E Am
+ function mood(m){if(m!==moodNow&&MOODS[m]){moodNow=m;CHORDS=MOODS[m];}}
  function voice(dest,type,f,t,dur,vol,a=.01,cut=0){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+dur);
   if(cut){const fl=ac.createBiquadFilter();fl.type='lowpass';fl.frequency.value=cut;o.connect(fl);fl.connect(g);}else o.connect(g);g.connect(dest);o.start(t);o.stop(t+a+dur+.05);}
  function drum(dest,kind,t,vol){if(kind==='kick'){const o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(40,t+.18);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+.25);o.connect(g);g.connect(dest);o.start(t);o.stop(t+.3);return;}
@@ -75,5 +80,5 @@ const StarAudio=(()=>{
  function setStyle(s){if(s===style)return;style=s;if(eng){engine(false);}}
  function stopAll(){engine(false);hangar(false);music('off');}
  function suspend(on){if(!ac)return;if(on)ac.suspend().catch(()=>{});else ac.resume().catch(()=>{});}
- return{flyby,cabin,laser,enemyLaser,boom,hit,shieldHit,pickup,clamps,gear,alarm,click,jump,engine,hangar,music,tick,setStyle,stopAll,suspend,get style(){return style;},get state(){return mState;}};
+ return{mood,creak,hullAlarm,patter,flyby,cabin,laser,enemyLaser,boom,hit,shieldHit,pickup,clamps,gear,alarm,click,jump,engine,hangar,music,tick,setStyle,stopAll,suspend,get style(){return style;},get state(){return mState;}};
 })();
