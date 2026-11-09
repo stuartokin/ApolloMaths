@@ -1,7 +1,23 @@
 {
- "version": "2.27",
+ "version": "2.28",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.28",
+   "date": "9 November 2026",
+   "kids": [
+    "🚀 Starlane Trader: in MODERN style the cockpit’s side windows and mirror now show real 3D",
+    "📡 A new holographic 3D radar (or keep the classic one) — zoom with [",
+    "🗺️ A 3D star map you can spin and zoom, with a route planner for long trips"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🚀 Starlane Trader: Modern cockpit with 3D side windows and mirror, glass reflections, holographic edges and sun glints; Holo 3D radar (or Classic) with 5/10/25 km range; 3D star map with colour filters (economy, danger, tech, visited) and a shortest-route planner."
+   ]
+  },
   {
    "v": "2.27",
    "date": "9 November 2026",
@@ -145,23 +161,6 @@
     "🛡️ Fair play: one tab at a time, game time can’t be reduced by older files, device-clock checks, hand-edited files detected, new players start locked, 5 automatic backups with restore, and a log in the Parent dashboard.",
     "📱 Help: new “Keeping it fair” and “Parental controls on your devices” guides.",
     "🪐 Starlane Trader: new icon and an optional 3D lighting mode."
-   ]
-  },
-  {
-   "v": "2.18",
-   "date": "9 November 2026",
-   "kids": [
-    "🛸 Starlane Trader: a real flight deck — glowing console keys that tell you what they do when you hover or tap",
-    "🌌 A brand-new hyperspace jump: stars stretch into streaks!",
-    "🎬 Watch your ship land inside the station hangar — and take off again",
-    "🪐 Planets with rings, moons, gas giants and double or triple suns",
-    "👀 Side views and an outside camera, speed-up-time, save anywhere, and change any key"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🚀 Starlane Trader upgrade: flight-deck console keys with hover help, pause menu (save, settings, key remapping, how-to-play guides), cargo and mission screens in the cockpit, station marker on the scanner, time acceleration, save in flight, side and outside views, new hyperspace effect, docking and launch cut scenes, and varied systems (gas giants, rings, moons, multiple stars, asteroid belts, meteor showers)."
    ]
   }
  ]

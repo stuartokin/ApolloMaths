@@ -5,7 +5,7 @@
 // atmospheres, a bloom glow, particle explosions, smoke and engine trails, and a deep starfield.
 // Starlane's world uses the opposite handedness to three.js, so positions are mirrored on one axis (M below).
 const StarModern=(()=>{
- let state='idle',T=null,R=null,scene=null,cam=null,comp=null,bloom=null,gl=null,quality={pr:1,bloom:true},slow=0,fast=0,lastSys=null,root=null;
+ let state='idle',T=null,R=null,scene=null,cam=null,cam2=null,comp=null,bloom=null,gl=null,quality={pr:1,bloom:true,views:true},slow=0,fast=0,lastSys=null,root=null;
  const objs=new Map(),geoCache=new WeakMap(),texCache={};let sunLights=[],bodies=[],starField=null,fire=null,smoke=null,dustPts=null,bhGroup=null,stationGrp=null;
  const M=v=>[v[0],v[1],-v[2]];
  function load(){if(state!=='idle')return;state='loading';const s=document.createElement('script');s.src='js/vendor/three-bundle.js';s.onload=()=>{try{init();state='ready';}catch(e){console.error(e);state='failed';}};s.onerror=()=>{state='failed';};document.head.appendChild(s);}
@@ -35,7 +35,7 @@ const StarModern=(()=>{
  function metal(col,o={}){return new T.MeshStandardMaterial({color:new T.Color(col),map:panelTex(),metalness:o.metal??.55,roughness:o.rough??.42,flatShading:true,emissive:o.emissive?new T.Color(o.emissive):new T.Color(0),emissiveMap:o.emissiveMap||null,emissiveIntensity:o.ei??1});}
  // ---------------- setup ----------------
  function init(){T=window.THREE;gl=document.createElement('canvas');R=new T.WebGLRenderer({canvas:gl,antialias:true,alpha:false,powerPreference:'high-performance'});R.outputEncoding=T.sRGBEncoding;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=.82;
-  scene=new T.Scene();scene.background=new T.Color(0x000004);cam=new T.PerspectiveCamera(50,800/400,5,6e6);cam.matrixAutoUpdate=false;root=new T.Group();scene.add(root);
+  scene=new T.Scene();scene.background=new T.Color(0x000004);cam=new T.PerspectiveCamera(50,800/400,5,6e6);cam.matrixAutoUpdate=false;cam2=new T.PerspectiveCamera(70,1,5,6e6);cam2.matrixAutoUpdate=false;root=new T.Group();scene.add(root);
   scene.add(new T.AmbientLight(0x404a66,.1));scene.add(new T.HemisphereLight(0x8899cc,0x110808,.05));
   // starfield
   const sp=[],sc=[],r=rnd(99);for(let i=0;i<5000;i++){const u=r()*2-1,a=r()*Math.PI*2,s=Math.sqrt(1-u*u);sp.push(s*Math.cos(a)*4e5,u*4e5,s*Math.sin(a)*4e5);const w=.6+r()*.4,tint=r();sc.push(w*(tint<.2?.8:1),w*(tint>.85?.85:1),w*(tint<.2?1:tint>.85?.7:.95));}
@@ -126,7 +126,15 @@ const StarModern=(()=>{
   bloom.enabled=quality.bloom;comp.render();ctx.drawImage(gl,0,0,W,VH);
   // keep it smooth: drop the glow, then the resolution, if frames get slow (and raise them again when there is room)
   const ms=performance.now()-t0;if(ms>22){slow++;fast=0;}else if(ms<9){fast++;slow=0;}
-  if(slow>40){slow=0;if(quality.bloom)quality.bloom=false;else quality.pr=Math.max(.6,quality.pr-.15);}if(fast>240){fast=0;if(quality.pr<1)quality.pr=Math.min(1,quality.pr+.15);else if(!quality.bloom)quality.bloom=true;}
+  if(slow>40){slow=0;if(quality.views)quality.views=false;else if(quality.bloom)quality.bloom=false;else quality.pr=Math.max(.6,quality.pr-.15);}if(fast>240){fast=0;if(quality.pr<1)quality.pr=Math.min(1,quality.pr+.15);else if(!quality.bloom)quality.bloom=true;else if(!quality.views)quality.views=true;}
   return true;}
- return{load,ready,render,get state(){return state;},get quality(){return quality;}};
+ // extra cameras for the cockpit's side windows and mirror: rendered straight after the main view into small regions of
+ // the same WebGL canvas, then copied through each window's shape. {o:{r,u,f}, pos, fov, rect:[x,y,w,h], clip(ctx), mirror}
+ function views(ctx,A,list){if(!ready()||!quality.views)return false;const W=A.W,VH=A.VH,pw=gl.width/W,ph=gl.height/VH;R.setScissorTest(true);
+  for(const v of list){const[x,y,w,h]=v.rect,gx=Math.round(x*pw),gy=Math.round(gl.height-(y+h)*ph),gw=Math.round(w*pw),gh=Math.round(h*ph);if(gw<2||gh<2)continue;
+   const r=M(v.o.r),u=M(v.o.u),f=M(v.o.f).map(q=>-q),p=M(v.pos);cam2.matrix.set(r[0],u[0],f[0],p[0],r[1],u[1],f[1],p[1],r[2],u[2],f[2],p[2],0,0,0,1);cam2.matrixWorld.copy(cam2.matrix);cam2.matrixWorldInverse.copy(cam2.matrix).invert();
+   cam2.fov=v.fov;cam2.aspect=w/h;cam2.updateProjectionMatrix();starField.position.set(...p);R.setViewport(gx,gy,gw,gh);R.setScissor(gx,gy,gw,gh);R.render(scene,cam2);
+   ctx.save();v.clip(ctx);ctx.clip();if(v.mirror){ctx.translate(x+w,0);ctx.scale(-1,1);ctx.drawImage(gl,gx,gl.height-gy-gh,gw,gh,0,y,w,h);}else ctx.drawImage(gl,gx,gl.height-gy-gh,gw,gh,x,y,w,h);ctx.restore();}
+  R.setScissorTest(false);R.setViewport(0,0,gl.width,gl.height);return true;}
+ return{load,ready,render,views,get state(){return state;},get quality(){return quality;}};
 })();
