@@ -1,7 +1,20 @@
 {
- "version": "2.31",
+ "version": "2.32",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.32",
+   "date": "9 November 2026",
+   "kids": [
+    "📖 Starlane: the help pages, Nova’s intro and the guided flight now explain exactly the controls you are using — mouse, keyboard or touch"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🚀 Starlane Trader: How to play rewritten (new CONTROLS and EXTRAS pages), and all help — Nova’s intro, the guided flight, the Launch screen, console tips, hints and messages — now reads the live key settings and the control scheme (Modern, Classic or touch). Fixed: the Launch screen still said E for E.C.M. (it is U). Shift boost now also works with Classic controls; Tab cycles all three chart views. Main Help now explains the Starlane controls."
+   ]
+  },
   {
    "v": "2.31",
    "date": "9 November 2026",
@@ -144,23 +157,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: assistant voice fixed; separate voice and subtitle switches; battle, trading and mission tips; enemy fighters break off earlier and most close calls are near misses; controls page fits all keys."
-   ]
-  },
-  {
-   "v": "2.22",
-   "date": "9 November 2026",
-   "kids": [
-    "🤖 Starlane Trader has a ship’s assistant — give it a name! It warns you and gives tips",
-    "🚨 Red alert lights when you’re under attack",
-    "⭐ A story adventure: The Vorn Signal — can you defeat the mothership?",
-    "🚀 Buy bigger ships, hide cargo from the police, and crack codes with maths",
-    "🎯 Tap anything on the radar to see what it is"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🚀 Starlane Trader: hide/show cockpit screens (✕, F2); named voice assistant with tips and alerts (mute in menu); red alert light (can be turned off); data on this system or the target; prices paid and profit/loss in the market, hold and cockpit; radar target details (tap a blip or N); turn left/right (Q/E — E.C.M. moved to U), roll lock (L) and match station spin (Y); cockpit shakes when hit; ships to buy; hidden cargo compartment and police scans; story campaign; station defences; ore from asteroids; solar flares and ion storms; exploration data; maths challenges for fuel and locked canisters."
    ]
   }
  ]

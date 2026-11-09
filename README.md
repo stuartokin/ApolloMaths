@@ -92,7 +92,12 @@ An original space-trading game in the style of the 1984 wireframe classics — o
 - **Docking:** manual (within 26° of head-on, inside a 22° approach cone, slot within ~34° of level, slow) or docking computer (goes round the station if needed, matches rotation; plays The Blue Danube — public domain).
 - **Combat & law:** lasers with heat, missiles, ECM, shock pulse, escape capsule; pirates, police, traders, distress calls, asteroids, cargo scooping, bounties, ranks; Clean/Offender/Fugitive.
 - **Missions:** courier, supply, bounty, and political missions that change a system's government (saved as `gov` overrides, reported as Galactic News). Future upgrades add galaxies, systems, mission types and political events here.
-- **Controls:** keyboard, mouse wheel, gamepad, on-screen buttons; touch: floating stick, FIRE, speed slider (multi-touch). Opens full screen on small touch screens.
+- **Controls (v2.31):** two schemes, chosen in the pause menu → CONTROLS (defaults: MODERN on computers, CLASSIC on phones/tablets).
+  - *MODERN:* mouse steers (dead zone; arrow keys also pitch/turn and pause mouse aim for 2 s), W/S speed, A/D slide, Q/E roll, Shift boost, left click or Space fire, right-drag looks around (Modern style + 3D cockpit).
+  - *CLASSIC:* arrow keys or W A S D roll/pitch, Q/E turn, R/F (or + / −) speed, Shift boost, Space fire.
+  - *Both (remappable):* M missile (needs a 1.2 s lock), U E.C.M., B shock pulse, J jump drive, C docking computer, H hyperspace, T time, V next view, 1–4 views, O outside camera, G chart (Tab cycles galaxy / local / 3D map), I hold, K missions, Z career, X escape capsule (twice), L roll lock, Y match spin, N next target, ] engines/weapons, ' wingman, [ radar range, F1 hover help, F2 cockpit screens, P or Esc pause. Mouse wheel = speed. Docked: 1–7 tabs, L launch; market ↑↓ choose, → / + buy, ← / − sell, Enter buy max.
+  - *Touch:* floating stick, FIRE button, speed slider, deck buttons. *Gamepad:* left stick steer, right stick turn, triggers speed, A fire, B missile, X E.C.M., Y jump, LB dock, RB hyperspace, Start map, L3 boost.
+  - All in-game help (How to play, Nova's intro, the guided flight, the Launch screen, console tips) reads the live key settings and the scheme in use.
 - **Flight deck (v2.18):** 14 console keys with status lights (MSL, ECM, JUMP, DOCK, HYPER, TIME, VIEW, CAM, BOMB, POD, HOLD, MISN, MAP, MENU); hover (or tap) help on every key and gauge, switchable in settings. Station shown on the scanner rim when out of range.
 - **Pause menu (P / Esc / MENU):** resume, save, hover help / cut scenes / invert pitch, full key remapping (saved per player), how-to-play guides (docking, trading, combat, travel, missions). The arcade session clock stops while it is open (`game.paused`, via the `game.onPause` hook).
 - **Views:** front, rear, left, right (keys 1–4) and an outside chase camera (O) you can fly from. Time acceleration ×2/×4/×8 (T) switches off when danger appears.
@@ -106,7 +111,7 @@ An original space-trading game in the style of the 1984 wireframe classics — o
 - **Saving:** the commander lives in `stats.arcade.saves.starlane`. SAVE in the pause menu works docked or in flight (resumes at the same spot); stopping or running out of time also saves in flight; being destroyed rolls back to the last save.
 
 ## New-version announcements
-- `version.json` (generated from the version history in `js/data/help.js` by `node tools/make-version.js`) holds the latest version and child-friendly highlights, tagged `games`, `shop` or `look`. When online, the app checks it on opening, every 30 minutes and when it comes back online; if newer, it shows what’s new and how to save and update. **Upload `version.json` with every release.**
+- `version.json` (generated from the version history in `js/data/help.js` by `node tools/make-version.js`) holds the latest version and child-friendly highlights, tagged `games`, `shop` or `look`. When online, the app checks it on opening, every 10 minutes and when it comes back online; if newer, it shows what’s new and how to save and update. **Upload `version.json` with every release.**
 - The service worker always asks the website for fresh files and never caches `version.json`, so “Update now” picks up the new version straight away.
 
 ## Hover help
