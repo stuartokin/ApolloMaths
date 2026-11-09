@@ -1,7 +1,21 @@
 {
- "version": "2.25",
+ "version": "2.26",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.26",
+   "date": "9 November 2026",
+   "kids": [
+    "🚀 Starlane Trader: a tidier pause menu with tabs — Game, Display, Sound & Voice, Controls, How to play",
+    "🧮 Starlane’s maths puzzles now practise your Focus topics"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🚀 Starlane Trader: every screen checked automatically for overlaps and fixed (35 screens); pause menu split into five tabs; station tips shown across the top; in-game maths favours the Focus topics (and covers more of them) and every answer is logged in the Parent dashboard (Activity tab)."
+   ]
+  },
   {
    "v": "2.25",
    "date": "9 November 2026",
@@ -147,17 +161,6 @@
    ],
    "items": [
     "🚀 New in the secret arcade: Starlane Trader — an original space-trading game in the style of the 1984 wireframe classics, with trading, missions, docking and hyperspace. Your career is saved."
-   ]
-  },
-  {
-   "v": "2.16",
-   "date": "8 November 2026",
-   "kids": [
-    "🔔 The app now tells you when there’s a new version — and what’s new!"
-   ],
-   "tags": [],
-   "items": [
-    "🔔 When online, the app checks for a new version and shows what has changed, with simple steps to save and update."
    ]
   }
  ]

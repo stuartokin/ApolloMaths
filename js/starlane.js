@@ -176,54 +176,61 @@ function makeStarlane(env){
   if(C.opt.voice&&typeof Speech!=='undefined'&&Speech.ok)try{Speech.say(text,'tour');}catch(e){}}
  let aiRect=null;
  function drawAI(ctx,y,fixed){if(!aiLine||C.opt.subs===false){aiRect=null;return;}const now=performance.now()/1000;if(now>aiLine.until){aiLine=null;aiRect=null;return;}
-  const pos=fixed?'top':C.opt.subPos||'top',side=pos==='left'||pos==='right',maxW=side?330:Math.min(W-40,640);ctx.font='bold 13px "Courier New",monospace';
+  const pos=fixed?'top':C.opt.subPos||'top',side=pos==='left'||pos==='right',maxW=fixed==='top'?520:side?330:(pos==='top'&&radarTgt)?400:Math.min(W-40,640);ctx.font='bold 13px "Courier New",monospace';
   const words=`${aiLine.name}: ${aiLine.text}`.split(' '),lines=[];let cur='';for(const w of words){const t=cur?cur+' '+w:w;if(ctx.measureText(t).width>maxW-30&&cur){lines.push(cur);cur=w;}else cur=t;}if(cur)lines.push(cur);
   const w=Math.min(maxW,Math.max(...lines.map(l=>ctx.measureText(l).width))+34),h=lines.length*16+12;let cx,cy;
-  if(fixed){cx=CX;cy=y;}else if(typeof pos==='object'){cx=pos.x;cy=pos.y;}else if(pos==='bottom'){cx=CX;cy=(C.opt.cockpit&&C.opt.mfd&&!touchSeen?VH-150:VH-60)-h;}else if(pos==='left'){cx=30+w/2;cy=VH*.42;}else if(pos==='right'){cx=W-30-w/2;cy=VH*.42;}else{cx=CX;cy=y;}
+  if(fixed==='top'){cx=CX;cy=4;}else if(fixed){cx=CX;cy=y;}else if(typeof pos==='object'){cx=pos.x;cy=pos.y;}else if(pos==='bottom'){cx=CX;cy=(C.opt.cockpit&&C.opt.mfd&&!touchSeen?VH-150:VH-60)-h;}else if(pos==='left'){cx=30+w/2;cy=VH*.42;}else if(pos==='right'){cx=W-30-w/2;cy=VH*.42;}else{cx=radarTgt?320:CX;cy=y;}
   cx=Math.max(w/2+4,Math.min(W-w/2-4,cx));cy=Math.max(4,Math.min((fixed?H:VH)-h-4,cy));const x=cx-w/2;aiRect={x,y:cy,w,h};
+  if(LAYOUT)LAYOUT=LAYOUT.filter(e=>!(e.x<x+w&&e.x+e.w>x&&e.y<cy+h&&e.y+e.h>cy));
   ctx.fillStyle='rgba(8,20,40,.88)';ctx.strokeStyle='#3fe0ff';ctx.lineWidth=1.5;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,cy,w,h,8);else ctx.rect(x,cy,w,h);ctx.fill();ctx.stroke();
   if(!fixed){ctx.fillStyle='rgba(63,224,255,.5)';for(let k=0;k<3;k++)for(let m=0;m<2;m++)ctx.fillRect(x+7+m*4,cy+h/2-5+k*4,2,2);}
   lines.forEach((l,i)=>text(ctx,l,x+20,cy+6+i*16,'#bdf3ff',13,'left'));}
  // ---------------- maths challenges (from the app's own question bank) ----------------
  // maths that belongs to the story: navigation, codes and trading, using the game's real numbers
  const RI=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),PK=a=>a[Math.floor(Math.random()*a.length)],R1=v=>Math.round(v*10)/10;
- function themedQ(kind){const h=here(),tg=C.target!==null&&C.target!==undefined&&GAL[C.target]?GAL[C.target]:null,Q=(q,a,u,dp=0)=>({q,a:dp?R1(a):a,u,dp});
-  if(kind==='hyper'){const d=tg?SL.dist(GAL[C.sys],tg):R1(RI(15,60)/10),nm=tg?tg.name:'the next system';return PK([
-    ()=>Q(`Our tank holds ${C.fuel.toFixed(1)} light years of fuel. The jump to ${nm} is ${d} light years. How much fuel will be left?`,C.fuel-d,'LY',1),
-    ()=>{const t=RI(8,40),sp=PK([150,200,250,300,400]);return Q(`After the jump, ${nm} Station will be ${t*sp} metres away. At ${sp} metres per second, how many seconds until we reach it?`,t,'seconds');},
-    ()=>{const r=PK([12,15,18,24,30]),t=RI(3,9);return Q(`The docking slot at ${nm} turns ${r}° every second. How many degrees does it turn in ${t} seconds?`,r*t,'°');},
-    ()=>{const a=R1(RI(12,38)/10),b=R1(RI(12,38)/10);return Q(`The route to ${nm} has two hops: ${a} light years then ${b} light years. How far is that altogether?`,a+b,'LY',1);},
-    ()=>{const p=PK([2,2.5,3,4]),n=RI(3,7);return Q(`Fuel at ${nm} costs ${p} credits per light year. How much to buy ${n} light years?`,p*n,'Cr',1);},
-    ()=>{const sp=PK([240,300,360,420]),t=PK([5,10,15,20]);return Q(`Leaving the jump point at ${sp} metres per second, how far do we travel in ${t} seconds?`,sp*t,'metres');}])();}
-  if(kind==='vault'){return PK([
-    ()=>{const a=RI(2,15),b=RI(3,12);return Q(`The canister’s keypad shows a pattern: ${a}, ${a+b}, ${a+2*b}, ${a+3*b}, ? — enter the next number.`,a+4*b,'');},
-    ()=>{const a=RI(2,5),k=PK([2,3]);return Q(`The lock flashes: ${a}, ${a*k}, ${a*k*k}, ${a*k*k*k}, ? — what comes next?`,a*k**4,'');},
-    ()=>{const den=PK([3,4,5,8]),num=RI(1,den-1),n=den*RI(6,30);return Q(`The code is ${num}/${den} of ${n}. What is the code?`,num*n/den,'');},
-    ()=>{const a=RI(2,5),b=RI(1,a-1)||1,k=RI(10,40),tot=(a+b)*k;return Q(`The canister holds ${tot} credits of loot. You split it with your co-pilot in the ratio ${a}:${b}. How much is your (bigger) share?`,a*k,'Cr');},
-    ()=>{const n=PK([40,60,80,120,200]),p=PK([10,15,20,25,30,75]);return Q(`The canister holds ${n} gems and ${p}% of them are rubies. How many rubies?`,n*p/100,'gems');},
-    ()=>{const t=-RI(5,25),u=RI(3,20);return Q(`The canister is frozen at ${t}°C. It must warm up to ${u}°C before it opens. How many degrees warmer is that?`,u-t,'°C');},
-    ()=>{const l=RI(2,6),w=RI(2,5),hh=RI(2,5);return Q(`The vault inside measures ${l} m by ${w} m by ${hh} m. The code is its volume in cubic metres. What is it?`,l*w*hh,'m³');}])();}
-  // trading — prices from today's market here
-  const mk=market(),ok=GOODS.map((g,i)=>i).filter(i=>!GOODS[i][6]&&mk[i].price>1),i=PK(ok),g=GOODS[i],p=mk[i].price,unit=g[1]==='t'?'tonne':g[1];return PK([
-    ()=>{const n=RI(3,12);return Q(`${g[0]} cost ${p.toFixed(1)} credits per ${unit} at ${h.name} today. How much would ${n} ${unit}s cost?`,p*n,'Cr',1);},
-    ()=>{const n=RI(4,10),q=R1(p+RI(3,25)/2);return Q(`We buy ${n} ${unit}s of ${g[0]} here at ${p.toFixed(1)} credits each and sell them at ${q.toFixed(1)} each. What is our total profit?`,(q-p)*n,'Cr',1);},
-    ()=>{const a=PK([20,40,50,80]),pc=PK([10,20,25,50]),b=a*(1+pc/100);return Q(`At ${h.name}, ${g[0]} went from ${a} credits to ${b} credits. What is the percentage increase?`,pc,'%');},
-    ()=>{const n=RI(2,6),cost=R1(p*n);return Q(`${n} ${unit}s of ${g[0]} cost ${cost.toFixed(1)} credits. How much is one ${unit}?`,cost/n,'Cr',1);},
-    ()=>{const n=RI(2,5),note=100*Math.ceil(p*n/100+.01);return Q(`You buy ${n} ${unit}s of ${g[0]} at ${p.toFixed(1)} each and pay with ${note} credits. How much change?`,note-p*n,'Cr',1);}])();}
+ function themedQ(kind){const h=here(),tg=C.target!==null&&C.target!==undefined&&GAL[C.target]?GAL[C.target]:null,Q=(tp,q,a,u,dp=0)=>({tp,q,a:dp?R1(a):a,u,dp}),d=tg?SL.dist(GAL[C.sys],tg):R1(RI(15,60)/10),nm=tg?tg.name:'the next system';
+  const NAV=[['measure',()=>Q('measure',`Our tank holds ${C.fuel.toFixed(1)} light years of fuel. The jump to ${nm} is ${d} light years. How much fuel will be left?`,C.fuel-d,'LY',1)],
+   ['speed',()=>{const t=RI(8,40),sp=PK([150,200,250,300,400]);return Q('speed',`After the jump, ${nm} Station will be ${t*sp} metres away. At ${sp} metres per second, how many seconds until we reach it?`,t,'seconds');}],
+   ['geometry',()=>{const r=PK([12,15,18,24,30]),t=RI(3,9);return Q('geometry',`The docking slot at ${nm} turns ${r}° every second. How many degrees does it turn in ${t} seconds?`,r*t,'°');}],
+   ['measure',()=>{const a=R1(RI(12,38)/10),b=R1(RI(12,38)/10);return Q('measure',`The route to ${nm} has two hops: ${a} light years then ${b} light years. How far is that altogether?`,a+b,'LY',1);}],
+   ['speed',()=>{const sp=PK([240,300,360,420]),t=PK([5,10,15,20]);return Q('speed',`Leaving the jump point at ${sp} metres per second, how far do we travel in ${t} seconds?`,sp*t,'metres');}],
+   ['units',()=>{const km=R1(RI(12,96)/10);return Q('units',`The station at ${nm} is ${km} km away. How many metres is that?`,km*1000,'m');}],
+   ['time',()=>{const hh=RI(1,3),mm=PK([5,15,25,35,45,50]);return Q('time',`The jump to ${nm} takes ${hh} hour${hh>1?'s':''} ${mm} minutes of ship time. How many minutes is that altogether?`,hh*60+mm,'minutes');}],
+   ['geometry',()=>{const a=PK([35,48,62,75,110,125]);return Q('geometry',`We must turn ${a}° to face ${nm}. How many more degrees would make a full half-turn (180°)?`,180-a,'°');}]];
+  const CODE=[['sequences',()=>{const a=RI(2,15),b=RI(3,12);return Q('sequences',`The canister’s keypad shows a pattern: ${a}, ${a+b}, ${a+2*b}, ${a+3*b}, ? — enter the next number.`,a+4*b,'');}],
+   ['patterns',()=>{const a=RI(2,5),k=PK([2,3]);return Q('patterns',`The lock flashes: ${a}, ${a*k}, ${a*k*k}, ${a*k*k*k}, ? — what comes next?`,a*k**4,'');}],
+   ['fractions',()=>{const den=PK([3,4,5,8]),num=RI(1,den-1),n=den*RI(6,30);return Q('fractions',`The code is ${num}/${den} of ${n}. What is the code?`,num*n/den,'');}],
+   ['equivfrac',()=>{const den=PK([4,5,8,10]),num=RI(1,den-1),cap=den*RI(3,8);return Q('equivfrac',`The vault is ${num}/${den} full of gold bars. It holds ${cap} bars when full. How many bars are inside?`,num*cap/den,'bars');}],
+   ['ratio',()=>{const a=RI(2,5),b=RI(1,a-1)||1,k=RI(10,40),tot=(a+b)*k;return Q('ratio',`The canister holds ${tot} credits of loot. You split it with your co-pilot in the ratio ${a}:${b}. How much is your (bigger) share?`,a*k,'Cr');}],
+   ['percent',()=>{const n=PK([40,60,80,120,200]),p=PK([10,15,20,25,30,75]);return Q('percent',`The canister holds ${n} gems and ${p}% of them are rubies. How many rubies?`,n*p/100,'gems');}],
+   ['reasoning',()=>{const t=-RI(5,25),u=RI(3,20);return Q('reasoning',`The canister is frozen at ${t}°C. It must warm up to ${u}°C before it opens. How many degrees warmer is that?`,u-t,'°C');}],
+   ['volume',()=>{const l=RI(2,6),w=RI(2,5),hh=RI(2,5);return Q('volume',`The vault inside measures ${l} m by ${w} m by ${hh} m. The code is its volume in cubic metres. What is it?`,l*w*hh,'m³');}],
+   ['algebra',()=>{const n=RI(3,14),a=RI(2,6),b=RI(1,20);return Q('algebra',`The pirate’s code: ${a} × n + ${b} = ${a*n+b}. What is n?`,n,'');}],
+   ['divisibility',()=>{const k=PK([6,7,8,9,12]),n=RI(6,15);return Q('divisibility',`${k*n} gem crystals must be packed into boxes of ${k}. How many boxes?`,n,'boxes');}]];
+  const mk=market(),ok=GOODS.map((g,i)=>i).filter(i=>!GOODS[i][6]&&mk[i].price>1),gi=PK(ok),g=GOODS[gi],p=mk[gi].price,unit=g[1]==='t'?'tonne':g[1];
+  const TRADE=[['reasoning',()=>{const n=RI(3,12);return Q('reasoning',`${g[0]} cost ${p.toFixed(1)} credits per ${unit} at ${h.name} today. How much would ${n} ${unit}s cost?`,p*n,'Cr',1);}],
+   ['reasoning',()=>{const n=RI(4,10),q=R1(p+RI(3,25)/2);return Q('reasoning',`We buy ${n} ${unit}s of ${g[0]} here at ${p.toFixed(1)} credits each and sell them at ${q.toFixed(1)} each. What is our total profit?`,(q-p)*n,'Cr',1);}],
+   ['percent',()=>{const a=PK([20,40,50,80]),pc=PK([10,20,25,50]),b=a*(1+pc/100);return Q('percent',`At ${h.name}, ${g[0]} went from ${a} credits to ${b} credits. What is the percentage increase?`,pc,'%');}],
+   ['reasoning',()=>{const n=RI(2,6),cost=R1(p*n);return Q('reasoning',`${n} ${unit}s of ${g[0]} cost ${cost.toFixed(1)} credits. How much is one ${unit}?`,cost/n,'Cr',1);}],
+   ['reasoning',()=>{const n=RI(2,5),note=100*Math.ceil(p*n/100+.01);return Q('reasoning',`You buy ${n} ${unit}s of ${g[0]} at ${p.toFixed(1)} each and pay with ${note} credits. How much change?`,note-p*n,'Cr',1);}],
+   ['averages',()=>{const v=[RI(5,30),RI(5,30),RI(5,30)];const sum=v.reduce((a,b)=>a+b,0),x=(4-sum%4)%4+RI(0,2)*4;const all=[...v,x];return Q('averages',`Our last four trades made ${all.join(', ')} credits profit. What is the mean profit per trade?`,all.reduce((a,b)=>a+b,0)/4,'Cr',1);}],
+   ['area',()=>{const a=RI(4,12),b=RI(3,9);return Q('area',`The ${h.name} warehouse floor is ${a} m by ${b} m. What is its area?`,a*b,'m²');}]];
+  const list=kind==='hyper'?NAV:kind==='vault'?CODE:TRADE;const foc=(typeof stats!=='undefined'&&Array.isArray(stats.focus))?stats.focus:[];
+  const wts=list.map(([tp])=>foc.includes(tp)?4:1),tot=wts.reduce((a,b)=>a+b,0);let x=Math.random()*tot,k=0;while(x>wts[k]){x-=wts[k];k++;}return list[Math.min(k,list.length-1)][1]();}
  function makeMathQ(kind){if(kind&&Math.random()<.9){try{const q=themedQ(kind);if(q&&Number.isFinite(+q.a)){const a=+q.a,dp=q.dp||(String(q.a).split('.')[1]||'').length,fm=v=>dp?(+v).toFixed(dp):String(Math.round(v));const set=new Set([fm(a)]);let k=0;const st=dp?[.1,.2,.5,1,1.5,2]:[1,2,3,5,10,Math.max(1,Math.round(Math.abs(a)*.1)),Math.max(1,Math.round(Math.abs(a)*.5))];
-    while(set.size<4&&k<60){const v=a+(Math.random()<.5?-1:1)*st[k%st.length]*(1+Math.floor(k/st.length));if(v>=0||a<0)set.add(fm(v));k++;}return{q:q.q,opts:[...set].sort(()=>Math.random()-.5),ans:fm(a),u:q.u||''};}}catch(e){}}
+    while(set.size<4&&k<60){const v=a+(Math.random()<.5?-1:1)*st[k%st.length]*(1+Math.floor(k/st.length));if(v>=0||a<0)set.add(fm(v));k++;}return{q:q.q,tp:q.tp,opts:[...set].sort(()=>Math.random()-.5),ans:fm(a),u:q.u||''};}}catch(e){}}
   return makeBankQ();}
  function makeBankQ(){if(typeof bank==='undefined')return null;const topics=Object.keys(bank);for(let t=0;t<40;t++){const list=bank[topics[Math.floor(Math.random()*topics.length)]];if(!list||!list.length)continue;let q;try{q=list[Math.floor(Math.random()*list.length)]();}catch(e){continue;}
    if(!q||typeof q.q!=='string'||q.fig||q.table||!Number.isFinite(+q.a)||q.q.length>230)continue;const a=+q.a,dp=(String(q.a).split('.')[1]||'').length,fm=v=>dp?(+v).toFixed(dp):String(Math.round(v));
    const set=new Set([fm(a)]);const d=[1,2,5,10,Math.max(1,Math.round(a*.1)),Math.max(1,Math.round(a*.5)),3];let k=0;while(set.size<4&&k<40){const v=a+(Math.random()<.5?-1:1)*d[k%d.length]*(dp?Math.pow(10,-dp)*10:1);if(v>=0||a<0)set.add(fm(v));k++;}
    const opts=[...set].sort(()=>Math.random()-.5);return{q:q.q.replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' '),opts,ans:fm(a),u:q.u||''};}return null;}
  function openMath(kind,after){const q=makeMathQ(kind);if(!q){after(false);return;}mathQ={...q,kind,after,picked:null};overlay='maths';say('maths'+kind,kind==='hyper'?'The navigation computer needs a calculation. Solve it to save fuel!':kind==='trade'?'The Traders’ Guild has a challenge for us — get it right for a bonus!':'Crack the canister code by solving this.',20);}
- function renderMath(ctx){btns=[];ctx.fillStyle='rgba(2,4,14,.9)';ctx.fillRect(0,0,W,H);const m=mathQ;ctx.fillStyle='#0b1028';ctx.strokeStyle='#ffe45e';ctx.lineWidth=3;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(60,70,680,430,16);else ctx.rect(60,70,680,430);ctx.fill();ctx.stroke();
+ function renderMath(ctx){btns=[];if(LAYOUT)LAYOUT.length=0;ctx.fillStyle='rgba(2,4,14,.9)';ctx.fillRect(0,0,W,H);const m=mathQ;ctx.fillStyle='#0b1028';ctx.strokeStyle='#ffe45e';ctx.lineWidth=3;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(60,70,680,430,16);else ctx.rect(60,70,680,430);ctx.fill();ctx.stroke();
   text(ctx,m.kind==='hyper'?'🧮 NAVIGATION CALCULATION':m.kind==='trade'?'💰 TRADERS’ GUILD CHALLENGE':'🔐 CRACK THE CANISTER CODE',CX,88,'#ffe45e',20,'center');text(ctx,m.kind==='hyper'?'Get it right to save 30% of the fuel for this jump.':m.kind==='trade'?`Get it right for a ${tradeBonus()} credit bonus from the Traders’ Guild.`:'Get it right to open the canister of treasure.',CX,116,'#9aa3c7',13,'center');
   const y=wrap(ctx,m.q,90,150,620,22,'#e6e9f2',16);m.opts.forEach((o,i)=>{const bx=90+(i%2)*315,by=Math.max(y+20,260)+Math.floor(i/2)*64;const right=o===m.ans,picked=m.picked===o;button(ctx,B(bx,by,300,52,`${i+1})  ${o} ${m.u}`.trim(),()=>{if(m.picked===null)pickMath(o);},{fs:16,bg:m.picked!==null?(right?'rgba(30,120,60,.95)':picked?'rgba(140,30,40,.95)':undefined):undefined}));});
   if(m.picked!==null){text(ctx,m.picked===m.ans?'✅ Correct — brilliant!':`❌ Not quite — the answer was ${m.ans} ${m.u}`,CX,430,m.picked===m.ans?'#3cff6a':'#ff8a1c',16,'center');button(ctx,B(CX-100,456,200,36,'CONTINUE ▶',()=>finishMath(),{fs:14}));}
   else text(ctx,'Press 1–4 or tap an answer. (Use a scratch pad if it helps!)',CX,470,'#9aa3c7',12,'center');}
- function pickMath(o){mathQ.picked=o;const ok=o===mathQ.ans;ST('mAsked');if(ok){ST('mRight');C.stats.mStreak=(C.stats.mStreak||0)+1;STmax('mBest',C.stats.mStreak);if((C.stats.mRight||0)>=10)medal('maths10');}else C.stats.mStreak=0;env.beep(ok?1200:200,.25,'triangle',.05,ok?1.5:.6);say('mres',ok?'Correct! Well done, commander.':`Not quite. The answer was ${mathQ.ans}.`,1);}
+ function pickMath(o){mathQ.picked=o;const ok=o===mathQ.ans;try{if(typeof stats!=='undefined'&&stats){const L=(stats.starlane ||= {log:[]});L.log=(L.log||[]).concat({t:Date.now(),tp:mathQ.tp||'',kind:mathQ.kind,q:mathQ.q.slice(0,220),ans:mathQ.ans+(mathQ.u?' '+mathQ.u:''),given:o,ok}).slice(-300);if(typeof save==='function')save(false);}}catch(e){}ST('mAsked');if(ok){ST('mRight');C.stats.mStreak=(C.stats.mStreak||0)+1;STmax('mBest',C.stats.mStreak);if((C.stats.mRight||0)>=10)medal('maths10');}else C.stats.mStreak=0;env.beep(ok?1200:200,.25,'triangle',.05,ok?1.5:.6);say('mres',ok?'Correct! Well done, commander.':`Not quite. The answer was ${mathQ.ans}.`,1);}
  function finishMath(){const m=mathQ;mathQ=null;overlay=null;m.after(m.picked===m.ans);}
  // medals
  const MEDALS={bigtrade:'📈 A 500 Cr trade',maths10:'🧮 10 maths puzzles right',jumps20:'🌌 20 hyperspace jumps',villain:'😈 Became a fugitive',pardon:'⚖️ Earned a pardon',story:'⭐ Defeated the Vorn mothership',launch:'🚀 First flight',dock:'🛬 First docking',kill:'🎯 First pirate',mission:'📦 First mission',rich1:'💰 1,000 credits',rich10:'💎 10,000 credits',explorer:'🧭 Visited 10 systems',hero:'🗳️ Changed a government',rescue:'🛟 Rescued a survivor',miner:'⛏️ Cleared a hazard',daredevil:'🕳️ Escaped a black hole'};
@@ -555,9 +562,10 @@ function makeStarlane(env){
  // ---------------- flight screen ----------------
  let btns=[],tips=[],touchSeen=!!env.touch,fireTouch=false;
  const B=(x,y,w,h,label,fn,o={})=>{btns.push({x,y,w,h,fn});return{x,y,w,h,label,...o};};
+ let LAYOUT=null;const lay=(k,x,y,w,h,s,extra)=>{if(LAYOUT)LAYOUT.push({k,x,y,w,h,s,...extra});};
  function button(ctx,b,on){ctx.fillStyle=on?'rgba(255,228,94,.9)':b.bg||'rgba(30,38,80,.82)';ctx.strokeStyle=b.border||'#3fe0ff';ctx.lineWidth=2;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(b.x,b.y,b.w,b.h,8);else ctx.rect(b.x,b.y,b.w,b.h);ctx.fill();ctx.stroke();
-  ctx.fillStyle=on?'#10142b':b.fg||'#fff';ctx.font=`bold ${b.fs||13}px "Courier New",monospace`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.label,b.x+b.w/2,b.y+b.h/2+1);}
- function text(ctx,t,x,y,col='#fff',size=15,align='left',bold=true){ctx.fillStyle=col;ctx.font=`${bold?'bold ':''}${size}px "Courier New",monospace`;ctx.textAlign=align;ctx.textBaseline='top';ctx.fillText(t,x,y);}
+  ctx.fillStyle=on?'#10142b':b.fg||'#fff';ctx.font=`bold ${b.fs||13}px "Courier New",monospace`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.label,b.x+b.w/2,b.y+b.h/2+1);if(LAYOUT){const lw=ctx.measureText(b.label).width;lay('btn',b.x,b.y,b.w,b.h,b.label,{over:lw>b.w-6});}}
+ function text(ctx,t,x,y,col='#fff',size=15,align='left',bold=true){ctx.fillStyle=col;ctx.font=`${bold?'bold ':''}${size}px "Courier New",monospace`;ctx.textAlign=align;ctx.textBaseline='top';ctx.fillText(t,x,y);if(LAYOUT&&t!==''&&t!==undefined){const w=ctx.measureText(String(t)).width,x0=align==='center'?x-w/2:align==='right'?x-w:x;lay('text',x0,y,w,size*1.05,String(t));}}
  const tipAt=(x,y,w,h,title,body)=>tips.push({x,y,w,h,title,body});
  const KN={ArrowUp:'↑',ArrowDown:'↓',ArrowLeft:'←',ArrowRight:'→',' ':'Space',Enter:'Enter',Escape:'Esc'};
  const keyName=id=>(C.opt.keys[id]||[]).map(k=>KN[k]||(k.length===1?k.toUpperCase():k)).join(' / ')||'—';
@@ -627,7 +635,7 @@ function makeStarlane(env){
    const diff=Math.abs((rollLock?lockRate:P.roll)+station.spin)*57;text(ctx,`Your roll ${Math.round(-(rollLock?lockRate:P.roll)*57)}°/s · station spin ${Math.round(station.spin*57)}°/s${diff<2?' ✓ MATCHED':''}`,12+(cockpit?100:0),y+30,diff<2?'#3cff6a':'#9aa3c7',11,'left',false);}
   else if(rollLock)text(ctx,`🔒 ROLL LOCK ${Math.round(-lockRate*57)}°/s (L to release)`,12+(cockpit?100:0),cockpit?64:34,'#3fe0ff',12);
   if(redOn&&C.opt.redAlert){const a=.35+.35*Math.sin(clock*9);ctx.strokeStyle=`rgba(255,30,60,${a})`;ctx.lineWidth=8;ctx.strokeRect(4,4,W-8,VH-8);}
-  drawAI(ctx,cockpit?(radarTgt?196:96):(radarTgt?160:40));
+  drawAI(ctx,cockpit?96:40);
   if(hyperT>0&&hyperT<1.6){drawStreaks(ctx,(1.6-hyperT)*.18,.5);}
   if(exitT>0){const k=exitT/1.6;drawStreaks(ctx,1.6*k*k,k);if(exitT>1.35){ctx.fillStyle=`rgba(255,255,255,${(exitT-1.35)*3})`;ctx.fillRect(0,0,W,VH);}}
   // sights and view name
@@ -821,7 +829,7 @@ function makeStarlane(env){
  const infamyT=v=>tier(v,[[0,'Spotless'],[5,'Rascal'],[20,'Outlaw'],[60,'Notorious'],[150,'Villain'],[400,'Most Wanted']]);
  const exploreT=v=>tier(v,[[0,'Stay-at-home'],[3,'Wanderer'],[10,'Explorer'],[25,'Pathfinder'],[60,'Star Cartographer']]);
  function careerScore(){const S=C.stats||{};return Math.round((S.peak||C.credits)/10+(S.hero||0)*10+((S.k_pirate||0)+(S.k_alien||0))*20+Object.keys(C.visited||{}).length*25+(C.done||0)*50+Object.keys(C.medals||{}).length*100+(S.mRight||0)*15);}
- function renderCareer(ctx){btns=[];ctx.fillStyle='rgba(2,4,14,.96)';ctx.fillRect(0,0,W,H);const S=C.stats||{},n=v=>Math.round(v||0).toLocaleString('en-GB'),cr=v=>(v||0).toLocaleString('en-GB',{maximumFractionDigits:1});
+ function renderCareer(ctx){btns=[];if(LAYOUT)LAYOUT.length=0;ctx.fillStyle='rgba(2,4,14,.96)';ctx.fillRect(0,0,W,H);const S=C.stats||{},n=v=>Math.round(v||0).toLocaleString('en-GB'),cr=v=>(v||0).toLocaleString('en-GB',{maximumFractionDigits:1});
   const name=((env.names&&env.names[0])||'Pilot').toUpperCase(),vis=Object.keys(C.visited||{}).length,hero=S.hero||0,vil=S.villain||0;
   text(ctx,`🏆 CAREER RECORD — COMMANDER ${name}`,CX,10,'#ffe45e',19,'center');text(ctx,`Commander score ${n(careerScore())}  ·  Day ${C.day}  ·  ${rankOf(C.killPts)}`,CX,34,'#3fe0ff',13,'center');
   // hero / villain balance
@@ -852,7 +860,7 @@ function makeStarlane(env){
   ['🧮','Your maths skills',`Sometimes I'll need your help with a calculation: fuel for a jump, cracking a canister code, or a traders' challenge. Get it right for a bonus!`],
   ['🏆','Ready for launch',`Check your Career record any time with Z, and the pause menu has all the settings. Good luck, Commander. Press LAUNCH when you're ready!`]];};
  function openIntro(){introI=0;introSpoke=-1;introT=0;overlay='intro';}
- function renderIntro(ctx,dt){btns=[];const L=INTRO(),sl=L[introI];introT+=1/60;ctx.fillStyle='#02040e';ctx.fillRect(0,0,W,H);for(const[x,y,b]of bgStars){ctx.fillStyle=`rgba(255,255,255,${.25+b*.6})`;ctx.fillRect((x+introT*8*b)%W,y,1.5,1.5);}
+ function renderIntro(ctx,dt){btns=[];if(LAYOUT)LAYOUT.length=0;const L=INTRO(),sl=L[introI];introT+=1/60;ctx.fillStyle='#02040e';ctx.fillRect(0,0,W,H);for(const[x,y,b]of bgStars){ctx.fillStyle=`rgba(255,255,255,${.25+b*.6})`;ctx.fillRect((x+introT*8*b)%W,y,1.5,1.5);}
   if(introSpoke!==introI){introSpoke=introI;if(C.opt.voice&&typeof Speech!=='undefined'&&Speech.ok)try{Speech.say(sl[1]+'. '+sl[2],'tour');}catch(e){}}
   const talking=typeof Speech!=='undefined'&&Speech.speaking&&Speech.speaking(),hx=150,hy=230;   // hologram
   for(let k=3;k>=0;k--){ctx.strokeStyle=`rgba(63,224,255,${.15+k*.12})`;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(hx,hy+70,60+k*14+Math.sin(introT*2+k)*3,14+k*3,0,0,Math.PI*2);ctx.stroke();}
@@ -865,7 +873,7 @@ function makeStarlane(env){
   if(introI>0)button(ctx,B(160,470,150,40,'◀ BACK',()=>{introI--;},{fs:14}));button(ctx,B(CX-90,470,180,40,introI<L.length-1?'NEXT ▶':'🚀 LET’S GO!',()=>{if(introI<L.length-1)introI++;else closeIntro();},{fs:15,bg:'rgba(30,80,50,.92)'}));
   button(ctx,B(W-230,470,180,40,'SKIP INTRO',()=>closeIntro(),{fs:13}));text(ctx,'Space / → next · ← back · Esc skip',CX,524,'#4a5180',11,'center');}
  function closeIntro(){overlay=null;C.introSeen=true;try{if(typeof Speech!=='undefined')Speech.stop();}catch(e){}persist();}
- function renderArrival(ctx){btns=[];ctx.fillStyle='rgba(2,4,14,.88)';ctx.fillRect(0,0,W,H);const h=Math.min(440,150+arrival.length*48);const y0=(H-h)/2;ctx.fillStyle='#0b1028';ctx.strokeStyle='#3cff6a';ctx.lineWidth=3;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(90,y0,620,h,16);else ctx.rect(90,y0,620,h);ctx.fill();ctx.stroke();
+ function renderArrival(ctx){btns=[];if(LAYOUT)LAYOUT.length=0;ctx.fillStyle='rgba(2,4,14,.88)';ctx.fillRect(0,0,W,H);const h=Math.min(440,150+arrival.length*48);const y0=(H-h)/2;ctx.fillStyle='#0b1028';ctx.strokeStyle='#3cff6a';ctx.lineWidth=3;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(90,y0,620,h,16);else ctx.rect(90,y0,620,h);ctx.fill();ctx.stroke();
   const good=arrival.filter(a=>a.ok&&a.r).reduce((t,a)=>t+a.r,0);text(ctx,arrival.some(a=>a.ok)?'🎉 MISSION REPORT':'📋 ARRIVAL REPORT',CX,y0+18,'#3cff6a',24,'center');let y=y0+60;
   for(const a of arrival.slice(0,6)){y=wrap(ctx,a.t,120,y,480,18,a.ok?'#e6e9f2':'#ff8a1c',15);if(a.r)text(ctx,`+${a.r} Cr`,690,y-18,'#ffe45e',16,'right');y+=10;}
   if(good)text(ctx,`Total reward: ${good} Cr   ·   You now have ${C.credits.toFixed(1)} Cr`,CX,y0+h-84,'#ffe45e',15,'center');button(ctx,B(CX-110,y0+h-58,220,42,'👍 GREAT!',()=>{overlay=null;arrival=[];},{fs:16,bg:'rgba(30,80,50,.92)'}));}
@@ -901,9 +909,9 @@ function makeStarlane(env){
   if(t){const d=SL.dist(cur,GAL[t.i]);text(ctx,`${t.name}: ${d} LY · ${GOV[t.gov]} · ${ECON[t.eco]} · Tech ${t.tech}`,x+6,y+h+6,d<=C.fuel?'#3cff6a':'#ff8a1c',14);text(ctx,d<=C.fuel?'In range — press HYPER in flight':'Too far for your fuel',x+w-4,y+h+6,d<=C.fuel?'#3cff6a':'#ff8a1c',13,'right');}
   else text(ctx,'Tap a star to choose your hyperspace destination. Green ring = fuel range. Orange = mission.',x+6,y+h+6,'#9aa3c7',13);
   button(ctx,B(x+w-190,y+6,180,28,local?'GALAXY VIEW':'SHORT-RANGE VIEW',()=>{chartMode=local?'galaxy':'local';},{fs:12}));}
- function renderOverlay(ctx){btns=[];renderFlight(ctx);btns=[];ctx.fillStyle='rgba(0,0,0,.92)';ctx.fillRect(0,0,W,VH);text(ctx,chartMode==='galaxy'?'GALACTIC CHART':'SHORT-RANGE CHART',CX,6,'#3fe0ff',18,'center');chart(ctx,10,30,780,350);
+ function renderOverlay(ctx){btns=[];renderFlight(ctx);btns=[];ctx.fillStyle='rgba(0,0,0,.92)';ctx.fillRect(0,0,W,VH);if(LAYOUT)LAYOUT.length=0;text(ctx,chartMode==='galaxy'?'GALACTIC CHART':'SHORT-RANGE CHART',CX,6,'#3fe0ff',18,'center');chart(ctx,10,30,780,350);
   button(ctx,B(10,30+356-36,120,30,'DATA',()=>{overlay='data';},{fs:12}));button(ctx,B(W-130,4,120,26,'✕ CLOSE',()=>{overlay=null;},{fs:12}));
-  if(overlay==='data'){const hasT=C.target!==null&&C.target!==undefined&&C.target!==C.sys,t=hasT&&dataSel==='target'?sysOf(C.target):here();ctx.fillStyle='rgba(0,0,0,.95)';ctx.fillRect(0,0,W,VH);text(ctx,`DATA ON ${t.name.toUpperCase()}`,CX,10,'#3fe0ff',18,'center');button(ctx,B(20,8,110,24,'THIS SYSTEM',()=>{dataSel='here';},{fs:11}),t===here());button(ctx,B(136,8,110,24,'TARGET',()=>{if(hasT)dataSel='target';},{fs:11}),t!==here());
+  if(overlay==='data'){const hasT=C.target!==null&&C.target!==undefined&&C.target!==C.sys,t=hasT&&dataSel==='target'?sysOf(C.target):here();ctx.fillStyle='rgba(0,0,0,.95)';ctx.fillRect(0,0,W,VH);if(LAYOUT)LAYOUT.length=0;text(ctx,`DATA ON ${t.name.toUpperCase()}`,CX,10,'#3fe0ff',18,'center');button(ctx,B(20,8,110,24,'THIS SYSTEM',()=>{dataSel='here';},{fs:11}),t===here());button(ctx,B(136,8,110,24,'TARGET',()=>{if(hasT)dataSel='target';},{fs:11}),t!==here());
    [['Economy',ECON[t.eco]],['Government',GOV[t.gov]],['Tech Level',t.tech],['Population',t.pop+' Billion'],['Species',t.species]].forEach(([a,b],i)=>{text(ctx,a+':',30,46+i*26,'#3cff6a',16);text(ctx,String(b),220,46+i*26,'#fff',16);});wrap(ctx,t.desc,30,184,740,20,'#e6e9f2',15);
    button(ctx,B(W-130,4,120,26,'◀ CHART',()=>{overlay='chart';},{fs:12}));}}
  // ---------------- quick tunnels (used when cut scenes are switched off) ----------------
@@ -977,21 +985,25 @@ function makeStarlane(env){
   ['COMBAT','Put the enemy in your sights and fire. Lasers get hot — let them cool.\n• Shields (FS front, AS rear) protect you and recharge from your energy banks.\n• Missiles home in on the ship in your sights. E.C.M. destroys missiles fired at you.\n• Destroying pirates earns a bounty. Attacking traders or police makes you an Offender — police will attack you!\n• Lawless systems (Anarchy, Warlord) have the most pirates.'],
   ['TRAVEL','• JUMP drive: zooms across a system. It won’t work near ships, stations or planets (mass lock).\n• TIME button: speeds up long trips (it stops if danger appears).\n• HYPERSPACE: choose a destination on the MAP, then press HYPER. It uses fuel (light years).\n• Refuel at stations, or buy fuel scoops and fly near a star (watch the cabin temperature!).\n• Watch out for moons, rings and multiple stars — some systems are very different!'],
   ['MISSIONS','Stations have a bulletin board (MISSIONS tab):\n• Courier — deliver a package by a deadline.\n• Supply run — bring goods back to that station.\n• Wanted — hunt a named pirate, then collect the reward.\n• Freedom / Expansion — help change how a planet is ruled. Deliver the goods, defeat the patrols, and the planet’s government changes for good (see Galactic News)!\nPress MISN in the cockpit to see your missions at any time.']];
- function panel(ctx,title){btns=[];tips=[];ctx.fillStyle='#03050f';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#3fe0ff';ctx.lineWidth=2;ctx.strokeRect(8,8,W-16,H-16);text(ctx,title,CX,18,'#3fe0ff',20,'center');}
+ function panel(ctx,title){if(LAYOUT)LAYOUT.length=0;btns=[];tips=[];ctx.fillStyle='#03050f';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#3fe0ff';ctx.lineWidth=2;ctx.strokeRect(8,8,W-16,H-16);text(ctx,title,CX,18,'#3fe0ff',20,'center');}
  function unsaved(){return JSON.stringify(C)!==lastSaved||((mode==='flight')&&clock-lastSaveClock>3);}
- function renderMenu(ctx){panel(ctx,'PAUSED');const tabsM=[['main','GAME'],['controls','CONTROLS'],['help','HOW TO PLAY']];tabsM.forEach(([k,l],i)=>button(ctx,B(40+i*245,52,230,34,l,()=>{menuTab=k;remap=null;},{fs:14}),menuTab===k||(k==='main'&&menuTab==='restart')));
+ function renderMenu(ctx){panel(ctx,'PAUSED');const tabsM=[['main','GAME'],['display','DISPLAY'],['sound','SOUND & VOICE'],['controls','CONTROLS'],['help','HOW TO PLAY']];tabsM.forEach(([k,l],i)=>button(ctx,B(40+i*146,52,140,34,l,()=>{menuTab=k;remap=null;},{fs:12}),menuTab===k||(k==='main'&&menuTab==='restart')));
+  const T=(k,l,d)=>[l,k==='invert'?C.invert:C.opt[k],()=>{if(k==='invert')C.invert=!C.invert;else C.opt[k]=!C.opt[k];persist();},d];
+  const grid=(list,y0)=>list.forEach(([l,on,fn,d],i)=>{const x=40+(i%2)*365,y=y0+Math.floor(i/2)*58;ctx.fillStyle='rgba(255,255,255,.045)';ctx.fillRect(x,y-5,355,50);text(ctx,l,x+10,y,'#e6e9f2',14);wrap(ctx,d,x+10,y+21,240,13,'#9aa3c7',11);button(ctx,B(x+262,y+3,84,30,on?'ON':'OFF',fn,{bg:on?'rgba(30,80,50,.92)':'rgba(60,30,40,.92)',fs:13}));});
   if(menuTab==='main'){[['▶  RESUME',()=>{overlay=null;},'rgba(30,80,50,.92)'],['💾  SAVE GAME',()=>saveGame(),'rgba(30,38,80,.92)'],['↺  RESTART',()=>{menuTab='restart';},'rgba(90,40,30,.92)']].forEach(([l,fn,bg],i)=>button(ctx,B(40+i*245,104,230,46,l,fn,{fs:17,bg})));
-   text(ctx,saveNote||(unsaved()?'You have progress that isn’t saved yet.':'Everything is saved.'),CX,154,saveNote?'#3cff6a':unsaved()?'#ffb020':'#9aa3c7',12,'center');
-   const T=(k,l,d)=>[l,k==='invert'?C.invert:C.opt[k],()=>{if(k==='invert')C.invert=!C.invert;else C.opt[k]=!C.opt[k];persist();},d];
-   const tg=[T('lit','3D lighting','Solid, sunlit ships and planets.'),T('cockpit','3D cockpit','Frame, side windows and mirror.'),T('tips','Hover help','Explains the controls (F1).'),T('cuts','Cut scenes','Docking and launch movies.'),
-    T('voice','Assistant voice','Spoken tips and alerts.'),T('subs','Assistant subtitles','Shows what it says on screen.'),T('redAlert','Red alert light','Flashing alarm when attacked.'),T('maths','Maths challenges','Sums for bonuses in flight.'),T('invert','Invert pitch','Up and down swapped.'),T('mfd','Cockpit screens','Hold and mission screens (F2).')];
-   tg.forEach(([l,on,fn,d],i)=>{const x=40+(i%2)*365,y=174+Math.floor(i/2)*51;ctx.fillStyle='rgba(255,255,255,.045)';ctx.fillRect(x,y-5,355,47);text(ctx,l,x+10,y,'#e6e9f2',14);wrap(ctx,d,x+10,y+20,240,13,'#9aa3c7',11);button(ctx,B(x+262,y+2,84,28,on?'ON':'OFF',fn,{bg:on?'rgba(30,80,50,.92)':'rgba(60,30,40,.92)',fs:13}));});
-   text(ctx,`🤖 Assistant: ${C.opt.aiName||'NOVA'}`,60,436,'#3fe0ff',15);button(ctx,B(300,430,150,28,'✎ RENAME',()=>{const n=window.prompt('Give your ship’s assistant a name:',C.opt.aiName||'NOVA');if(n&&n.trim()){C.opt.aiName=n.trim().slice(0,14);persist();say('hello',`Hello commander. I’m ${C.opt.aiName}. Ready when you are.`,1);}},{fs:12}));button(ctx,B(460,430,150,28,'🔊 TEST VOICE',()=>say('test',`${C.opt.aiName||'NOVA'} here. Voice check complete.`,1),{fs:12}));
-   {const sp=C.opt.subPos,lab=typeof sp==='object'?'CUSTOM':String(sp||'top').toUpperCase();button(ctx,B(616,430,144,28,`📍 SUBS: ${lab}`,()=>{const L=['top','bottom','left','right'];const i=typeof sp==='object'?-1:L.indexOf(sp);C.opt.subPos=L[(i+1)%4];persist();},{fs:11}));}
-   button(ctx,B(60,400,170,24,'🏆 CAREER RECORD',()=>{overlay='career';},{fs:10}));button(ctx,B(240,400,150,24,'▶ REPLAY INTRO',()=>openIntro(),{fs:10}));
-   button(ctx,B(616,400,144,24,'✋ DRAG TO PLACE',()=>{overlay=null;aiGap.sample=0;say('sample','Drag this box to wherever you would like my subtitles.',0);if(aiLine)aiLine.until=performance.now()/1000+12;},{fs:10}));
+   text(ctx,saveNote||(unsaved()?'You have progress that isn’t saved yet.':'Everything is saved.'),CX,158,saveNote?'#3cff6a':unsaved()?'#ffb020':'#9aa3c7',12,'center');
+   button(ctx,B(40,182,230,40,'🏆 CAREER RECORD',()=>{overlay='career';},{fs:13,bg:'rgba(90,70,20,.92)'}));button(ctx,B(285,182,230,40,'▶ NOVA’S INTRO',()=>openIntro(),{fs:13}));button(ctx,B(530,182,230,40,`🧮 MATHS PUZZLES: ${C.opt.maths?'ON':'OFF'}`,()=>{C.opt.maths=!C.opt.maths;persist();},{fs:12,bg:C.opt.maths?'rgba(30,80,50,.92)':'rgba(60,30,40,.92)'}));
+   const Sx=C.stats||{},vis=Object.keys(C.visited||{}).length;ctx.fillStyle='rgba(255,255,255,.04)';ctx.fillRect(40,240,720,150);text(ctx,'YOUR CAREER SO FAR',60,250,'#ffe45e',14);
+   [[`Commander score`,careerScore().toLocaleString('en-GB')],['Combat rank',rankOf(C.killPts)],['Fortune',`${fortuneT(Sx.peak||C.credits)} (${Math.floor(C.credits)} Cr)`],['Fame / infamy',`${fameT(Sx.hero||0)} / ${infamyT(Sx.villain||0)}`],['Explorer',`${exploreT(vis)} (${vis} systems)`],['Ship',`${shipCls().name} · hull ${Math.round((1-(C.hull||0))*100)}%`]].forEach(([k,v],i)=>{const x=60+(i%2)*350,y=276+Math.floor(i/2)*34;text(ctx,k,x,y,'#9aa3c7',12,'left',false);text(ctx,v,x,y+15,'#e6e9f2',13);});
    text(ctx,`${here().name} · Day ${C.day} · ${Math.floor(C.credits)} Cr · ${rankOf(C.killPts)} · ${legalName(C.legal)}`,CX,474,'#c8d0ff',14,'center');
-   text(ctx,'P or Esc pauses · F2 cockpit screens · L roll lock · Y match spin · N next target',CX,496,'#9aa3c7',11,'center');}
+   text(ctx,'P or Esc pauses · Z career · F2 cockpit screens · L roll lock · Y match spin · N next target',CX,496,'#9aa3c7',11,'center');}
+  else if(menuTab==='display'){text(ctx,'How Starlane looks',60,100,'#3fe0ff',15);
+   grid([T('lit','3D lighting','Solid, sunlit ships and planets.'),T('cockpit','3D cockpit','Frame, side windows and mirror.'),T('mfd','Cockpit screens','Hold and mission screens (F2).'),T('cuts','Cut scenes','Docking and launch movies.'),T('tips','Hover help','Explains the controls (F1).'),T('redAlert','Red alert light','Flashing alarm when attacked.'),T('invert','Invert pitch','Up and down swapped.')],128);}
+  else if(menuTab==='sound'){text(ctx,`Your assistant`,60,100,'#3fe0ff',15);grid([T('voice','Assistant voice','Spoken tips and alerts.'),T('subs','Assistant subtitles','Shows what it says on screen.')],128);
+   text(ctx,`🤖 Name: ${C.opt.aiName||'NOVA'}`,60,200,'#e6e9f2',15);button(ctx,B(330,192,200,32,'✎ RENAME',()=>{const n=window.prompt('Give your ship’s assistant a name:',C.opt.aiName||'NOVA');if(n&&n.trim()){C.opt.aiName=n.trim().slice(0,14);persist();say('hello',`Hello commander. I’m ${C.opt.aiName}. Ready when you are.`,1);}},{fs:12}));button(ctx,B(545,192,200,32,'🔊 TEST VOICE',()=>say('test',`${C.opt.aiName||'NOVA'} here. Voice check complete.`,1),{fs:12}));
+   text(ctx,'Where subtitles appear in flight',60,250,'#e6e9f2',15);const sp=C.opt.subPos;[['top','TOP'],['bottom','BOTTOM'],['left','LEFT'],['right','RIGHT']].forEach(([k,l],i)=>button(ctx,B(60+i*130,276,120,32,l,()=>{C.opt.subPos=k;persist();},{fs:12}),sp===k));
+   button(ctx,B(580,276,180,32,typeof sp==='object'?'✋ CUSTOM — DRAG':'✋ DRAG TO PLACE',()=>{overlay=null;aiGap.sample=0;say('sample','Drag this box to wherever you would like my subtitles.',0);if(aiLine)aiLine.until=performance.now()/1000+12;},{fs:12}),typeof sp==='object');
+   wrap(ctx,'Tip: in flight you can drag the subtitle box anywhere — grab it by the dotted grip. Game sound effects follow the arcade’s sound button.',60,330,680,17,'#9aa3c7',13);}
   else if(menuTab==='restart'){text(ctx,'START OVER?',CX,108,'#ffe45e',22,'center');
    if(unsaved()){ctx.fillStyle='rgba(255,176,32,.12)';ctx.fillRect(90,142,620,66);ctx.strokeStyle='#ffb020';ctx.strokeRect(90,142,620,66);wrap(ctx,'⚠ You have progress that isn’t saved yet. If you restart now, it will be lost. Save first if you want to keep it.',110,152,580,18,'#ffd27a',14);
     button(ctx,B(CX-120,214,240,36,'💾 SAVE FIRST',()=>{saveGame();},{fs:14}));}
@@ -1038,9 +1050,9 @@ function makeStarlane(env){
   if(exitT>0){exitT=Math.max(0,exitT-dt);const k=exitT/1.6;hypMove(1.6*k*k,dt);}
   if(hyperT>0&&hyperT<1.6)hypMove((1.6-hyperT)*.18,dt);
   if(mode==='flight'&&!overlay){for(let i=0;i<timeScale&&mode==='flight';i++)flight(dt);}};
- G.render=ctx=>{btns=[];tips=[];
+ G.render=ctx=>{btns=[];tips=[];if(LAYOUT){G._lastLayout=LAYOUT;LAYOUT=[];}
   if(overlay==='intro'){renderIntro(ctx);return;}if(overlay==='career'){renderCareer(ctx);return;}
-  if(mode==='docked'){renderDocked(ctx);if(overlay==='maths'&&mathQ){renderMath(ctx);return;}drawAI(ctx,H-84-0,true);if(overlay==='arrival')renderArrival(ctx);if(overlay==='menu')renderMenu(ctx);drawTip(ctx);return;}
+  if(mode==='docked'){renderDocked(ctx);if(overlay==='maths'&&mathQ){renderMath(ctx);return;}drawAI(ctx,4,'top');if(overlay==='arrival')renderArrival(ctx);if(overlay==='menu')renderMenu(ctx);drawTip(ctx);return;}
   if(mode==='dockScene'||mode==='launchScene'){renderScene(ctx);if(overlay==='menu')renderMenu(ctx);return;}
   if(mode==='launch'||mode==='dockAnim'){tunnel(ctx,anim*(mode==='launch'?1:-1)+5,6,'#3fe0ff');dashboard(ctx);btns=[];text(ctx,mode==='launch'?'LAUNCHING…':'DOCKING…',CX,VH-40,'#3fe0ff',18,'center');return;}
   if(mode==='hyper'){ctx.fillStyle='#000';ctx.fillRect(0,0,W,VH);const g=ctx.createRadialGradient(CX,CY,4,CX,CY,220);g.addColorStop(0,`rgba(160,200,255,${Math.min(.5,anim*.15)})`);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,VH);drawStreaks(ctx,hypV(anim),1);
@@ -1089,8 +1101,8 @@ function makeStarlane(env){
  G.onEnd=why=>{stopMusic();if(mode==='dead')return;if(mode==='hyper')arrive();if(mode==='launchScene')endLaunchScene();if(mode==='launch')mode='flight';
   if(mode==='dockScene'||mode==='dockAnim'){mode='docked';persist();return;}
   if(mode==='flight'){if(planet&&!interdicted)saveGame();else{finishDock();mode='docked';}return;}if(mode==='docked')persist();};
- G._dbg={get C(){return C;},get P(){return P;},get mode(){return mode;},get station(){return station;},get ships(){return ships;},get scene(){return scene;},get planet(){return planet;},get moons(){return moons;},get suns(){return suns;},get timeScale(){return timeScale;},get overlay(){return overlay;},get bh(){return bh;},get redOn(){return redOn;},openIntro,careerScore,get lockOn(){return lockOn;},get jamT(){return jamT;},get aiRect(){return aiRect;},say,makeMathQ,kill,get msgs(){return msgs;},get tgt(){return radarTgt;},get mathQ(){return mathQ;},get rollLock(){return rollLock;},get aiLine(){return aiLine;},buyShip,storyOffer,accept,missionSpawns,finish:()=>finishDock(),get tips(){return tips;},
-  set:(k,v)=>{({mode:()=>mode=v,tab:()=>tab=v,overlay:()=>overlay=v,view:()=>view=v,camMode:()=>camMode=v})[k]();},launch,startHyper,toggleDock,spawn,buy,buyEq,accept,board,arrive:()=>arrive(),flight,kill:sh=>kill(sh,true),dock:()=>docked(),saveGame,hurt:(d)=>hurt(d,P.o.f),get tab(){return tab;}};
+ G._dbg={get C(){return C;},get P(){return P;},get mode(){return mode;},get station(){return station;},get ships(){return ships;},get scene(){return scene;},get planet(){return planet;},get moons(){return moons;},get suns(){return suns;},get timeScale(){return timeScale;},get overlay(){return overlay;},get bh(){return bh;},get redOn(){return redOn;},openMath,layoutOn:()=>{LAYOUT=[];},layoutOff:()=>{LAYOUT=null;},get layout(){return G._lastLayout||[];},openIntro,careerScore,get lockOn(){return lockOn;},get jamT(){return jamT;},get aiRect(){return aiRect;},say,makeMathQ,kill,get msgs(){return msgs;},get tgt(){return radarTgt;},get mathQ(){return mathQ;},get rollLock(){return rollLock;},get aiLine(){return aiLine;},buyShip,storyOffer,accept,missionSpawns,finish:()=>finishDock(),get tips(){return tips;},
+  set:(k,v)=>{({menuTab:()=>menuTab=v,yardMode:()=>yardMode=v,introI:()=>introI=v,dataSel:()=>dataSel=v,chartMode:()=>chartMode=v,mode:()=>mode=v,tab:()=>tab=v,overlay:()=>overlay=v,view:()=>view=v,camMode:()=>camMode=v})[k]();},launch,startHyper,toggleDock,spawn,buy,buyEq,accept,board,arrive:()=>arrive(),flight,kill:sh=>kill(sh,true),dock:()=>docked(),saveGame,hurt:(d)=>hurt(d,P.o.f),get tab(){return tab;}};
  if(C.flight&&C.flight.sys===C.sys&&GAL[C.sys])restoreFlight();
  if(!C.introSeen)setTimeout(()=>{if(mode==='docked'&&!overlay)openIntro();},600);
  if(env.store)persist();
