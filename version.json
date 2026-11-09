@@ -1,7 +1,23 @@
 {
- "version": "2.30",
+ "version": "2.31",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.31",
+   "date": "9 November 2026",
+   "kids": [
+    "🚀 Starlane (MODERN): sit in a real 3D cockpit — hold the RIGHT mouse button and drag to look around!",
+    "🛬 The hangar is now fully 3D when you dock and launch",
+    "🔫 Fixed: lasers could get stuck firing"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🚀 Starlane Trader: 3D cockpit model with look-around (right-drag on computers; Display → “3D cockpit model”), 3D hangar in the docking and launch movies, and a fix for firing getting stuck when the mouse button was released outside the game or the window lost focus."
+   ]
+  },
   {
    "v": "2.30",
    "date": "9 November 2026",
@@ -145,23 +161,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: hide/show cockpit screens (✕, F2); named voice assistant with tips and alerts (mute in menu); red alert light (can be turned off); data on this system or the target; prices paid and profit/loss in the market, hold and cockpit; radar target details (tap a blip or N); turn left/right (Q/E — E.C.M. moved to U), roll lock (L) and match station spin (Y); cockpit shakes when hit; ships to buy; hidden cargo compartment and police scans; story campaign; station defences; ore from asteroids; solar flares and ion storms; exploration data; maths challenges for fuel and locked canisters."
-   ]
-  },
-  {
-   "v": "2.21",
-   "date": "9 November 2026",
-   "kids": [
-    "🕳️ Starlane Trader: black holes, pirate minefields and asteroid fields to get through!",
-    "🎬 New docking and launch movies — busy hangars, drones and other ships",
-    "📰 Planets have news: wars, droughts and festivals change what they pay",
-    "🛟 Rescue survivors from escape pods, and earn 11 medals",
-    "🔧 Damage stays until you pay to repair it — and a mission report when you dock"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🚀 Starlane Trader: cockpit cargo and mission screens; full 3D lighting and 3D cockpit on by default; varied, animated cut scenes; TIPS key; stars, moons, planet and black holes on the scanner; mission report on docking; trade hints and local news that change prices; damage persists with repair costs and a damage report; credits on every station screen; asteroid fields, minefields and black holes; escape-pod rescues and medals."
    ]
   }
  ]

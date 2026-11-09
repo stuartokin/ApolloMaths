@@ -154,6 +154,48 @@ const StarModern=(()=>{
   const sx=(v.x+1)/2*W,sy=(1-v.y)/2*VH,cx=W/2,cy=VH/2,dx=cx-sx,dy=cy-sy,str=Math.max(0,1-Math.hypot(v.x,v.y)*.7);if(str<=0)return;ctx.save();ctx.globalCompositeOperation='lighter';
   for(const[k,r0,col]of[[.4,24,'255,200,120'],[.7,12,'120,200,255'],[1.1,36,'180,120,255'],[1.5,9,'255,255,200'],[1.9,60,'90,160,255']]){const x=sx+dx*k,y=sy+dy*k,g=ctx.createRadialGradient(x,y,0,x,y,r0);g.addColorStop(0,`rgba(${col},${.22*str})`);g.addColorStop(1,`rgba(${col},0)`);ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r0,0,7);ctx.fill();}
   const g=ctx.createLinearGradient(sx-140,sy,sx+140,sy);g.addColorStop(0,'rgba(255,240,210,0)');g.addColorStop(.5,`rgba(255,240,210,${.25*str})`);g.addColorStop(1,'rgba(255,240,210,0)');ctx.fillStyle=g;ctx.fillRect(sx-140,sy-1.5,280,3);ctx.restore();}
+ // ---------------- 3D cockpit, carried with the ship; struts sit where the classic 2D frame was drawn ----------------
+ let pit=null,pitLights=[],pitKey='';
+ function beam(a,b,w){const d=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],L=Math.hypot(...d)||1,u=d.map(x=>x/L);let p=Math.abs(u[1])<.9?[0,1,0]:[1,0,0];const c1=[u[1]*p[2]-u[2]*p[1],u[2]*p[0]-u[0]*p[2],u[0]*p[1]-u[1]*p[0]],l1=Math.hypot(...c1),n1=c1.map(x=>x/l1*w),n2=[u[1]*n1[2]-u[2]*n1[1],u[2]*n1[0]-u[0]*n1[2],u[0]*n1[1]-u[1]*n1[0]];
+  const pts=[];for(const e of[a,b])for(const s1 of[-1,1])for(const s2 of[-1,1])pts.push([e[0]+n1[0]*s1+n2[0]*s2,e[1]+n1[1]*s1+n2[1]*s2,e[2]+n1[2]*s1+n2[2]*s2]);return geoOf(SL.hull(pts));}
+ function screenTex(){return texCache.screen||(texCache.screen=cv(256,128,(c,w,h)=>{c.fillStyle='#03140c';c.fillRect(0,0,w,h);c.strokeStyle='#3cff6a';c.lineWidth=2;c.beginPath();for(let x=0;x<w;x+=4){const y=h/2+Math.sin(x*.07)*30*Math.sin(x*.013);x?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();c.fillStyle='rgba(60,255,106,.6)';for(let i=0;i<8;i++)c.fillRect(10+i*30,h-20-((i*37)%60),18,(i*37)%60+10);c.strokeStyle='rgba(60,255,106,.3)';c.strokeRect(2,2,w-4,h-4);}));}
+ function buildPit(A){const W=A.W,VH=A.VH,F=A.FOC,D=130,X=sx=>(sx-W/2)/F*D,Y=sy=>(VH/2-sy)/F*D,P3=(sx,sy,z=D)=>[X(sx)*z/D,Y(sy)*z/D,z];const g=new T.Group(),mat=metal('#39426a',{metal:.75,rough:.38}),dark=metal('#1b2140',{metal:.6,rough:.5});
+  const add=(geo,m)=>{const me=new T.Mesh(geo,m);g.add(me);return me;};
+  add(beam(P3(60,47),P3(W-60,47),4.2),mat);add(beam(P3(0,24),P3(W,24),5),dark);
+  add(beam(P3(105,54),P3(47,VH+30),3.6),mat);add(beam(P3(W-105,54),P3(W-47,VH+30),3.6),mat);
+  for(const sx of[1,-1]){const top=P3(sx>0?W-60:60,47),far=[top[0]*2.4,top[1]*1.3,D*.35];add(beam(top,far,3.2),mat);add(beam(far,[far[0],-90,D*.3],3,),mat);add(beam([far[0],-90,D*.3],P3(sx>0?W-47:47,VH+30),3),mat);
+   const strip=new T.Mesh(beam(P3(sx>0?W-112:112,60),P3(sx>0?W-56:56,VH-10),.8),new T.MeshBasicMaterial({color:0x3fe0ff}));strip.userData.strip=true;g.add(strip);pitLights.push(strip);}
+  const yb=Y(VH+6),cons=SL.hull([[-160,yb,D*.95],[160,yb,D*.95],[-160,yb-6,D*.95],[160,yb-6,D*.95],[-150,yb-60,D*.45],[150,yb-60,D*.45],[-150,yb-70,D*.45],[150,yb-70,D*.45]]);add(geoOf(cons),dark);
+  for(let i=0;i<3;i++){const sc=new T.Mesh(new T.PlaneGeometry(52,24),new T.MeshBasicMaterial({map:screenTex()}));sc.position.set(-60+i*60,yb-26,D*.72);sc.rotation.x=-1.05;g.add(sc);}
+  const lamp=new T.PointLight(0x3fe0ff,.6,260);lamp.position.set(0,40,40);g.add(lamp);g.userData.lamp=lamp;
+  root.add(g);return g;}
+ function cockpit(A,on,red,clock){if(!ready())return;if(!on){if(pit)pit.visible=false;return;}const key=A.W+'x'+A.VH;if(!pit||pitKey!==key){if(pit)root.remove(pit);pitLights=[];pit=buildPit(A);pitKey=key;}pit.visible=true;setBasis(pit,A.P.pos,A.P.o);
+  const col=red?(Math.sin(clock*9)>0?0xff2d55:0x5a0a1a):0x3fe0ff;for(const s2 of pitLights)s2.material.color.setHex(col);pit.userData.lamp.color.setHex(red?0xff2d55:0x3fe0ff);}
+ // ---------------- 3D hangar for the docking and launch movies ----------------
+ let hs=null,hcam=null,hobjs=new Map();
+ function hangarTex(){return texCache.floor||(texCache.floor=(()=>{const t=cv(512,512,(c,w,h)=>{c.fillStyle='#3a3f4c';c.fillRect(0,0,w,h);const r=rnd(5);for(let i=0;i<300;i++){c.fillStyle=`rgba(0,0,0,${r()*.12})`;c.fillRect(r()*w,r()*h,r()*60,r()*60);}c.strokeStyle='rgba(10,12,20,.8)';c.lineWidth=3;for(let i=0;i<=4;i++){c.beginPath();c.moveTo(i*128,0);c.lineTo(i*128,h);c.stroke();c.beginPath();c.moveTo(0,i*128);c.lineTo(w,i*128);c.stroke();}});t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(4,10);return t;})());}
+ function buildHangar(HG,PADS){hs=new T.Scene();hs.background=new T.Color(0x05070d);hcam=new T.PerspectiveCamera(50,2,5,2e5);hcam.matrixAutoUpdate=false;const X=HG.x,F=HG.yF,Cc=HG.yC,Z=HG.z1,M3=(x,y,z)=>new T.Vector3(...M([x,y,z]));
+  const box=(w,h,d,col,o={})=>new T.Mesh(new T.BoxGeometry(w,h,d),o.basic?new T.MeshBasicMaterial({color:col}):new T.MeshStandardMaterial({color:col,metalness:o.metal??.5,roughness:o.rough??.6,map:o.map||null}));
+  const put=(m,x,y,z)=>{m.position.copy(M3(x,y,z));hs.add(m);return m;};
+  put(box(2*X,4,Z+600,0xffffff,{map:hangarTex(),metal:.6,rough:.55}),0,F-2,Z/2);put(box(2*X,4,Z+600,0x1a1f30),0,Cc+2,Z/2);
+  put(box(4,Cc-F,Z+600,0x232a40,{metal:.4}),-X,(F+Cc)/2,Z/2);put(box(4,Cc-F,Z+600,0x232a40,{metal:.4}),X,(F+Cc)/2,Z/2);put(box(2*X,Cc-F,4,0x1d2338),0,(F+Cc)/2,Z+300);
+  for(const[y0,h0]of[[F,(Cc-F)/2-80],[(F+Cc)/2+80,(Cc-F)/2-80]])put(box(2*X,h0,4,0x1d2338),0,y0+h0/2,-2);for(const sx of[-1,1])put(box(X-260,160,4,0x1d2338),sx*(260+(X-260)/2),(F+Cc)/2,-2);
+  const stars=new T.Mesh(new T.PlaneGeometry(520,160),new T.MeshBasicMaterial({map:cv(256,80,(c,w,h)=>{c.fillStyle='#000';c.fillRect(0,0,w,h);for(let i=0;i<120;i++){c.fillStyle=`rgba(255,255,255,${Math.random()})`;c.fillRect(Math.random()*w,Math.random()*h,1,1);}})}));stars.position.copy(M3(0,(F+Cc)/2,-40));hs.add(stars);
+  for(let z=200;z<Z;z+=400)for(const sx of[-1,1])put(box(30,Cc-F,30,0x2e3656,{metal:.7}),sx*(X-16),(F+Cc)/2,z);
+  for(let z=300;z<Z;z+=680){const l=put(box(240,4,120,0xfff3c4,{basic:true}),0,Cc-4,z+60);const pl=new T.PointLight(0xffe6b0,1.1,2200,1.4);pl.position.copy(M3(0,Cc-60,z+60));hs.add(pl);}
+  hs.add(new T.AmbientLight(0x6070a0,.35));hs.add(new T.HemisphereLight(0xbfc8ff,0x202020,.35));
+  for(const[x,z]of PADS){put(box(300,3,300,0x2a3150,{metal:.6}),x,F+1.5,z);const ring=new T.Mesh(new T.RingGeometry(120,136,48),new T.MeshBasicMaterial({color:0xff8a1c,side:T.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.copy(M3(x,F+4,z));hs.add(ring);
+   for(const[dx,dz]of[[-140,-140],[140,-140],[140,140],[-140,140]]){const L=put(new T.Mesh(new T.SphereGeometry(7,10,8),new T.MeshBasicMaterial({color:0xffb020})),x+dx,F+8,z+dz);L.userData.blink=x+z+dx;}}
+  for(let i=0;i<14;i++){const st=put(box(50,2,8,0xffd23a,{basic:true}),-X+60+i*((2*X-120)/13),F+1,60);st.rotation.y=.6;}}
+ function hangar(ctx,A,H){if(!ready())return false;if(!hs)buildHangar(A.HG,A.PADS);const W=A.W;const live=new Set();
+  for(const o of A.objs){live.add(o.key);let g=hobjs.get(o.key);if(!g){g=new T.Group();g.add(new T.Mesh(geoOf(o.m),metal(o.col,{metal:.6})));if(o.engine){const e=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:0x3fe0ff,blending:T.AdditiveBlending,depthWrite:false,transparent:true}));e.position.set(0,0,-98);e.scale.set(80,80,1);e.userData.engine=true;g.add(e);}if(o.blink){const l=new T.Mesh(new T.SphereGeometry(6,8,6),new T.MeshBasicMaterial({color:0xff2d55}));l.position.set(0,14,0);l.userData.b=true;g.add(l);}hs.add(g);hobjs.set(o.key,g);}
+   setBasis(g,o.pos,o.o);g.children.forEach(x=>{if(x.userData.engine)x.visible=o.engine>0;if(x.userData.b)x.material.color.setHex(Math.floor(A.t*3)%2?0xff2d55:0x3cff6a);});}
+  for(const[k,g]of hobjs)if(!live.has(k)){hs.remove(g);hobjs.delete(k);}
+  hs.traverse(x=>{if(x.userData&&x.userData.blink!==undefined)x.visible=Math.sin(A.t*4+x.userData.blink)>0;});
+  const C2=A.CAM,r=M(C2.r),u=M(C2.u),f=M(C2.f).map(q=>-q),p=M(C2.pos);hcam.matrix.set(r[0],u[0],f[0],p[0],r[1],u[1],f[1],p[1],r[2],u[2],f[2],p[2],0,0,0,1);hcam.matrixWorld.copy(hcam.matrix);hcam.matrixWorldInverse.copy(hcam.matrix).invert();
+  hcam.fov=2*Math.atan((H/2)/A.FOC)*180/Math.PI;hcam.aspect=W/H;hcam.updateProjectionMatrix();
+  const k=Math.max(1,Math.min(ctx.canvas.width/W,1920/W)),w=Math.round(W*quality.pr*k),h=Math.round(H*quality.pr*k);if(gl.width!==w||gl.height!==h){R.setSize(w,h,false);comp.setSize(w,h);bloom.resolution.set(w,h);}
+  R.render(hs,hcam);ctx.drawImage(gl,0,0,W,H);return true;}
  // extra cameras for the cockpit's side windows and mirror: rendered straight after the main view into small regions of
  // the same WebGL canvas, then copied through each window's shape. {o:{r,u,f}, pos, fov, rect:[x,y,w,h], clip(ctx), mirror}
  function views(ctx,A,list){if(!ready()||!quality.views)return false;const W=A.W,VH=A.VH,pw=gl.width/W,ph=gl.height/VH;R.setScissorTest(true);
@@ -164,5 +206,5 @@ const StarModern=(()=>{
   R.setScissorTest(false);R.setViewport(0,0,gl.width,gl.height);return true;}
  let pmul=1;
  function profile(dev){if(dev==='phone'){Object.assign(quality,{pr:.6,bloom:false,views:false});pmul=.4;}else if(dev==='tablet'){Object.assign(quality,{pr:.8,views:false});pmul=.7;}else pmul=1;}
- return{profile,load,ready,render,views,get state(){return state;},get quality(){return quality;}};
+ return{cockpit,hangar,profile,load,ready,render,views,get state(){return state;},get quality(){return quality;}};
 })();
