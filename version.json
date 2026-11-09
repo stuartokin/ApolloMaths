@@ -1,7 +1,22 @@
 {
- "version": "2.38",
+ "version": "2.39",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.39",
+   "date": "9 November 2026",
+   "kids": [
+    "🎓 Starlane: 12 training tours — watch Nova fly while the keys and mouse light up",
+    "💾 Save your game under different names and go back to any of them",
+    "🛬 Matching the station’s spin now really works (it was turning the wrong way!)"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🚀 Starlane Trader: Save as… / Open… named saves (opening keeps the current game as “Where I was”); 12 training tours in a practice game (station screens, trading, upgrades, missions, flying, hyperspace, jump drive, lasers, missiles/ECM, mining and scooping, stars and planets, docking) with an on-screen keyboard and mouse; fixed the spin-match lock, which turned the ship the wrong way."
+   ]
+  },
   {
    "v": "2.38",
    "date": "9 November 2026",
@@ -144,24 +159,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: phone/tablet/computer profiles (phones start in Retro with lighter effects); 3D positional sound, fly-bys, muffled cockpit and three-layer music; missile lock-on, subsystem targeting, wingmen and flanking pirates; faction reputation; prices that react to trading; planet/moon/star surveys and a codex; story “The Lost Freighter”; route-risk probability question, Academy Challenge on Focus topics, and a Parent dashboard setting for how often maths appears; generated planet terrain in Modern."
-   ]
-  },
-  {
-   "v": "2.29",
-   "date": "9 November 2026",
-   "kids": [
-    "🚀 Starlane Trader now starts in MODERN 3D — and the title screen shows off all three styles",
-    "🖱️ Fly with the mouse! W/S speed, A/D slide sideways, Q/E roll, Shift to BOOST",
-    "🌌 Nebula skies, lens flare, shiny oceans and city lights on the dark side of planets",
-    "📻 Station radio chatter — and pirates who taunt you!",
-    "📈 Read price graphs and plan routes for bonus credits"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🚀 Starlane Trader: live attract screen cycling Original/Retro/Modern; Modern style and Modern (mouse) controls by default, with boost and sideways thrusters; nebula backdrops, lens flare, ocean shine, night-side city lights, 3D docking/launch exteriors; radio chatter; market price-trend and route-estimate maths; reduced motion and colour-safe radar; automatic switch to Retro if Modern is too slow."
    ]
   }
  ]
