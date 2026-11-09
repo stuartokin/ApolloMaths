@@ -1,7 +1,25 @@
 {
- "version": "2.35",
+ "version": "2.36",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.36",
+   "date": "9 November 2026",
+   "kids": [
+    "🖥️ Full screen now shows every arcade game at its true shape — no more stretched text",
+    "🪟 Starlane: your LEFT and RIGHT side windows are back",
+    "💥 You can really see damage now — sparks, cracks, flickering screens and a hull gauge",
+    "🎛️ Clearer cockpit screens and proper switches, knobs and guarded buttons"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🕹️ Arcade: in full screen the canvas was being stretched sideways (a height limit overrode the calculated size); every game now keeps its true shape and fits with its controls.",
+    "🚀 Starlane Trader (Modern cockpit): upright console screens and wing panels with sharp, even text; switches drawn as toggle levers, push buttons, knobs and guarded covers; live LEFT/RIGHT side windows; visible damage — red hit flash across the whole width, cabin sparks, screen glitches, canopy cracks across widescreen, Hull gauge, HULL light and warning."
+   ]
+  },
   {
    "v": "2.35",
    "date": "9 November 2026",
@@ -147,20 +165,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: Original / Retro / Modern styles (Modern uses a bundled 3D engine, loaded only when chosen, with automatic quality); new synthesised sound (engine, weapons and explosions placed left/right, hangar ambience, calm and battle music, docking clamps and landing gear) with Music and Engine & hangar switches; guided first flight; difficulty; floating rewards and kill flashes; cockpit glows red under attack; Navigator ranks for maths (Master: 10% less fuel per jump; Star: double Traders’ Guild bonuses)."
-   ]
-  },
-  {
-   "v": "2.26",
-   "date": "9 November 2026",
-   "kids": [
-    "🚀 Starlane Trader: a tidier pause menu with tabs — Game, Display, Sound & Voice, Controls, How to play",
-    "🧮 Starlane’s maths puzzles now practise your Focus topics"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🚀 Starlane Trader: every screen checked automatically for overlaps and fixed (35 screens); pause menu split into five tabs; station tips shown across the top; in-game maths favours the Focus topics (and covers more of them) and every answer is logged in the Parent dashboard (Activity tab)."
    ]
   }
  ]

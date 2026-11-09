@@ -258,6 +258,10 @@ dialog.win-max .win-resize{display:none}
 .arcade.arc-full .lk-head,.arcade.arc-full .win-resize{display:none}
 .arcade.arc-full .arc-body{height:100%;display:flex;flex-direction:column;justify-content:center;padding:8px}
 .arcade.arc-full .arc-game{flex:1;justify-content:center}
+/* full screen: keep every game's true shape — centre the canvas instead of stretching it sideways */
+.arcade.arc-full .arc-game{align-items:center}.arcade.arc-full #arcCanvas{align-self:center}
+/* when the arcade has sized the canvas exactly for full screen, that size wins (otherwise the height cap squashes it) */
+.arcade.arc-full #arcCanvas.fitted,.arcade.arc-full .arc-game.nopad #arcCanvas.fitted,.arcade.arc-full .arc-game.two #arcCanvas.fitted{max-height:none!important}
 .arcade:fullscreen::backdrop{background:#05060f}
 .fz-chip{display:inline-block;background:#fff;border:2px solid var(--dark);border-radius:20px;padding:3px 10px;margin:3px;font-weight:800;font-size:13px}.fz-current{margin:8px 0}.fz-count{font-size:15px}.ptable input[type=checkbox]{width:22px;height:22px}
 .clockchip{background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.55);border-radius:30px;padding:6px 12px;font-size:13px;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}.clockchip b{font-weight:950}

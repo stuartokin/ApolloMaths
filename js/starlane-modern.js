@@ -174,7 +174,7 @@ const StarModern=(()=>{
  // ---------------- 3D cockpit (Modern): an enclosed cabin carried with the ship ----------------
  // Built in ship-local units (x right, y up, z forward). The console's top edge sits where the old 2D dashboard began,
  // so the forward view keeps its familiar framing; everything else is real geometry that looks right from any angle.
- let pit=null,pitLights=[],pitKey='',dashTex=null,sway=[0,0,0],lastSpeed=0,pitLamp=null,pitGlow=[];
+ let scrMeshes=[],lastHitSeen=-1,pit=null,pitLights=[],pitKey='',dashTex=null,sway=[0,0,0],lastSpeed=0,pitLamp=null,pitGlow=[];
  function beam(a,b,w){const d=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],L=Math.hypot(...d)||1,u=d.map(x=>x/L);let p=Math.abs(u[1])<.9?[0,1,0]:[1,0,0];const c1=[u[1]*p[2]-u[2]*p[1],u[2]*p[0]-u[0]*p[2],u[0]*p[1]-u[1]*p[0]],l1=Math.hypot(...c1),n1=c1.map(x=>x/l1*w),n2=[u[1]*n1[2]-u[2]*n1[1],u[2]*n1[0]-u[0]*n1[2],u[0]*n1[1]-u[1]*n1[0]];
   const pts=[];for(const e of[a,b])for(const s1 of[-1,1])for(const s2 of[-1,1])pts.push([e[0]+n1[0]*s1+n2[0]*s2,e[1]+n1[1]*s1+n2[1]*s2,e[2]+n1[2]*s1+n2[2]*s2]);return geoOf(SL.hull(pts));}
  function quadGeo(p,uv){const g=new T.BufferGeometry(),P=[p[0],p[1],p[2],p[0],p[2],p[3]],U=[uv[0],uv[1],uv[2],uv[0],uv[2],uv[3]];g.setAttribute('position',new T.Float32BufferAttribute(P.flat(),3));g.setAttribute('uv',new T.Float32BufferAttribute(U.flat(),2));g.computeVertexNormals();return g;}
@@ -183,10 +183,10 @@ const StarModern=(()=>{
  // ---------------- console wings (widescreen): a screen and a bank of real switches on each side ----------------
  let deckObjs=null,wingTex=[];
  function buildDeck(A,g,deck,onC){deckObjs={};wingTex=[];const base=new T.MeshStandardMaterial({color:0x1a2030,metalness:.7,roughness:.4,side:T.DoubleSide}),chrome=new T.MeshStandardMaterial({color:0xc8d0e0,metalness:.95,roughness:.18,side:T.DoubleSide});
-  deck.wings.forEach((wg,i)=>{const[x0,x1]=wg.x,tex=new T.CanvasTexture(wg.cv);tex.encoding=T.sRGBEncoding;wingTex.push(tex);const P=[onC(x0,596),onC(x1,596),onC(x1,412),onC(x0,412)].map(q=>q.map(c=>c*.994));
-   g.add(new T.Mesh(quadGeo(P,[[0,0],[1,0],[1,1],[0,1]]),new T.MeshBasicMaterial({map:tex,toneMapped:false,side:T.DoubleSide})));
-   const P2=[onC(x0-5,600),onC(x1+5,600),onC(x1+5,407),onC(x0-5,407)].map(q=>q.map(c=>c*.997));g.add(new T.Mesh(quadGeo(P2,[[0,0],[1,0],[1,1],[0,1]]),new T.MeshStandardMaterial({color:0x0a0e18,metalness:.6,roughness:.3,side:T.DoubleSide})));});
-  for(const s of deck.sws){const cx=s.x+15,cy=s.y+24,P=onC(cx,cy),Px=onC(cx+8,cy),Py=onC(cx,cy-8);let tx=Px.map((v,k)=>v-P[k]),ty=Py.map((v,k)=>v-P[k]);const nl=v=>{const l=Math.hypot(...v)||1;return v.map(x=>x/l);};tx=nl(tx);ty=nl(ty);
+  deck.wings.forEach((wg,i)=>{const[x0,x1]=wg.x,tex=new T.CanvasTexture(wg.cv);tex.encoding=T.sRGBEncoding;tex.anisotropy=4;wingTex.push(tex);const P=[onC(x0,596),onC(x1,596),onC(x1,412),onC(x0,412)];
+   {const wm=new T.Mesh(quadGeo(P,[[0,0],[1,0],[1,1],[0,1]]),new T.MeshBasicMaterial({map:tex,toneMapped:false,side:T.DoubleSide}));g.add(wm);scrMeshes.push(wm);}
+   const P2=[onC(x0-5,600,52.6),onC(x1+5,600,52.6),onC(x1+5,407,52.6),onC(x0-5,407,52.6)];g.add(new T.Mesh(quadGeo(P2,[[0,0],[1,0],[1,1],[0,1]]),new T.MeshStandardMaterial({color:0x0a0e18,metalness:.6,roughness:.3,side:T.DoubleSide})));});
+  for(const s of (deck.drawn?[]:deck.sws)){const cx=s.x+15,cy=s.y+24,P=onC(cx,cy),Px=onC(cx+8,cy),Py=onC(cx,cy-8);let tx=Px.map((v,k)=>v-P[k]),ty=Py.map((v,k)=>v-P[k]);const nl=v=>{const l=Math.hypot(...v)||1;return v.map(x=>x/l);};tx=nl(tx);ty=nl(ty);
    let n=nl([tx[1]*ty[2]-tx[2]*ty[1],tx[2]*ty[0]-tx[0]*ty[2],tx[0]*ty[1]-tx[1]*ty[0]]);if(n[0]*-P[0]+n[1]*-P[1]+n[2]*-P[2]<0){n=n.map(x=>-x);tx=tx.map(x=>-x);}
    const piv=new T.Group();piv.matrixAutoUpdate=false;piv.matrix.makeBasis(new T.Vector3(...tx),new T.Vector3(...ty),new T.Vector3(...n));piv.matrix.setPosition(...P.map(c=>c*.993));g.add(piv);
    const sc=Math.hypot(...P)/80*.62;const plate=new T.Mesh(new T.BoxGeometry(5.4*sc,4.2*sc,.8*sc),base);plate.position.z=.4*sc;piv.add(plate);let o={kind:s.kind,sc};
@@ -205,13 +205,13 @@ const StarModern=(()=>{
    wall=new T.MeshStandardMaterial({color:0xffffff,map:wallTex(),metalness:.45,roughness:.6,side:T.DoubleSide}),add=(geo,m)=>{const me=new T.Mesh(geo,m);g.add(me);return me;},
    box=(w,h,d,x,y,z,m)=>{const me=new T.Mesh(new T.BoxGeometry(w,h,d),m);me.position.set(x,y,z);g.add(me);return me;},glow=(c)=>new T.MeshBasicMaterial({color:c});
   // the console: its sloping top passes exactly through the line where the old dashboard began (screen y = VH)
-  const k=.24,y0=-50,z0=95,onC=(sx,sy)=>{const dx=(sx-CX)/F,dy=-(sy-CY)/F,z=(y0-k*z0)/(dy-k);return[dx*z,dy*z,z];};
+  const k=.24,y0=-50,z0=95,onC=(sx,sy)=>{const dx=(sx-CX)/F,dy=-(sy-CY)/F,z=(y0-k*z0)/(dy-k);return[dx*z,dy*z,z];},Zs=52,onS=(sx,sy,z=Zs)=>{const dx=(sx-CX)/F,dy=-(sy-CY)/F;return[dx*z,dy*z,z];};scrMeshes=[];
   add(geoOf(SL.hull([[-270,-50,95],[270,-50,95],[-270,-63.2,40],[270,-63.2,40],[-270,-150,95],[270,-150,95],[-270,-150,40],[270,-150,40]])),dark);
   add(beam([-262,-46.5,97],[262,-46.5,97],3.2),trim);const brow=add(beam([-252,-50.6,93.5],[252,-50.6,93.5],.55),glow(0x3fe0ff));pitLights.push(brow);
   // three live screens set into the console: ship systems, radar, flight
   dashTex=new T.CanvasTexture(document.createElement('canvas'));dashTex.encoding=T.sRGBEncoding;
-  const screen=(x0,y0s,x1,y1s,u0,v0,u1,v1)=>{const P=[onC(x0,y1s),onC(x1,y1s),onC(x1,y0s),onC(x0,y0s)].map(q=>q.map(c=>c*.994));const m=new T.Mesh(quadGeo(P,[[u0,v0],[u1,v0],[u1,v1],[u0,v1]]),new T.MeshBasicMaterial({map:dashTex,toneMapped:false,side:T.DoubleSide}));g.add(m);
-   const P2=[onC(x0-6,y1s+5),onC(x1+6,y1s+5),onC(x1+6,y0s-5),onC(x0-6,y0s-5)].map(q=>q.map(c=>c*.997));g.add(new T.Mesh(quadGeo(P2,[[0,0],[1,0],[1,1],[0,1]]),new T.MeshStandardMaterial({color:0x0a0e18,metalness:.6,roughness:.3,side:T.DoubleSide})));};
+  const screen=(x0,y0s,x1,y1s,u0,v0,u1,v1)=>{const P=[onS(x0,y1s),onS(x1,y1s),onS(x1,y0s),onS(x0,y0s)];const m=new T.Mesh(quadGeo(P,[[u0,v0],[u1,v0],[u1,v1],[u0,v1]]),new T.MeshBasicMaterial({map:dashTex,toneMapped:false,side:T.DoubleSide}));g.add(m);scrMeshes.push(m);
+   const P2=[onS(x0-6,y1s+5,Zs+.6),onS(x1+6,y1s+5,Zs+.6),onS(x1+6,y0s-5,Zs+.6),onS(x0-6,y0s-5,Zs+.6)];g.add(new T.Mesh(quadGeo(P2,[[0,0],[1,0],[1,1],[0,1]]),new T.MeshStandardMaterial({color:0x10151f,metalness:.7,roughness:.3,side:T.DoubleSide})));};
   screen(22,414,252,592,0,0,250/800,1);screen(262,410,538,596,250/800,0,550/800,.82);screen(548,414,778,592,550/800,0,1,1);
   // canopy: pillars, a bow across the top of the view, sills, rails and a spine; glass with the sun's glare
   for(const sx of[-1,1]){const base=[sx*178,-50,95],mid=[sx*128,92,58],top=[sx*70,124,-6];add(beam(base,mid,4.2),frame);add(beam(mid,top,3.6),frame);add(beam([sx*178,-50,95],[sx*178,-50,-92],3.4),frame);
@@ -229,7 +229,7 @@ const StarModern=(()=>{
   box(60,12,40,0,-118,52,dark);add(beam([0,-112,52],[0,-80,60],2.2),trim);{const k2=new T.Mesh(new T.SphereGeometry(5,12,10),dark);k2.position.set(0,-78,61);g.add(k2);}
   add(beam([-146,-56,20],[-146,-40,30],1.8),trim);{const k3=new T.Mesh(new T.SphereGeometry(4.5,12,10),glow(0xff8a1c));k3.position.set(-146,-39,31);g.add(k3);pitGlow.push(k3);}
   pitLamp=new T.PointLight(0x3fe0ff,.85,520,1.4);pitLamp.position.set(0,70,10);g.add(pitLamp);
-  deckObjs=null;wingTex=[];if(deck&&deck.wings.length)buildDeck(A,g,deck,onC);
+  deckObjs=null;wingTex=[];if(deck&&deck.wings.length)buildDeck(A,g,deck,onS);
   root.add(g);return g;}
  function cockpit(A,on,red,clock,dash,deck){if(!ready())return;if(!on){if(pit)pit.visible=false;return;}const key=A.W+'x'+A.VH+'x'+A.CY+'|'+(deck?deck.key:'');if(!pit||pitKey!==key){if(pit)root.remove(pit);pitLights=[];pitGlow=[];pit=buildPit(A,deck);pitKey=key;}pit.visible=true;if(deck)updDeck(deck,clock);
   if(dash&&dashTex){if(dashTex.image!==dash)dashTex.image=dash;dashTex.needsUpdate=true;}
@@ -237,7 +237,11 @@ const StarModern=(()=>{
   const P=A.P,acc=(P.speed-lastSpeed);lastSpeed=P.speed;const want=[-(P.yaw||0)*2.6+(P.roll||0)*.8,(P.pitch||0)*2.2-Math.max(-2,Math.min(2,acc*.05)),-Math.max(-3,Math.min(3,acc*.12))];for(let i=0;i<3;i++)sway[i]+=(want[i]-sway[i])*.08;
   const o=P.o,pos=[P.pos[0]+o.r[0]*sway[0]+o.u[0]*sway[1]+o.f[0]*sway[2],P.pos[1]+o.r[1]*sway[0]+o.u[1]*sway[1]+o.f[1]*sway[2],P.pos[2]+o.r[2]*sway[0]+o.u[2]*sway[1]+o.f[2]*sway[2]];setBasis(pit,pos,o);
   const pulse=Math.sin(clock*9)>0,col=red?(pulse?0xff2d55:0x5a0a1a):0x3fe0ff;for(const s2 of pitLights)s2.material.color.setHex(col);if(pitLamp){pitLamp.color.setHex(red?0xff2d55:0x3fe0ff);pitLamp.intensity=red?(pulse?1.6:.5):.85;}
-  pitGlow.forEach((b,i)=>{b.visible=((clock*(.6+i*.13)+i*.37)%1)>.18;});}
+  pitGlow.forEach((b,i)=>{b.visible=((clock*(.6+i*.13)+i*.37)%1)>.18;});
+  const dmg=P.hull||0,flick=dmg>.3&&Math.random()<dmg*.12,glitch=(clock-(A.lastHitT||-9))<.35;for(const m of scrMeshes)m.material.color.setScalar(glitch?(Math.random()<.5?.25:1.4):flick?.35+Math.random()*.3:1);
+  if(pitLamp&&(flick||glitch))pitLamp.intensity*=.3+Math.random()*.5;
+  if(A.lastHitT!==undefined&&A.lastHitT!==lastHitSeen&&(clock-A.lastHitT)<.2){lastHitSeen=A.lastHitT;const n=2+Math.round(dmg*4);for(let i=0;i<n;i++){const L=[(Math.random()-.5)*300,-44+Math.random()*6,60+Math.random()*30],w=[P.pos[0]+o.r[0]*L[0]+o.u[0]*L[1]+o.f[0]*L[2],P.pos[1]+o.r[1]*L[0]+o.u[1]*L[1]+o.f[1]*L[2],P.pos[2]+o.r[2]*L[0]+o.u[2]*L[1]+o.f[2]*L[2]];burst(w,10,40,.45,[1.6,1.1,.4]);}}
+  if(dmg>.5&&Math.random()<(dmg-.5)*.08){const L=[(Math.random()-.5)*280,-46,70+Math.random()*20],w=[P.pos[0]+o.r[0]*L[0]+o.u[0]*L[1]+o.f[0]*L[2],P.pos[1]+o.r[1]*L[0]+o.u[1]*L[1]+o.f[1]*L[2],P.pos[2]+o.r[2]*L[0]+o.u[2]*L[1]+o.f[2]*L[2]];burst(w,4,25,.35,[1.4,.9,.3]);}}
  // ---------------- 3D hangar for the docking and launch movies ----------------
  let hs=null,hcam=null,hobjs=new Map();
  function hangarTex(){return texCache.floor||(texCache.floor=(()=>{const t=cv(512,512,(c,w,h)=>{c.fillStyle='#3a3f4c';c.fillRect(0,0,w,h);const r=rnd(5);for(let i=0;i<300;i++){c.fillStyle=`rgba(0,0,0,${r()*.12})`;c.fillRect(r()*w,r()*h,r()*60,r()*60);}c.strokeStyle='rgba(10,12,20,.8)';c.lineWidth=3;for(let i=0;i<=4;i++){c.beginPath();c.moveTo(i*128,0);c.lineTo(i*128,h);c.stroke();c.beginPath();c.moveTo(0,i*128);c.lineTo(w,i*128);c.stroke();}});t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(4,10);return t;})());}
@@ -265,7 +269,7 @@ const StarModern=(()=>{
   R.render(hs,hcam);ctx.drawImage(gl,0,0,W,H);return true;}
  // extra cameras for the cockpit's side windows and mirror: rendered straight after the main view into small regions of
  // the same WebGL canvas, then copied through each window's shape. {o:{r,u,f}, pos, fov, rect:[x,y,w,h], clip(ctx), mirror}
- function views(ctx,A,list){if(!ready()||!quality.views)return false;const W=A.W,VH=A.VH,pw=Math.max(1,Math.min(3,ctx.canvas.width/W))*quality.pr,ph=pw,pv=pit&&pit.visible;if(pit)pit.visible=false;R.setScissorTest(true);
+ function views(ctx,A,list,scale){if(!ready()||!quality.views)return false;const W=A.W,VH=A.VH,pw=(scale||Math.max(1,Math.min(3,ctx.canvas.width/W)))*quality.pr,ph=pw,pv=pit&&pit.visible;if(pit)pit.visible=false;R.setScissorTest(true);
   for(const v of list){const[x,y,w,h]=v.rect,gx=0,gy=0,gw=Math.min(gl.width,Math.round(w*pw)),gh=Math.min(gl.height,Math.round(h*ph));if(gw<2||gh<2)continue;
    const r=M(v.o.r),u=M(v.o.u),f=M(v.o.f).map(q=>-q),p=M(v.pos);cam2.matrix.set(r[0],u[0],f[0],p[0],r[1],u[1],f[1],p[1],r[2],u[2],f[2],p[2],0,0,0,1);cam2.matrixWorld.copy(cam2.matrix);cam2.matrixWorldInverse.copy(cam2.matrix).invert();
    cam2.fov=v.fov;cam2.aspect=w/h;cam2.updateProjectionMatrix();starField.position.set(...p);R.setViewport(gx,gy,gw,gh);R.setScissor(gx,gy,gw,gh);R.render(scene,cam2);
