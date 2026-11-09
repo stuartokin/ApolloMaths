@@ -1,7 +1,24 @@
 {
- "version": "2.33",
+ "version": "2.34",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.34",
+   "date": "9 November 2026",
+   "kids": [
+    "🚀 Starlane MODERN: a brand-new 3D cockpit — look around with the right mouse button and see the whole cabin!",
+    "🖥️ Your ship’s screens are now built into the console, and the action buttons slide up when you need them",
+    "🖼️ In full screen, Modern now fills your whole widescreen",
+    "📋 A Mission Log tells you where you are and exactly what to do next"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🚀 Starlane Trader (Modern style): an enclosed 3D cockpit (canopy, glass glare, side walls and consoles, red-alert cabin lighting, head sway); the dashboard rebuilt as live screens in the 3D console; a modern font and glass buttons; a slide-up action bar; true widescreen in full screen; the aim ring and pointer hide while looking around. New Mission Log with a recap and next step for every mission, read aloud on request, and a welcome-back recap after a break. The arcade’s “Retro screen” scanlines are skipped in Modern style."
+   ]
+  },
   {
    "v": "2.33",
    "date": "9 November 2026",
@@ -143,22 +160,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: Career Record with fortune, fame and infamy (hero–villain balance), combat, explorer, ship, missions and maths statistics, titles, a Commander score and all medals; 4 new medals; Nova’s spoken intro (replay from the pause menu or Status)."
-   ]
-  },
-  {
-   "v": "2.24",
-   "date": "9 November 2026",
-   "kids": [
-    "🎯 Starlane Trader: lasers lock on to targets for a few seconds — but getting hit breaks the lock!",
-    "⚖️ Amnesty missions: help the police and wipe your record clean",
-    "🧮 Maths puzzles now fit the story — fuel, distances, codes and trading",
-    "💬 Drag your assistant’s subtitles wherever you like"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🚀 Starlane Trader: movable subtitles (drag, or top/bottom/left/right); laser target lock (3 s, broken by hits, 4 s recharge); amnesty missions to clear legal status; story-themed maths (navigation, codes, trading) plus a Traders’ Guild challenge after docking."
    ]
   }
  ]

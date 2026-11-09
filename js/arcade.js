@@ -30,7 +30,7 @@ const Arcade=(()=>{
   get('arcHud').innerHTML=`<span>Score <b>${game.score.toLocaleString('en-GB')}</b></span><span>${game.levelName} <b>${game.level}</b></span><span>${'❤️'.repeat(Math.max(0,Math.min(6,game.lives)))||'💔'}</span><span class="${!admin&&cap-played<60?'arc-low':''}">⏱️ <b>${admin?'∞':fmt(cap-played)}</b></span>`;}
  function loop(t){if(view!=='game'){raf=0;return;}const dt=Math.min(.05,(t-(last||t))/1000);last=t;
   if(!paused&&document.visibilityState==='visible'){if(!game.intro&&!game.paused)played+=dt;if(sim2()){game.update(dt,inpP(0),inpP(1));latchP=[{},{}];}else game.update(dt,inp());latch={};if(game.over){finish('gameover');return;}if(!admin&&played>=cap){finish('time');return;}}
-  ctx.save();ctx.scale(cv.width/game.W,cv.height/game.H);game.render(ctx);if(stats.arcade.crt!==false)Retro.crt(ctx,game.W,game.H);
+  ctx.save();ctx.scale(cv.width/game.W,cv.height/game.H);game.render(ctx);if(stats.arcade.crt!==false&&!game.noCrt)Retro.crt(ctx,game.W,game.H);
   if(paused){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,game.W,game.H);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='bold 34px monospace';ctx.fillText('PAUSED',game.W/2,game.H/2);ctx.font='14px monospace';ctx.fillText('Tap ▶ Play or press P',game.W/2,game.H/2+30);}
   ctx.restore();hud();raf=requestAnimationFrame(loop);}
  function card(html){get('arcBody').innerHTML=html;}

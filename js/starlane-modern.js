@@ -126,12 +126,15 @@ const StarModern=(()=>{
  // ---------------- per-frame ----------------
  let lastT=performance.now(),trailT=0;
  function render(ctx,A){if(!ready())return false;const t0=performance.now(),dt=Math.min(.1,(t0-lastT)/1000);lastT=t0;
-  const W=A.W,VH=A.VH,k=Math.max(1,Math.min(ctx.canvas.width/W,1920/W)),pr=quality.pr*k,w=Math.round(W*pr),h=Math.round(VH*pr);
-  if(gl.width!==w||gl.height!==h){R.setPixelRatio(1);R.setSize(w,h,false);comp.setSize(w,h);bloom.resolution.set(w,h);}
+  const W=A.W,VH=A.VH,CXa=A.CX??W/2,CYa=A.CY??VH/2,Hv=A.full&&A.H?A.H:VH,k=Math.max(1,Math.min(ctx.canvas.width/W,1920/W)),pr=quality.pr*k,wd=A.wide||null;let w,h,ppx,ppy,foc;
+  if(wd){const dpr=Math.min(window.devicePixelRatio||1,2)*quality.pr,sc=Math.min(dpr,2400/wd.w);w=Math.round(wd.w*sc);h=Math.round(wd.h*sc);ppx=(wd.ox+CXa*wd.s)*sc;ppy=(wd.oy+CYa*wd.s)*sc;foc=A.FOC*wd.s*sc;}
+  else{w=Math.round(W*pr);h=Math.round(Hv*pr);ppx=CXa*pr;ppy=CYa*pr;foc=A.FOC*pr;}
+  if(gl.width!==w||gl.height!==h){R.setPixelRatio(1);R.setSize(w,h,false);comp.setSize(w,h);bloom.resolution.set(w,h);}R.setScissorTest(false);R.setViewport(0,0,w,h);
+  toGame=wd?((x,y)=>[(((x+1)/2*wd.w)-wd.ox)/wd.s,(((1-y)/2*wd.h)-wd.oy)/wd.s]):((x,y)=>[(x+1)/2*W,(1-y)/2*Hv]);
   const sys=A.here();if(lastSys!==A.planet){lastSys=A.planet;for(const[o,g]of objs){root.remove(g);}objs.clear();buildBodies(A);}
   // camera (mirrored into three's handedness)
   const C=A.CAM,r=M(C.r),u=M(C.u),f=M(C.f).map(x=>-x),p=M(C.pos);cam.matrix.set(r[0],u[0],f[0],p[0],r[1],u[1],f[1],p[1],r[2],u[2],f[2],p[2],0,0,0,1);cam.matrixWorld.copy(cam.matrix);cam.matrixWorldInverse.copy(cam.matrix).invert();
-  const fov=2*Math.atan((VH/2)/A.FOC)*180/Math.PI;if(Math.abs(cam.fov-fov)>.01||Math.abs(cam.aspect-W/VH)>.001){cam.fov=fov;cam.aspect=W/VH;cam.updateProjectionMatrix();}
+  {const n=cam.near;cam.projectionMatrix.makePerspective(-ppx/foc*n,(w-ppx)/foc*n,ppy/foc*n,-(h-ppy)/foc*n,n,cam.far);cam.projectionMatrixInverse.copy(cam.projectionMatrix).invert();}
   starField.position.set(...p);if(nebula)nebula.position.set(...p);
   if(cityMats.length&&A.suns[0]){const sd=new T.Vector3(...M(A.suns[0].pos)).sub(new T.Vector3(...M(A.planet?A.planet.pos:[0,0,0]))).normalize().transformDirection(cam.matrixWorldInverse);for(const m of cityMats)if(m.userData.sh)m.userData.sh.uniforms.sunDirV.value.copy(sd);}
   // bodies follow their game positions and spin
@@ -156,34 +159,64 @@ const StarModern=(()=>{
   {const P2=smoke.p.geometry.attributes.position,C2=smoke.p.geometry.attributes.color;stepParticles(smoke,dt,true);let k2=smoke.p.geometry.drawRange.count;for(const sm of A.smokes){if(k2>=smoke.n)break;const m=M(sm.pos),f2=.55*(1-sm.t/1.6);P2.setXYZ(k2,m[0],m[1],m[2]);C2.setXYZ(k2,f2,f2,f2*1.05);k2++;}smoke.p.geometry.setDrawRange(0,k2);P2.needsUpdate=true;C2.needsUpdate=true;}
   // space dust
   {const D=dustPts.geometry.attributes.position;let n=0;for(const d of A.dust){if(n>=400)break;const m=M(d);D.setXYZ(n++,m[0],m[1],m[2]);}dustPts.geometry.setDrawRange(0,n);D.needsUpdate=true;}
-  bloom.enabled=quality.bloom;comp.render();ctx.drawImage(gl,0,0,W,VH);flare(ctx,A,W,VH);
+  bloom.enabled=quality.bloom;comp.render();if(wd){if(wd.cv.width!==w||wd.cv.height!==h){wd.cv.width=w;wd.cv.height=h;}wd.ctx.drawImage(gl,0,0);ctx.clearRect(0,0,W,Hv);}else ctx.drawImage(gl,0,0,W,Hv);flare(ctx,A,CXa,CYa);
   // keep it smooth: drop the glow, then the resolution, if frames get slow (and raise them again when there is room)
   const ms=performance.now()-t0;if(quality.auto===false){slow=fast=0;}else if(ms>22){slow++;fast=0;}else if(ms<9){fast++;slow=0;}
   if(slow>40){slow=0;if(quality.views)quality.views=false;else if(quality.bloom)quality.bloom=false;else quality.pr=Math.max(.6,quality.pr-.15);}if(fast>240){fast=0;if(quality.pr<1)quality.pr=Math.min(1,quality.pr+.15);else if(!quality.bloom)quality.bloom=true;else if(!quality.views)quality.views=true;}
   return true;}
  // lens flare from the brightest sun (hidden when a planet is in the way)
- function flare(ctx,A,W,VH){const sn=A.suns[0];if(!sn)return;const v=new T.Vector3(...M(sn.pos)).project(cam);if(v.z>1||Math.abs(v.x)>1.2||Math.abs(v.y)>1.2)return;
+ let toGame=(x,y)=>[0,0];
+ function flare(ctx,A,CXg,CYg){const sn=A.suns[0];if(!sn)return;const v=new T.Vector3(...M(sn.pos)).project(cam);if(v.z>1||Math.abs(v.x)>1.2||Math.abs(v.y)>1.2)return;
   if(A.planet){const C0=A.CAM.pos,d=[sn.pos[0]-C0[0],sn.pos[1]-C0[1],sn.pos[2]-C0[2]],L=Math.hypot(...d),u=d.map(x=>x/L),pc=[A.planet.pos[0]-C0[0],A.planet.pos[1]-C0[1],A.planet.pos[2]-C0[2]],t=pc[0]*u[0]+pc[1]*u[1]+pc[2]*u[2];if(t>0&&t<L){const q=[pc[0]-u[0]*t,pc[1]-u[1]*t,pc[2]-u[2]*t];if(Math.hypot(...q)<A.planet.R)return;}}
-  const sx=(v.x+1)/2*W,sy=(1-v.y)/2*VH,cx=W/2,cy=VH/2,dx=cx-sx,dy=cy-sy,str=Math.max(0,1-Math.hypot(v.x,v.y)*.7);if(str<=0)return;ctx.save();ctx.globalCompositeOperation='lighter';
+  const[sx,sy]=toGame(v.x,v.y),cx=CXg,cy=CYg,dx=cx-sx,dy=cy-sy,str=Math.max(0,1-Math.hypot(v.x,v.y)*.7);if(str<=0)return;ctx.save();ctx.globalCompositeOperation='lighter';
   for(const[k,r0,col]of[[.4,24,'255,200,120'],[.7,12,'120,200,255'],[1.1,36,'180,120,255'],[1.5,9,'255,255,200'],[1.9,60,'90,160,255']]){const x=sx+dx*k,y=sy+dy*k,g=ctx.createRadialGradient(x,y,0,x,y,r0);g.addColorStop(0,`rgba(${col},${.22*str})`);g.addColorStop(1,`rgba(${col},0)`);ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r0,0,7);ctx.fill();}
   const g=ctx.createLinearGradient(sx-140,sy,sx+140,sy);g.addColorStop(0,'rgba(255,240,210,0)');g.addColorStop(.5,`rgba(255,240,210,${.25*str})`);g.addColorStop(1,'rgba(255,240,210,0)');ctx.fillStyle=g;ctx.fillRect(sx-140,sy-1.5,280,3);ctx.restore();}
- // ---------------- 3D cockpit, carried with the ship; struts sit where the classic 2D frame was drawn ----------------
- let pit=null,pitLights=[],pitKey='';
+ // ---------------- 3D cockpit (Modern): an enclosed cabin carried with the ship ----------------
+ // Built in ship-local units (x right, y up, z forward). The console's top edge sits where the old 2D dashboard began,
+ // so the forward view keeps its familiar framing; everything else is real geometry that looks right from any angle.
+ let pit=null,pitLights=[],pitKey='',dashTex=null,sway=[0,0,0],lastSpeed=0,pitLamp=null,pitGlow=[];
  function beam(a,b,w){const d=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],L=Math.hypot(...d)||1,u=d.map(x=>x/L);let p=Math.abs(u[1])<.9?[0,1,0]:[1,0,0];const c1=[u[1]*p[2]-u[2]*p[1],u[2]*p[0]-u[0]*p[2],u[0]*p[1]-u[1]*p[0]],l1=Math.hypot(...c1),n1=c1.map(x=>x/l1*w),n2=[u[1]*n1[2]-u[2]*n1[1],u[2]*n1[0]-u[0]*n1[2],u[0]*n1[1]-u[1]*n1[0]];
   const pts=[];for(const e of[a,b])for(const s1 of[-1,1])for(const s2 of[-1,1])pts.push([e[0]+n1[0]*s1+n2[0]*s2,e[1]+n1[1]*s1+n2[1]*s2,e[2]+n1[2]*s1+n2[2]*s2]);return geoOf(SL.hull(pts));}
- function screenTex(){return texCache.screen||(texCache.screen=cv(256,128,(c,w,h)=>{c.fillStyle='#03140c';c.fillRect(0,0,w,h);c.strokeStyle='#3cff6a';c.lineWidth=2;c.beginPath();for(let x=0;x<w;x+=4){const y=h/2+Math.sin(x*.07)*30*Math.sin(x*.013);x?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();c.fillStyle='rgba(60,255,106,.6)';for(let i=0;i<8;i++)c.fillRect(10+i*30,h-20-((i*37)%60),18,(i*37)%60+10);c.strokeStyle='rgba(60,255,106,.3)';c.strokeRect(2,2,w-4,h-4);}));}
- function buildPit(A){const W=A.W,VH=A.VH,F=A.FOC,D=130,X=sx=>(sx-W/2)/F*D,Y=sy=>(VH/2-sy)/F*D,P3=(sx,sy,z=D)=>[X(sx)*z/D,Y(sy)*z/D,z];const g=new T.Group(),mat=metal('#39426a',{metal:.75,rough:.38}),dark=metal('#1b2140',{metal:.6,rough:.5});
-  const add=(geo,m)=>{const me=new T.Mesh(geo,m);g.add(me);return me;};
-  add(beam(P3(60,47),P3(W-60,47),4.2),mat);add(beam(P3(0,24),P3(W,24),5),dark);
-  add(beam(P3(105,54),P3(47,VH+30),3.6),mat);add(beam(P3(W-105,54),P3(W-47,VH+30),3.6),mat);
-  for(const sx of[1,-1]){const top=P3(sx>0?W-60:60,47),far=[top[0]*2.4,top[1]*1.3,D*.35];add(beam(top,far,3.2),mat);add(beam(far,[far[0],-90,D*.3],3,),mat);add(beam([far[0],-90,D*.3],P3(sx>0?W-47:47,VH+30),3),mat);
-   const strip=new T.Mesh(beam(P3(sx>0?W-112:112,60),P3(sx>0?W-56:56,VH-10),.8),new T.MeshBasicMaterial({color:0x3fe0ff}));strip.userData.strip=true;g.add(strip);pitLights.push(strip);}
-  const yb=Y(VH+6),cons=SL.hull([[-160,yb,D*.95],[160,yb,D*.95],[-160,yb-6,D*.95],[160,yb-6,D*.95],[-150,yb-60,D*.45],[150,yb-60,D*.45],[-150,yb-70,D*.45],[150,yb-70,D*.45]]);add(geoOf(cons),dark);
-  for(let i=0;i<3;i++){const sc=new T.Mesh(new T.PlaneGeometry(52,24),new T.MeshBasicMaterial({map:screenTex()}));sc.position.set(-60+i*60,yb-26,D*.72);sc.rotation.x=-1.05;g.add(sc);}
-  const lamp=new T.PointLight(0x3fe0ff,.6,260);lamp.position.set(0,40,40);g.add(lamp);g.userData.lamp=lamp;
+ function quadGeo(p,uv){const g=new T.BufferGeometry(),P=[p[0],p[1],p[2],p[0],p[2],p[3]],U=[uv[0],uv[1],uv[2],uv[0],uv[2],uv[3]];g.setAttribute('position',new T.Float32BufferAttribute(P.flat(),3));g.setAttribute('uv',new T.Float32BufferAttribute(U.flat(),2));g.computeVertexNormals();return g;}
+ function wallTex(){return texCache.wall||(texCache.wall=(()=>{const t=cv(256,256,(c,w,h)=>{c.fillStyle='#1c2233';c.fillRect(0,0,w,h);const r=rnd(77);for(let i=0;i<60;i++){c.fillStyle=`rgba(255,255,255,${r()*.035})`;c.fillRect(r()*w,r()*h,r()*80,r()*80);}c.strokeStyle='rgba(0,0,0,.6)';c.lineWidth=2;for(const[x,y,ww,hh]of[[8,8,112,70],[128,8,120,70],[8,86,240,74],[8,168,76,80],[92,168,156,80]]){c.strokeRect(x,y,ww,hh);}
+   c.fillStyle='rgba(120,140,190,.25)';for(let i=0;i<14;i++)c.fillRect(14+((i*53)%228),20+((i*37)%220),3,3);});t.wrapS=t.wrapT=T.RepeatWrapping;return t;})());}
+ function buildPit(A){const CX=A.CX,CY=A.CY,F=A.FOC,g=new T.Group(),dark=new T.MeshStandardMaterial({color:0x232a3d,metalness:.55,roughness:.5,side:T.DoubleSide,flatShading:true}),
+   frame=new T.MeshStandardMaterial({color:0x3b4562,metalness:.8,roughness:.32,side:T.DoubleSide,flatShading:true}),trim=new T.MeshStandardMaterial({color:0x66749c,metalness:.9,roughness:.22,side:T.DoubleSide,flatShading:true}),
+   wall=new T.MeshStandardMaterial({color:0xffffff,map:wallTex(),metalness:.45,roughness:.6,side:T.DoubleSide}),add=(geo,m)=>{const me=new T.Mesh(geo,m);g.add(me);return me;},
+   box=(w,h,d,x,y,z,m)=>{const me=new T.Mesh(new T.BoxGeometry(w,h,d),m);me.position.set(x,y,z);g.add(me);return me;},glow=(c)=>new T.MeshBasicMaterial({color:c});
+  // the console: its sloping top passes exactly through the line where the old dashboard began (screen y = VH)
+  const k=.24,y0=-50,z0=95,onC=(sx,sy)=>{const dx=(sx-CX)/F,dy=-(sy-CY)/F,z=(y0-k*z0)/(dy-k);return[dx*z,dy*z,z];};
+  add(geoOf(SL.hull([[-270,-50,95],[270,-50,95],[-270,-63.2,40],[270,-63.2,40],[-270,-150,95],[270,-150,95],[-270,-150,40],[270,-150,40]])),dark);
+  add(beam([-262,-46.5,97],[262,-46.5,97],3.2),trim);const brow=add(beam([-252,-50.6,93.5],[252,-50.6,93.5],.55),glow(0x3fe0ff));pitLights.push(brow);
+  // three live screens set into the console: ship systems, radar, flight
+  dashTex=new T.CanvasTexture(document.createElement('canvas'));dashTex.encoding=T.sRGBEncoding;
+  const screen=(x0,y0s,x1,y1s,u0,v0,u1,v1)=>{const P=[onC(x0,y1s),onC(x1,y1s),onC(x1,y0s),onC(x0,y0s)].map(q=>q.map(c=>c*.994));const m=new T.Mesh(quadGeo(P,[[u0,v0],[u1,v0],[u1,v1],[u0,v1]]),new T.MeshBasicMaterial({map:dashTex,toneMapped:false,side:T.DoubleSide}));g.add(m);
+   const P2=[onC(x0-6,y1s+5),onC(x1+6,y1s+5),onC(x1+6,y0s-5),onC(x0-6,y0s-5)].map(q=>q.map(c=>c*.997));g.add(new T.Mesh(quadGeo(P2,[[0,0],[1,0],[1,1],[0,1]]),new T.MeshStandardMaterial({color:0x0a0e18,metalness:.6,roughness:.3,side:T.DoubleSide})));};
+  screen(22,414,252,592,0,0,250/800,1);screen(262,410,538,596,250/800,0,550/800,.82);screen(548,414,778,592,550/800,0,1,1);
+  // canopy: pillars, a bow across the top of the view, sills, rails and a spine; glass with the sun's glare
+  for(const sx of[-1,1]){const base=[sx*178,-50,95],mid=[sx*128,92,58],top=[sx*70,124,-6];add(beam(base,mid,4.2),frame);add(beam(mid,top,3.6),frame);add(beam([sx*178,-50,95],[sx*178,-50,-92],3.4),frame);
+   const sill=add(beam([sx*174,-47,92],[sx*174,-47,-88],.55),glow(0x3fe0ff));pitLights.push(sill);add(beam(top,[sx*62,128,-92],3.2),frame);add(beam(mid,[sx*170,40,-60],2.6),frame);
+   // side walls with panel detail, a side console and indicator lights
+   const wl=new T.Mesh(new T.PlaneGeometry(190,104),wall);wl.position.set(sx*180,-100,2);wl.rotation.y=Math.PI/2;g.add(wl);
+   add(geoOf(SL.hull([[sx*176,-52,80],[sx*120,-56,80],[sx*176,-52,-30],[sx*120,-56,-30],[sx*176,-110,80],[sx*120,-110,80],[sx*176,-110,-30],[sx*120,-110,-30]])),dark);
+   for(let i=0;i<5;i++){const b=box(5,1.4,5,sx*(132+i*8),-56.5,40-i*13,glow([0x3cff6a,0xffb020,0x3fe0ff,0xff2d55,0x3fe0ff][i]));pitGlow.push(b);}
+   box(14,48,12,sx*34,-6,-40,dark);box(16,4,14,sx*34,20,-40,trim);}
+  {const pts=[];for(let i=0;i<=16;i++){const t=i/16,x=-150+300*t,y=58+Math.pow(Math.abs(t-.5)*2,2)*30;pts.push([x,y,118-Math.abs(t-.5)*40]);}for(let i=0;i<16;i++)add(beam(pts[i],pts[i+1],2.4),frame);}
+  add(beam([0,124,40],[0,129,-92],3),frame);
+  const glass=new T.Mesh(new T.SphereGeometry(300,48,24,0,Math.PI*2,0,Math.PI*.56),new T.MeshStandardMaterial({color:0x9cc4ff,transparent:true,opacity:.045,roughness:.06,metalness:.1,depthWrite:false,side:T.DoubleSide}));glass.position.set(0,-48,0);g.add(glass);
+  // rear bulkhead, a flight stick and a throttle
+  {const bw=new T.Mesh(new T.PlaneGeometry(356,262),wall);bw.position.set(0,-20,-94);g.add(bw);}
+  box(60,12,40,0,-118,52,dark);add(beam([0,-112,52],[0,-80,60],2.2),trim);{const k2=new T.Mesh(new T.SphereGeometry(5,12,10),dark);k2.position.set(0,-78,61);g.add(k2);}
+  add(beam([-146,-56,20],[-146,-40,30],1.8),trim);{const k3=new T.Mesh(new T.SphereGeometry(4.5,12,10),glow(0xff8a1c));k3.position.set(-146,-39,31);g.add(k3);pitGlow.push(k3);}
+  pitLamp=new T.PointLight(0x3fe0ff,.85,520,1.4);pitLamp.position.set(0,70,10);g.add(pitLamp);
   root.add(g);return g;}
- function cockpit(A,on,red,clock){if(!ready())return;if(!on){if(pit)pit.visible=false;return;}const key=A.W+'x'+A.VH;if(!pit||pitKey!==key){if(pit)root.remove(pit);pitLights=[];pit=buildPit(A);pitKey=key;}pit.visible=true;setBasis(pit,A.P.pos,A.P.o);
-  const col=red?(Math.sin(clock*9)>0?0xff2d55:0x5a0a1a):0x3fe0ff;for(const s2 of pitLights)s2.material.color.setHex(col);pit.userData.lamp.color.setHex(red?0xff2d55:0x3fe0ff);}
+ function cockpit(A,on,red,clock,dash){if(!ready())return;if(!on){if(pit)pit.visible=false;return;}const key=A.W+'x'+A.VH+'x'+A.CY;if(!pit||pitKey!==key){if(pit)root.remove(pit);pitLights=[];pitGlow=[];pit=buildPit(A);pitKey=key;}pit.visible=true;
+  if(dash&&dashTex){if(dashTex.image!==dash)dashTex.image=dash;dashTex.needsUpdate=true;}
+  // head sway: the cabin shifts a little against acceleration and turns, then settles
+  const P=A.P,acc=(P.speed-lastSpeed);lastSpeed=P.speed;const want=[-(P.yaw||0)*2.6+(P.roll||0)*.8,(P.pitch||0)*2.2-Math.max(-2,Math.min(2,acc*.05)),-Math.max(-3,Math.min(3,acc*.12))];for(let i=0;i<3;i++)sway[i]+=(want[i]-sway[i])*.08;
+  const o=P.o,pos=[P.pos[0]+o.r[0]*sway[0]+o.u[0]*sway[1]+o.f[0]*sway[2],P.pos[1]+o.r[1]*sway[0]+o.u[1]*sway[1]+o.f[1]*sway[2],P.pos[2]+o.r[2]*sway[0]+o.u[2]*sway[1]+o.f[2]*sway[2]];setBasis(pit,pos,o);
+  const pulse=Math.sin(clock*9)>0,col=red?(pulse?0xff2d55:0x5a0a1a):0x3fe0ff;for(const s2 of pitLights)s2.material.color.setHex(col);if(pitLamp){pitLamp.color.setHex(red?0xff2d55:0x3fe0ff);pitLamp.intensity=red?(pulse?1.6:.5):.85;}
+  pitGlow.forEach((b,i)=>{b.visible=((clock*(.6+i*.13)+i*.37)%1)>.18;});}
  // ---------------- 3D hangar for the docking and launch movies ----------------
  let hs=null,hcam=null,hobjs=new Map();
  function hangarTex(){return texCache.floor||(texCache.floor=(()=>{const t=cv(512,512,(c,w,h)=>{c.fillStyle='#3a3f4c';c.fillRect(0,0,w,h);const r=rnd(5);for(let i=0;i<300;i++){c.fillStyle=`rgba(0,0,0,${r()*.12})`;c.fillRect(r()*w,r()*h,r()*60,r()*60);}c.strokeStyle='rgba(10,12,20,.8)';c.lineWidth=3;for(let i=0;i<=4;i++){c.beginPath();c.moveTo(i*128,0);c.lineTo(i*128,h);c.stroke();c.beginPath();c.moveTo(0,i*128);c.lineTo(w,i*128);c.stroke();}});t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(4,10);return t;})());}
@@ -211,12 +244,12 @@ const StarModern=(()=>{
   R.render(hs,hcam);ctx.drawImage(gl,0,0,W,H);return true;}
  // extra cameras for the cockpit's side windows and mirror: rendered straight after the main view into small regions of
  // the same WebGL canvas, then copied through each window's shape. {o:{r,u,f}, pos, fov, rect:[x,y,w,h], clip(ctx), mirror}
- function views(ctx,A,list){if(!ready()||!quality.views)return false;const W=A.W,VH=A.VH,pw=gl.width/W,ph=gl.height/VH;R.setScissorTest(true);
-  for(const v of list){const[x,y,w,h]=v.rect,gx=Math.round(x*pw),gy=Math.round(gl.height-(y+h)*ph),gw=Math.round(w*pw),gh=Math.round(h*ph);if(gw<2||gh<2)continue;
+ function views(ctx,A,list){if(!ready()||!quality.views)return false;const W=A.W,VH=A.VH,pw=Math.max(1,Math.min(3,ctx.canvas.width/W))*quality.pr,ph=pw,pv=pit&&pit.visible;if(pit)pit.visible=false;R.setScissorTest(true);
+  for(const v of list){const[x,y,w,h]=v.rect,gx=0,gy=0,gw=Math.min(gl.width,Math.round(w*pw)),gh=Math.min(gl.height,Math.round(h*ph));if(gw<2||gh<2)continue;
    const r=M(v.o.r),u=M(v.o.u),f=M(v.o.f).map(q=>-q),p=M(v.pos);cam2.matrix.set(r[0],u[0],f[0],p[0],r[1],u[1],f[1],p[1],r[2],u[2],f[2],p[2],0,0,0,1);cam2.matrixWorld.copy(cam2.matrix);cam2.matrixWorldInverse.copy(cam2.matrix).invert();
    cam2.fov=v.fov;cam2.aspect=w/h;cam2.updateProjectionMatrix();starField.position.set(...p);R.setViewport(gx,gy,gw,gh);R.setScissor(gx,gy,gw,gh);R.render(scene,cam2);
    ctx.save();v.clip(ctx);ctx.clip();if(v.mirror){ctx.translate(x+w,0);ctx.scale(-1,1);ctx.drawImage(gl,gx,gl.height-gy-gh,gw,gh,0,y,w,h);}else ctx.drawImage(gl,gx,gl.height-gy-gh,gw,gh,x,y,w,h);ctx.restore();}
-  R.setScissorTest(false);R.setViewport(0,0,gl.width,gl.height);return true;}
+  R.setScissorTest(false);R.setViewport(0,0,gl.width,gl.height);if(pit)pit.visible=pv;return true;}
  let pmul=1;
  const PRESET={low:{pr:.6,bloom:false,views:false},medium:{pr:.8,bloom:true,views:false},high:{pr:1,bloom:true,views:true},ultra:{pr:1.35,bloom:true,views:true}};
  function setQuality(q){if(q==='auto'){quality.auto=true;return;}quality.auto=false;Object.assign(quality,PRESET[q]||PRESET.high);}
