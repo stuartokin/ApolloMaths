@@ -1,7 +1,25 @@
 {
- "version": "2.28",
+ "version": "2.29",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.29",
+   "date": "9 November 2026",
+   "kids": [
+    "🚀 Starlane Trader now starts in MODERN 3D — and the title screen shows off all three styles",
+    "🖱️ Fly with the mouse! W/S speed, A/D slide sideways, Q/E roll, Shift to BOOST",
+    "🌌 Nebula skies, lens flare, shiny oceans and city lights on the dark side of planets",
+    "📻 Station radio chatter — and pirates who taunt you!",
+    "📈 Read price graphs and plan routes for bonus credits"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🚀 Starlane Trader: live attract screen cycling Original/Retro/Modern; Modern style and Modern (mouse) controls by default, with boost and sideways thrusters; nebula backdrops, lens flare, ocean shine, night-side city lights, 3D docking/launch exteriors; radio chatter; market price-trend and route-estimate maths; reduced motion and colour-safe radar; automatic switch to Retro if Modern is too slow."
+   ]
+  },
   {
    "v": "2.28",
    "date": "9 November 2026",
@@ -143,24 +161,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: tidier pause menu with Restart (back to last save, or new commander — with a warning if not saved); optional 3D cockpit; textured, rotating planets with atmospheres; four station designs with lights; unique ship fittings; visible damage on ships and on your own canopy."
-   ]
-  },
-  {
-   "v": "2.19",
-   "date": "9 November 2026",
-   "kids": [
-    "🪐 Starlane Trader has a new icon — and an optional solid 3D look with real lighting (turn it on in its pause menu)",
-    "🔐 A grown-up now chooses your secret codes for the games",
-    "💾 Your progress is backed up automatically"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "👪 Family codes: a grown-up sets a passphrase (or 6+ digit PIN) and the child’s secret word and 00 number code — stored scrambled in the child’s profile; old shared codes stop working; one-time recovery code.",
-    "🛡️ Fair play: one tab at a time, game time can’t be reduced by older files, device-clock checks, hand-edited files detected, new players start locked, 5 automatic backups with restore, and a log in the Parent dashboard.",
-    "📱 Help: new “Keeping it fair” and “Parental controls on your devices” guides.",
-    "🪐 Starlane Trader: new icon and an optional 3D lighting mode."
    ]
   }
  ]

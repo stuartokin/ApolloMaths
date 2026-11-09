@@ -6,12 +6,12 @@
 // Starlane's world uses the opposite handedness to three.js, so positions are mirrored on one axis (M below).
 const StarModern=(()=>{
  let state='idle',T=null,R=null,scene=null,cam=null,cam2=null,comp=null,bloom=null,gl=null,quality={pr:1,bloom:true,views:true},slow=0,fast=0,lastSys=null,root=null;
- const objs=new Map(),geoCache=new WeakMap(),texCache={};let sunLights=[],bodies=[],starField=null,fire=null,smoke=null,dustPts=null,bhGroup=null,stationGrp=null;
+ const objs=new Map(),geoCache=new WeakMap(),texCache={};let sunLights=[],bodies=[],nebula=null,cityMats=[],starField=null,fire=null,smoke=null,dustPts=null,bhGroup=null,stationGrp=null;
  const M=v=>[v[0],v[1],-v[2]];
  function load(){if(state!=='idle')return;state='loading';const s=document.createElement('script');s.src='js/vendor/three-bundle.js';s.onload=()=>{try{init();state='ready';}catch(e){console.error(e);state='failed';}};s.onerror=()=>{state='failed';};document.head.appendChild(s);}
  const ready=()=>state==='ready';
  // ---------------- textures drawn on canvases ----------------
- function cv(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new T.CanvasTexture(c);t.anisotropy=4;return t;}
+ function cv(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new T.CanvasTexture(c);t.anisotropy=4;t.encoding=T.sRGBEncoding;return t;}
  const rnd=s=>{let x=s>>>0||1;return()=>{x^=x<<13;x>>>=0;x^=x>>17;x^=x<<5;x>>>=0;return x/4294967296;};};
  function panelTex(){return texCache.panel||(texCache.panel=(()=>{const t=cv(256,256,(c,w,h)=>{c.fillStyle='#b8bcc8';c.fillRect(0,0,w,h);const r=rnd(7);for(let i=0;i<400;i++){c.fillStyle=`rgba(0,0,0,${r()*.06})`;c.fillRect(r()*w,r()*h,r()*40,r()*40);}
    c.strokeStyle='rgba(40,44,60,.55)';c.lineWidth=2;for(let i=0;i<=4;i++){c.beginPath();c.moveTo(0,i*64);c.lineTo(w,i*64);c.stroke();c.beginPath();c.moveTo(i*64+(i%2)*32,0);c.lineTo(i*64+(i%2)*32,h);c.stroke();}
@@ -52,12 +52,20 @@ const StarModern=(()=>{
  function atmoMat(col){const m=/rgba?\(([^)]+)\)/.exec(col||'');const v=m?m[1].split(',').map(Number):[140,200,255];return new T.ShaderMaterial({uniforms:{c:{value:new T.Color(v[0]/255,v[1]/255,v[2]/255)}},
    vertexShader:'varying vec3 vN;varying vec3 vV;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
    fragmentShader:'uniform vec3 c;varying vec3 vN;varying vec3 vV;void main(){float f=pow(1.0-abs(dot(vN,vV)),4.0);gl_FragColor=vec4(c*1.2,f*0.85);}',transparent:true,blending:T.AdditiveBlending,side:T.FrontSide,depthWrite:false});}
- function buildBodies(A){clearBodies();const sys=A.here();
+ function nebulaTex(seed){const r=rnd(seed),W=1024,H=512;return cv(W,H,(c)=>{c.fillStyle='#000';c.fillRect(0,0,W,H);const hues=[r()*360,r()*360];
+   for(let i=0;i<26;i++){const x=r()*W,y=H*(.25+r()*.5),rad=60+r()*240,h=hues[i%2]+(r()-.5)*40,g=c.createRadialGradient(x,y,0,x,y,rad);g.addColorStop(0,`hsla(${h},70%,45%,${.10+r()*.12})`);g.addColorStop(1,'hsla(0,0%,0%,0)');c.fillStyle=g;for(const dx of[-W,0,W]){c.beginPath();c.arc(x+dx,y,rad,0,7);c.fill();}}
+   for(let i=0;i<1400;i++){c.fillStyle=`rgba(255,255,255,${r()*.5})`;c.fillRect(r()*W,r()*H,1,1);}});}
+ function cityTex(tex,seed){const W=1024,H=512,r=rnd(seed);return cv(W,H,c=>{c.fillStyle='#000';c.fillRect(0,0,W,H);for(const f of tex.f||[]){if(f.col==='#eef4ff')continue;const x0=(((f.lon%(2*Math.PI))+2*Math.PI)%(2*Math.PI))/(2*Math.PI)*W,y0=(.5-f.lat/Math.PI)*H,ry=f.size/Math.PI*H*.8,rx=ry/Math.max(.3,Math.cos(f.lat));
+   for(let k=0;k<70;k++){const a=r()*7,d=Math.sqrt(r());c.fillStyle=r()<.8?'rgba(255,214,140,.9)':'rgba(255,250,220,1)';c.fillRect(x0+Math.cos(a)*rx*d,y0+Math.sin(a)*ry*d,1+r()*2,1+r()*1.5);}}});}
+ function roughTex(tex){const W=512,H=256;const t=cv(W,H,c=>{c.fillStyle='#4a4a4a';c.fillRect(0,0,W,H);c.fillStyle='#ffffff';for(const f of tex.f||[]){const x=(((f.lon%(2*Math.PI))+2*Math.PI)%(2*Math.PI))/(2*Math.PI)*W,y=(.5-f.lat/Math.PI)*H,ry=f.size/Math.PI*H,rx=Math.min(W/2,ry/Math.max(.25,Math.cos(f.lat)));c.beginPath();c.ellipse(x,y,rx,ry,0,0,7);c.fill();}});t.encoding=T.LinearEncoding;return t;}
+ function buildBodies(A){clearBodies();const sys=A.here();if(nebula){scene.remove(nebula);nebula.material.map.dispose();nebula.material.dispose();}nebula=new T.Mesh(new T.SphereGeometry(3.6e5,48,32),new T.MeshBasicMaterial({map:nebulaTex(sys.seed^0x77),side:T.BackSide,depthWrite:false}));nebula.renderOrder=-2;scene.add(nebula);cityMats=[];
   for(const sn of A.suns){const g=new T.Group();const m=new T.Mesh(new T.SphereGeometry(sn.R,48,32),new T.MeshBasicMaterial({color:new T.Color(sn.col).multiplyScalar(2.2)}));g.add(m);
    const gs=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:new T.Color(sn.col),blending:T.AdditiveBlending,depthWrite:false,transparent:true}));gs.scale.set(sn.R*9,sn.R*9,1);g.add(gs);g.userData={src:sn};root.add(g);bodies.push(g);
    const L=new T.DirectionalLight(new T.Color(sn.col).lerp(new T.Color(1,1,1),.6),sunLights.length?0.6:1.35);scene.add(L);scene.add(L.target);L.userData={src:sn};sunLights.push(L);}
   const pl=A.planet;if(pl){const g=new T.Group();g.userData={src:pl,spinBody:true};const tex=pl.tex||{base:'#3f86c9',f:[],cl:[]};
-   g.add(new T.Mesh(new T.SphereGeometry(pl.R,128,96),new T.MeshStandardMaterial({map:bodyMap(tex,sys.seed,false),roughness:.9,metalness:0})));
+   const rocky=pl.kind==='rocky',pm=new T.MeshStandardMaterial({map:bodyMap(tex,sys.seed,false),roughness:rocky?1:.9,roughnessMap:rocky?roughTex(tex):null,metalness:0,emissive:rocky?new T.Color(1,1,1):new T.Color(0),emissiveMap:rocky?cityTex(tex,sys.seed+9):null,emissiveIntensity:1.4});
+   if(rocky){pm.onBeforeCompile=sh=>{sh.uniforms.sunDirV={value:new T.Vector3(0,0,1)};pm.userData.sh=sh;sh.fragmentShader='uniform vec3 sunDirV;\n'+sh.fragmentShader.replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\n totalEmissiveRadiance*=smoothstep(0.12,-0.25,dot(normalize(vNormal),normalize(sunDirV)));');};cityMats.push(pm);}
+   g.add(new T.Mesh(new T.SphereGeometry(pl.R,128,96),pm));
    if(tex.cl&&tex.cl.length){const cm=new T.Mesh(new T.SphereGeometry(pl.R*1.012,96,64),new T.MeshStandardMaterial({map:bodyMap(tex,sys.seed+1,true),transparent:true,depthWrite:false,roughness:1}));cm.userData.clouds=true;g.add(cm);}
    if(tex.atmo)g.add(new T.Mesh(new T.SphereGeometry(pl.R*1.06,96,64),atmoMat(tex.atmo)));
    if(pl.rings){const rg=new T.RingGeometry(pl.rings.a,pl.rings.b,160,1);const uv=rg.attributes.uv,pp=rg.attributes.position;for(let i=0;i<uv.count;i++){const rr=Math.hypot(pp.getX(i),pp.getY(i));uv.setXY(i,(rr-pl.rings.a)/(pl.rings.b-pl.rings.a),.5);}rg.rotateX(-Math.PI/2);
@@ -101,7 +109,8 @@ const StarModern=(()=>{
   // camera (mirrored into three's handedness)
   const C=A.CAM,r=M(C.r),u=M(C.u),f=M(C.f).map(x=>-x),p=M(C.pos);cam.matrix.set(r[0],u[0],f[0],p[0],r[1],u[1],f[1],p[1],r[2],u[2],f[2],p[2],0,0,0,1);cam.matrixWorld.copy(cam.matrix);cam.matrixWorldInverse.copy(cam.matrix).invert();
   const fov=2*Math.atan((VH/2)/A.FOC)*180/Math.PI;if(Math.abs(cam.fov-fov)>.01||Math.abs(cam.aspect-W/VH)>.001){cam.fov=fov;cam.aspect=W/VH;cam.updateProjectionMatrix();}
-  starField.position.set(...p);
+  starField.position.set(...p);if(nebula)nebula.position.set(...p);
+  if(cityMats.length&&A.suns[0]){const sd=new T.Vector3(...M(A.suns[0].pos)).sub(new T.Vector3(...M(A.planet?A.planet.pos:[0,0,0]))).normalize().transformDirection(cam.matrixWorldInverse);for(const m of cityMats)if(m.userData.sh)m.userData.sh.uniforms.sunDirV.value.copy(sd);}
   // bodies follow their game positions and spin
   for(const b of bodies){const s=b.userData.src;if(!s)continue;if(s.o)setBasis(b,s.pos,s.o);else{b.position.set(...M(s.pos));b.matrixAutoUpdate=true;}if(b.userData.bh)b.children.forEach(x=>{if(x.userData.disk)x.rotation.z+=dt*.5;});
    b.children.forEach(x=>{if(x.userData.clouds)x.rotation.y+=dt*.01;});}
@@ -123,11 +132,17 @@ const StarModern=(()=>{
   {const P2=smoke.p.geometry.attributes.position,C2=smoke.p.geometry.attributes.color;stepParticles(smoke,dt,true);let k2=smoke.p.geometry.drawRange.count;for(const sm of A.smokes){if(k2>=smoke.n)break;const m=M(sm.pos),f2=.55*(1-sm.t/1.6);P2.setXYZ(k2,m[0],m[1],m[2]);C2.setXYZ(k2,f2,f2,f2*1.05);k2++;}smoke.p.geometry.setDrawRange(0,k2);P2.needsUpdate=true;C2.needsUpdate=true;}
   // space dust
   {const D=dustPts.geometry.attributes.position;let n=0;for(const d of A.dust){if(n>=400)break;const m=M(d);D.setXYZ(n++,m[0],m[1],m[2]);}dustPts.geometry.setDrawRange(0,n);D.needsUpdate=true;}
-  bloom.enabled=quality.bloom;comp.render();ctx.drawImage(gl,0,0,W,VH);
+  bloom.enabled=quality.bloom;comp.render();ctx.drawImage(gl,0,0,W,VH);flare(ctx,A,W,VH);
   // keep it smooth: drop the glow, then the resolution, if frames get slow (and raise them again when there is room)
   const ms=performance.now()-t0;if(ms>22){slow++;fast=0;}else if(ms<9){fast++;slow=0;}
   if(slow>40){slow=0;if(quality.views)quality.views=false;else if(quality.bloom)quality.bloom=false;else quality.pr=Math.max(.6,quality.pr-.15);}if(fast>240){fast=0;if(quality.pr<1)quality.pr=Math.min(1,quality.pr+.15);else if(!quality.bloom)quality.bloom=true;else if(!quality.views)quality.views=true;}
   return true;}
+ // lens flare from the brightest sun (hidden when a planet is in the way)
+ function flare(ctx,A,W,VH){const sn=A.suns[0];if(!sn)return;const v=new T.Vector3(...M(sn.pos)).project(cam);if(v.z>1||Math.abs(v.x)>1.2||Math.abs(v.y)>1.2)return;
+  if(A.planet){const C0=A.CAM.pos,d=[sn.pos[0]-C0[0],sn.pos[1]-C0[1],sn.pos[2]-C0[2]],L=Math.hypot(...d),u=d.map(x=>x/L),pc=[A.planet.pos[0]-C0[0],A.planet.pos[1]-C0[1],A.planet.pos[2]-C0[2]],t=pc[0]*u[0]+pc[1]*u[1]+pc[2]*u[2];if(t>0&&t<L){const q=[pc[0]-u[0]*t,pc[1]-u[1]*t,pc[2]-u[2]*t];if(Math.hypot(...q)<A.planet.R)return;}}
+  const sx=(v.x+1)/2*W,sy=(1-v.y)/2*VH,cx=W/2,cy=VH/2,dx=cx-sx,dy=cy-sy,str=Math.max(0,1-Math.hypot(v.x,v.y)*.7);if(str<=0)return;ctx.save();ctx.globalCompositeOperation='lighter';
+  for(const[k,r0,col]of[[.4,24,'255,200,120'],[.7,12,'120,200,255'],[1.1,36,'180,120,255'],[1.5,9,'255,255,200'],[1.9,60,'90,160,255']]){const x=sx+dx*k,y=sy+dy*k,g=ctx.createRadialGradient(x,y,0,x,y,r0);g.addColorStop(0,`rgba(${col},${.22*str})`);g.addColorStop(1,`rgba(${col},0)`);ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r0,0,7);ctx.fill();}
+  const g=ctx.createLinearGradient(sx-140,sy,sx+140,sy);g.addColorStop(0,'rgba(255,240,210,0)');g.addColorStop(.5,`rgba(255,240,210,${.25*str})`);g.addColorStop(1,'rgba(255,240,210,0)');ctx.fillStyle=g;ctx.fillRect(sx-140,sy-1.5,280,3);ctx.restore();}
  // extra cameras for the cockpit's side windows and mirror: rendered straight after the main view into small regions of
  // the same WebGL canvas, then copied through each window's shape. {o:{r,u,f}, pos, fov, rect:[x,y,w,h], clip(ctx), mirror}
  function views(ctx,A,list){if(!ready()||!quality.views)return false;const W=A.W,VH=A.VH,pw=gl.width/W,ph=gl.height/VH;R.setScissorTest(true);
