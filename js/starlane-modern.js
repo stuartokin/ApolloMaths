@@ -125,7 +125,7 @@ const StarModern=(()=>{
   P.needsUpdate=true;C.needsUpdate=true;sys.p.geometry.setDrawRange(0,k);}
  // ---------------- per-frame ----------------
  let lastT=performance.now(),trailT=0;
- function render(ctx,A){if(!ready())return false;const t0=performance.now(),dt=Math.min(.1,(t0-lastT)/1000);lastT=t0;
+ function render(ctx,A){if(!ready())return false;if(A.full===undefined&&pit)pit.visible=false;const t0=performance.now(),dt=Math.min(.1,(t0-lastT)/1000);lastT=t0;
   const W=A.W,VH=A.VH,CXa=A.CX??W/2,CYa=A.CY??VH/2,Hv=A.full&&A.H?A.H:VH,k=Math.max(1,Math.min(ctx.canvas.width/W,1920/W)),pr=quality.pr*k,wd=A.wide||null;let w,h,ppx,ppy,foc;
   if(wd){const dpr=Math.min(window.devicePixelRatio||1,2)*quality.pr,sc=Math.min(dpr,2400/wd.w);w=Math.round(wd.w*sc);h=Math.round(wd.h*sc);ppx=(wd.ox+CXa*wd.s)*sc;ppy=(wd.oy+CYa*wd.s)*sc;foc=A.FOC*wd.s*sc;}
   else{w=Math.round(W*pr);h=Math.round(Hv*pr);ppx=CXa*pr;ppy=CYa*pr;foc=A.FOC*pr;}
@@ -231,7 +231,7 @@ const StarModern=(()=>{
   pitLamp=new T.PointLight(0x3fe0ff,.85,520,1.4);pitLamp.position.set(0,70,10);g.add(pitLamp);
   deckObjs=null;wingTex=[];if(deck&&deck.wings.length)buildDeck(A,g,deck,onS);
   root.add(g);return g;}
- function cockpit(A,on,red,clock,dash,deck){if(!ready())return;if(!on){if(pit)pit.visible=false;return;}const key=A.W+'x'+A.VH+'x'+A.CY+'|'+(deck?deck.key:'');if(!pit||pitKey!==key){if(pit)root.remove(pit);pitLights=[];pitGlow=[];pit=buildPit(A,deck);pitKey=key;}pit.visible=true;if(deck)updDeck(deck,clock);
+ function cockpit(A,on,red,clock,dash,deck){if(!ready())return;if(pit&&pit.parent&&pit.parent!==root)root.add(pit);if(!on){if(pit)pit.visible=false;return;}const key=A.W+'x'+A.VH+'x'+A.CY+'|'+(deck?deck.key:'');if(!pit||pitKey!==key){if(pit)root.remove(pit);pitLights=[];pitGlow=[];pit=buildPit(A,deck);pitKey=key;}pit.visible=true;if(deck)updDeck(deck,clock);
   if(dash&&dashTex){if(dashTex.image!==dash)dashTex.image=dash;dashTex.needsUpdate=true;}
   // head sway: the cabin shifts a little against acceleration and turns, then settles
   const P=A.P,acc=(P.speed-lastSpeed);lastSpeed=P.speed;const want=[-(P.yaw||0)*2.6+(P.roll||0)*.8,(P.pitch||0)*2.2-Math.max(-2,Math.min(2,acc*.05)),-Math.max(-3,Math.min(3,acc*.12))];for(let i=0;i<3;i++)sway[i]+=(want[i]-sway[i])*.08;
@@ -264,8 +264,11 @@ const StarModern=(()=>{
   for(const[k,g]of hobjs)if(!live.has(k)){hs.remove(g);hobjs.delete(k);}
   hs.traverse(x=>{if(x.userData&&x.userData.blink!==undefined)x.visible=Math.sin(A.t*4+x.userData.blink)>0;});
   const C2=A.CAM,r=M(C2.r),u=M(C2.u),f=M(C2.f).map(q=>-q),p=M(C2.pos);hcam.matrix.set(r[0],u[0],f[0],p[0],r[1],u[1],f[1],p[1],r[2],u[2],f[2],p[2],0,0,0,1);hcam.matrixWorld.copy(hcam.matrix);hcam.matrixWorldInverse.copy(hcam.matrix).invert();
-  hcam.fov=2*Math.atan((H/2)/A.FOC)*180/Math.PI;hcam.aspect=W/H;hcam.updateProjectionMatrix();
-  const k=Math.max(1,Math.min(ctx.canvas.width/W,1920/W)),w=Math.round(W*quality.pr*k),h=Math.round(H*quality.pr*k);if(gl.width!==w||gl.height!==h){R.setSize(w,h,false);comp.setSize(w,h);bloom.resolution.set(w,h);}
+  const k=Math.max(1,Math.min(ctx.canvas.width/W,1920/W)),w=Math.round(W*quality.pr*k),h=Math.round(H*quality.pr*k);if(gl.width!==w||gl.height!==h){R.setSize(w,h,false);comp.setSize(w,h);bloom.resolution.set(w,h);}R.setScissorTest(false);R.setViewport(0,0,w,h);
+  {const sc=w/W,ppx=(A.CX??W/2)*sc,ppy=(A.CY??H/2)*sc,foc=A.FOC*sc,n=hcam.near;hcam.projectionMatrix.makePerspective(-ppx/foc*n,(w-ppx)/foc*n,ppy/foc*n,-(h-ppy)/foc*n,n,hcam.far);hcam.projectionMatrixInverse.copy(hcam.projectionMatrix).invert();}
+  if(A.pit){const key=A.W+'x'+A.VH+'x'+A.CY+'|';if(!pit||pitKey!==key){if(pit&&pit.parent)pit.parent.remove(pit);pitLights=[];pitGlow=[];pit=buildPit(A,null);pitKey=key;}if(pit.parent!==hs)hs.add(pit);pit.visible=true;setBasis(pit,A.pitPos,A.pitO);
+   if(A.dash&&dashTex){if(dashTex.image!==A.dash)dashTex.image=A.dash;dashTex.needsUpdate=true;}for(const m of scrMeshes)m.material.color.setScalar(1);if(pitLamp){pitLamp.color.setHex(0x3fe0ff);pitLamp.intensity=.7;}for(const s2 of pitLights)s2.material.color.setHex(0x3fe0ff);}
+  else if(pit&&pit.parent===hs){root.add(pit);pit.visible=false;}
   R.render(hs,hcam);ctx.drawImage(gl,0,0,W,H);return true;}
  // extra cameras for the cockpit's side windows and mirror: rendered straight after the main view into small regions of
  // the same WebGL canvas, then copied through each window's shape. {o:{r,u,f}, pos, fov, rect:[x,y,w,h], clip(ctx), mirror}

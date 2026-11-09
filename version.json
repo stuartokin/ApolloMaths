@@ -1,7 +1,23 @@
 {
- "version": "2.36",
+ "version": "2.37",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.37",
+   "date": "9 November 2026",
+   "kids": [
+    "🪑 Starlane: sit in your cockpit inside the station — look around the hangar, check the pre-flight list and launch from there",
+    "🎬 Docking and launch movies fixed — and now with lots of different camera shots",
+    "📋 The Missions board is tidier — no more buttons on top of the title"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🚀 Starlane Trader: “Sit in the cockpit” from the station’s Launch tab — look around (right-drag or arrow keys), Front/Left/Right/Rear/Outside views, settings, and a pre-flight check that warns about no mission, low fuel, damage, no missiles or police trouble before launch. Movies: the far camera now shows the station, all hangar cameras stay inside the hangar, the cockpit no longer appears in movies, and five outside and five hangar camera styles are mixed at random. Missions board: station services in one row under the title."
+   ]
+  },
   {
    "v": "2.36",
    "date": "9 November 2026",
@@ -148,23 +164,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: Modern cockpit with 3D side windows and mirror, glass reflections, holographic edges and sun glints; Holo 3D radar (or Classic) with 5/10/25 km range; 3D star map with colour filters (economy, danger, tech, visited) and a shortest-route planner."
-   ]
-  },
-  {
-   "v": "2.27",
-   "date": "9 November 2026",
-   "kids": [
-    "🚀 Starlane Trader has three styles: ORIGINAL (1984 green wireframe), RETRO and MODERN (real 3D with glowing lights and explosions)",
-    "🎵 New sounds and music — engine hum, booming explosions, a battle theme at red alert",
-    "🎓 Nova’s guided first flight, plus Easy, Normal and Hard",
-    "🧭 Get maths right to rise through the Navigator ranks — Master and Star Navigators get real perks!"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🚀 Starlane Trader: Original / Retro / Modern styles (Modern uses a bundled 3D engine, loaded only when chosen, with automatic quality); new synthesised sound (engine, weapons and explosions placed left/right, hangar ambience, calm and battle music, docking clamps and landing gear) with Music and Engine & hangar switches; guided first flight; difficulty; floating rewards and kill flashes; cockpit glows red under attack; Navigator ranks for maths (Master: 10% less fuel per jump; Star: double Traders’ Guild bonuses)."
    ]
   }
  ]
