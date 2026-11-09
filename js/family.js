@@ -135,17 +135,25 @@ const Family=(()=>{
    <p class="mini">Protections: one tab at a time · game time used can’t be reduced by older files · device-clock checks · hand-edited files are detected · 5 automatic backups. See ❓ Help → “Keeping it fair” and “Parental controls on your devices”.</p>
    <h4>Recent events</h4>${evts.length?`<ul class="fam-log">${evts.map(e=>`<li><span class="mini">${new Date(e.t).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span> ${esc(e.text)}${e.who?` <span class="mini">(${esc(e.who)})</span>`:''}</li>`).join('')}</ul>`:'<p class="mini">Nothing unusual.</p>'}`;}
  function refreshDashboard(){if(typeof Parent!=='undefined'&&get('parent')&&get('parent').open&&Parent.open)Parent.open('settings');}
+ // ---------------- discreet grown-up shortcut straight into the games (Ctrl+Shift+G, or triple-tap the big title) ----------------
+ function openGames(){const go=()=>{log('A grown-up opened the games');document.querySelectorAll('dialog[open]').forEach(d=>{if(d.id!=='famDlg'&&d.close)d.close();});if(typeof Arcade!=='undefined')Arcade.open({admin:true});};
+  if(ready()){ask('Open the games (grown-up)').then(ok=>{if(ok)go();});return;}
+  if(typeof Admin!=='undefined'&&Admin.hasPin&&Admin.hasPin()){pinForm('');pending=ok=>{if(ok)go();};return;}
+  setupForm('Set up family codes first — then this shortcut asks for your passphrase.');}
+ function pinForm(err){show(`<h3>👪 Grown-up check</h3><p>Enter your Admin PIN to open the games.</p><input id="famPin" type="password" inputmode="numeric" autocomplete="off" placeholder="Admin PIN"><p class="plerr">${esc(err||'')}</p><div class="actions"><button class="primary" data-fam="pin" type="button">Continue</button><button class="ghost" data-fam="cancel" type="button">Cancel</button></div>`);}
+ function checkPin(){if(Admin.pinOk(get('famPin').value)){hide();const r=pending;pending=null;if(r)r(true);}else{log('Wrong Admin PIN entered');pinForm('That isn’t right — try again.');}}
+ let taps=[];function titleTap(e){if(!e.target.closest('.hero h1'))return;const now=Date.now();taps=taps.filter(t=>now-t<900);taps.push(now);if(taps.length>=3){taps=[];openGames();}}
  // ---------------- clicks ----------------
  function onClick(e){const b=e.target.closest('[data-fam]');if(!b)return;e.preventDefault();const a=b.dataset.fam;
-  if(a==='check')checkPass();else if(a==='cancel')cancel();else if(a==='forgot')forgotForm('');else if(a==='rec')useRecovery();else if(a==='save')saveSetup();
+  if(a==='check')checkPass();else if(a==='pin')checkPin();else if(a==='cancel')cancel();else if(a==='forgot')forgotForm('');else if(a==='rec')useRecovery();else if(a==='save')saveSetup();
   else if(a==='done'){if(!get('famDone').checked){toast('Please tick to confirm you’ve written down the recovery code.');return;}hide();toast('👪 Family codes are ready.');refreshDashboard();}
   else if(a==='setup')setup();else if(a==='unlockArcade')unlockArcade();else if(a==='lockNow'){ask('Lock the games').then(ok=>{if(ok){lockArcade('Locked by a grown-up');refreshDashboard();}});}
   else if(a==='admin'){ask('Open advanced settings').then(ok=>{if(ok){if(get('parent')&&get('parent').close)get('parent').close();Admin.open();}});}
   else if(a==='restoreList'){guard('Restore an earlier save',restoreList);}else if(a==='restore')restore(b.dataset.id);
   else if(a==='onlineOnly'){ask('Change “games only when online”').then(ok=>{if(ok){stats.family.onlineOnly=!stats.family.onlineOnly;log('Games only when online: '+(stats.family.onlineOnly?'on':'off'));save();refreshDashboard();}});}}
- function init(){document.addEventListener('click',onClick);const d=dlg();d.addEventListener('keydown',e=>{if(e.key==='Enter'){if(get('famPass')&&e.target.id==='famPass')checkPass();else if(e.target.id==='famRec')useRecovery();}});d.addEventListener('cancel',()=>{const r=pending;pending=null;if(r)r(false);});
+ function init(){document.addEventListener('click',onClick);document.addEventListener('click',titleTap);document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.shiftKey&&(e.key==='G'||e.key==='g')){e.preventDefault();openGames();}});const d=dlg();d.addEventListener('keydown',e=>{if(e.key==='Enter'){if(get('famPass')&&e.target.id==='famPass')checkPass();else if(e.target.id==='famPin')checkPin();else if(e.target.id==='famRec')useRecovery();}});d.addEventListener('cancel',()=>{const r=pending;pending=null;if(r)r(false);});
   if(typeof stats!=='undefined'&&stats){mergeLedger(stats);if(stats.integrity===undefined)stats.integrity={lock:null,log:[]};}
   clockCheck();setInterval(clockCheck,60000);serverTime();setInterval(serverTime,15*60000);tabLock();storageSafety();
   setTimeout(()=>backup('When the app opened'),5000);setInterval(()=>{if(Date.now()-lastBackup>10*60000)backup();},60000);}
- return{init,ready,ask,guard,setup,secret,arcadeBlock,blockedCard,mergeLedger,sig,vetIncoming,newPlayer,log,lockArcade,dashboardHTML,backup,unlocked:()=>unlocked(),_restoreList:restoreList};
+ return{openGames,init,ready,ask,guard,setup,secret,arcadeBlock,blockedCard,mergeLedger,sig,vetIncoming,newPlayer,log,lockArcade,dashboardHTML,backup,unlocked:()=>unlocked(),_restoreList:restoreList};
 })();

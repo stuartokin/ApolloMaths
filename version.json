@@ -1,7 +1,23 @@
 {
- "version": "2.23",
+ "version": "2.24",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.24",
+   "date": "9 November 2026",
+   "kids": [
+    "🎯 Starlane Trader: lasers lock on to targets for a few seconds — but getting hit breaks the lock!",
+    "⚖️ Amnesty missions: help the police and wipe your record clean",
+    "🧮 Maths puzzles now fit the story — fuel, distances, codes and trading",
+    "💬 Drag your assistant’s subtitles wherever you like"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🚀 Starlane Trader: movable subtitles (drag, or top/bottom/left/right); laser target lock (3 s, broken by hits, 4 s recharge); amnesty missions to clear legal status; story-themed maths (navigation, codes, trading) plus a Traders’ Guild challenge after docking."
+   ]
+  },
   {
    "v": "2.23",
    "date": "9 November 2026",
@@ -144,21 +160,6 @@
    "items": [
     "ⓘ Hover help: hover over (or tap ⓘ beside) any setting in Admin, the Parent dashboard and Voices, and the main buttons, to see what it does.",
     "🤫 The secret surprise now has two-player modes and one more game…"
-   ]
-  },
-  {
-   "v": "2.14",
-   "date": "8 November 2026",
-   "kids": [
-    "✅ Hints and methods now show every single step",
-    "🎱 🧱 🐸 Three more secret surprises…"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "✅ Quality check of every question, hint, worked method and lesson. Hints and methods now show EVERY step of the working — for example, in ratio questions, “divide the total by the number of parts” is always shown with the actual sum.",
-    "🤫 Three more surprises for players who put the work in…"
    ]
   }
  ]
