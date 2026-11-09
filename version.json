@@ -1,7 +1,23 @@
 {
- "version": "2.39",
+ "version": "2.40",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.40",
+   "date": "9 November 2026",
+   "kids": [
+    "💥 Starlane: you can see every hit now — shield flashes, spreading cracks and red warnings as your ship gets close to destruction",
+    "💾 Typing a save name now works properly",
+    "📋 Click a mission to read its recap"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🚀 Starlane Trader: hits show a shield arc (blue) or hull arc (red) at the front or rear; damage builds with lost energy (cracks, smoke, sparks, flicker); staged warnings — shield low, shield down, energy low, hull critical — with Nova, alarms and an escape-capsule prompt. Save-as name is a real text box (typing P no longer pauses the game). Click a mission under “Your missions” for its recap. Supply missions now say to buy the goods elsewhere and bring them back, and suggest where.",
+    "🕹️ Arcade: keys typed into text boxes are no longer treated as game keys."
+   ]
+  },
   {
    "v": "2.39",
    "date": "9 November 2026",
@@ -141,24 +157,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: 3D cockpit model with look-around (right-drag on computers; Display → “3D cockpit model”), 3D hangar in the docking and launch movies, and a fix for firing getting stuck when the mouse button was released outside the game or the window lost focus."
-   ]
-  },
-  {
-   "v": "2.30",
-   "date": "9 November 2026",
-   "kids": [
-    "🎯 Starlane: lock on with missiles, aim at enemy engines or weapons — and hire a wingman!",
-    "🤝 Earn the trust of the Federation, the Traders’ Guild… or the pirates",
-    "🔭 Survey planets, moons and stars, and sell your discoveries",
-    "🛰️ A new story: The Lost Freighter",
-    "🎓 Take the Academy Challenge at any station — 8 questions against the clock",
-    "🎵 Sound comes from where things are, and the music builds as danger grows"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🚀 Starlane Trader: phone/tablet/computer profiles (phones start in Retro with lighter effects); 3D positional sound, fly-bys, muffled cockpit and three-layer music; missile lock-on, subsystem targeting, wingmen and flanking pirates; faction reputation; prices that react to trading; planet/moon/star surveys and a codex; story “The Lost Freighter”; route-risk probability question, Academy Challenge on Focus topics, and a Parent dashboard setting for how often maths appears; generated planet terrain in Modern."
    ]
   }
  ]
