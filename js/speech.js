@@ -35,6 +35,7 @@ const Speech=(()=>{
  const WORDS=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve'];
  const KEEP=/^(HCF|LCM|UFO|PIN|CSV|PDF|AI|UK|GB|OK|KS2)$/;
  function speakable(t){return String(t)
+  .replace(/(\d+)\.(\d+)/g,(m,a,b)=>`${a} point ${b.split('').join(' ')}`)
   .replace(/<[^>]*>/g,' ').replace(/&amp;/g,'and').replace(/&[a-z]+;/g,' ')
   .replace(/(\d+)\s?\/\s?(\d+)/g,(m,a,b)=>{const n=+a,d=+b;if(d in SMALL&&n<=12&&n>0&&a.length<3)return `${WORDS[n]} ${SMALL[d]}${n>1?(d===2?'s':'s'):''}`.replace('halfs','halves');return `${a} over ${b}`;})
   .replace(/\?\s?\/\s?(\d+)/g,'what over $1').replace(/(\d+)\s?\/\s?\?/g,'$1 over what')

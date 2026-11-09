@@ -1,7 +1,23 @@
 {
- "version": "2.40",
+ "version": "2.41",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.41",
+   "date": "9 November 2026",
+   "kids": [
+    "🛒 Starlane: a bigger shipyard with pages — and new gear: Starburst laser (5), fire-control computer (6), plasma cannon, twin beams, shield booster, repair drones, tractor beam and afterburner",
+    "🖥️ Movies, rear and side views now fill a widescreen too",
+    "🔢 Nova says numbers like 6.2 properly"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🚀 Starlane Trader: Shipyard categories (Essentials, Weapons, Defence, Systems) with automatic pages and a description of each item; the Market pages automatically as goods are added. New: twin beam and plasma lasers, Starburst laser charges, shield booster, fire-control computer, repair drones, tractor beam, afterburner. After being destroyed you restart at the station where you last docked. Movies, the rear/side views and the outside camera use the full widescreen; ships in movies show their full detail.",
+    "🔊 Speech: numbers with a decimal point are read as “six point two”, everywhere in the app."
+   ]
+  },
   {
    "v": "2.40",
    "date": "9 November 2026",
@@ -141,22 +157,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: How to play rewritten (new CONTROLS and EXTRAS pages), and all help — Nova’s intro, the guided flight, the Launch screen, console tips, hints and messages — now reads the live key settings and the control scheme (Modern, Classic or touch). Fixed: the Launch screen still said E for E.C.M. (it is U). Shift boost now also works with Classic controls; Tab cycles all three chart views. Main Help now explains the Starlane controls."
-   ]
-  },
-  {
-   "v": "2.31",
-   "date": "9 November 2026",
-   "kids": [
-    "🚀 Starlane (MODERN): sit in a real 3D cockpit — hold the RIGHT mouse button and drag to look around!",
-    "🛬 The hangar is now fully 3D when you dock and launch",
-    "🔫 Fixed: lasers could get stuck firing"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🚀 Starlane Trader: 3D cockpit model with look-around (right-drag on computers; Display → “3D cockpit model”), 3D hangar in the docking and launch movies, and a fix for firing getting stuck when the mouse button was released outside the game or the window lost focus."
    ]
   }
  ]
