@@ -1,7 +1,24 @@
 {
- "version": "2.26",
+ "version": "2.27",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.27",
+   "date": "9 November 2026",
+   "kids": [
+    "🚀 Starlane Trader has three styles: ORIGINAL (1984 green wireframe), RETRO and MODERN (real 3D with glowing lights and explosions)",
+    "🎵 New sounds and music — engine hum, booming explosions, a battle theme at red alert",
+    "🎓 Nova’s guided first flight, plus Easy, Normal and Hard",
+    "🧭 Get maths right to rise through the Navigator ranks — Master and Star Navigators get real perks!"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🚀 Starlane Trader: Original / Retro / Modern styles (Modern uses a bundled 3D engine, loaded only when chosen, with automatic quality); new synthesised sound (engine, weapons and explosions placed left/right, hangar ambience, calm and battle music, docking clamps and landing gear) with Music and Engine & hangar switches; guided first flight; difficulty; floating rewards and kill flashes; cockpit glows red under attack; Navigator ranks for maths (Master: 10% less fuel per jump; Star: double Traders’ Guild bonuses)."
+   ]
+  },
   {
    "v": "2.26",
    "date": "9 November 2026",
@@ -145,22 +162,6 @@
    ],
    "items": [
     "🚀 Starlane Trader upgrade: flight-deck console keys with hover help, pause menu (save, settings, key remapping, how-to-play guides), cargo and mission screens in the cockpit, station marker on the scanner, time acceleration, save in flight, side and outside views, new hyperspace effect, docking and launch cut scenes, and varied systems (gas giants, rings, moons, multiple stars, asteroid belts, meteor showers)."
-   ]
-  },
-  {
-   "v": "2.17",
-   "date": "9 November 2026",
-   "kids": [
-    "🚀 A HUGE new game: trade, fight and explore a whole galaxy of 160 star systems!",
-    "🛸 Dock with spinning space stations — by hand, or let the docking computer do it",
-    "🗳️ Special missions can change how a planet is ruled — forever!",
-    "💾 Your space career is saved, so you can carry on next time"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🚀 New in the secret arcade: Starlane Trader — an original space-trading game in the style of the 1984 wireframe classics, with trading, missions, docking and hyperspace. Your career is saved."
    ]
   }
  ]
