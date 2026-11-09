@@ -144,16 +144,17 @@ function makeStarlane(env){
  const G={W,H,score:0,lives:1,level:1,levelName:'Rank',over:false,preferFull:true};
  const FX=Retro.fx();
  const ACTIONS=[['rollL','Roll left',['ArrowLeft','a'],1],['rollR','Roll right',['ArrowRight','d'],1],['yawL','Turn left',['q'],1],['yawR','Turn right',['e'],1],['up','Nose up',['ArrowUp','w'],1],['down','Nose down',['ArrowDown','s'],1],['fast','Speed up',['r','+','='],1],['slow','Slow down',['f','-'],1],['fire','Fire laser',[' '],1],
-  ['missile','Fire missile',['m']],['ecm','E.C.M.',['u']],['bomb','Shock pulse',['b']],['jump','Jump drive',['j']],['dock','Docking computer',['c']],['hyper','Hyperspace',['h']],['time','Speed up time',['t']],['view','Next view',['v']],['cam','Outside camera',['o']],['chart','Galaxy chart',['g']],['cargo','Cargo hold',['i']],['missions','Missions',['k']],['pod','Escape capsule',['x']],['tips','Hover help on/off',['F1']],['rlock','Roll lock on/off',['l']],['spin','Match station spin',['y']],['scan','Next radar target',['n']],['mfd','Cockpit screens on/off',['F2']]];
+  ['missile','Fire missile',['m']],['ecm','E.C.M.',['u']],['bomb','Shock pulse',['b']],['jump','Jump drive',['j']],['dock','Docking computer',['c']],['hyper','Hyperspace',['h']],['time','Speed up time',['t']],['view','Next view',['v']],['cam','Outside camera',['o']],['chart','Galaxy chart',['g']],['cargo','Cargo hold',['i']],['missions','Missions',['k']],['career','Career record',['z']],['pod','Escape capsule',['x']],['tips','Hover help on/off',['F1']],['rlock','Roll lock on/off',['l']],['spin','Match station spin',['y']],['scan','Next radar target',['n']],['mfd','Cockpit screens on/off',['F2']]];
  const optDefaults=()=>({subPos:'top',subs:true,voice:true,aiName:'NOVA',redAlert:true,mfd:true,maths:true,cockpit:true,lit:true,tips:true,cuts:true,keys:Object.fromEntries(ACTIONS.map(a=>[a[0],a[2].slice()]))});
- function fixOpt(){C.opt=Object.assign(optDefaults(),C.opt||{});C.opt.keys=Object.assign(optDefaults().keys,C.opt.keys||{});if(!(C.optVer>=2)){C.opt.lit=true;C.opt.cockpit=true;C.optVer=2;}if(!(C.optVer>=3)){if((C.opt.keys.ecm||[]).join()==='e')C.opt.keys.ecm=['u'];C.optVer=3;}C.paid=C.paid||{};C.ship=C.ship||'kestrel';if(C.hull===undefined)C.hull=0;C.medals=C.medals||{};C.log=C.log||[];C.rescued=C.rescued||0;}
+ function fixOpt(){C.opt=Object.assign(optDefaults(),C.opt||{});C.opt.keys=Object.assign(optDefaults().keys,C.opt.keys||{});if(!(C.optVer>=2)){C.opt.lit=true;C.opt.cockpit=true;C.optVer=2;}if(!(C.optVer>=3)){if((C.opt.keys.ecm||[]).join()==='e')C.opt.keys.ecm=['u'];C.optVer=3;}C.paid=C.paid||{};C.ship=C.ship||'kestrel';C.stats=C.stats||{};C.ships=C.ships||[C.ship];if(C.hull===undefined)C.hull=0;C.medals=C.medals||{};C.log=C.log||[];C.rescued=C.rescued||0;}
  // ---------------- commander (saved with the player's progress) ----------------
  function newCommander(){const start=GAL.find(s=>s.gov>=5&&s.tech>=6&&s.eco>=4)||GAL.find(s=>s.gov>=4)||GAL[0];
-  return{v:1,optVer:3,paid:{},ship:'kestrel',hull:0,medals:{},log:[],rescued:0,opt:optDefaults(),flight:null,sys:start.i,credits:100,fuel:7,cargo:{},cap:20,equip:{},front:'pulse',rear:null,missiles:3,legal:0,killPts:0,kills:0,day:1,missions:[],gov:{},news:[],visited:{[start.i]:1},target:null,invert:false,done:0,market:null,board:null};}
+  return{v:1,optVer:3,stats:{},ships:['kestrel'],introSeen:false,paid:{},ship:'kestrel',hull:0,medals:{},log:[],rescued:0,opt:optDefaults(),flight:null,sys:start.i,credits:100,fuel:7,cargo:{},cap:20,equip:{},front:'pulse',rear:null,missiles:3,legal:0,killPts:0,kills:0,day:1,missions:[],gov:{},news:[],visited:{[start.i]:1},target:null,invert:false,done:0,market:null,board:null};}
  let C=(()=>{const s=env.store&&env.store.get();return s&&s.v===1&&GAL[s.sys]?JSON.parse(JSON.stringify(s)):newCommander();})();
  fixOpt();
  let lastSaved='',lastSaveClock=0;
- const persist=()=>{lastSaved=JSON.stringify(C);try{lastSaveClock=clock;}catch(e){lastSaveClock=0;}if(env.store)env.store.set(JSON.parse(lastSaved));};
+ const ST=(k,n=1)=>{if(!C.stats)C.stats={};C.stats[k]=(C.stats[k]||0)+n;};const STmax=(k,v)=>{if(!C.stats)C.stats={};if(v>(C.stats[k]||0))C.stats[k]=Math.round(v*10)/10;};
+ const persist=()=>{if(C.stats)STmax('peak',C.credits);lastSaved=JSON.stringify(C);try{lastSaveClock=clock;}catch(e){lastSaveClock=0;}if(env.store)env.store.set(JSON.parse(lastSaved));};
  const sysOf=i=>{const s=GAL[i];return C.gov[i]!==undefined?{...s,gov:C.gov[i]}:s;};
  const here=()=>sysOf(C.sys);
  const cargoT=()=>Object.entries(C.cargo).reduce((a,[k,n])=>a+(GOODS[k][1]==='t'?n:0),0);
@@ -222,10 +223,10 @@ function makeStarlane(env){
   const y=wrap(ctx,m.q,90,150,620,22,'#e6e9f2',16);m.opts.forEach((o,i)=>{const bx=90+(i%2)*315,by=Math.max(y+20,260)+Math.floor(i/2)*64;const right=o===m.ans,picked=m.picked===o;button(ctx,B(bx,by,300,52,`${i+1})  ${o} ${m.u}`.trim(),()=>{if(m.picked===null)pickMath(o);},{fs:16,bg:m.picked!==null?(right?'rgba(30,120,60,.95)':picked?'rgba(140,30,40,.95)':undefined):undefined}));});
   if(m.picked!==null){text(ctx,m.picked===m.ans?'✅ Correct — brilliant!':`❌ Not quite — the answer was ${m.ans} ${m.u}`,CX,430,m.picked===m.ans?'#3cff6a':'#ff8a1c',16,'center');button(ctx,B(CX-100,456,200,36,'CONTINUE ▶',()=>finishMath(),{fs:14}));}
   else text(ctx,'Press 1–4 or tap an answer. (Use a scratch pad if it helps!)',CX,470,'#9aa3c7',12,'center');}
- function pickMath(o){mathQ.picked=o;const ok=o===mathQ.ans;env.beep(ok?1200:200,.25,'triangle',.05,ok?1.5:.6);say('mres',ok?'Correct! Well done, commander.':`Not quite. The answer was ${mathQ.ans}.`,1);}
+ function pickMath(o){mathQ.picked=o;const ok=o===mathQ.ans;ST('mAsked');if(ok){ST('mRight');C.stats.mStreak=(C.stats.mStreak||0)+1;STmax('mBest',C.stats.mStreak);if((C.stats.mRight||0)>=10)medal('maths10');}else C.stats.mStreak=0;env.beep(ok?1200:200,.25,'triangle',.05,ok?1.5:.6);say('mres',ok?'Correct! Well done, commander.':`Not quite. The answer was ${mathQ.ans}.`,1);}
  function finishMath(){const m=mathQ;mathQ=null;overlay=null;m.after(m.picked===m.ans);}
  // medals
- const MEDALS={pardon:'⚖️ Earned a pardon',story:'⭐ Defeated the Vorn mothership',launch:'🚀 First flight',dock:'🛬 First docking',kill:'🎯 First pirate',mission:'📦 First mission',rich1:'💰 1,000 credits',rich10:'💎 10,000 credits',explorer:'🧭 Visited 10 systems',hero:'🗳️ Changed a government',rescue:'🛟 Rescued a survivor',miner:'⛏️ Cleared a hazard',daredevil:'🕳️ Escaped a black hole'};
+ const MEDALS={bigtrade:'📈 A 500 Cr trade',maths10:'🧮 10 maths puzzles right',jumps20:'🌌 20 hyperspace jumps',villain:'😈 Became a fugitive',pardon:'⚖️ Earned a pardon',story:'⭐ Defeated the Vorn mothership',launch:'🚀 First flight',dock:'🛬 First docking',kill:'🎯 First pirate',mission:'📦 First mission',rich1:'💰 1,000 credits',rich10:'💎 10,000 credits',explorer:'🧭 Visited 10 systems',hero:'🗳️ Changed a government',rescue:'🛟 Rescued a survivor',miner:'⛏️ Cleared a hazard',daredevil:'🕳️ Escaped a black hole'};
  function medal(id){if(!C.medals||C.medals[id])return;C.medals[id]=C.day;msg(`🏅 MEDAL: ${MEDALS[id].toUpperCase()}`,4,'#ffe45e');env.beep(880,.15,'triangle',.05,1.5);setTimeout(()=>env.beep(1320,.25,'triangle',.05,1.2),160);}
  // ---------------- messages ----------------
  let msgs=[];const msg=(t,d=3,c='#ffe45e')=>{msgs=msgs.filter(m=>m.t!==t);msgs.push({t,d,c});if(msgs.length>3)msgs.shift();};
@@ -298,12 +299,12 @@ function makeStarlane(env){
  // ---------------- launching, docking, hyperspace ----------------
  function launch(){newPlayer();rollLock=false;lockRate=0;radarTgt=null;policeScan=false;stationAlarm=false;P.hull=C.hull||0;while(P.cracks.length<Math.floor(P.hull*9))P.cracks.push(makeCrack());medal('launch');buildSystem(false);setTimeout(()=>{const f=SL.features(here());say('launch',`Systems online. ${f.obstacle?{field:'Warning: a dense asteroid field lies between us and the jump point.',mines:'Warning: pirate mines around the station approach.',blackhole:'Warning: a black hole in this system. Keep your distance.'}[f.obstacle]:'Have a good flight, commander.'}`,5);},800);P.pos=add(station.pos,mul(station.o.f,420));P.o={f:station.o.f.slice(),u:station.o.u.slice(),r:station.o.r.slice()};P.speed=120;P.throttle=.4;initDust();spawnT=6;dockComp=false;jump=false;
   // illegal cargo may be spotted by customs as you leave
-  const ill=Object.keys(C.cargo).filter(k=>GOODS[k][6]&&C.cargo[k]>0);if(ill.length&&here().gov>=3&&Math.random()<(has('hidden')?.12:.5)){C.legal+=6*ill.length;msg('CUSTOMS SCANNED YOUR CARGO — LEGAL STATUS: '+legalName(C.legal).toUpperCase(),4,'#ff2d55');}
+  const ill=Object.keys(C.cargo).filter(k=>GOODS[k][6]&&C.cargo[k]>0);if(ill.length&&here().gov>=3&&Math.random()<(has('hidden')?.12:.5)){C.legal+=6*ill.length;ST('villain',4);msg('CUSTOMS SCANNED YOUR CARGO — LEGAL STATUS: '+legalName(C.legal).toUpperCase(),4,'#ff2d55');}
   if(C.opt.cuts){scene=makeScene('launch');mode='launchScene';env.beep(160,2.6,'sawtooth',.035,3);}else{mode='launch';anim=0;env.beep(200,1.2,'sawtooth',.04,3);}timeScale=1;camMode='cockpit';view='front';missionSpawns();}
  function docked(auto){stopMusic();timeScale=1;dockComp=false;if(C.opt.cuts){scene=makeScene('dock');mode='dockScene';}else{mode='dockAnim';anim=0;}env.beep(600,.9,'triangle',.05,.4);
   // arriving: complete deliveries, refresh the board, save
   C.visited[C.sys]=1;finishDock();}
- function finishDock(){P&&(P.speed=0);C.flight=null;if(P)C.hull=P.hull||0;const s=here();const done=[];const report=[];medal('dock');if(C.newData){const rw=C.newData*25;C.credits+=rw;report.push({ok:true,t:`🧭 Exploration data for ${C.newData} new system${C.newData>1?'s':''} sold to the cartographers`,r:rw});C.newData=0;}if(C.pendingRescue){const rw=C.pendingRescue*150;C.credits+=rw;C.rescued+=C.pendingRescue;report.push({ok:true,t:`🛟 ${C.pendingRescue} survivor${C.pendingRescue>1?'s':''} handed to the station medics`,r:rw});C.pendingRescue=0;medal('rescue');}
+ function finishDock(){P&&(P.speed=0);C.flight=null;if(P)C.hull=P.hull||0;const s=here();const done=[];const report=[];medal('dock');if(C.newData){const rw=C.newData*25;C.credits+=rw;report.push({ok:true,t:`🧭 Exploration data for ${C.newData} new system${C.newData>1?'s':''} sold to the cartographers`,r:rw});C.newData=0;}if(C.pendingRescue){const rw=C.pendingRescue*150;C.credits+=rw;C.rescued+=C.pendingRescue;ST('hero',5*C.pendingRescue);ST('missionPay',rw);report.push({ok:true,t:`🛟 ${C.pendingRescue} survivor${C.pendingRescue>1?'s':''} handed to the station medics`,r:rw});C.pendingRescue=0;medal('rescue');}
   for(const m of C.missions){if(m.type==='courier'&&m.dest===C.sys){C.credits+=m.reward;done.push(m);report.push({ok:true,t:`📦 ${m.title} — delivered`,r:m.reward});}
    if(m.type==='bounty'&&m.killed&&m.from===C.sys){C.credits+=m.reward;done.push(m);report.push({ok:true,t:`🎯 ${m.title} — bounty paid`,r:m.reward});}
    if(m.type==='political'&&m.sys===C.sys&&!m.delivered&&(C.cargo[m.good]||0)>=m.qty){C.cargo[m.good]-=m.qty;m.delivered=true;report.push({ok:true,t:`🗳️ ${m.qty}t ${GOODS[m.good][0]} delivered for “${m.title}”${m.kills<m.need?` — now defeat ${m.need-m.kills} more patrol ship${m.need-m.kills>1?'s':''}`:''}`,r:0});}
@@ -313,6 +314,7 @@ function makeStarlane(env){
   for(const m of C.missions)if(m.type==='story'&&C.sys===m.b){if(m.stage===2){m.stage=3;report.push({ok:true,t:`⭐ The charts are decoded! The Vorn mothership hides at ${GAL[m.c].name}. Destroy it!`,r:0});}else if(m.stage===4){C.credits+=m.reward;done.push(m);C.storyDone=true;report.push({ok:true,t:'⭐ The Vorn Signal — you saved the galaxy!',r:m.reward});medal('story');}}
   for(const m of C.missions)if(!done.includes(m)&&m.deadline&&C.day>m.deadline)report.push({ok:false,t:`❌ ${m.title} — too late (deadline was day ${m.deadline})`,r:0});
   C.missions=C.missions.filter(m=>!done.includes(m)&&!(m.deadline&&C.day>m.deadline&&(m.failed=true)));C.done+=done.length;if(done.length)medal('mission');
+  for(const m of done){ST('m_'+m.type);ST('missionPay',m.reward||0);ST('hero',m.type==='amnesty'?4:m.type==='story'?25:m.type==='political'?10:2);}for(const x of report)if(!x.ok)ST('failed');
   for(const x of report)C.log.unshift({day:C.day,...x});C.log=C.log.slice(0,30);arrival=report;if(C.credits>=1000)medal('rich1');if(C.credits>=10000)medal('rich10');if(Object.keys(C.visited).length>=10)medal('explorer');
   C.board=null;syncScore();persist();}
  function crash(dmg,why){hurt(dmg,P.o.f,true);msg(why,2,'#ff2d55');FX.shake(10);env.noise(.4,.08,600);}
@@ -329,7 +331,7 @@ function makeStarlane(env){
   const d=SL.dist(GAL[C.sys],GAL[C.target]);if(d>C.fuel+1e-6){msg(`NOT ENOUGH FUEL (NEED ${d} LY)`,3,'#ff2d55');return;}if(hyperT>0){hyperT=0;msg('HYPERSPACE CANCELLED',2);return;}
   if(!skipMath&&C.opt.maths&&Math.random()<.45){openMath('hyper',ok=>{hyperBonus=ok;startHyper(true);});return;}
   hyperT=5;hyperTo=C.target;hypInit();msg(`HYPERSPACE TO ${GAL[C.target].name.toUpperCase()}`,2,'#3fe0ff');}
- function doHyper(){const d=SL.dist(GAL[C.sys],GAL[hyperTo]);const alien=Math.random()<.03+(here().gov<=1?.02:0);mode='hyper';anim=0;timeScale=1;C.flight=null;if(!hyp.length)hypInit();env.beep(90,3.4,'sawtooth',.05,8);
+ function doHyper(){const d=SL.dist(GAL[C.sys],GAL[hyperTo]);ST('jumps');ST('ly',d);if((C.stats.jumps||0)>=20)medal('jumps20');const alien=Math.random()<.03+(here().gov<=1?.02:0);mode='hyper';anim=0;timeScale=1;C.flight=null;if(!hyp.length)hypInit();env.beep(90,3.4,'sawtooth',.05,8);
   if(alien){C.fuel=Math.max(0,C.fuel-d/2);interdicted=true;}else{C.fuel=Math.max(0,C.fuel-d*(hyperBonus?.7:1));if(hyperBonus)msg(`PERFECT CALCULATION — SAVED ${(d*.3).toFixed(1)} LY OF FUEL`,4,'#3cff6a');hyperBonus=false;C.sys=hyperTo;interdicted=false;}
   C.day+=1+Math.round(d/2.5);C.legal=Math.floor(C.legal*.6);C.target=interdicted?hyperTo:null;stopMusic();}
  function arrive(){initDust();if(interdicted){buildSystem(true);P.pos=V(0,0,0);P.o={r:V(1,0,0),u:V(0,1,0),f:V(0,0,1)};for(let i=0;i<3;i++){const v=spawn('vorn',add(P.pos,V((i-1)*900,200,4000)),{angry:true,target:'player'});}msg('INTERDICTED! ALIEN VORN RAIDERS!',5,'#9dff2e');msg('DESTROY THEM, THEN HYPERSPACE ON',5,'#9dff2e');}
@@ -340,11 +342,12 @@ function makeStarlane(env){
   lastHit=.25;FX.shake(Math.min(8,2+d*.2));env.noise(.15,.05,1800);if(P.energy<e0){P.hull=Math.min(1,(P.hull||0)+(e0-P.energy)*.012);P.cracks=P.cracks||[];while(P.cracks.length<Math.floor(P.hull*9))P.cracks.push(makeCrack());}if(P.energy<=0)die();}
  function makeCrack(){const side=Math.floor(Math.random()*4);let x,y;if(side===0){x=40+Math.random()*(W-80);y=6+Math.random()*30;}else if(side===1){x=6+Math.random()*50;y=40+Math.random()*(VH-90);}else if(side===2){x=W-6-Math.random()*50;y=40+Math.random()*(VH-90);}else{x=Math.random()<.5?20+Math.random()*90:W-20-Math.random()*90;y=VH-10-Math.random()*40;}
   const lines=[];for(let k=0;k<3;k++){const pts=[[x,y]];let a=Math.atan2(VH/2-y,W/2-x)+(Math.random()-.5)*1.6,px=x,py=y;for(let n=0;n<4;n++){const l=10+Math.random()*22;px+=Math.cos(a)*l;py+=Math.sin(a)*l;a+=(Math.random()-.5)*.9;pts.push([px,py]);}lines.push(pts);}return lines;}
- function die(){if(mode!=='flight')return;mode='dead';deathT=0;stopMusic();env.noise(1.2,.1,400);FX.shake(14);for(let i=0;i<4;i++)booms.push({pos:add(P.pos,mul(P.o.f,40)),t:0,lines:[]});}
+ function die(){if(mode!=='flight')return;ST('deaths');mode='dead';deathT=0;stopMusic();env.noise(1.2,.1,400);FX.shake(14);for(let i=0;i<4;i++)booms.push({pos:add(P.pos,mul(P.o.f,40)),t:0,lines:[]});}
  function boom(sh){FX.shake(5);env.noise(.6,.08,700);const lines=sh.m.edges.slice(0,30).map(e=>{const a=add(sh.pos,toWorld(sh.o,sh.m.pts[e.a])),b=add(sh.pos,toWorld(sh.o,sh.m.pts[e.b]));const c=mul(add(a,b),.5),v=mul(norm(sub(c,sh.pos)),60+Math.random()*120);return{a:sub(a,c),b:sub(b,c),c,v};});booms.push({pos:sh.pos,t:0,lines,col:sh.T.color});}
  function kill(sh,byPlayer){sh.dead=true;boom(sh);if(sh.mission){const am=C.missions.find(m=>m.type==='amnesty'&&m.id===sh.mission);if(am&&byPlayer){am.kills++;if(am.kills>=am.need){msg('PIRATES CLEARED — DOCK FOR YOUR PARDON',4,'#3cff6a');say('amn3',`All pirates destroyed. Dock at ${GAL[am.sys].name} to collect your pardon.`,5);}else msg(`AMNESTY: ${am.kills}/${am.need} PIRATES`,2.5,'#3fe0ff');}}if(byPlayer&&['pirate','alien'].includes(sh.T.role)){const left=ships.filter(x=>!x.dead&&x.angry&&x.target==='player').length;say('killed',`Target destroyed!${sh.bounty&&!sh.legalClean?' Bounty '+sh.bounty+' credits.':''}${left?' '+left+' more to go.':' All clear.'}`,3);}if(sh.mission==='story'){const m=C.missions.find(x=>x.type==='story');if(m&&m.stage===3){m.stage=4;msg('THE VORN MOTHERSHIP IS DESTROYED!',5,'#3cff6a');say('won',`Incredible flying! Return to ${GAL[m.b].name} for your reward.`,5);persist();}}if(byPlayer&&sh.hazard){C.cleared=(C.cleared||0)+1;if(C.cleared>=5)medal('miner');if(sh.type==='mine'&&!ships.some(x=>!x.dead&&x.type==='mine'))msg('MINEFIELD CLEARED!',3,'#3cff6a');}if(byPlayer&&['pirate','alien'].includes(sh.T.role))setTimeout(()=>medal('kill'),400);
   if(byPlayer){const T=sh.T;C.kills+=T.kill?1:0;C.killPts+=T.kill;
-   if(sh.bounty&&!sh.legalClean){C.credits+=sh.bounty;msg(`BOUNTY +${sh.bounty} CR`,3,'#3cff6a');}
+   if(sh.bounty&&!sh.legalClean){C.credits+=sh.bounty;ST('bounties',sh.bounty);msg(`BOUNTY +${sh.bounty} CR`,3,'#3cff6a');}
+   if(byPlayer){const role=T.role;ST('k_'+(role==='alien'?'alien':role==='pirate'?'pirate':role==='police'?'police':role==='trader'?'trader':role==='rock'?'rock':role==='mine'?'mine':'other'));if(role==='pirate')ST('hero',2);if(role==='alien')ST('hero',5);if(role==='police')ST('villain',12);if(role==='trader')ST('villain',6);}
    if(sh.legalClean&&['trader','police'].includes(T.role)){C.legal+=T.role==='police'?40:12;msg('LEGAL STATUS: '+legalName(C.legal).toUpperCase(),3,'#ff2d55');}
    if(sh.mission){const m=C.missions.find(x=>x.id===sh.mission);if(m){if(m.type==='bounty'&&sh.leader){m.killed=true;msg(`${m.target.toUpperCase()} DESTROYED! RETURN TO ${GAL[m.from].name.toUpperCase()} FOR THE REWARD`,5,'#3cff6a');}if(m.type==='political'){m.kills++;msg(`${m.patrol.toUpperCase()} SHIP DOWN (${Math.min(m.kills,m.need)}/${m.need})`,3,'#3cff6a');}}}
    if(T.role==='alien'&&ships.filter(x=>x.T.role==='alien'&&!x.dead).length===0)msg('ALL VORN DESTROYED — YOU CAN HYPERSPACE ON',5,'#3cff6a');
@@ -359,7 +362,7 @@ function makeStarlane(env){
   P.cool=L.rate;P.heat=Math.min(1,P.heat+L.heat);P.energy-=.4;laserShow=.08;env.beep(view==='rear'?900:1100,.06,'sawtooth',.03,.4);
   const dirSign=view==='rear'?-1:1;let best=null,bd=1e9;
   for(const sh of ships){if(sh.dead||sh.type==='missile'&&false)continue;const l=toLocal(P.o,sub(sh.pos,P.pos));const z=l[2]*dirSign;if(z<=0||z>5200)continue;if(Math.hypot(l[0],l[1])<sh.m.rad*.95&&z<bd){bd=z;best=sh;}}
-  if(station){const l=toLocal(P.o,sub(station.pos,P.pos));const z=l[2]*dirSign;if(z>0&&z<5000&&Math.hypot(l[0],l[1])<station.m.rad*.8&&(!best||z<bd)){C.legal=Math.max(C.legal,60);msg('YOU FIRED AT THE STATION! POLICE LAUNCHED',4,'#ff2d55');for(let i=0;i<2;i++)spawn('warden',add(station.pos,mul(station.o.f,500+i*120)),{angry:true,target:'player',f:station.o.f,speed:300});return;}}
+  if(station){const l=toLocal(P.o,sub(station.pos,P.pos));const z=l[2]*dirSign;if(z>0&&z<5000&&Math.hypot(l[0],l[1])<station.m.rad*.8&&(!best||z<bd)){C.legal=Math.max(C.legal,60);ST('villain',15);msg('YOU FIRED AT THE STATION! POLICE LAUNCHED',4,'#ff2d55');for(let i=0;i<2;i++)spawn('warden',add(station.pos,mul(station.o.f,500+i*120)),{angry:true,target:'player',f:station.o.f,speed:300});return;}}
   laserTgt=null;if(view==='front'&&jamT<=0){
    if(lockOn&&!lockOn.dead&&lockT>0){const l=toLocal(P.o,sub(lockOn.pos,P.pos)),a=Math.atan2(Math.hypot(l[0],l[1]),l[2]);if(l[2]>0&&a<.4&&l[2]<4200){best=lockOn;laserTgt=lockOn;}}
    else if(!best&&lockCD<=0){let cand=null,ca=.16;for(const sh of ships){if(sh.dead||['rock','cargo','missile','mine','beacon'].includes(sh.T.role))continue;const l=toLocal(P.o,sub(sh.pos,P.pos));if(l[2]<=0||l[2]>3600)continue;const a=Math.atan2(Math.hypot(l[0],l[1]),l[2]);if(a<ca){ca=a;cand=sh;}}
@@ -368,7 +371,7 @@ function makeStarlane(env){
   if(best){best.energy-=L.dmg*(C.front==='mining'&&best.T.role==='rock'?3:1);if(best.T.role!=='rock'&&best.T.role!=='cargo'){best.angry=true;best.provoked=true;best.target='player';if(best.legalClean&&best.T.role==='trader'&&!best.hitOnce){best.hitOnce=true;C.legal+=3;}}
    booms.push({pos:best.pos.slice(),t:.6,spark:true});if(best.energy<=0)kill(best,true);}}
  function fireMissile(){if(C.missiles<=0){msg('NO MISSILES',1.5);return;}let best=null,ba=.3;for(const sh of ships){if(sh.dead||['cargo','rock','missile'].includes(sh.T.role))continue;const l=toLocal(P.o,sub(sh.pos,P.pos));if(l[2]<=0)continue;const a=Math.hypot(l[0],l[1])/l[2];if(a<ba){ba=a;best=sh;}}
-  if(!best){msg('NO TARGET IN SIGHT — AIM AT A SHIP',2);return;}C.missiles--;const m=spawn('missile',add(P.pos,mul(P.o.f,60)),{f:P.o.f.slice(),speed:P.speed+200,target:best,life:18});m.own='player';best.angry=true;best.target='player';msg('MISSILE AWAY',1.5,'#ff8a1c');env.beep(300,.5,'square',.05,3);}
+  if(!best){msg('NO TARGET IN SIGHT — AIM AT A SHIP',2);return;}C.missiles--;ST('missiles');const m=spawn('missile',add(P.pos,mul(P.o.f,60)),{f:P.o.f.slice(),speed:P.speed+200,target:best,life:18});m.own='player';best.angry=true;best.target='player';msg('MISSILE AWAY',1.5,'#ff8a1c');env.beep(300,.5,'square',.05,3);}
  function ecm(){if(!has('ecm')){msg('NO E.C.M. FITTED',1.5);return;}if(ecmT>0)return;ecmT=1.2;P.energy-=8;let n=0;for(const sh of ships)if(sh.type==='missile'&&!sh.dead){sh.dead=true;boom(sh);n++;}env.beep(1500,.6,'square',.04,.3);msg(n?'E.C.M.: MISSILES DESTROYED':'E.C.M. ACTIVATED',2,'#3fe0ff');}
  function bomb(){if(!has('bomb')){msg('NO SHOCK PULSE FITTED',1.5);return;}delete C.equip.bomb;let n=0;for(const sh of ships)if(!sh.dead&&sh.type!=='canister'&&len(sub(sh.pos,P.pos))<9000){kill(sh,true);n++;}FX.flash&&FX.flash(.4);env.noise(1.5,.12,300);msg(`SHOCK PULSE! ${n} DESTROYED`,3,'#3fe0ff');}
  function ejectPod(){if(!has('pod')){msg('NO ESCAPE CAPSULE FITTED',1.5);return;}if(podArm<=0){podArm=2;msg('PRESS AGAIN TO EJECT!',2,'#ff2d55');return;}
@@ -405,8 +408,9 @@ function makeStarlane(env){
    if(station&&!dockComp){const d=len(sub(station.pos,P.pos));if(d<3000&&P.speed>140)say('slow','Approaching the station. Slow down below 60 to dock.',25);if(d<2200&&!rollLock)say('spinhint','Tip: press Y to match the station’s spin, then line up with the slot.',90);}
    if(C.legal>=50&&station&&!stationAlarm&&!amnestyHere()&&len(sub(station.pos,P.pos))<SAFE){stationAlarm=true;for(let k=0;k<2;k++)spawn('warden',add(station.pos,mul(station.o.f,600+k*200)),{angry:true,target:'player'});msg('STATION DEFENCES LAUNCHED!',3,'#ff2d55');say('police','The station has launched police ships — we are wanted here!',20);}
    const cop=ships.find(x=>!x.dead&&x.T.role==='police'&&len(sub(x.pos,P.pos))<1400);const ill=Object.keys(C.cargo).filter(k=>GOODS[k][6]&&C.cargo[k]>0);
-   if(cop&&ill.length&&!policeScan){policeScan=true;if(Math.random()<(has('hidden')?.12:.45)){C.legal+=8*ill.length;msg('POLICE SCANNED YOUR CARGO! LEGAL STATUS: '+legalName(C.legal).toUpperCase(),4,'#ff2d55');say('scan','The police scanned our hold and found illegal goods.',20);}else say('scan','A police ship scanned us — nothing found.',20);}}
+   if(cop&&ill.length&&!policeScan){policeScan=true;if(Math.random()<(has('hidden')?.12:.45)){C.legal+=8*ill.length;ST('villain',4);msg('POLICE SCANNED YOUR CARGO! LEGAL STATUS: '+legalName(C.legal).toUpperCase(),4,'#ff2d55');say('scan','The police scanned our hold and found illegal goods.',20);}else say('scan','A police ship scanned us — nothing found.',20);}}
   if(lockT>0){lockT-=dt;if(lockT<=0||!lockOn||lockOn.dead){lockOn=null;lockT=0;lockCD=4;}}if(lockCD>0)lockCD-=dt;if(jamT>0)jamT-=dt;
+  ST('flown',P.speed*dt/1000);ST('flightTime',dt);if(C.legal>=50)medal('villain');
   if(storm>0)storm-=dt;if(flareT>0){flareT-=dt;if(flareT<=0){const sh=(P.shF+P.shA)/200;hurt(28*(1-sh)+4,P.o.f);FX.shake(8);msg('SOLAR FLARE HIT!',2.5,'#ffb020');}}
   if(!(station&&len(sub(station.pos,P.pos))<SAFE)&&!jump){nextEvent-=dt;if(nextEvent<=0){nextEvent=150+Math.random()*150;if(Math.random()<.5){flareT=10;msg('SOLAR FLARE WARNING!',4,'#ffb020');say('flare','Solar flare in ten seconds! Keep your shields charged.',5);}else{storm=18;msg('ION STORM — SCANNER UNRELIABLE',4,'#b45bd6');say('storm','Ion storm! Our scanner will be unreliable for a while.',5);}}}
   if(bh){const v=sub(bh.pos,P.pos),d=len(v);if(d<bh.R){msg('PULLED INTO THE BLACK HOLE!',3,'#b45bd6');P.energy=0;die();return;}
@@ -481,7 +485,7 @@ function makeStarlane(env){
   if(sh.bumpT>0)sh.bumpT-=dt;
   if(dP<sh.m.rad+30&&!(sh.bumpT>0)){sh.bumpT=2;sh.breakT=2;sh.breakDir=norm(sub(sh.pos,P.pos));
    if(Math.random()<.25){hurt(20+P.speed*.08,mul(norm(toP),-1));sh.energy-=40;msg('COLLISION!',1.5,'#ff2d55');if(sh.energy<=0)kill(sh,true);}
-   else{sh.pos=add(P.pos,mul(norm(sub(sh.pos,P.pos)),sh.m.rad+120));FX.shake(2);env.noise(.35,.04,500);msg('NEAR MISS!',1.2,'#ffb020');say('nearmiss','That was close!',20);}}}
+   else{sh.pos=add(P.pos,mul(norm(sub(sh.pos,P.pos)),sh.m.rad+120));FX.shake(2);env.noise(.35,.04,500);msg('NEAR MISS!',1.2,'#ffb020');ST('nearMiss');say('nearmiss','That was close!',20);}}}
  // ---------------- cameras: four cockpit views and an outside chase camera ----------------
  function setCam(){if(camMode==='ext'&&P){CAM.pos=add(add(P.pos,mul(P.o.f,-440)),mul(P.o.u,150));CAM.f=norm(sub(add(P.pos,mul(P.o.f,260)),CAM.pos));CAM.u=P.o.u.slice();ortho(CAM);return;}
   const o=P.o;CAM.pos=P.pos;if(view==='rear'){CAM.f=mul(o.f,-1);CAM.u=o.u;CAM.r=mul(o.r,-1);}else if(view==='left'){CAM.f=mul(o.r,-1);CAM.u=o.u;CAM.r=o.f;}else if(view==='right'){CAM.f=o.r;CAM.u=o.u;CAM.r=mul(o.f,-1);}else{CAM.f=o.f;CAM.u=o.u;CAM.r=o.r;}}
@@ -727,17 +731,17 @@ function makeStarlane(env){
  const board=()=>{if(!C.board||C.board.day!==C.day||C.board.sys!==C.sys)C.board={day:C.day,sys:C.sys,offers:genBoard().filter(o=>!C.missions.some(m=>m.id===o.id))};return C.board.offers;};
  // ---------------- buying and selling ----------------
  function buy(i,n){const mk=market(),g=GOODS[i];let k=0;const had=C.cargo[i]||0,pr=mk[i].price;while(k<n&&mk[i].qty>0&&C.credits>=mk[i].price&&(g[1]!=='t'||cargoT()<C.cap)){C.credits=Math.round((C.credits-mk[i].price)*10)/10;mk[i].qty--;C.cargo[i]=(C.cargo[i]||0)+1;k++;}
-  if(!k)msg(mk[i].qty<=0?'NONE IN STOCK':C.credits<mk[i].price?'NOT ENOUGH CREDITS':'CARGO HOLD FULL',2,'#ff2d55');else{env.beep(900,.05,'square',.03);C.paid[i]=Math.round((((C.paid[i]||0)*had)+pr*k)/(had+k)*10)/10;}syncScore();}
- function sellG(i,n){const mk=market();let k=0;if(C.paid[i]&&mk[i].price<C.paid[i]&&(C.cargo[i]||0)>0)say('loss'+i,`Careful — we paid ${C.paid[i].toFixed(1)} for ${GOODS[i][0]}, so selling at ${mk[i].price.toFixed(1)} is a loss.`,30);while(k<n&&(C.cargo[i]||0)>0){C.credits=Math.round((C.credits+mk[i].price)*10)/10;C.cargo[i]--;mk[i].qty++;k++;}if(!C.cargo[i])delete C.paid[i];if(k)env.beep(700,.05,'square',.03);syncScore();}
+  if(!k)msg(mk[i].qty<=0?'NONE IN STOCK':C.credits<mk[i].price?'NOT ENOUGH CREDITS':'CARGO HOLD FULL',2,'#ff2d55');else{env.beep(900,.05,'square',.03);ST('tBought',k);ST('spent',pr*k);ST('trades');C.paid[i]=Math.round((((C.paid[i]||0)*had)+pr*k)/(had+k)*10)/10;}syncScore();}
+ function sellG(i,n){const mk=market();let k=0;if(C.paid[i]&&mk[i].price<C.paid[i]&&(C.cargo[i]||0)>0)say('loss'+i,`Careful — we paid ${C.paid[i].toFixed(1)} for ${GOODS[i][0]}, so selling at ${mk[i].price.toFixed(1)} is a loss.`,30);const pd0=C.paid[i]||0,pr0=mk[i].price;while(k<n&&(C.cargo[i]||0)>0){C.credits=Math.round((C.credits+mk[i].price)*10)/10;C.cargo[i]--;mk[i].qty++;k++;}if(k){ST('tSold',k);ST('trades');if(pd0){const pf=(pr0-pd0)*k;ST('tradeProfit',pf);STmax('bestTrade',pf);if(pf>=500)medal('bigtrade');}if(GOODS[i][6]){ST('contraband',k);ST('villain',k*2);}}if(!C.cargo[i])delete C.paid[i];if(k)env.beep(700,.05,'square',.03);syncScore();}
  const SHIPCLS={kestrel:{name:'Kestrel',price:0,speed:330,cargo:20,shield:1,turn:1,model:'kestrel',tech:1,desc:'Your trusty all-rounder.'},courier:{name:'Swift courier',price:5000,speed:410,cargo:25,shield:.9,turn:1.15,model:'sparrow',tech:4,desc:'Very fast, light shields — great for missions.'},
   falcon:{name:'Falcon fighter',price:6500,speed:400,cargo:12,shield:1.6,turn:1.3,model:'raven',tech:6,desc:'Agile with strong shields — for bounty hunters.'},mule:{name:'Mule freighter',price:8000,speed:260,cargo:60,shield:1.3,turn:.75,model:'hauler',tech:5,desc:'Slow but carries 60 tonnes — the trader’s choice.'},
   warden:{name:'Warden gunship',price:14000,speed:360,cargo:30,shield:2.2,turn:1,model:'warden',tech:9,desc:'Heavily armoured police design. Tough!'}};
  const shipCls=()=>SHIPCLS[C.ship]||SHIPCLS.kestrel;
  function buyShip(id){const n=SHIPCLS[id],o=shipCls();if(id===C.ship)return;if(n.tech>here().tech){msg(`NEEDS A TECH ${n.tech} SHIPYARD`,2.5,'#ff2d55');return;}const bay=C.cap>o.cargo,cap=n.cargo+(bay?15:0);if(cargoT()>cap){msg('SELL SOME CARGO FIRST — IT WON’T FIT',2.5,'#ff2d55');return;}
-  const cost=Math.max(0,n.price-Math.round(o.price*.6));if(C.credits<cost){msg(`YOU NEED ${cost} CR (AFTER TRADE-IN)`,2.5,'#ff2d55');return;}C.credits=Math.round((C.credits-cost)*10)/10;C.ship=id;C.cap=cap;C.hull=0;msg(`YOU NOW FLY A ${n.name.toUpperCase()}!`,3.5,'#3cff6a');say('ship',`Congratulations on your new ${n.name}, commander.`,1);syncScore();persist();}
+  const cost=Math.max(0,n.price-Math.round(o.price*.6));if(C.credits<cost){msg(`YOU NEED ${cost} CR (AFTER TRADE-IN)`,2.5,'#ff2d55');return;}C.credits=Math.round((C.credits-cost)*10)/10;C.ship=id;if(!C.ships.includes(id))C.ships.push(id);ST('shipSpend',cost);C.cap=cap;C.hull=0;msg(`YOU NOW FLY A ${n.name.toUpperCase()}!`,3.5,'#3cff6a');say('ship',`Congratulations on your new ${n.name}, commander.`,1);syncScore();persist();}
  const repairCost=frac=>Math.ceil(Math.min(frac,C.hull)*1100);
- function repair(frac){if(!(C.hull>0)){msg('YOUR SHIP IS NOT DAMAGED',2);return;}const f=Math.min(frac,C.hull),cost=repairCost(f);if(C.credits<cost){msg(`REPAIR COSTS ${cost} CR — NOT ENOUGH CREDITS`,2.5,'#ff2d55');return;}C.credits=Math.round((C.credits-cost)*10)/10;C.hull=Math.max(0,Math.round((C.hull-f)*100)/100);msg(C.hull?`REPAIRED — HULL NOW ${Math.round((1-C.hull)*100)}%`:'FULLY REPAIRED!',2.5,'#3cff6a');env.beep(700,.3,'triangle',.05,1.5);syncScore();persist();}
- function buyEq(e){const t=here().tech;if(e.tech>t){msg('NOT SOLD AT THIS TECH LEVEL',2);return;}
+ function repair(frac){if(!(C.hull>0)){msg('YOUR SHIP IS NOT DAMAGED',2);return;}const f=Math.min(frac,C.hull),cost=repairCost(f);if(C.credits<cost){msg(`REPAIR COSTS ${cost} CR — NOT ENOUGH CREDITS`,2.5,'#ff2d55');return;}ST('repairs',cost);C.credits=Math.round((C.credits-cost)*10)/10;C.hull=Math.max(0,Math.round((C.hull-f)*100)/100);msg(C.hull?`REPAIRED — HULL NOW ${Math.round((1-C.hull)*100)}%`:'FULLY REPAIRED!',2.5,'#3cff6a');env.beep(700,.3,'triangle',.05,1.5);syncScore();persist();}
+ function buyEq(e){if(e.id!=='fuel')ST('upgrades');const t=here().tech;if(e.tech>t){msg('NOT SOLD AT THIS TECH LEVEL',2);return;}
   if(e.id==='fuel'){const need=Math.round((7-C.fuel)*10)/10,cost=Math.round(need*e.price*10)/10;if(need<=0){msg('FUEL TANK IS FULL',1.5);return;}const can=Math.min(need,C.credits/e.price);if(can<=0){msg('NOT ENOUGH CREDITS',2,'#ff2d55');return;}C.fuel=Math.round((C.fuel+can)*10)/10;C.credits=Math.round((C.credits-can*e.price)*10)/10;msg(`REFUELLED: ${C.fuel.toFixed(1)} LY`,2,'#3cff6a');syncScore();return;}
   if(C.credits<e.price){msg('NOT ENOUGH CREDITS',2,'#ff2d55');return;}
   if(e.id==='missile'){if(C.missiles>=4){msg('MISSILE RACK IS FULL',1.5);return;}C.missiles++;}
@@ -760,7 +764,7 @@ function makeStarlane(env){
     const eff=C.hull>0?[`Engines: −${Math.round(C.hull*35)}% top speed`,`Shields recharge ${Math.round(C.hull*60)}% slower`,C.hull>.4?'Canopy cracked':'',C.hull>.6?'Smoke in the cabin!':''].filter(Boolean):['All systems working'];eff.forEach((t,i)=>text(ctx,t,560,198+i*16,'#c8d0ff',12,'left',false));if(C.hull>0)text(ctx,'Repair at the SHIPYARD',560,198+eff.length*16+2,'#ffb020',12);
     const md=Object.keys(C.medals||{});text(ctx,`MEDALS (${md.length}/${Object.keys(MEDALS).length})`,560,290,'#b45bd6',14);md.slice(0,7).forEach((k,i)=>text(ctx,MEDALS[k],560,310+i*17,'#ffe45e',12,'left',false));if(!md.length)text(ctx,'Fly, trade and fight to earn them!',560,310,'#9aa3c7',12,'left',false);}
    button(ctx,B(560,58,220,30,`Pitch: ${C.invert?'INVERTED':'NORMAL'}`,()=>{C.invert=!C.invert;persist();},{fs:12}));
-   button(ctx,B(560,94,220,30,'New commander…',()=>{overlay='reset';},{fs:12,border:'#ff2d55'}));}
+   button(ctx,B(560,94,220,30,'New commander…',()=>{overlay='reset';},{fs:12,border:'#ff2d55'}));button(ctx,B(560,440,220,30,'🏆 CAREER RECORD',()=>{overlay='career';},{fs:12,bg:'rgba(90,70,20,.92)'}));button(ctx,B(560,476,220,26,'▶ NOVA’S INTRO',()=>openIntro(),{fs:11}));}
   else if(tab==='market'){frame(ctx,`${s.name.toUpperCase()} MARKET PRICES`);const mk=market();{let best=-1,bv=0;mk.forEach((x,i)=>{if(GOODS[i][6]||!x.qty)return;const v=GOODS[i][2]/Math.max(1,x.price);if(v>bv){bv=v;best=i;}});if(best>=0&&bv>1.15)say('mkt'+C.sys+'-'+C.day,`Tip: ${GOODS[best][0]} is cheap here today — worth buying if another system needs it.`,9999);}text(ctx,'PRODUCT',24,50,'#b45bd6',14);text(ctx,'UNIT',262,50,'#b45bd6',14);text(ctx,'PRICE',312,50,'#b45bd6',14);text(ctx,'FOR SALE',398,50,'#b45bd6',14);text(ctx,'IN HOLD',498,50,'#b45bd6',14);text(ctx,'PAID',590,50,'#b45bd6',14);text(ctx,'PROFIT/UNIT',668,50,'#b45bd6',14);
    if(sel>=0&&sel<GOODS.length)tradeAdvice(sel);
    GOODS.forEach((g,i)=>{const y=72+i*23,on=sel===i;btns.push({x:14,y:y-2,w:W-28,h:22,fn:()=>{sel=i;}});if(on){ctx.fillStyle='rgba(60,255,106,.18)';ctx.fillRect(14,y-2,W-28,22);}
@@ -810,6 +814,57 @@ function makeStarlane(env){
    text(ctx,c.name+(own?'  ✓ YOURS':''),24,y,own?'#3fe0ff':ok?'#e6e9f2':'#4a4f63',16);text(ctx,c.desc,24,y+20,'#9aa3c7',12,'left',false);text(ctx,`Speed ${c.speed} · Cargo ${c.cargo}t · Shields ×${c.shield} · Handling ×${c.turn}`,24,y+38,'#c8d0ff',12,'left',false);
    if(!own){if(ok)button(ctx,B(590,y+8,190,40,`BUY · ${cost} Cr`,()=>buyShip(id),{fs:13,bg:C.credits>=cost?'rgba(30,80,50,.92)':undefined}));else text(ctx,`needs tech ${c.tech}`,600,y+18,'#4a4f63',13);}});
   if(C.hull>0)button(ctx,B(20,484,260,38,`🔧 FULL REPAIR · ${repairCost(1)} Cr`,()=>repair(1),{fs:12,bg:'rgba(30,80,50,.9)'}));}
+ // ---------------- career record ----------------
+ const tier=(v,list)=>{let t=list[0][1];for(const[min,name]of list)if(v>=min)t=name;return t;};
+ const fortuneT=v=>tier(v,[[0,'Penniless'],[500,'Trader'],[2000,'Merchant'],[10000,'Magnate'],[50000,'Tycoon']]);
+ const fameT=v=>tier(v,[[0,'Unknown'],[5,'Noticed'],[20,'Respected'],[60,'Famous'],[150,'Hero'],[400,'Galactic Legend']]);
+ const infamyT=v=>tier(v,[[0,'Spotless'],[5,'Rascal'],[20,'Outlaw'],[60,'Notorious'],[150,'Villain'],[400,'Most Wanted']]);
+ const exploreT=v=>tier(v,[[0,'Stay-at-home'],[3,'Wanderer'],[10,'Explorer'],[25,'Pathfinder'],[60,'Star Cartographer']]);
+ function careerScore(){const S=C.stats||{};return Math.round((S.peak||C.credits)/10+(S.hero||0)*10+((S.k_pirate||0)+(S.k_alien||0))*20+Object.keys(C.visited||{}).length*25+(C.done||0)*50+Object.keys(C.medals||{}).length*100+(S.mRight||0)*15);}
+ function renderCareer(ctx){btns=[];ctx.fillStyle='rgba(2,4,14,.96)';ctx.fillRect(0,0,W,H);const S=C.stats||{},n=v=>Math.round(v||0).toLocaleString('en-GB'),cr=v=>(v||0).toLocaleString('en-GB',{maximumFractionDigits:1});
+  const name=((env.names&&env.names[0])||'Pilot').toUpperCase(),vis=Object.keys(C.visited||{}).length,hero=S.hero||0,vil=S.villain||0;
+  text(ctx,`🏆 CAREER RECORD — COMMANDER ${name}`,CX,10,'#ffe45e',19,'center');text(ctx,`Commander score ${n(careerScore())}  ·  Day ${C.day}  ·  ${rankOf(C.killPts)}`,CX,34,'#3fe0ff',13,'center');
+  // hero / villain balance
+  const bx=200,bw=400,by=56,t=(hero+vil)?hero/(hero+vil):.5;ctx.fillStyle='#1a1f3a';ctx.fillRect(bx,by,bw,10);const g=ctx.createLinearGradient(bx,0,bx+bw,0);g.addColorStop(0,'#ff2d55');g.addColorStop(.5,'#9aa3c7');g.addColorStop(1,'#3cff6a');ctx.fillStyle=g;ctx.fillRect(bx,by,bw,10);ctx.fillStyle='#fff';ctx.fillRect(bx+bw*t-3,by-4,6,18);
+  text(ctx,'😈 VILLAIN',bx-8,by-2,'#ff2d55',11,'right');text(ctx,'HERO 🦸',bx+bw+8,by-2,'#3cff6a',11);text(ctx,hero>vil*1.5?'You are known as a HERO':vil>hero*1.5?'You are known as a VILLAIN':'Your reputation is mixed',CX,by+16,'#c8d0ff',11,'center');
+  const sec=(x,y,title,rows,col)=>{text(ctx,title,x,y,col,13);rows.forEach(([k,v],i)=>{text(ctx,k,x,y+18+i*15,'#9aa3c7',11,'left',false);text(ctx,String(v),x+238,y+18+i*15,'#e6e9f2',11,'right',false);});return y+24+rows.length*15;};
+  let y1=96;y1=sec(24,y1,`💰 FORTUNE — ${fortuneT(S.peak||C.credits)}`,[['Credits now',cr(C.credits)],['Highest ever',cr(Math.max(S.peak||0,C.credits))],['Trading profit',cr(S.tradeProfit)],['Best single trade',cr(S.bestTrade)],['Bounties earned',cr(S.bounties)],['Mission pay',cr(S.missionPay)],['Tonnes bought / sold',`${n(S.tBought)} / ${n(S.tSold)}`]],'#ffe45e');
+  y1=sec(24,y1,'🎯 MISSIONS',[['Completed',n(C.done)],['Failed (too late)',n(S.failed)],['Survivors rescued',n(C.rescued)],['Story: The Vorn Signal',C.storyDone?'COMPLETE ⭐':C.missions.some(m=>m.type==='story')?'in progress':'not started']],'#ff8a1c');
+  let y2=96;y2=sec(282,y2,`🦸 FAME — ${fameT(hero)}`,[['Hero points',n(hero)],['Pirates destroyed',n(S.k_pirate)],['Vorn aliens destroyed',n(S.k_alien)],['Mines and rocks cleared',n((S.k_mine||0)+(S.k_rock||0))]],'#3cff6a');
+  y2=sec(282,y2,`😈 INFAMY — ${infamyT(vil)}`,[['Villain points',n(vil)],['Legal status now',legalName(C.legal)],['Police / traders attacked',`${n(S.k_police)} / ${n(S.k_trader)}`],['Contraband sold (t)',n(S.contraband)]],'#ff2d55');
+  y2=sec(282,y2,'⚔️ COMBAT',[['Missiles fired',n(S.missiles)],['Near misses',n(S.nearMiss)],['Times destroyed',n(S.deaths)]],'#b45bd6');
+  let y3=96;y3=sec(540,y3,`🧭 EXPLORER — ${exploreT(vis)}`,[['Systems visited',`${vis} / ${GAL.length} (${Math.round(vis/GAL.length*100)}%)`],['Hyperspace jumps',n(S.jumps)],['Light years travelled',cr(S.ly)],['Distance flown',`${n(S.flown)} km`],['Time in flight',`${Math.floor((S.flightTime||0)/60)} min`]],'#3fe0ff');
+  y3=sec(540,y3,'🚀 SHIP',[['Flying',shipCls().name],['Ships owned',n((C.ships||[]).length)],['Upgrades bought',n(S.upgrades)],['Spent on repairs',cr(S.repairs)],['Hull',`${Math.round((1-(C.hull||0))*100)}%`]],'#e6e9f2');
+  y3=sec(540,y3,'🧮 MATHS',[['Puzzles answered',n(S.mAsked)],['Right',`${n(S.mRight)} (${S.mAsked?Math.round((S.mRight||0)/S.mAsked*100):0}%)`],['Best streak',n(S.mBest)]],'#ffe45e');
+  const ids=Object.keys(MEDALS),got=Object.keys(C.medals||{}).length,my=Math.max(y1,y2,y3)+4;text(ctx,`🏅 MEDALS ${got}/${ids.length}`,24,my,'#ffe45e',13);
+  ids.forEach((id,i)=>{const x=24+(i%3)*255,yy=my+18+Math.floor(i/3)*16,on=!!(C.medals||{})[id];text(ctx,on?MEDALS[id]:'🔒 '+MEDALS[id].replace(/^\S+\s/,''),x,yy,on?'#ffe45e':'#4a4f63',11,'left',false);});
+  button(ctx,B(CX-90,H-44,180,34,'✕ CLOSE',()=>{overlay=null;},{fs:13}));}
+ // ---------------- Nova's welcome briefing ----------------
+ let introI=0,introSpoke=-1,introT=0;
+ const INTRO=()=>{const n=C.opt.aiName||'NOVA',cmd=(env.names&&env.names[0])||'Commander';return[
+  ['👋',`Hello, Commander ${cmd}!`,`I'm ${n}, your ship's assistant. Welcome to Starlane Trader. Let me show you the key things before your first flight.`],
+  ['🌌','Your goal',`Become rich and famous across 160 star systems. Trade goods, take missions, hunt pirates and explore. Every success shows up in your Career record.`],
+  ['💰','Trading',`Buy goods cheaply and sell them where they're needed. Farming worlds sell food cheaply, and factory worlds pay well for it. I'll show what you paid, and whether a sale makes a profit or a loss.`],
+  ['🕹️','Flying',`Steer with the arrow keys or W A S D. Q and E turn left and right. R and F change speed, and Space fires the laser. Press P at any time to pause.`],
+  ['🛬','Docking',`To dock, slow right down and press Y to match the station's spin. Then fly gently into the glowing slot. A docking computer can do it for you.`],
+  ['🚀','Hyperspace',`Press G for the galaxy chart, pick a system within your fuel range, then press H to jump. Some systems have asteroid fields, minefields or even black holes.`],
+  ['🚨','Danger and the law',`Pirates attack traders. When you hear red alert, it's time to fight or flee, and I'll tell you where the enemy is. Smuggling or attacking the police makes you a fugitive, but amnesty missions can clear your name.`],
+  ['🧮','Your maths skills',`Sometimes I'll need your help with a calculation: fuel for a jump, cracking a canister code, or a traders' challenge. Get it right for a bonus!`],
+  ['🏆','Ready for launch',`Check your Career record any time with Z, and the pause menu has all the settings. Good luck, Commander. Press LAUNCH when you're ready!`]];};
+ function openIntro(){introI=0;introSpoke=-1;introT=0;overlay='intro';}
+ function renderIntro(ctx,dt){btns=[];const L=INTRO(),sl=L[introI];introT+=1/60;ctx.fillStyle='#02040e';ctx.fillRect(0,0,W,H);for(const[x,y,b]of bgStars){ctx.fillStyle=`rgba(255,255,255,${.25+b*.6})`;ctx.fillRect((x+introT*8*b)%W,y,1.5,1.5);}
+  if(introSpoke!==introI){introSpoke=introI;if(C.opt.voice&&typeof Speech!=='undefined'&&Speech.ok)try{Speech.say(sl[1]+'. '+sl[2],'tour');}catch(e){}}
+  const talking=typeof Speech!=='undefined'&&Speech.speaking&&Speech.speaking(),hx=150,hy=230;   // hologram
+  for(let k=3;k>=0;k--){ctx.strokeStyle=`rgba(63,224,255,${.15+k*.12})`;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(hx,hy+70,60+k*14+Math.sin(introT*2+k)*3,14+k*3,0,0,Math.PI*2);ctx.stroke();}
+  const gl=ctx.createRadialGradient(hx,hy,8,hx,hy,70);gl.addColorStop(0,'rgba(190,250,255,.95)');gl.addColorStop(.5,'rgba(63,224,255,.45)');gl.addColorStop(1,'rgba(63,224,255,0)');ctx.fillStyle=gl;ctx.beginPath();ctx.arc(hx,hy,70+Math.sin(introT*3)*4,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#02121c';ctx.fillRect(hx-20,hy-10,12,5);ctx.fillRect(hx+8,hy-10,12,5);for(let b=0;b<7;b++){const hgt=talking?6+Math.abs(Math.sin(introT*12+b*1.7))*18:4;ctx.fillStyle='#02121c';ctx.fillRect(hx-24+b*7,hy+12-hgt/2,5,hgt);}
+  text(ctx,(C.opt.aiName||'NOVA').toUpperCase(),hx,hy+96,'#3fe0ff',16,'center');
+  ctx.fillStyle='rgba(11,16,40,.9)';ctx.strokeStyle='#3fe0ff';ctx.lineWidth=2;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(290,110,480,300,14);else ctx.rect(290,110,480,300);ctx.fill();ctx.stroke();
+  text(ctx,sl[0],320,130,'#fff',40);text(ctx,sl[1],380,140,'#ffe45e',22);wrap(ctx,sl[2],320,200,430,24,'#e6e9f2',16);
+  L.forEach((_,i)=>{ctx.fillStyle=i===introI?'#3fe0ff':'#2a3360';ctx.beginPath();ctx.arc(CX-L.length*9+i*18,440,5,0,Math.PI*2);ctx.fill();});
+  if(introI>0)button(ctx,B(160,470,150,40,'◀ BACK',()=>{introI--;},{fs:14}));button(ctx,B(CX-90,470,180,40,introI<L.length-1?'NEXT ▶':'🚀 LET’S GO!',()=>{if(introI<L.length-1)introI++;else closeIntro();},{fs:15,bg:'rgba(30,80,50,.92)'}));
+  button(ctx,B(W-230,470,180,40,'SKIP INTRO',()=>closeIntro(),{fs:13}));text(ctx,'Space / → next · ← back · Esc skip',CX,524,'#4a5180',11,'center');}
+ function closeIntro(){overlay=null;C.introSeen=true;try{if(typeof Speech!=='undefined')Speech.stop();}catch(e){}persist();}
  function renderArrival(ctx){btns=[];ctx.fillStyle='rgba(2,4,14,.88)';ctx.fillRect(0,0,W,H);const h=Math.min(440,150+arrival.length*48);const y0=(H-h)/2;ctx.fillStyle='#0b1028';ctx.strokeStyle='#3cff6a';ctx.lineWidth=3;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(90,y0,620,h,16);else ctx.rect(90,y0,620,h);ctx.fill();ctx.stroke();
   const good=arrival.filter(a=>a.ok&&a.r).reduce((t,a)=>t+a.r,0);text(ctx,arrival.some(a=>a.ok)?'🎉 MISSION REPORT':'📋 ARRIVAL REPORT',CX,y0+18,'#3cff6a',24,'center');let y=y0+60;
   for(const a of arrival.slice(0,6)){y=wrap(ctx,a.t,120,y,480,18,a.ok?'#e6e9f2':'#ff8a1c',15);if(a.r)text(ctx,`+${a.r} Cr`,690,y-18,'#ffe45e',16,'right');y+=10;}
@@ -933,6 +988,7 @@ function makeStarlane(env){
    tg.forEach(([l,on,fn,d],i)=>{const x=40+(i%2)*365,y=174+Math.floor(i/2)*51;ctx.fillStyle='rgba(255,255,255,.045)';ctx.fillRect(x,y-5,355,47);text(ctx,l,x+10,y,'#e6e9f2',14);wrap(ctx,d,x+10,y+20,240,13,'#9aa3c7',11);button(ctx,B(x+262,y+2,84,28,on?'ON':'OFF',fn,{bg:on?'rgba(30,80,50,.92)':'rgba(60,30,40,.92)',fs:13}));});
    text(ctx,`🤖 Assistant: ${C.opt.aiName||'NOVA'}`,60,436,'#3fe0ff',15);button(ctx,B(300,430,150,28,'✎ RENAME',()=>{const n=window.prompt('Give your ship’s assistant a name:',C.opt.aiName||'NOVA');if(n&&n.trim()){C.opt.aiName=n.trim().slice(0,14);persist();say('hello',`Hello commander. I’m ${C.opt.aiName}. Ready when you are.`,1);}},{fs:12}));button(ctx,B(460,430,150,28,'🔊 TEST VOICE',()=>say('test',`${C.opt.aiName||'NOVA'} here. Voice check complete.`,1),{fs:12}));
    {const sp=C.opt.subPos,lab=typeof sp==='object'?'CUSTOM':String(sp||'top').toUpperCase();button(ctx,B(616,430,144,28,`📍 SUBS: ${lab}`,()=>{const L=['top','bottom','left','right'];const i=typeof sp==='object'?-1:L.indexOf(sp);C.opt.subPos=L[(i+1)%4];persist();},{fs:11}));}
+   button(ctx,B(60,400,170,24,'🏆 CAREER RECORD',()=>{overlay='career';},{fs:10}));button(ctx,B(240,400,150,24,'▶ REPLAY INTRO',()=>openIntro(),{fs:10}));
    button(ctx,B(616,400,144,24,'✋ DRAG TO PLACE',()=>{overlay=null;aiGap.sample=0;say('sample','Drag this box to wherever you would like my subtitles.',0);if(aiLine)aiLine.until=performance.now()/1000+12;},{fs:10}));
    text(ctx,`${here().name} · Day ${C.day} · ${Math.floor(C.credits)} Cr · ${rankOf(C.killPts)} · ${legalName(C.legal)}`,CX,474,'#c8d0ff',14,'center');
    text(ctx,'P or Esc pauses · F2 cockpit screens · L roll lock · Y match spin · N next target',CX,496,'#9aa3c7',11,'center');}
@@ -941,7 +997,7 @@ function makeStarlane(env){
     button(ctx,B(CX-120,214,240,36,'💾 SAVE FIRST',()=>{saveGame();},{fs:14}));}
    const y0=unsaved()?272:160;
    button(ctx,B(90,y0,300,70,'⏪ BACK TO MY LAST SAVE',()=>{restartFromSave();},{fs:15}));wrap(ctx,'Carry on from the last time you saved (or docked).',90,y0+78,300,16,'#9aa3c7',12);
-   button(ctx,B(410,y0,300,70,'🆕 NEW COMMANDER',()=>{const go=()=>{C=newCommander();overlay=null;mode='docked';tab='status';scene=null;persist();syncScore();msg('A NEW CAREER BEGINS — 100 CREDITS',3,'#3cff6a');};if(typeof Family!=='undefined')Family.guard('Start a new Starlane commander',go);else go();},{fs:15,bg:'rgba(90,40,30,.92)'}));
+   button(ctx,B(410,y0,300,70,'🆕 NEW COMMANDER',()=>{const go=()=>{C=newCommander();overlay=null;mode='docked';tab='status';scene=null;persist();syncScore();msg('A NEW CAREER BEGINS — 100 CREDITS',3,'#3cff6a');setTimeout(openIntro,400);};if(typeof Family!=='undefined')Family.guard('Start a new Starlane commander',go);else go();},{fs:15,bg:'rgba(90,40,30,.92)'}));
    wrap(ctx,'Start again from scratch: 100 credits, a basic ship, day 1.',410,y0+78,300,16,'#9aa3c7',12);
    button(ctx,B(CX-100,y0+140,200,38,'✕ CANCEL',()=>{menuTab='main';},{fs:14}));}
   else if(menuTab==='controls'){text(ctx,'Click a key to change it, then press the new key.',CX,94,'#9aa3c7',13,'center');
@@ -972,7 +1028,7 @@ function makeStarlane(env){
  const hypV=t=>t<1?.05+t*.9:.95+(t-1)*1.2;
  G.update=(dt)=>{clock+=dt;FX.update(dt);msgs.forEach(m=>m.d-=dt);msgs=msgs.filter(m=>m.d>0);if(lastHit>0)lastHit-=dt*2;if(laserShow>0)laserShow-=dt;pollPad();
   for(const b of booms)b.t+=dt;booms=booms.filter(b=>b.t<(b.spark?.8:2.4));
-  if(overlay==='menu'||overlay==='maths')return;
+  if(overlay==='menu'||overlay==='maths'||overlay==='career'||overlay==='intro')return;
   if(mode==='dockScene'||mode==='launchScene'){scene.t+=dt;if(station){station.o.r=rot(station.o.r,station.o.f,station.spin*dt);station.o.u=rot(station.o.u,station.o.f,station.spin*dt);ortho(station.o);}
    if(mode==='dockScene'&&scene.t>DOCK_OUT+DOCK_IN)endDockScene();else if(mode==='launchScene'&&scene.t>LAUNCH_IN+LAUNCH_OUT)endLaunchScene();return;}
   if(mode==='launch'){anim+=dt;if(anim>1.6){mode='flight';msg(`LEAVING ${here().name.toUpperCase()} STATION`,3,'#3fe0ff');}return;}
@@ -983,6 +1039,7 @@ function makeStarlane(env){
   if(hyperT>0&&hyperT<1.6)hypMove((1.6-hyperT)*.18,dt);
   if(mode==='flight'&&!overlay){for(let i=0;i<timeScale&&mode==='flight';i++)flight(dt);}};
  G.render=ctx=>{btns=[];tips=[];
+  if(overlay==='intro'){renderIntro(ctx);return;}if(overlay==='career'){renderCareer(ctx);return;}
   if(mode==='docked'){renderDocked(ctx);if(overlay==='maths'&&mathQ){renderMath(ctx);return;}drawAI(ctx,H-84-0,true);if(overlay==='arrival')renderArrival(ctx);if(overlay==='menu')renderMenu(ctx);drawTip(ctx);return;}
   if(mode==='dockScene'||mode==='launchScene'){renderScene(ctx);if(overlay==='menu')renderMenu(ctx);return;}
   if(mode==='launch'||mode==='dockAnim'){tunnel(ctx,anim*(mode==='launch'?1:-1)+5,6,'#3fe0ff');dashboard(ctx);btns=[];text(ctx,mode==='launch'?'LAUNCHING…':'DOCKING…',CX,VH-40,'#3fe0ff',18,'center');return;}
@@ -1000,6 +1057,9 @@ function makeStarlane(env){
   if(mode==='dockScene'||mode==='launchScene'){if(overlay!=='menu')skipScene();return;}
   if(overlay==='menu')return;
   if(overlay==='reset'){if(k==='Escape')overlay=null;return;}
+  if(overlay==='intro'){const L=INTRO().length;if(k===' '||k==='Enter'||k==='ArrowRight'){if(introI<L-1)introI++;else closeIntro();}else if(k==='ArrowLeft'&&introI>0)introI--;else if(k==='Escape')closeIntro();return;}
+  if(overlay==='career'){if(k==='Escape'||k==='z'||k==='Z'||k==='Enter')overlay=null;return;}
+  if(!overlay&&(mode==='docked'||mode==='flight')&&(C.opt.keys.career||['z']).some(x=>x.toLowerCase()===String(k).toLowerCase())){overlay='career';return;}
   if(overlay==='maths'&&mathQ){const n='1234'.indexOf(k);if(n>=0&&mathQ.picked===null&&mathQ.opts[n])pickMath(mathQ.opts[n]);else if((k==='Enter'||k===' ')&&mathQ.picked!==null)finishMath();return;}
   if(mode==='docked'){const n='1234567'.indexOf(k);if(n>=0){tab=TABS[n][0];sel=0;return;}
    if(tab==='market'){if(k==='ArrowUp')sel=(sel+GOODS.length-1)%GOODS.length;else if(k==='ArrowDown')sel=(sel+1)%GOODS.length;else if(k==='ArrowRight'||k==='+'||k==='=')buy(sel,1);else if(k==='ArrowLeft'||k==='-')sellG(sel,1);else if(k==='Enter')buy(sel,999);return;}
@@ -1011,7 +1071,7 @@ function makeStarlane(env){
   const act=ACTIONS.find(a=>!a[3]&&(C.opt.keys[a[0]]||[]).includes(k));
   if(overlay){if(k==='Tab')chartMode=chartMode==='galaxy'?'local':'galaxy';else if(act&&['chart','cargo','missions'].includes(act[0]))overlay=null;return;}
   if('1234'.includes(k)&&k.length===1){view=['front','rear','left','right'][+k-1];camMode='cockpit';return;}
-  if(!act)return;({rlock:toggleRollLock,spin:matchSpin,scan:nextTarget,mfd:()=>{C.opt.mfd=!C.opt.mfd;persist();},tips:()=>{C.opt.tips=!C.opt.tips;persist();msg(C.opt.tips?'HOVER HELP ON':'HOVER HELP OFF',1.5,'#3fe0ff');},missile:fireMissile,ecm,bomb,jump:toggleJump,dock:toggleDock,hyper:startHyper,time:cycleTime,view:nextView,cam:()=>{camMode=camMode==='ext'?'cockpit':'ext';},chart:()=>{overlay='chart';chartMode='galaxy';},cargo:()=>{overlay='cargo';},missions:()=>{overlay='missions';},pod:ejectPod})[act[0]]();};
+  if(!act)return;({career:()=>{overlay='career';},rlock:toggleRollLock,spin:matchSpin,scan:nextTarget,mfd:()=>{C.opt.mfd=!C.opt.mfd;persist();},tips:()=>{C.opt.tips=!C.opt.tips;persist();msg(C.opt.tips?'HOVER HELP ON':'HOVER HELP OFF',1.5,'#3fe0ff');},missile:fireMissile,ecm,bomb,jump:toggleJump,dock:toggleDock,hyper:startHyper,time:cycleTime,view:nextView,cam:()=>{camMode=camMode==='ext'?'cockpit':'ext';},chart:()=>{overlay='chart';chartMode='galaxy';},cargo:()=>{overlay='cargo';},missions:()=>{overlay='missions';},pod:ejectPod})[act[0]]();};
  const ptrs={};
  G.onPointer=(type,x,y,id,kind)=>{if(kind==='touch'||kind==='pen')touchSeen=true;if(kind==='mouse'){hover={x,y};if(type==='move'&&!ptrs[id])return;}
   if(type==='down'&&G.intro&&G.tap){G.tap();return;}
@@ -1029,9 +1089,10 @@ function makeStarlane(env){
  G.onEnd=why=>{stopMusic();if(mode==='dead')return;if(mode==='hyper')arrive();if(mode==='launchScene')endLaunchScene();if(mode==='launch')mode='flight';
   if(mode==='dockScene'||mode==='dockAnim'){mode='docked';persist();return;}
   if(mode==='flight'){if(planet&&!interdicted)saveGame();else{finishDock();mode='docked';}return;}if(mode==='docked')persist();};
- G._dbg={get C(){return C;},get P(){return P;},get mode(){return mode;},get station(){return station;},get ships(){return ships;},get scene(){return scene;},get planet(){return planet;},get moons(){return moons;},get suns(){return suns;},get timeScale(){return timeScale;},get overlay(){return overlay;},get bh(){return bh;},get redOn(){return redOn;},get lockOn(){return lockOn;},get jamT(){return jamT;},get aiRect(){return aiRect;},say,makeMathQ,kill,get msgs(){return msgs;},get tgt(){return radarTgt;},get mathQ(){return mathQ;},get rollLock(){return rollLock;},get aiLine(){return aiLine;},buyShip,storyOffer,accept,missionSpawns,finish:()=>finishDock(),get tips(){return tips;},
+ G._dbg={get C(){return C;},get P(){return P;},get mode(){return mode;},get station(){return station;},get ships(){return ships;},get scene(){return scene;},get planet(){return planet;},get moons(){return moons;},get suns(){return suns;},get timeScale(){return timeScale;},get overlay(){return overlay;},get bh(){return bh;},get redOn(){return redOn;},openIntro,careerScore,get lockOn(){return lockOn;},get jamT(){return jamT;},get aiRect(){return aiRect;},say,makeMathQ,kill,get msgs(){return msgs;},get tgt(){return radarTgt;},get mathQ(){return mathQ;},get rollLock(){return rollLock;},get aiLine(){return aiLine;},buyShip,storyOffer,accept,missionSpawns,finish:()=>finishDock(),get tips(){return tips;},
   set:(k,v)=>{({mode:()=>mode=v,tab:()=>tab=v,overlay:()=>overlay=v,view:()=>view=v,camMode:()=>camMode=v})[k]();},launch,startHyper,toggleDock,spawn,buy,buyEq,accept,board,arrive:()=>arrive(),flight,kill:sh=>kill(sh,true),dock:()=>docked(),saveGame,hurt:(d)=>hurt(d,P.o.f),get tab(){return tab;}};
  if(C.flight&&C.flight.sys===C.sys&&GAL[C.sys])restoreFlight();
+ if(!C.introSeen)setTimeout(()=>{if(mode==='docked'&&!overlay)openIntro();},600);
  if(env.store)persist();
  const legend=['sparrow','raven','hauler','warden'].map(k=>({name:SHIPS[k].name.toUpperCase(),pts:SHIPS[k].role.toUpperCase(),color:SHIPS[k].color,draw:(c,x,y,tt)=>{const m=MODELS[k],a=tt*1.2,o={r:[Math.cos(a),0,-Math.sin(a)],u:[0,1,0],f:[Math.sin(a),0,Math.cos(a)]};c.strokeStyle=SHIPS[k].color;c.lineWidth=1.2;c.beginPath();
    const pts=m.pts.map(p=>{const w=toWorld(o,p);const z=w[2]+320,s=70/z;return[x+w[0]*s*1.2,y-(w[1]*Math.cos(.4)-w[2]*Math.sin(.4))*s*1.2];});for(const e of m.edges){c.moveTo(...pts[e.a]);c.lineTo(...pts[e.b]);}c.stroke();}}));

@@ -1,7 +1,21 @@
 {
- "version": "2.24",
+ "version": "2.25",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.25",
+   "date": "9 November 2026",
+   "kids": [
+    "🏆 Starlane Trader: a Career Record — your fortune, fame, infamy, exploring, ship, maths and medals (press Z)",
+    "🤖 Nova now gives you a spoken welcome briefing before your first flight"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🚀 Starlane Trader: Career Record with fortune, fame and infamy (hero–villain balance), combat, explorer, ship, missions and maths statistics, titles, a Commander score and all medals; 4 new medals; Nova’s spoken intro (replay from the pause menu or Status)."
+   ]
+  },
   {
    "v": "2.24",
    "date": "9 November 2026",
@@ -144,22 +158,6 @@
    "tags": [],
    "items": [
     "🔔 When online, the app checks for a new version and shows what has changed, with simple steps to save and update."
-   ]
-  },
-  {
-   "v": "2.15",
-   "date": "8 November 2026",
-   "kids": [
-    "🧩 A brand-new puzzle game in the secret arcade…",
-    "👥 Play with a friend, brother or sister — two-player modes!",
-    "🏆 Top-5 high-score tables with your name"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "ⓘ Hover help: hover over (or tap ⓘ beside) any setting in Admin, the Parent dashboard and Voices, and the main buttons, to see what it does.",
-    "🤫 The secret surprise now has two-player modes and one more game…"
    ]
   }
  ]
