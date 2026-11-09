@@ -1,7 +1,25 @@
 {
- "version": "2.29",
+ "version": "2.30",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.30",
+   "date": "9 November 2026",
+   "kids": [
+    "🎯 Starlane: lock on with missiles, aim at enemy engines or weapons — and hire a wingman!",
+    "🤝 Earn the trust of the Federation, the Traders’ Guild… or the pirates",
+    "🔭 Survey planets, moons and stars, and sell your discoveries",
+    "🛰️ A new story: The Lost Freighter",
+    "🎓 Take the Academy Challenge at any station — 8 questions against the clock",
+    "🎵 Sound comes from where things are, and the music builds as danger grows"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🚀 Starlane Trader: phone/tablet/computer profiles (phones start in Retro with lighter effects); 3D positional sound, fly-bys, muffled cockpit and three-layer music; missile lock-on, subsystem targeting, wingmen and flanking pirates; faction reputation; prices that react to trading; planet/moon/star surveys and a codex; story “The Lost Freighter”; route-risk probability question, Academy Challenge on Focus topics, and a Parent dashboard setting for how often maths appears; generated planet terrain in Modern."
+   ]
+  },
   {
    "v": "2.29",
    "date": "9 November 2026",
@@ -144,23 +162,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: cockpit cargo and mission screens; full 3D lighting and 3D cockpit on by default; varied, animated cut scenes; TIPS key; stars, moons, planet and black holes on the scanner; mission report on docking; trade hints and local news that change prices; damage persists with repair costs and a damage report; credits on every station screen; asteroid fields, minefields and black holes; escape-pod rescues and medals."
-   ]
-  },
-  {
-   "v": "2.20",
-   "date": "9 November 2026",
-   "kids": [
-    "🚀 Starlane Trader: sit inside a 3D cockpit with side windows and a rear-view mirror",
-    "🪐 Planets with oceans, continents, clouds and glowing atmospheres — and they turn!",
-    "🛸 Four kinds of space station, and every ship looks a little different",
-    "💥 Damaged ships smoke and spark — and your canopy cracks if you take hits",
-    "↺ Restart from your last save, or start a whole new career"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🚀 Starlane Trader: tidier pause menu with Restart (back to last save, or new commander — with a warning if not saved); optional 3D cockpit; textured, rotating planets with atmospheres; four station designs with lights; unique ship fittings; visible damage on ships and on your own canopy."
    ]
   }
  ]

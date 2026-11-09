@@ -4,16 +4,17 @@
 // placed left or right, a hangar soundscape, and music that is calm when cruising and builds to a battle theme at red alert.
 // Muted whenever the arcade's sound button is off.
 const StarAudio=(()=>{
- let ac=null,master=null,sfx=null,mus=null,amb=null,verb=null,noiseBuf=null,style='retro',muteNow=false;
+ let cab=null,ac=null,master=null,sfx=null,mus=null,amb=null,verb=null,noiseBuf=null,style='retro',muteNow=false;
  const muted=()=>typeof stats!=='undefined'&&stats&&stats.arcade&&!!stats.arcade.mute;
  function A(){if(!ac){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;ac=new C();master=ac.createGain();master.gain.value=muted()?0:.9;master.connect(ac.destination);
    // a simple echo for space and hangar ambience
    verb=ac.createDelay(1);verb.delayTime.value=.23;const fb=ac.createGain();fb.gain.value=.32;const vf=ac.createBiquadFilter();vf.type='lowpass';vf.frequency.value=2200;verb.connect(vf);vf.connect(fb);fb.connect(verb);const vo=ac.createGain();vo.gain.value=.5;vf.connect(vo);vo.connect(master);
-   sfx=ac.createGain();sfx.gain.value=.8;sfx.connect(master);mus=ac.createGain();mus.gain.value=.0;mus.connect(master);amb=ac.createGain();amb.gain.value=.0;amb.connect(master);
+   cab=ac.createBiquadFilter();cab.type='lowpass';cab.frequency.value=20000;cab.connect(master);sfx=ac.createGain();sfx.gain.value=.8;sfx.connect(cab);mus=ac.createGain();mus.gain.value=.0;mus.connect(master);amb=ac.createGain();amb.gain.value=.0;amb.connect(master);
    const n=ac.sampleRate*2;noiseBuf=ac.createBuffer(1,n,ac.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;}
   if(ac.state==='suspended')ac.resume().catch(()=>{});return ac;}
  const now=()=>ac.currentTime;
- function panNode(p){const s=ac.createStereoPanner?ac.createStereoPanner():null;if(s)s.pan.value=Math.max(-1,Math.min(1,p||0));return s;}
+ function panNode(p){if(Array.isArray(p)&&ac.createPanner){const n=ac.createPanner();n.panningModel='HRTF';n.distanceModel='inverse';n.refDistance=700;n.rolloffFactor=.9;const x=p[0],y=p[1],z=-p[2];if(n.positionX){n.positionX.value=x;n.positionY.value=y;n.positionZ.value=z;}else n.setPosition(x,y,z);return n;}
+  const s=ac.createStereoPanner?ac.createStereoPanner():null;if(s)s.pan.value=Math.max(-1,Math.min(1,Array.isArray(p)?p[0]/1500:(p||0)));return s;}
  function out(node,p,dest,wet){const s=panNode(p);if(s){node.connect(s);s.connect(dest||sfx);if(wet)s.connect(verb);}else{node.connect(dest||sfx);if(wet)node.connect(verb);}}
  function env(g,t0,a,peak,d){g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(Math.max(.0002,peak),t0+a);g.gain.exponentialRampToValueAtTime(.0001,t0+a+d);}
  function osc(type,f0,f1,dur,vol,p,o={}){if(!A()||muteNow)return;const t=now(),o1=ac.createOscillator(),g=ac.createGain();o1.type=type;o1.frequency.setValueAtTime(f0,t);if(f1)o1.frequency.exponentialRampToValueAtTime(Math.max(20,f1),t+dur);env(g,t,o.a||.005,vol,dur);o1.connect(g);out(g,p,o.dest,o.wet);o1.start(t);o1.stop(t+dur+.05);}
@@ -24,6 +25,8 @@ const StarAudio=(()=>{
  function enemyLaser(p=0,dist=1){const v=Math.max(.15,1-dist);if(style==='original'){osc('square',700,300,.08,.03*v,p);return;}osc('sawtooth',800,180,.13,.035*v,p,{wet:style==='modern'});}
  function boom(p=0,dist=0,size=1){const v=Math.max(.08,1-dist)*Math.min(1.6,size);if(style==='original'){noise(.5,.12*v,p,'lowpass',1500,100);return;}
   noise(1.1*size,.16*v,p,'lowpass',4200,90,{wet:true});osc('sine',110,28,.6*size,.25*v,p);if(style==='modern'){noise(.35,.08*v,p,'highpass',3000,800);setTimeout(()=>noise(.8,.05*v,p,'lowpass',900,80,{wet:true}),120);}}
+ function flyby(l,rel=300){if(!A()||muteNow)return;const v=Math.min(1,rel/500);noise(.9,.07*v,l,'bandpass',2400,500,{q:1.2,a:.25,wet:true});osc('sawtooth',260+rel*.4,90,.9,.02*v,l,{a:.2});}
+ function cabin(inside){if(!A())return;cab.frequency.setTargetAtTime(inside?5200:20000,now(),.2);}
  function hit(){if(style==='original'){noise(.15,.1,0,'lowpass',2000,300);return;}noise(.25,.14,0,'bandpass',1800,500,{q:3});osc('square',220,90,.2,.05,0);if(style==='modern')osc('sine',60,35,.3,.18,0);}
  function shieldHit(){osc('sine',520,260,.25,.06,0,{wet:true});}
  function pickup(){osc('triangle',660,1320,.18,.06,0);setTimeout(()=>osc('triangle',990,1980,.16,.05,0),90);}
@@ -47,33 +50,30 @@ const StarAudio=(()=>{
   const g1=ac.createGain();g1.gain.value=.25;o1.connect(g1);o2.connect(g1);n.connect(f);f.connect(g1);g1.connect(amb);o1.start();o2.start();n.start();hang=[o1,o2,n];amb.gain.setTargetAtTime(muteNow?0:.18,now(),1);
   const clank=()=>{if(!hang)return;if(!muteNow){const p=Math.random()*1.6-.8;if(Math.random()<.6){noise(.15,.05,p,'bandpass',600+Math.random()*1400,300,{q:5,wet:true,dest:amb});osc('square',90+Math.random()*80,60,.12,.02,p,{dest:amb});}else osc('sine',900+Math.random()*600,880,.5,.012,p,{dest:amb,wet:true});}clankT=setTimeout(clank,1500+Math.random()*4000);};clankT=setTimeout(clank,1200);}
  // ---------------- music ----------------
- let mState='off',timer=null,nextT=0,step=0,cg=null,bg=null;
+ let mState='off',timer=null,nextT=0,step=0,cg=null,tg=null,bg=null;
  const NOTE=n=>440*Math.pow(2,(n-69)/12);
  const CHORDS=[[57,60,64],[53,57,60],[48,52,55],[55,59,62]];   // Am F C G
  function voice(dest,type,f,t,dur,vol,a=.01,cut=0){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+dur);
   if(cut){const fl=ac.createBiquadFilter();fl.type='lowpass';fl.frequency.value=cut;o.connect(fl);fl.connect(g);}else o.connect(g);g.connect(dest);o.start(t);o.stop(t+a+dur+.05);}
  function drum(dest,kind,t,vol){if(kind==='kick'){const o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(40,t+.18);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+.25);o.connect(g);g.connect(dest);o.start(t);o.stop(t+.3);return;}
   const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();s.buffer=noiseBuf;f.type=kind==='hat'?'highpass':'bandpass';f.frequency.value=kind==='hat'?7000:1800;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+(kind==='hat'?.05:.18));s.connect(f);f.connect(g);g.connect(dest);s.start(t,Math.random());s.stop(t+.25);}
- function schedule(){if(!ac)return;while(nextT<now()+.25){const t=nextT;
-   if(mState==='calm'){const beat=step%16,ch=CHORDS[Math.floor(step/16)%4],pad=style==='original'?'square':'triangle';
-    if(beat===0)ch.forEach((n,i)=>voice(cg,pad,NOTE(n-12),t,7.5,style==='original'?.018:.035,1.6,style==='modern'?900:1400));
-    if(style!=='original'&&(beat%4===2)&&Math.random()<.7){const pent=[69,72,74,76,79,81];voice(cg,'sine',NOTE(pent[Math.floor(Math.random()*pent.length)]),t,1.6,.03,.01);}
-    nextT+=.5;}
-   else if(mState==='battle'){const s=step%16,root=[45,45,41,43][Math.floor(step/16)%4];
-    voice(bg,style==='original'?'square':'sawtooth',NOTE(root-12+(s%8===6?12:0)),t,.12,.05,.005,style==='modern'?700:1100);
-    if(s%4===0)drum(bg,'kick',t,.35);if(s%8===4)drum(bg,'snare',t,.16);if(style!=='original')drum(bg,'hat',t,.035);
-    if(s%2===0){const arp=[0,3,7,12,7,3][Math.floor(s/2)%6];voice(bg,'square',NOTE(root+12+arp),t,.09,.016,.003,2600);}
-    nextT+=60/132/4;}
-   else nextT+=.25;step++;}}
+ // one clock (16th notes at 120 bpm) drives all three layers; the state only changes how loud each layer is
+ function schedule(){if(!ac)return;const sixteenth=.125;while(nextT<now()+.3){const t=nextT,s=step%32,bar=Math.floor(step/32)%4,ch=CHORDS[bar],root=ch[0]-12,orig=style==='original';
+   if(s===0)ch.forEach(n=>voice(cg,orig?'square':'triangle',NOTE(n-12),t,3.6,orig?.016:.032,1.2,style==='modern'?900:1400));
+   if(!orig&&s%8===4&&Math.random()<.6){const pent=[69,72,74,76,79,81];voice(cg,'sine',NOTE(pent[Math.floor(Math.random()*pent.length)]),t,1.4,.028,.01);}
+   if(s%4===0)voice(tg,orig?'square':'sawtooth',NOTE(root-12),t,.2,.045,.005,style==='modern'?500:800);if(s%8===6)voice(tg,'sine',NOTE(root+7),t,.3,.02,.01);
+   if(s%8===0)drum(bg,'kick',t,.32);if(s%16===8)drum(bg,'snare',t,.15);if(!orig&&s%2===0)drum(bg,'hat',t,.03);if(s%2===0){const arp=[0,3,7,12,7,3][Math.floor(s/2)%6];voice(bg,'square',NOTE(root+24+arp),t,.08,.014,.003,2600);}
+   nextT+=sixteenth;step++;}}
  function music(state){if(!A())return;if(state===mState)return;const t=now();
-  if(!cg){cg=ac.createGain();cg.gain.value=0;cg.connect(mus);bg=ac.createGain();bg.gain.value=0;bg.connect(mus);}
+  if(!cg){cg=ac.createGain();cg.gain.value=0;cg.connect(mus);tg=ac.createGain();tg.gain.value=0;tg.connect(mus);bg=ac.createGain();bg.gain.value=0;bg.connect(mus);}
   if(mState==='off'&&state!=='off'){nextT=t+.1;step=0;}
-  mState=state;mus.gain.setTargetAtTime(state==='off'||muteNow?0:.5,t,.6);cg.gain.setTargetAtTime(state==='calm'?.9:0,t,state==='battle'?.25:1.5);bg.gain.setTargetAtTime(state==='battle'?1:0,t,state==='battle'?.25:1.5);
+  mState=state;const lv={off:[0,0,0],calm:[.9,0,0],tension:[.75,.85,0],battle:[.5,1,1]}[state]||[0,0,0],tc=state==='battle'?.2:1.2;
+  mus.gain.setTargetAtTime(state==='off'||muteNow?0:.5,t,.6);cg.gain.setTargetAtTime(lv[0],t,tc);tg.gain.setTargetAtTime(lv[1],t,tc);bg.gain.setTargetAtTime(lv[2],t,tc);
   if(!timer)timer=setInterval(schedule,90);if(state==='off'){setTimeout(()=>{if(mState==='off'&&timer){clearInterval(timer);timer=null;}},3000);}}
  // ---------------- control ----------------
  function tick(){if(!ac)return;const m=muted();if(m!==muteNow){muteNow=m;master.gain.setTargetAtTime(m?0:.9,now(),.05);}}
  function setStyle(s){if(s===style)return;style=s;if(eng){engine(false);}}
  function stopAll(){engine(false);hangar(false);music('off');}
  function suspend(on){if(!ac)return;if(on)ac.suspend().catch(()=>{});else ac.resume().catch(()=>{});}
- return{laser,enemyLaser,boom,hit,shieldHit,pickup,clamps,gear,alarm,click,jump,engine,hangar,music,tick,setStyle,stopAll,suspend,get style(){return style;},get state(){return mState;}};
+ return{flyby,cabin,laser,enemyLaser,boom,hit,shieldHit,pickup,clamps,gear,alarm,click,jump,engine,hangar,music,tick,setStyle,stopAll,suspend,get style(){return style;},get state(){return mState;}};
 })();
