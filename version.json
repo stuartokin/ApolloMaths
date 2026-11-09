@@ -1,7 +1,21 @@
 {
- "version": "2.37",
+ "version": "2.38",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.38",
+   "date": "9 November 2026",
+   "kids": [
+    "🪑 Starlane: sit in your normal cockpit inside the station — every control where it is in flight, looking out at the shuttle bay"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🚀 Starlane Trader: a second way to sit in the cockpit at a station — “Cockpit: flight controls” shows the flight cockpit exactly as in flight (console screens, switch wings, mirror and side windows, widescreen in full screen) looking into the hangar. Weapons and flight systems are safe while docked; view, camera, map, missions, hold, tips and menu work; LAUNCH gives the pre-flight warning first. The pre-flight view is still there, and you can swap between them."
+   ]
+  },
   {
    "v": "2.37",
    "date": "9 November 2026",
@@ -148,22 +162,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: live attract screen cycling Original/Retro/Modern; Modern style and Modern (mouse) controls by default, with boost and sideways thrusters; nebula backdrops, lens flare, ocean shine, night-side city lights, 3D docking/launch exteriors; radio chatter; market price-trend and route-estimate maths; reduced motion and colour-safe radar; automatic switch to Retro if Modern is too slow."
-   ]
-  },
-  {
-   "v": "2.28",
-   "date": "9 November 2026",
-   "kids": [
-    "🚀 Starlane Trader: in MODERN style the cockpit’s side windows and mirror now show real 3D",
-    "📡 A new holographic 3D radar (or keep the classic one) — zoom with [",
-    "🗺️ A 3D star map you can spin and zoom, with a route planner for long trips"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🚀 Starlane Trader: Modern cockpit with 3D side windows and mirror, glass reflections, holographic edges and sun glints; Holo 3D radar (or Classic) with 5/10/25 km range; 3D star map with colour filters (economy, danger, tech, visited) and a shortest-route planner."
    ]
   }
  ]

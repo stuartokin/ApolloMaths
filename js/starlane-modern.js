@@ -264,24 +264,28 @@ const StarModern=(()=>{
   for(const[k,g]of hobjs)if(!live.has(k)){hs.remove(g);hobjs.delete(k);}
   hs.traverse(x=>{if(x.userData&&x.userData.blink!==undefined)x.visible=Math.sin(A.t*4+x.userData.blink)>0;});
   const C2=A.CAM,r=M(C2.r),u=M(C2.u),f=M(C2.f).map(q=>-q),p=M(C2.pos);hcam.matrix.set(r[0],u[0],f[0],p[0],r[1],u[1],f[1],p[1],r[2],u[2],f[2],p[2],0,0,0,1);hcam.matrixWorld.copy(hcam.matrix);hcam.matrixWorldInverse.copy(hcam.matrix).invert();
-  const k=Math.max(1,Math.min(ctx.canvas.width/W,1920/W)),w=Math.round(W*quality.pr*k),h=Math.round(H*quality.pr*k);if(gl.width!==w||gl.height!==h){R.setSize(w,h,false);comp.setSize(w,h);bloom.resolution.set(w,h);}R.setScissorTest(false);R.setViewport(0,0,w,h);
-  {const sc=w/W,ppx=(A.CX??W/2)*sc,ppy=(A.CY??H/2)*sc,foc=A.FOC*sc,n=hcam.near;hcam.projectionMatrix.makePerspective(-ppx/foc*n,(w-ppx)/foc*n,ppy/foc*n,-(h-ppy)/foc*n,n,hcam.far);hcam.projectionMatrixInverse.copy(hcam.projectionMatrix).invert();}
-  if(A.pit){const key=A.W+'x'+A.VH+'x'+A.CY+'|';if(!pit||pitKey!==key){if(pit&&pit.parent)pit.parent.remove(pit);pitLights=[];pitGlow=[];pit=buildPit(A,null);pitKey=key;}if(pit.parent!==hs)hs.add(pit);pit.visible=true;setBasis(pit,A.pitPos,A.pitO);
+  const wd=A.wide||null,CXa=A.CX??W/2,CYa=A.CY??H/2;let w,h,ppx,ppy,foc;
+  if(wd){const dpr=Math.min(window.devicePixelRatio||1,2)*quality.pr,sc=Math.min(dpr,2400/wd.w);w=Math.round(wd.w*sc);h=Math.round(wd.h*sc);ppx=(wd.ox+CXa*wd.s)*sc;ppy=(wd.oy+CYa*wd.s)*sc;foc=A.FOC*wd.s*sc;}
+  else{const k=Math.max(1,Math.min(ctx.canvas.width/W,1920/W));w=Math.round(W*quality.pr*k);h=Math.round(H*quality.pr*k);const sc=w/W;ppx=CXa*sc;ppy=CYa*sc;foc=A.FOC*sc;}
+  if(gl.width!==w||gl.height!==h){R.setPixelRatio(1);R.setSize(w,h,false);comp.setSize(w,h);bloom.resolution.set(w,h);}R.setScissorTest(false);R.setViewport(0,0,w,h);
+  {const n=hcam.near;hcam.projectionMatrix.makePerspective(-ppx/foc*n,(w-ppx)/foc*n,ppy/foc*n,-(h-ppy)/foc*n,n,hcam.far);hcam.projectionMatrixInverse.copy(hcam.projectionMatrix).invert();}
+  if(A.pit){const key=A.W+'x'+A.VH+'x'+A.CY+'|'+(A.deck?A.deck.key:'');if(!pit||pitKey!==key){if(pit&&pit.parent)pit.parent.remove(pit);pitLights=[];pitGlow=[];pit=buildPit(A,A.deck||null);pitKey=key;}if(A.deck)updDeck(A.deck,A.t);if(pit.parent!==hs)hs.add(pit);pit.visible=true;setBasis(pit,A.pitPos,A.pitO);
    if(A.dash&&dashTex){if(dashTex.image!==A.dash)dashTex.image=A.dash;dashTex.needsUpdate=true;}for(const m of scrMeshes)m.material.color.setScalar(1);if(pitLamp){pitLamp.color.setHex(0x3fe0ff);pitLamp.intensity=.7;}for(const s2 of pitLights)s2.material.color.setHex(0x3fe0ff);}
   else if(pit&&pit.parent===hs){root.add(pit);pit.visible=false;}
-  R.render(hs,hcam);ctx.drawImage(gl,0,0,W,H);return true;}
+  R.render(hs,hcam);if(wd){if(wd.cv.width!==w||wd.cv.height!==h){wd.cv.width=w;wd.cv.height=h;}wd.ctx.drawImage(gl,0,0);ctx.clearRect(0,0,W,H);}else ctx.drawImage(gl,0,0,W,H);return true;}
  // extra cameras for the cockpit's side windows and mirror: rendered straight after the main view into small regions of
  // the same WebGL canvas, then copied through each window's shape. {o:{r,u,f}, pos, fov, rect:[x,y,w,h], clip(ctx), mirror}
  function views(ctx,A,list,scale){if(!ready()||!quality.views)return false;const W=A.W,VH=A.VH,pw=(scale||Math.max(1,Math.min(3,ctx.canvas.width/W)))*quality.pr,ph=pw,pv=pit&&pit.visible;if(pit)pit.visible=false;R.setScissorTest(true);
   for(const v of list){const[x,y,w,h]=v.rect,gx=0,gy=0,gw=Math.min(gl.width,Math.round(w*pw)),gh=Math.min(gl.height,Math.round(h*ph));if(gw<2||gh<2)continue;
    const r=M(v.o.r),u=M(v.o.u),f=M(v.o.f).map(q=>-q),p=M(v.pos);cam2.matrix.set(r[0],u[0],f[0],p[0],r[1],u[1],f[1],p[1],r[2],u[2],f[2],p[2],0,0,0,1);cam2.matrixWorld.copy(cam2.matrix);cam2.matrixWorldInverse.copy(cam2.matrix).invert();
-   cam2.fov=v.fov;cam2.aspect=w/h;cam2.updateProjectionMatrix();starField.position.set(...p);R.setViewport(gx,gy,gw,gh);R.setScissor(gx,gy,gw,gh);R.render(scene,cam2);
+   cam2.fov=v.fov;cam2.aspect=w/h;cam2.updateProjectionMatrix();starField.position.set(...p);R.setViewport(gx,gy,gw,gh);R.setScissor(gx,gy,gw,gh);R.render(vHangar&&hs?hs:scene,cam2);
    ctx.save();v.clip(ctx);ctx.clip();if(v.mirror){ctx.translate(x+w,0);ctx.scale(-1,1);ctx.drawImage(gl,gx,gl.height-gy-gh,gw,gh,0,y,w,h);}else ctx.drawImage(gl,gx,gl.height-gy-gh,gw,gh,x,y,w,h);ctx.restore();}
   R.setScissorTest(false);R.setViewport(0,0,gl.width,gl.height);if(pit)pit.visible=pv;return true;}
+ let vHangar=false;function viewHangar(b){vHangar=!!b;}
  let pmul=1;
  const PRESET={low:{pr:.6,bloom:false,views:false},medium:{pr:.8,bloom:true,views:false},high:{pr:1,bloom:true,views:true},ultra:{pr:1.35,bloom:true,views:true}};
  function setQuality(q){if(q==='auto'){quality.auto=true;return;}quality.auto=false;Object.assign(quality,PRESET[q]||PRESET.high);}
  function pregen(seed){try{terrain((seed^0x5151)>>>0);terrain(seed^0x5151);}catch(e){}}
  function profile(dev){if(dev==='phone'){Object.assign(quality,{pr:.6,bloom:false,views:false});pmul=.4;}else if(dev==='tablet'){Object.assign(quality,{pr:.8,views:false});pmul=.7;}else pmul=1;}
- return{setQuality,pregen,cockpit,hangar,profile,load,ready,render,views,get state(){return state;},get quality(){return quality;}};
+ return{viewHangar,setQuality,pregen,cockpit,hangar,profile,load,ready,render,views,get state(){return state;},get quality(){return quality;}};
 })();
