@@ -1,7 +1,22 @@
 {
- "version": "2.42",
+ "version": "2.43",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.43",
+   "date": "9 November 2026",
+   "kids": [
+    "🧸 Starlane: make the cockpit your own — fuzzy dice, a bobble-head alien, fairy lights, a cat plush and more in the shipyard’s PERSONAL tab",
+    "🕹️ A real flight stick, deeper instrument panels and a lived-in cockpit (switch the clutter off in Display if you like it tidy)"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🚀 Starlane Trader (Modern cockpit): framed instrument screens with glare hoods, a proper flight stick, a cockpit floor, and lived-in clutter (mug, tablet, cables, tools, sticky notes) — Display → LIVED-IN COCKPIT turns it on or off. New PERSONAL shipyard category with ten cockpit items: fuzzy dice, bobble-head alien, pot plant, photo frame, scarf, trophy, toy rocket, cat plush, comic book and fairy lights. You can look further down to see the stick."
+   ]
+  },
   {
    "v": "2.42",
    "date": "9 November 2026",
@@ -141,23 +156,6 @@
    ],
    "items": [
     "🚀 Starlane Trader (Modern style): an enclosed 3D cockpit (canopy, glass glare, side walls and consoles, red-alert cabin lighting, head sway); the dashboard rebuilt as live screens in the 3D console; a modern font and glass buttons; a slide-up action bar; true widescreen in full screen; the aim ring and pointer hide while looking around. New Mission Log with a recap and next step for every mission, read aloud on request, and a welcome-back recap after a break. The arcade’s “Retro screen” scanlines are skipped in Modern style."
-   ]
-  },
-  {
-   "v": "2.33",
-   "date": "9 November 2026",
-   "kids": [
-    "🌌 Starlane: 8 galaxies to explore — buy a galactic hyperdrive!",
-    "🏁 Station races, 🧳 passengers and ⛏️ mining contracts",
-    "🏆 The weekly Navigator’s Cup — and when you get a puzzle wrong, you see how to work it out",
-    "✨ Glowing docking guides, a hyperspace tunnel, shield flashes and a cockpit that boots up",
-    "🔊 Every ship sounds different, and the music changes with the system"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🚀 Starlane Trader: smoother on slower machines (fixed-step timing, quality presets, FPS counter); worked explanations after wrong answers, adaptive weak-topic practice, repair and loading-bay puzzles, weekly Navigator’s Cup; docking corridor, target arrow, hyperspace tunnel, boot-up check, news ticker, ship detail, shield bubbles and explosion lighting; per-ship engine sounds and system music moods; 8 galaxies, economy events, and passenger, mining and race missions."
    ]
   }
  ]

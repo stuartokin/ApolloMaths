@@ -200,6 +200,48 @@ const StarModern=(()=>{
    if(o.knob){o.knob.rotation.z=-(s.pos||0)*Math.PI/2+Math.PI*.75;o.cap.material.color.set(s.hover?0xffe45e:lit||0xffffff);continue;}
    const up=s.kind==='toggle'?!!s.on:(clock-(s.flash||-9))<.28;const want=up?-.55:.5;o.lever.rotation.x+=(want-o.lever.rotation.x)*.45;
    if(s.kind!=='guard')o.cap.material.color.set(s.hover?0xffe45e:lit||0x2a3044);else o.cap.material.color.set(s.hover?0xffe45e:0xff2d55);if(o.cover)o.cover.rotation.x=s.hover?-2.2:-.9;}}
+ // ---------------- a lived-in cabin: instrument housings, a proper stick, clutter and personal items ----------------
+ const cabTex={};
+ function cabCanvas(key,w,h,draw){if(cabTex[key])return cabTex[key];const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;return(cabTex[key]=t);}
+ const mat=(col,o={})=>new T.MeshStandardMaterial({color:col,metalness:o.metal??.15,roughness:o.rough??.75,side:T.DoubleSide,emissive:o.em?new T.Color(o.em):new T.Color(0),emissiveIntensity:o.ei??1,map:o.map||null,transparent:!!o.op,opacity:o.op||1});
+ const mesh=(g,geo,m,x,y,z,rx=0,ry=0,rz=0)=>{const me=new T.Mesh(geo,m);me.position.set(x,y,z);me.rotation.set(rx,ry,rz);g.add(me);return me;};
+ function cabinExtras(g,A,onS,Zs){const cab=A.cab||{clutter:true,items:[]},has=id=>cab.items.includes(id),dark=mat(0x1b2030,{metal:.6,rough:.4}),trim=mat(0x5d6888,{metal:.85,rough:.25});
+  // depth for the instrument screens: frames that stand off the console and glare hoods above them
+  for(const[x0,x1,y0,y1]of[[22,252,414,592],[262,538,410,596],[548,778,414,592]]){const c=[onS(x0-8,y0-7,Zs+1.5),onS(x1+8,y0-7,Zs+1.5),onS(x1+8,y1+7,Zs+1.5),onS(x0-8,y1+7,Zs+1.5)];for(let k=0;k<4;k++){g.add(new T.Mesh(beam(c[k],c[(k+1)%4],1.1),trim));}
+   const back=[onS(x0-8,y0-7,Zs+5),onS(x1+8,y0-7,Zs+5)];g.add(new T.Mesh(geoOf(SL.hull([c[0],c[1],back[0],back[1],[c[0][0],c[0][1]+1.2,c[0][2]-3],[c[1][0],c[1][1]+1.2,c[1][2]-3]])),dark));
+   for(const p of[[x0-4,y0-3],[x1+4,y0-3],[x1+4,y1+3],[x0-4,y1+3]]){const q=onS(p[0],p[1],Zs-.6);mesh(g,new T.SphereGeometry(.45,6,4),trim,q[0],q[1],q[2]);}}
+  // a floor under your feet, with a tread plate
+  {const fl=cabCanvas('floor',128,128,(c,w,h)=>{c.fillStyle='#1d2130';c.fillRect(0,0,w,h);c.fillStyle='#2b3044';for(let y=0;y<h;y+=16)for(let x=(y/16)%2?8:0;x<w;x+=16){c.fillRect(x+3,y+6,9,3);}});fl.wrapS=fl.wrapT=T.RepeatWrapping;fl.repeat.set(6,4);mesh(g,new T.PlaneGeometry(360,200),mat(0xffffff,{map:fl,rough:.85,metal:.4}),0,-150,0,-Math.PI/2,0,0);}
+  // a proper flight stick: rubber boot, shaft, grip with buttons and a trigger
+  mesh(g,new T.CylinderGeometry(10,13,6,18),dark,18,-104,30);mesh(g,new T.ConeGeometry(8,10,16,1,true),mat(0x101218,{rough:.95}),18,-96,30);mesh(g,new T.CylinderGeometry(1.4,1.8,24,10),trim,18,-80,32,.12,0,0);
+  {mesh(g,new T.CylinderGeometry(3,2.4,11,12),mat(0x23262e,{rough:.85}),18,-64,34,.25,0,0);mesh(g,new T.SphereGeometry(1.1,8,6),new T.MeshBasicMaterial({color:0xff2d55}),18,-58,35.5);mesh(g,new T.SphereGeometry(.9,8,6),new T.MeshBasicMaterial({color:0x3fe0ff}),20.5,-59,34);mesh(g,new T.BoxGeometry(1.2,3,1.4),mat(0x888c96,{metal:.8}),18,-63,37.6,.3,0,0);}
+  if(cab.clutter){
+   // coffee mug (with a handle) on the left console, a tablet and a wrench on the right, cables, tape, a snack wrapper, sticky notes
+   mesh(g,new T.CylinderGeometry(3.2,2.8,7,16),mat(0xe8e2d4),-150,-52.5,40);mesh(g,new T.TorusGeometry(2,.6,6,12,Math.PI),mat(0xe8e2d4),-153.6,-52.5,40,0,0,Math.PI/2);mesh(g,new T.CircleGeometry(2.9,14),mat(0x3a2412),-150,-49,40,-Math.PI/2,0,0);
+   {const tab=cabCanvas('tablet',128,96,(c,w,h)=>{c.fillStyle='#0b1a2c';c.fillRect(0,0,w,h);c.fillStyle='#3fe0ff';c.font='bold 12px sans-serif';c.fillText('CARGO LIST',8,18);c.fillStyle='#9fd8ff';c.font='10px sans-serif';['Food x9','Gems x3','Tea?? (buy!)','Fuel: low'].forEach((t,i)=>c.fillText(t,8,36+i*14));});mesh(g,new T.BoxGeometry(16,.9,11),mat(0x15171d,{metal:.4,rough:.3}),140,-55.4,22,0,.35,0);mesh(g,new T.PlaneGeometry(14,9.5),new T.MeshBasicMaterial({map:tab,side:T.DoubleSide}),140,-54.9,22,-Math.PI/2,0,-.35);}
+   mesh(g,new T.BoxGeometry(2,1.4,18),mat(0x9aa1ad,{metal:.9,rough:.3}),160,-55.8,60,0,.6,0);mesh(g,new T.TorusGeometry(2.2,.7,6,10),mat(0x9aa1ad,{metal:.9,rough:.3}),165,-55.8,69,Math.PI/2,0,0);
+   mesh(g,new T.TorusGeometry(3.4,1.6,8,16),mat(0x8d949e,{rough:.6}),128,-55.4,-8,Math.PI/2,0,0);
+   {const w=mesh(g,new T.IcosahedronGeometry(3,0),mat(0xffb020,{rough:.4,metal:.3}),-128,-54,4);w.scale.set(1.4,.5,1);}
+   const curve=new T.CatmullRomCurve3([new T.Vector3(-168,-60,88),new T.Vector3(-150,-75,70),new T.Vector3(-110,-92,74),new T.Vector3(-70,-108,80),new T.Vector3(-40,-118,70)]);mesh(g,new T.TubeGeometry(curve,30,.8,6,false),mat(0x222428),0,0,0);
+   const curve2=new T.CatmullRomCurve3([new T.Vector3(168,-58,80),new T.Vector3(150,-80,85),new T.Vector3(120,-105,78)]);mesh(g,new T.TubeGeometry(curve2,20,.7,6,false),mat(0xb33a2a),0,0,0);
+   for(const[sx,sy,col,rot]of[[240,420,0xffe45e,.12],[30,580,0xff7eb6,-.18],[770,424,0x7cff9a,.2]]){const q=onS(sx,sy,Zs-.8);mesh(g,new T.PlaneGeometry(4.2,4.2),new T.MeshBasicMaterial({color:col,side:T.DoubleSide,toneMapped:false}),q[0],q[1],q[2],0,0,rot);}}
+  // personal items bought at the shipyard
+  if(has('p_dice')){const dt=cabCanvas('dice',64,64,(c,w,h)=>{c.fillStyle='#f4f1ea';c.fillRect(0,0,w,h);c.fillStyle='#d6234a';for(const[x,y]of[[16,16],[48,48],[32,32],[16,48],[48,16]])c.beginPath(),c.arc(x,y,6,0,7),c.fill();});
+   for(const[dx,dy]of[[-3,0],[3,-4]]){mesh(g,new T.CylinderGeometry(.15,.15,22,4),mat(0xdddddd),-62+dx,49-dy,104);const d=mesh(g,new T.BoxGeometry(5,5,5),mat(0xffffff,{map:dt,rough:.95}),-62+dx,36-dy,104,.3,.5,.2);d.userData.swing=dx;}}
+  if(has('p_bobble')){mesh(g,new T.CylinderGeometry(2.2,2.6,2,12),dark,-62,-45,92);mesh(g,new T.CylinderGeometry(1.4,1.8,6,10),mat(0x3cff6a),-62,-41,92);const head=mesh(g,new T.SphereGeometry(3.6,14,10),mat(0x5dff8a,{rough:.5}),-62,-35,92);head.userData.bob=true;
+   for(const sx of[-1,1])mesh(g,new T.SphereGeometry(1,8,6),mat(0x111111),-62+sx*1.4,-34.5,95.2);for(const sx of[-1,1])mesh(g,new T.CylinderGeometry(.2,.2,3,4),mat(0x5dff8a),-62+sx*1.8,-31,92,0,0,sx*.5);}
+  if(has('p_plant')){mesh(g,new T.CylinderGeometry(3.2,2.4,5,12),mat(0xb5582c,{rough:.9}),70,-44.5,92);for(let k=0;k<7;k++){const a=k/7*Math.PI*2;mesh(g,new T.ConeGeometry(1.1,9,5),mat(0x2f9e44,{rough:.8}),70+Math.cos(a)*1.4,-38,92+Math.sin(a)*1.4,Math.sin(a)*.5,0,-Math.cos(a)*.5);}}
+  if(has('p_photo')){const ph=cabCanvas('photo',96,72,(c,w,h)=>{const g2=c.createLinearGradient(0,0,0,h);g2.addColorStop(0,'#7ec8ff');g2.addColorStop(1,'#cfe9ff');c.fillStyle=g2;c.fillRect(0,0,w,h);c.fillStyle='#3a9a44';c.fillRect(0,h*.7,w,h*.3);c.fillStyle='#ffd23a';c.beginPath();c.arc(w*.8,h*.25,8,0,7);c.fill();
+    for(const[x,s,col]of[[30,1,'#c0392b'],[50,.8,'#2e86de'],[66,.65,'#8e44ad']]){c.fillStyle=col;c.fillRect(x-5*s,h*.7-22*s,10*s,22*s);c.fillStyle='#f2c69b';c.beginPath();c.arc(x,h*.7-27*s,6*s,0,7);c.fill();}});
+   mesh(g,new T.BoxGeometry(11,8.5,1),mat(0x6b4a2b,{rough:.7}),-25,-41.5,93,-.25,0,0);mesh(g,new T.PlaneGeometry(9,6.5),new T.MeshBasicMaterial({map:ph,side:T.DoubleSide}),-25,-41.4,92.4,-.25,Math.PI,0);}
+  if(has('p_scarf'))for(let k=0;k<8;k++){const st=k%2?0xffffff:0xd01c2c;mesh(g,new T.BoxGeometry(7,1.6,6.2),mat(st,{rough:.95}),-171+Math.sin(k*.9)*1.5,-46.5-Math.max(0,k-5)*3,64-k*6.2,0,0,k>5?.5:0);}
+  if(has('p_trophy')){const gold=mat(0xffc93c,{metal:1,rough:.2});mesh(g,new T.CylinderGeometry(2.6,2.6,1.6,12),dark,150,-55.2,0);mesh(g,new T.CylinderGeometry(.8,.8,4,8),gold,150,-52.5,0);mesh(g,new T.CylinderGeometry(3,1.2,5,14,1,true),gold,150,-48,0);for(const sx of[-1,1])mesh(g,new T.TorusGeometry(1.4,.35,6,10,Math.PI),gold,150+sx*3,-48,0,0,0,sx>0?-Math.PI/2:Math.PI/2);}
+  if(has('p_rocket')){const wht=mat(0xf3f3f3,{rough:.5});mesh(g,new T.CylinderGeometry(1.6,1.6,10,12),wht,128,-51,52);mesh(g,new T.ConeGeometry(1.6,4,12),mat(0xd01c2c),128,-44,52);for(let k=0;k<3;k++){const a=k/3*Math.PI*2;mesh(g,new T.BoxGeometry(.3,3,2.4),mat(0xd01c2c),128+Math.cos(a)*1.8,-55,52+Math.sin(a)*1.8,0,-a,0);}}
+  if(has('p_cat')){const fur=mat(0xf0a050,{rough:1});mesh(g,new T.SphereGeometry(4,12,10),fur,-140,-52,0).scale.set(1.2,.85,1);mesh(g,new T.SphereGeometry(2.8,12,10),fur,-140,-46.5,3.5);for(const sx of[-1,1])mesh(g,new T.ConeGeometry(1,2,4),fur,-140+sx*1.6,-43.6,3.5);for(const sx of[-1,1])mesh(g,new T.SphereGeometry(.4,6,4),mat(0x111111),-140+sx*1,-46.2,6);}
+  if(has('p_comic')){const cv2=cabCanvas('comic',96,128,(c,w,h)=>{c.fillStyle='#ffe45e';c.fillRect(0,0,w,h);c.fillStyle='#d01c2c';c.fillRect(0,0,w,26);c.fillStyle='#fff';c.font='bold 15px sans-serif';c.fillText('SPACE KID',6,19);c.fillStyle='#2e86de';c.beginPath();c.arc(w/2,h*.6,28,0,7);c.fill();c.fillStyle='#fff';c.font='bold 22px sans-serif';c.fillText('ZAP!',24,h*.64);});
+   mesh(g,new T.BoxGeometry(10,.6,13),mat(0xffffff),-128,-55.7,60,0,-.4,0);mesh(g,new T.PlaneGeometry(9.6,12.6),new T.MeshBasicMaterial({map:cv2,side:T.DoubleSide}),-128,-55.3,60,-Math.PI/2,0,.4);}
+  if(has('p_lights')){const cols=[0xff2d55,0xffe45e,0x3cff6a,0x3fe0ff,0xc77dff];for(let k=0;k<=24;k++){const t=k/24,x=-150+300*t,y=56+Math.pow(Math.abs(t-.5)*2,2)*30,z=117-Math.abs(t-.5)*40;const b=mesh(g,new T.SphereGeometry(.9,6,4),new T.MeshBasicMaterial({color:cols[k%5]}),x,y-1.5,z);b.userData.twinkle=k;}}}
+ function cabinTick(clock){if(!pit)return;pit.traverse(o=>{const u=o.userData;if(u.bob){o.rotation.z=Math.sin(clock*3.2)*.18;o.rotation.x=Math.sin(clock*2.1)*.1;}if(u.swing!==undefined){o.rotation.z=.2+Math.sin(clock*1.7+u.swing)*.15;}if(u.twinkle!==undefined)o.visible=((clock*1.3+u.twinkle*.37)%1)>.15;});}
  function buildPit(A,deck){const CX=A.CX,CY=A.CY,F=A.FOC,g=new T.Group(),dark=new T.MeshStandardMaterial({color:0x232a3d,metalness:.55,roughness:.5,side:T.DoubleSide,flatShading:true}),
    frame=new T.MeshStandardMaterial({color:0x3b4562,metalness:.8,roughness:.32,side:T.DoubleSide,flatShading:true}),trim=new T.MeshStandardMaterial({color:0x66749c,metalness:.9,roughness:.22,side:T.DoubleSide,flatShading:true}),
    wall=new T.MeshStandardMaterial({color:0xffffff,map:wallTex(),metalness:.45,roughness:.6,side:T.DoubleSide}),add=(geo,m)=>{const me=new T.Mesh(geo,m);g.add(me);return me;},
@@ -226,12 +268,11 @@ const StarModern=(()=>{
   const glass=new T.Mesh(new T.SphereGeometry(300,48,24,0,Math.PI*2,0,Math.PI*.56),new T.MeshStandardMaterial({color:0x9cc4ff,transparent:true,opacity:.045,roughness:.06,metalness:.1,depthWrite:false,side:T.DoubleSide}));glass.position.set(0,-48,0);g.add(glass);
   // rear bulkhead, a flight stick and a throttle
   {const bw=new T.Mesh(new T.PlaneGeometry(356,262),wall);bw.position.set(0,-20,-94);g.add(bw);}
-  box(60,12,40,0,-118,52,dark);add(beam([0,-112,52],[0,-80,60],2.2),trim);{const k2=new T.Mesh(new T.SphereGeometry(5,12,10),dark);k2.position.set(0,-78,61);g.add(k2);}
   add(beam([-146,-56,20],[-146,-40,30],1.8),trim);{const k3=new T.Mesh(new T.SphereGeometry(4.5,12,10),glow(0xff8a1c));k3.position.set(-146,-39,31);g.add(k3);pitGlow.push(k3);}
   pitLamp=new T.PointLight(0x3fe0ff,.85,520,1.4);pitLamp.position.set(0,70,10);g.add(pitLamp);
-  deckObjs=null;wingTex=[];if(deck&&deck.wings.length)buildDeck(A,g,deck,onS);
+  cabinExtras(g,A,onS,Zs);deckObjs=null;wingTex=[];if(deck&&deck.wings.length)buildDeck(A,g,deck,onS);
   root.add(g);return g;}
- function cockpit(A,on,red,clock,dash,deck){if(!ready())return;if(pit&&pit.parent&&pit.parent!==root)root.add(pit);if(!on){if(pit)pit.visible=false;return;}const key=A.W+'x'+A.VH+'x'+A.CY+'|'+(deck?deck.key:'');if(!pit||pitKey!==key){if(pit)root.remove(pit);pitLights=[];pitGlow=[];pit=buildPit(A,deck);pitKey=key;}pit.visible=true;if(deck)updDeck(deck,clock);
+ function cockpit(A,on,red,clock,dash,deck){if(!ready())return;if(pit&&pit.parent&&pit.parent!==root)root.add(pit);if(!on){if(pit)pit.visible=false;return;}const key=A.W+'x'+A.VH+'x'+A.CY+'|'+(deck?deck.key:'')+'|'+JSON.stringify(A.cab||{});if(!pit||pitKey!==key){if(pit)root.remove(pit);pitLights=[];pitGlow=[];pit=buildPit(A,deck);pitKey=key;}pit.visible=true;cabinTick(clock);if(deck)updDeck(deck,clock);
   if(dash&&dashTex){if(dashTex.image!==dash)dashTex.image=dash;dashTex.needsUpdate=true;}
   // head sway: the cabin shifts a little against acceleration and turns, then settles
   const P=A.P,acc=(P.speed-lastSpeed);lastSpeed=P.speed;const want=[-(P.yaw||0)*2.6+(P.roll||0)*.8,(P.pitch||0)*2.2-Math.max(-2,Math.min(2,acc*.05)),-Math.max(-3,Math.min(3,acc*.12))];for(let i=0;i<3;i++)sway[i]+=(want[i]-sway[i])*.08;
@@ -269,7 +310,7 @@ const StarModern=(()=>{
   else{const k=Math.max(1,Math.min(ctx.canvas.width/W,1920/W));w=Math.round(W*quality.pr*k);h=Math.round(H*quality.pr*k);const sc=w/W;ppx=CXa*sc;ppy=CYa*sc;foc=A.FOC*sc;}
   if(gl.width!==w||gl.height!==h){R.setPixelRatio(1);R.setSize(w,h,false);comp.setSize(w,h);bloom.resolution.set(w,h);}R.setScissorTest(false);R.setViewport(0,0,w,h);
   {const n=hcam.near;hcam.projectionMatrix.makePerspective(-ppx/foc*n,(w-ppx)/foc*n,ppy/foc*n,-(h-ppy)/foc*n,n,hcam.far);hcam.projectionMatrixInverse.copy(hcam.projectionMatrix).invert();}
-  if(A.pit){const key=A.W+'x'+A.VH+'x'+A.CY+'|'+(A.deck?A.deck.key:'');if(!pit||pitKey!==key){if(pit&&pit.parent)pit.parent.remove(pit);pitLights=[];pitGlow=[];pit=buildPit(A,A.deck||null);pitKey=key;}if(A.deck)updDeck(A.deck,A.t);if(pit.parent!==hs)hs.add(pit);pit.visible=true;setBasis(pit,A.pitPos,A.pitO);
+  if(A.pit){const key=A.W+'x'+A.VH+'x'+A.CY+'|'+(A.deck?A.deck.key:'')+'|'+JSON.stringify(A.cab||{});if(!pit||pitKey!==key){if(pit&&pit.parent)pit.parent.remove(pit);pitLights=[];pitGlow=[];pit=buildPit(A,A.deck||null);pitKey=key;}if(A.deck)updDeck(A.deck,A.t);if(pit.parent!==hs)hs.add(pit);pit.visible=true;setBasis(pit,A.pitPos,A.pitO);
    if(A.dash&&dashTex){if(dashTex.image!==A.dash)dashTex.image=A.dash;dashTex.needsUpdate=true;}for(const m of scrMeshes)m.material.color.setScalar(1);if(pitLamp){pitLamp.color.setHex(0x3fe0ff);pitLamp.intensity=.7;}for(const s2 of pitLights)s2.material.color.setHex(0x3fe0ff);}
   else if(pit&&pit.parent===hs){root.add(pit);pit.visible=false;}
   R.render(hs,hcam);if(wd){if(wd.cv.width!==w||wd.cv.height!==h){wd.cv.width=w;wd.cv.height=h;}wd.ctx.drawImage(gl,0,0);ctx.clearRect(0,0,W,H);}else ctx.drawImage(gl,0,0,W,H);return true;}
