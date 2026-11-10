@@ -1,7 +1,21 @@
 {
- "version": "2.46",
+ "version": "2.47",
  "date": "10 November 2026",
  "releases": [
+  {
+   "v": "2.47",
+   "date": "10 November 2026",
+   "kids": [
+    "🗺 Starlane adventures! Puzzles and missions that pop up while you play — defuse a bomb, fix the radio, meet aliens, travel back in time"
+   ],
+   "tags": [
+    "games",
+    "learning"
+   ],
+   "items": [
+    "🚀 Starlane Trader: the first six adventures — three In-Ship (The Ticking Canister, Radio Silence, The Stowaway) and three Space (The Black-Hole Time-Warp, First Contact, Planet-Killer) — mixing science and maths puzzles with flying tasks. They appear after you have some experience (after a fight, in hyperspace or on a quiet flight), never more than one every 20 minutes. Rewards include credits, a bobble-head alien and a prototype tractor beam; failing only costs something small. Completed adventures can be replayed from the new 🗺 ADVENTURE LOG in the pause menu, which also sets the puzzle level (younger, middle, older). Test mode has an ADVENTURES page."
+   ]
+  },
   {
    "v": "2.46",
    "date": "10 November 2026",
@@ -134,22 +148,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: a second way to sit in the cockpit at a station — “Cockpit: flight controls” shows the flight cockpit exactly as in flight (console screens, switch wings, mirror and side windows, widescreen in full screen) looking into the hangar. Weapons and flight systems are safe while docked; view, camera, map, missions, hold, tips and menu work; LAUNCH gives the pre-flight warning first. The pre-flight view is still there, and you can swap between them."
-   ]
-  },
-  {
-   "v": "2.37",
-   "date": "9 November 2026",
-   "kids": [
-    "🪑 Starlane: sit in your cockpit inside the station — look around the hangar, check the pre-flight list and launch from there",
-    "🎬 Docking and launch movies fixed — and now with lots of different camera shots",
-    "📋 The Missions board is tidier — no more buttons on top of the title"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🚀 Starlane Trader: “Sit in the cockpit” from the station’s Launch tab — look around (right-drag or arrow keys), Front/Left/Right/Rear/Outside views, settings, and a pre-flight check that warns about no mission, low fuel, damage, no missiles or police trouble before launch. Movies: the far camera now shows the station, all hangar cameras stay inside the hangar, the cockpit no longer appears in movies, and five outside and five hangar camera styles are mixed at random. Missions board: station services in one row under the title."
    ]
   }
  ]
