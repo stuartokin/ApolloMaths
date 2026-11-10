@@ -1,7 +1,21 @@
 {
- "version": "2.41",
+ "version": "2.42",
  "date": "9 November 2026",
  "releases": [
+  {
+   "v": "2.42",
+   "date": "9 November 2026",
+   "kids": [
+    "🎓 Starlane tours rebuilt: 17 longer lessons, Nova talks you through each step, and you can see the real keyboard and mouse being used",
+    "🛬 A proper docking lesson — approach from the side, level the slot, then let the docking computer do it"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🚀 Starlane Trader: tours rebuilt — each step waits for Nova to finish speaking (with a timed fallback), movies stay on, Modern controls steer with the mouse pointer, and a realistic keyboard and mouse light up as they are used. New docking lesson (off-angle approach, levelling and spin-matching, then the docking computer) and five new tours: your cockpit, sitting in the station, rescues and surveys, police and the law, saving and settings. Ending a tour returns you to where you started it. Fixed: fuel scoops were missing from the Shipyard categories."
+   ]
+  },
   {
    "v": "2.41",
    "date": "9 November 2026",
@@ -144,19 +158,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: smoother on slower machines (fixed-step timing, quality presets, FPS counter); worked explanations after wrong answers, adaptive weak-topic practice, repair and loading-bay puzzles, weekly Navigator’s Cup; docking corridor, target arrow, hyperspace tunnel, boot-up check, news ticker, ship detail, shield bubbles and explosion lighting; per-ship engine sounds and system music moods; 8 galaxies, economy events, and passenger, mining and race missions."
-   ]
-  },
-  {
-   "v": "2.32",
-   "date": "9 November 2026",
-   "kids": [
-    "📖 Starlane: the help pages, Nova’s intro and the guided flight now explain exactly the controls you are using — mouse, keyboard or touch"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🚀 Starlane Trader: How to play rewritten (new CONTROLS and EXTRAS pages), and all help — Nova’s intro, the guided flight, the Launch screen, console tips, hints and messages — now reads the live key settings and the control scheme (Modern, Classic or touch). Fixed: the Launch screen still said E for E.C.M. (it is U). Shift boost now also works with Classic controls; Tab cycles all three chart views. Main Help now explains the Starlane controls."
    ]
   }
  ]

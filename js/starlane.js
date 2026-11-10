@@ -191,8 +191,8 @@ function makeStarlane(env){
   return H[s.eco]+(s.tech>=10?' Its universities are famous for advanced technology.':s.tech<=3?' Spare parts and medicines are always in short supply.':'');}
  // ---------------- your ship's assistant (voice + subtitles; can be muted and renamed) ----------------
  const aiGap={};
- function say(id,text,gap=15,who,role){const now=performance.now()/1000;if(aiGap[id]&&now-aiGap[id]<gap)return;aiGap[id]=now;const name=(who||C.opt.aiName||'NOVA').toUpperCase();aiLine={name,text,until:now+Math.max(5.5,text.length/11)};
-  if(C.opt.voice&&typeof Speech!=='undefined'&&Speech.ok)try{Speech.say(text,role||'tour');}catch(e){}}
+ function say(id,text,gap=15,who,role,onEnd){const now=performance.now()/1000;if(aiGap[id]&&now-aiGap[id]<gap){if(onEnd)onEnd();return;}aiGap[id]=now;const name=(who||C.opt.aiName||'NOVA').toUpperCase();aiLine={name,text,until:now+Math.max(5.5,text.length/11)};
+  const est=(text.split(' ').length/2.5+.8)*1000;if(C.opt.voice&&typeof Speech!=='undefined'&&Speech.ok){try{Speech.say(text,role||'tour',onEnd);}catch(e){if(onEnd)setTimeout(onEnd,est);}}else if(onEnd)setTimeout(onEnd,est);}
  const radio=(id,who,text,gap=30)=>say(id,text,gap,who,'teach');
  const TAUNTS=['Drop your cargo and nobody gets hurt!','Nice ship. It’s mine now!','You picked the wrong space lane, trader!','Your credits or your hull — choose!'];
  let aiRect=null;
@@ -1052,7 +1052,7 @@ function makeStarlane(env){
   else{if(C.equip[e.id]){msg('ALREADY FITTED',1.5);return;}C.equip[e.id]=1;}
   C.credits=Math.round((C.credits-e.price)*10)/10;msg(`${e.name.split(' (')[0].toUpperCase()} FITTED`,2,'#3cff6a');env.beep(1200,.2,'triangle',.05,1.5);syncScore();persist();}
  // ---------------- the shop framework: categories, pages and descriptions ----------------
- const YARD_CATS=[['ess','⛽ ESSENTIALS',['fuel','missile','starburst','cargo','pod']],['wpn','🔫 WEAPONS',['pulse','beam','twin','military','plasma','rearlaser','mining']],['def','🛡 DEFENCE',['ecm','shieldboost','bomb']],['sys','⚙ SYSTEMS',['energy','dock','firectl','repairbot','tractor','afterburner','hidden','galdrive']]];
+ const YARD_CATS=[['ess','⛽ ESSENTIALS',['fuel','missile','starburst','scoop','cargo','pod']],['wpn','🔫 WEAPONS',['pulse','beam','twin','military','plasma','rearlaser','mining']],['def','🛡 DEFENCE',['ecm','shieldboost','bomb']],['sys','⚙ SYSTEMS',['energy','dock','firectl','repairbot','tractor','afterburner','hidden','galdrive']]];
  const EQ_DESC={fuel:'Hyperspace fuel, sold by the light year. Your tank holds 7 LY.',missile:'A homing missile. Hold a target in your sights for a lock, then fire. Carry up to 4.',starburst:'One charge for the Starburst laser: press 5 in flight and the ship spins a full circle, blasting every hostile ship close by. Holds up to 3 charges.',cargo:'Bigger cargo hold: 20 tonnes becomes 35.',pod:'If the ship is about to be destroyed, press twice to eject. You keep your credits (but lose your cargo).',
   pulse:'The standard front laser: steady and reliable.',beam:'A faster-firing laser that stays cooler.',twin:'Two beams at once — strong and fast.',military:'A powerful military laser: fast, hard-hitting and cool-running.',plasma:'The hardest-hitting gun in the galaxy. Gets hot quickly — fire in bursts.',rearlaser:'A second laser on the back, used from the rear view (2).',mining:'Splits asteroids into minerals. Weak against ships.',
   ecm:'Destroys missiles flying near you. Press U.',shieldboost:'Your shields recharge twice as fast.',bomb:'Destroys every ship near you — once. Press B.',
@@ -1164,130 +1164,186 @@ function makeStarlane(env){
  const KEYCAP=k=>{const m=MODN(),T={w:m?'Speed up':null,s:m?'Slow down':null,a:m?'Slide left':null,d:m?'Slide right':null,q:m?'Roll left':'Turn left',e:m?'Roll right':'Turn right',ArrowLeft:m?'Turn left':'Roll left',ArrowRight:m?'Turn right':'Roll right',ArrowUp:'Nose up',ArrowDown:'Nose down',' ':'Fire laser',Shift:'Boost',Enter:'Choose / buy',Tab:'Next map',1:'Front view / Status',2:'Rear view / Market',3:'Left view',4:'Right view'};
   if(T[k])return T[k];const a=ACTIONS.find(x=>(C.opt.keys[x[0]]||[]).includes(k));return a?a[1]:'';};
  const aimed=p=>{if(!p||!P)return false;const l=toLocal(P.o,sub(p,P.pos));return l[2]>0&&Math.hypot(l[0],l[1])/l[2]<.05;};
- const launchStep=()=>({say:`Press ${tk('launch')||'L'} (or click LAUNCH) to fly out of the station.`,tap:['l'],dur:3,until:()=>mode==='flight',timeout:15,do:()=>{tab='launch';}});
+ const launchStep=()=>({say:'Let’s head out. Press L, or click LAUNCH, to fly out of the station.',tap:['l'],until:()=>mode==='flight',timeout:45,do:()=>{tab='launch';}});
  const ahead=d=>add(P.pos,mul(P.o.f,d));
  const passive=sh=>{sh.T={...sh.T,laser:0,speed:Math.min(sh.T.speed,40),turn:.2};sh.angry=false;sh.target=null;sh.speed=0;return sh;};
  const sandboxBase=()=>{const s0=GAL.filter(g=>g.tech>=10&&g.gov>=4).sort((a,b)=>a.i-b.i)[0]||GAL.find(g=>g.tech>=10)||GAL[0];C.sys=s0.i;C.visited={[s0.i]:1};C.credits=6000;C.missiles=3;C.fuel=7;C.equip={};C.front='pulse';};
  function yardPath(id){const cat=YARD_CATS.findIndex(c=>c[2].includes(id));if(cat<0)return['Enter'];const steps=(cat-yardCat+YARD_CATS.length)%YARD_CATS.length,L=YARD_CATS[cat][2].map(x=>EQUIP.findIndex(e=>e.id===x)).filter(i=>i>=0),pos=L.indexOf(EQUIP.findIndex(e=>e.id===id)),cur=steps?0:Math.max(0,L.indexOf(selEq));return[...Array(steps).fill('ArrowRight'),...Array(Math.max(0,pos-cur)).fill('ArrowDown'),'Enter'];}
  const TOURS=[
-  {id:'station',icon:'🏢',title:'The station screens',desc:'Every tab at a station, and what it is for.',steps:[
-   {say:'Welcome to the station! Each tab along the bottom is a different screen. Let us look at them one by one.',dur:5},
-   {say:'STATUS shows your ship, your credits, your fuel and whether the police like you.',click:'^STATUS$',dur:5},
-   {say:'MARKET is where you buy and sell goods. Buy cheap here, sell dear somewhere else — that is profit!',click:'^MARKET$',dur:5},
-   {say:'SHIPYARD sells fuel, missiles, upgrades — and even new ships.',click:'^SHIPYARD$',dur:5},
-   {say:'MISSIONS is the bulletin board: paid jobs, the Academy, the Navigator’s Cup and story missions.',click:'^MISSIONS$',dur:5},
-   {say:'DATA tells you about this system, and the system you are heading to.',click:'^DATA$',dur:5},
-   {say:'CHART is the galaxy map, where you choose where to go next.',click:'^CHART$',dur:5},
-   {say:'LAUNCH takes you into space. You can also press the number keys 1 to 7 to switch tabs.',click:'LAUNCH$',dur:4},
-   {say:'Watch — pressing 2 jumps straight to the market, and 1 back to status.',tap:['2','1'],dur:4}]},
-  {id:'trade',icon:'💰',title:'Buying and selling',desc:'Choose goods, buy, see what you paid, sell for profit.',steps:[
-   {say:'In the MARKET, the up and down arrow keys choose a product.',do:()=>{tab='market';sel=0;},tap:['ArrowDown','ArrowUp'],dur:4},
-   {say:'Press → (or +) to buy one tonne at a time. Watch your credits go down and the hold fill up.',tap:['ArrowRight','ArrowRight','ArrowRight'],dur:5},
-   {say:'The PAID column remembers what you paid, so you can tell whether selling will make a profit or a loss.',dur:6},
-   {say:'Press ← (or −) to sell one back. Buying lots pushes the price up; selling lots pushes it down.',tap:['ArrowLeft'],dur:6},
-   {say:'Enter buys as much as you can afford and carry. Then fly somewhere that pays more. TREND shows a price graph.',dur:6}]},
-  {id:'yard',icon:'🔧',title:'Upgrades and fuel',desc:'Buy fuel, missiles, fuel scoops, a mining laser and more.',setup:()=>{C.fuel=3;},steps:[
-   {say:'In the SHIPYARD, ← and → choose a category, ↑ and ↓ choose an item, and Enter buys it. The box underneath explains each item.',do:()=>{tab='shipyard';yardMode='equip';yardCat=0;yardPage=0;selEq=yardList()[0];},dur:6},
-   {say:'First, fuel. Hyperspace uses fuel — one light year at a time. Enter fills the tank.',tapFn:()=>yardPath('fuel'),dur:5},
-   {say:'Missiles home in on enemies. You can carry four.',tapFn:()=>yardPath('missile'),dur:5},
-   {say:'Fuel scoops: collect cargo canisters, and scoop fuel from stars.',tapFn:()=>yardPath('scoop'),dur:6},
-   {say:'A docking computer docks for you — press C near a station.',tapFn:()=>yardPath('dock'),dur:6},
-   {say:'A mining laser splits asteroids into minerals you can sell.',tapFn:()=>yardPath('mining'),dur:6},
-   {say:'The SHIPS list has bigger, faster ships to buy when you are rich!',click:'SHIPS',dur:6}]},
-  {id:'mission',icon:'📋',title:'Taking a mission',desc:'Pick a job, accept it, and read the Mission Log.',steps:[
-   {say:'The MISSIONS board lists paid jobs. ↑ and ↓ choose one, and Nova gives advice about it.',do:()=>{tab='missions';selMis=0;},tap:['ArrowDown','ArrowUp'],dur:5},
-   {say:'Press Enter (or click ACCEPT) to take the job.',click:'ACCEPT',dur:4,until:()=>C.missions.length>0},
-   {say:'Your missions appear below. The MISSION LOG says where you are and exactly what to do next.',click:'MISSION LOG',dur:7},
-   {say:`In flight, press ${k1('missions')} any time to see the Mission Log.`,do:()=>{overlay=null;},dur:4}]},
-  {id:'fly',icon:'🚀',title:'Launch and fly',desc:'Speed, turning, rolling, views and the outside camera.',steps:[launchStep(),
-   {say:()=>`Speed: hold ${KN[thrK()]||thrK().toUpperCase()} to go faster and ${KN[slwK()]||slwK().toUpperCase()} to slow down.`,hold:{k:()=>[thrK()],to:2.5},dur:3.5},
-   {say:()=>MODN()?'Turning: move the mouse, or use the ← and → keys.':`Turning: ${tk('yawL').toUpperCase()} and ${tk('yawR').toUpperCase()} turn left and right.`,hold:{k:()=>[turnR()],to:2.2},dur:3},
-   {say:'Nose up and down: the ↑ and ↓ keys.',hold:{k:()=>['ArrowUp'],to:1.6},dur:2.5},
-   {say:()=>MODN()?'Rolling: Q and E roll the ship over.':'Rolling: ← and → roll the ship over.',hold:{k:()=>[rollR()],to:1.6},dur:3},
-   {say:`Views: 1 front, 2 rear, 3 left, 4 right. You fire from the front.`,tap:['2','3','4','1'],dur:5},
-   {say:`${k1('cam')} switches to the outside camera — press it again to come back.`,tap:['o','o'],dur:4},
-   {say:`${k1('radarRange')} changes the radar range: 5, 10 or 25 km.`,tap:['['],dur:3},
-   {say:'Shift gives a speed boost. Press P or Esc to pause the game at any time.',hold:{k:()=>['Shift',thrK()],to:2},dur:3}]},
-  {id:'hyper',icon:'🌌',title:'Routes and hyperspace',desc:'Open the chart, pick a star, and jump to another system.',steps:[launchStep(),
-   {say:`Press ${k1('chart')} for the galaxy chart. The green ring shows how far your fuel reaches.`,tap:['g'],dur:4},
-   {say:'Click a star inside the green ring to choose it. Here we pick a nearby system.',do:()=>{chartMode='local';const cur=GAL[C.sys];const t=GAL.filter(g=>g.i!==C.sys&&SL.dist(cur,g)<=Math.min(C.fuel,5)).sort((a,b)=>SL.dist(cur,a)-SL.dist(cur,b))[0];tour.dest=t?t.i:null;},clickAt:()=>tour.dest!==null&&G._chartPt?G._chartPt(GAL[tour.dest]):null,dur:5,until:()=>C.target===tour.dest},
-   {say:'Tab switches between the short-range chart, the whole galaxy and the 3D map with its route planner.',tap:['Tab','Tab','Tab'],dur:4},
-   {say:`Close the chart with ${k1('chart')}, then press ${k1('hyper')} to start the hyperspace countdown.`,tap:['g','h'],dur:4},
-   {say:'Five, four, three… Each light year uses fuel. Watch the stars stretch!',until:()=>mode==='flight'&&C.sys===tour.dest,dur:3,timeout:40},
-   {say:()=>`Welcome to ${here().name}! At the next station, check DATA to see what sells well here.`,dur:5}]},
-  {id:'jump',icon:'⚡',title:'Jump drive and time',desc:'Cross a system quickly, mass lock, and speeding up time.',steps:[launchStep(),
-   {say:'The planet is far away. First point at it…',aim:()=>planet&&planet.pos,dur:2,until:()=>aimed(planet&&planet.pos),timeout:20},
-   {say:`…then press ${k1('jump')} for the jump drive. It races you across the system.`,aim:()=>planet&&planet.pos,tap:['j'],dur:3},
-   {say:'The jump drive stops by itself near planets, stations and ships. That is mass lock — the M light.',aim:()=>planet&&planet.pos,until:()=>!jump,dur:4,timeout:30},
-   {say:`${k1('time')} speeds up time — ×2, ×4, ×8 — on long trips. It switches off if danger appears.`,tap:['t','t','t','t'],dur:5},
-   {say:'Fly slowly near a planet, moon or star to survey it. Survey data sells when you dock.',dur:5}]},
-  {id:'lasers',icon:'🔫',title:'Lasers and targets',desc:'Select an enemy, aim, fire and watch the laser heat.',steps:[launchStep(),
-   {say:`A pirate! Press ${k1('scan')} to select a target — its details appear on the right.`,do:()=>{ships.forEach(x=>{if(x!==station)x.dead=true;});tour.foe=passive(spawn('sparrow',add(ahead(1600),mul(P.o.r,420)),{}));tour.foe.energy=Math.min(tour.foe.energy,40);},tap:['n'],dur:4},
-   {say:'Turn to put it in your sights…',aim:()=>tour.foe&&!tour.foe.dead&&tour.foe.pos,dur:2,until:()=>aimed(tour.foe&&tour.foe.pos),timeout:20},
-   {say:'…and hold Space to fire. Lasers get hot — if they overheat, wait for them to cool.',aim:()=>tour.foe&&!tour.foe.dead&&tour.foe.pos,fire:()=>aimed(tour.foe&&tour.foe.pos),until:()=>!tour.foe||tour.foe.dead,dur:2,timeout:30},
-   {say:'Destroyed! Pirates pay a bounty. Keep an eye on the radar for more.',dur:5}]},
-  {id:'missiles',icon:'🎯',title:'Missiles, ECM and aiming',desc:'Missile lock, E.C.M. against missiles, and aiming at engines.',setup:()=>{C.equip.ecm=1;},steps:[launchStep(),
-   {say:'Missiles need a lock. Hold a ship in your sights until the ring fills and MISSILE LOCK shows.',do:()=>{ships.forEach(x=>{if(x!==station)x.dead=true;});tour.foe=passive(spawn('raven',add(ahead(2200),mul(P.o.u,300)),{}));},aim:()=>tour.foe&&!tour.foe.dead&&tour.foe.pos,dur:3,until:()=>msLocked,timeout:25},
-   {say:`Locked! Press ${k1('missile')} to fire a homing missile.`,aim:()=>tour.foe&&!tour.foe.dead&&tour.foe.pos,tap:['m'],dur:3},
-   {say:'It homes in on the target…',until:()=>!tour.foe||tour.foe.dead,dur:2,timeout:20},
-   {say:`INCOMING MISSILE! Press ${k1('ecm')} for the E.C.M. — it destroys missiles flying nearby.`,do:()=>{const m=spawn('missile',add(P.pos,mul(P.o.f,-1800)),{target:'player',life:20,speed:220});m.own='enemy';tour.inc=m;},tap:['u'],dur:5},
-   {say:`Clever trick: select a ship with ${k1('scan')}, then press ${k1('subsys')} to aim at its ENGINES (it cannot escape) or WEAPONS (it cannot shoot).`,do:()=>{tour.foe=passive(spawn('sparrow',ahead(1800),{}));},tap:['n',']',']'],dur:6}]},
-  {id:'mining',icon:'⛏️',title:'Mining and scooping',desc:'Split an asteroid with a mining laser and scoop the cargo.',setup:()=>{C.front='mining';C.equip.scoop=1;},steps:[launchStep(),
-   {say:'Mining lasers split asteroids. Aim at the rock…',do:()=>{ships.forEach(x=>{if(x!==station)x.dead=true;});tour.rock=spawn('asteroid',ahead(1100),{speed:0});tour.rock.speed=0;},aim:()=>tour.rock&&!tour.rock.dead&&tour.rock.pos,dur:2,until:()=>aimed(tour.rock&&tour.rock.pos),timeout:20},
-   {say:'…and fire!',aim:()=>tour.rock&&!tour.rock.dead&&tour.rock.pos,fire:()=>aimed(tour.rock&&tour.rock.pos),until:()=>!tour.rock||tour.rock.dead,dur:2,timeout:30},
-   {say:'Canisters float out. With fuel scoops, fly gently into one to collect it.',do:()=>{tour.c0=cargoT();},aim:()=>{const cn=ships.filter(x=>!x.dead&&x.T.role==='cargo').sort((a,b)=>len(sub(a.pos,P.pos))-len(sub(b.pos,P.pos)))[0];if(!cn&&!tour.made){tour.made=true;spawn('canister',ahead(600),{speed:0,cargo:4});}return cn&&cn.pos;},keys:()=>P.speed<90?[thrK()]:P.speed>150?[slwK()]:[],until:()=>cargoT()>tour.c0,dur:3,timeout:40},
-   {say:`Scooped! Press ${k1('cargo')} to look in your hold. Minerals sell well at factory worlds.`,tap:['i'],dur:5},
-   {say:'Shooting a cargo canister without scoops destroys it — so buy fuel scoops first!',tap:['i'],dur:4}]},
-  {id:'stars',icon:'☀️',title:'Stars, fuel and planets',desc:'Scoop fuel from a star; cabin heat; altitude near planets.',setup:()=>{C.equip.scoop=1;C.fuel=3;},steps:[launchStep(),
-   {say:'With fuel scoops, fly close to a star — fast — to scoop fuel. Watch FU (fuel) go up…',do:()=>{const sn=suns[0];if(sn){const d=norm(sub(P.pos,sn.pos));P.pos=add(sn.pos,mul(d,sn.R*1.9));const side=norm(cross(d,Math.abs(d[1])<.9?V(0,1,0):V(1,0,0)));P.o.f=side;P.o.u=d;P.o.r=cross(side,d);ortho(P.o);P.throttle=.7;}},keys:()=>[P.speed<180?thrK():''].filter(Boolean),dur:7},
-   {say:'…but CT, the cabin temperature, rises too. Too hot and you lose energy — so do not stay long!',keys:()=>[P.speed<180?thrK():''].filter(Boolean),dur:5},
-   {say:'Near a planet, AL (altitude) shows how high you are. Hit zero and you crash! You cannot land, but you can survey it.',do:()=>{if(planet){const d=norm(sub(P.pos,planet.pos));P.pos=add(planet.pos,mul(d,planet.R*1.25));P.o.f=norm(cross(d,V(0,1,0)));P.o.u=d;P.o.r=cross(P.o.f,d);ortho(P.o);P.throttle=.2;}},dur:7}]},
-  {id:'dock',icon:'🛬',title:'Docking by hand',desc:'Line up, match the spin, fly in slowly — or use the computer.',steps:[launchStep(),
-   {say:`To dock, line up with the glowing slot — and while it looks level, press ${k1('spin')} straight away to match the station’s spin, so it stays level.`,do:()=>{ships.forEach(x=>{if(x!==station)x.dead=true;});const s0=station;P.pos=add(s0.pos,mul(s0.o.f,1700));P.o={f:mul(s0.o.f,-1),u:s0.o.u.slice(),r:mul(s0.o.r,-1)};P.speed=0;P.throttle=0;P.roll=0;},tap:['y'],dur:5},
-   {say:'See how the slot stays still? If you wait too long, the slot turns on its side — then you must roll to level it before you press it.',dur:4},
-   {say:'Now follow the glowing corridor, slowly — under 120. Gently does it…',aim:()=>station&&station.pos,keys:()=>{const want=75/Math.max(1,P.max);return P.throttle<want-.03?[thrK()]:P.throttle>want+.03?[slwK()]:[];},until:()=>mode!=='flight',dur:3,timeout:45},
-   {say:`Docked! Tip: with a docking computer, just press ${k1('dock')} near a station and it flies you in.`,dur:6}]}];
+  {id:'station',icon:'🏢',title:'The station screens',desc:'Every station tab and what it is for.',steps:[
+   {say:'Welcome aboard, Commander! This is a space station. Everything you can do here lives behind the tabs along the bottom of the screen. Let me show you round.'},
+   {say:'STATUS is your ship’s report card: your credits, fuel, legal record, equipment and any damage.',click:'^STATUS$'},
+   {say:'MARKET is where traders make their fortune. Buy goods cheaply here, then sell them somewhere that pays more.',click:'^MARKET$'},
+   {say:'The SHIPYARD sells fuel, missiles and upgrades — sorted into categories — and even brand new ships when you can afford them.',click:'^SHIPYARD$'},
+   {say:'MISSIONS is the bulletin board. You will find paid jobs, story missions, the Academy and the Navigator’s Cup here.',click:'^MISSIONS$'},
+   {say:'DATA tells you about this system — who runs it, what it makes and how safe it is — and about the system you are heading to next.',click:'^DATA$'},
+   {say:'CHART is the galaxy map, where you choose your next destination.',click:'^CHART$'},
+   {say:'And LAUNCH takes you out into space. A handy shortcut: the number keys 1 to 7 jump straight to each tab. Watch — 2 for the market, and 1 back to status.',click:'LAUNCH$',tap:['2','1']}]},
+  {id:'trade',icon:'💰',title:'Buying and selling',desc:'Buy cheap, sell dear, and read your profit.',steps:[
+   {say:'Trading is the safest way to make money. In the MARKET, the up and down arrow keys choose a product.',do:()=>{tab='market';sel=0;},tap:['ArrowDown','ArrowUp']},
+   {say:'Press the right arrow, or plus, to buy one tonne at a time. Watch your credits go down and the hold fill up.',tap:['ArrowRight','ArrowRight','ArrowRight']},
+   {say:'See the PAID column? The game remembers what you paid, so the PROFIT column tells you straight away whether selling here would win or lose money.'},
+   {say:'The left arrow, or minus, sells one back. Careful — buying lots pushes the price up, and selling lots pushes it down.',tap:['ArrowLeft']},
+   {say:'Enter buys as much as you can afford and carry. The trick is to buy where something is cheap and sell where it is needed — the DATA tab and the news ticker give you clues.'}]},
+  {id:'yard',icon:'🔧',title:'Upgrades and fuel',desc:'Fuel, missiles, scoops, lasers and gadgets.',setup:()=>{C.fuel=3;},steps:[
+   {say:'In the SHIPYARD, left and right choose a category, up and down choose an item, and Enter buys it. The box underneath explains what everything does.',do:()=>{tab='shipyard';yardMode='equip';yardCat=0;yardPage=0;selEq=yardList()[0];}},
+   {say:'First things first: fuel. Hyperspace burns it one light year at a time, and Enter fills the tank.',tapFn:()=>yardPath('fuel')},
+   {say:'Missiles are your heavy hitters. They home in on a locked target. You can carry four.',tapFn:()=>yardPath('missile')},
+   {say:'Fuel scoops are wonderful: they let you collect floating cargo and even scoop fuel from a star.',tapFn:()=>yardPath('scoop')},
+   {say:'A docking computer flies you into a station automatically. Very relaxing!',tapFn:()=>yardPath('dock')},
+   {say:'A mining laser turns asteroids into minerals you can sell.',tapFn:()=>yardPath('mining')},
+   {say:'And when you are rich, the SHIPS list has bigger, faster ships with more room for cargo.',click:'SHIPS'}]},
+  {id:'mission',icon:'📋',title:'Taking a mission',desc:'Choose a job, accept it, read the Mission Log.',steps:[
+   {say:'Missions pay well and take you to new places. Up and down choose a job, and Nova gives advice about each one.',do:()=>{tab='missions';selMis=0;},tap:['ArrowDown','ArrowUp']},
+   {say:'Press Enter, or click ACCEPT, to take it on.',click:'ACCEPT',until:()=>C.missions.length>0},
+   {say:'Your missions appear underneath. Click one, or the MISSION LOG button, to see exactly where to go and what to do next.',click:'MISSION LOG'},
+   {say:`In flight, press ${k1('missions')} at any time to see the Mission Log again.`,do:()=>{overlay=null;}}]},
+  {id:'fly',icon:'🚀',title:'Launch and fly',desc:'Speed, steering, rolling, views and cameras.',steps:[launchStep(),
+   {say:()=>MODN()?'We are flying! Hold W to speed up and S to slow down.':`We are flying! Hold ${k1('fast')} to speed up and ${k1('slow')} to slow down.`,hold:{k:()=>[thrK()],to:2.5}},
+   {say:()=>MODN()?'To steer, simply move the mouse — the ship turns towards the pointer. Move it right…':`To turn, use ${k1('yawL')} and ${k1('yawR')}. Turning right…`,steer:{dx:.8,dy:0,from:.8,to:3}},
+   {say:()=>MODN()?'…and up to lift the nose. Keep the pointer near the middle to fly straight.':'…and the up and down arrows lift or drop the nose.',steer:{dx:0,dy:.7,from:.6,to:2.4}},
+   {say:()=>MODN()?'Q and E roll the ship over, like a barrel roll.':'The left and right arrows roll the ship over.',hold:{k:()=>[rollR()],from:.6,to:2}},
+   {say:'Views: 1 looks forward, 2 behind, 3 left and 4 right. Your lasers fire from the front.',tap:['2','3','4','1']},
+   {say:`${k1('cam')} switches to the outside camera, so you can admire your ship. Press it again to come back.`,tap:['o','o']},
+   {say:`${k1('radarRange')} changes the radar range between five, ten and twenty-five kilometres.`,tap:['[']},
+   {say:'And Shift fires the boosters for a burst of speed. You can pause at any time with P or Escape.',hold:{k:()=>['Shift',thrK()],to:2.4}}]},
+  {id:'hyper',icon:'🌌',title:'Routes and hyperspace',desc:'Pick a star on the chart and jump to it.',steps:[launchStep(),
+   {say:`To travel to another star system you need hyperspace. Press ${k1('chart')} for the chart. The green ring shows how far your fuel reaches.`,tap:['g']},
+   {say:'Click a star inside the ring to choose it. Here, a nearby system.',do:()=>{chartMode='local';const cur=GAL[C.sys];const t=GAL.filter(g=>g.i!==C.sys&&SL.dist(cur,g)<=Math.min(C.fuel,5)).sort((a,b)=>SL.dist(cur,a)-SL.dist(cur,b))[0];tour.dest=t?t.i:null;},clickAt:()=>tour.dest!==null&&G._chartPt?G._chartPt(GAL[tour.dest]):null,until:()=>C.target===tour.dest},
+   {say:'Tab switches between the short-range chart, the whole galaxy, and the 3D map, which can plan a route with several jumps.',tap:['Tab','Tab','Tab']},
+   {say:`Close the chart with ${k1('chart')}, then press ${k1('hyper')} to start the countdown.`,tap:['g','h']},
+   {say:'Five, four, three… hold on tight! Each light year uses fuel, so keep an eye on the tank.',until:()=>mode==='flight'&&C.sys===tour.dest,timeout:45},
+   {say:()=>`Welcome to ${here().name}! When you dock, the DATA tab will tell you what sells well here.`}]},
+  {id:'jump',icon:'⚡',title:'Jump drive and time',desc:'Cross a system fast; mass lock; speeding up time.',steps:[launchStep(),
+   {say:'Planets and stations are a long way apart. First, point the ship at the planet…',aim:()=>planet&&planet.pos,until:()=>aimed(planet&&planet.pos),timeout:25},
+   {say:`…then press ${k1('jump')} for the jump drive. It races you across the system in seconds.`,aim:()=>planet&&planet.pos,tap:['j']},
+   {say:'The jump drive switches itself off near planets, stations and other ships. That is called mass lock — the M light on your console.',aim:()=>planet&&planet.pos,until:()=>!jump,timeout:30},
+   {say:'When it stops, ease off the throttle — planets come up fast!',do:()=>{},keys:()=>P.speed>20?[slwK()]:[],until:()=>P.speed<40,timeout:15},
+   {say:`For long, quiet trips, ${k1('time')} speeds up time — times two, four, then eight. It drops back to normal if danger appears.`,tap:['t','t','t','t']},
+   {say:'Tip: fly slowly near a planet, moon or star and you will survey it. Survey data sells when you dock.'}]},
+  {id:'lasers',icon:'🔫',title:'Lasers and targets',desc:'Select an enemy, aim, fire, and manage heat.',steps:[launchStep(),
+   {say:`Pirate on the scanner! Press ${k1('scan')} to select a target. Its details appear on the right of the screen.`,do:()=>{ships.forEach(x=>{if(x!==station)x.dead=true;});tour.foe=passive(spawn('sparrow',add(ahead(1600),mul(P.o.r,520)),{}));tour.foe.energy=Math.min(tour.foe.energy,40);},tap:['n']},
+   {say:()=>MODN()?'Move the mouse to bring it into your sights…':'Turn until it sits in your sights…',aim:()=>tour.foe&&!tour.foe.dead&&tour.foe.pos,until:()=>aimed(tour.foe&&tour.foe.pos),timeout:25},
+   {say:()=>MODN()?'…and click to fire! Hold the button for a stream. Lasers heat up — if they overheat, let them cool.':'…and hold Space to fire! Lasers heat up — if they overheat, let them cool.',aim:()=>tour.foe&&!tour.foe.dead&&tour.foe.pos,fire:()=>aimed(tour.foe&&tour.foe.pos),until:()=>!tour.foe||tour.foe.dead,timeout:35},
+   {say:'Got it! Pirates carry a bounty, paid straight into your account. Watch the radar — they often travel in gangs.'}]},
+  {id:'missiles',icon:'🎯',title:'Missiles, ECM and aiming',desc:'Missile lock, the E.C.M., engines and weapons.',setup:()=>{C.equip.ecm=1;},steps:[launchStep(),
+   {say:'Missiles need a lock first. Keep a ship in your sights until the ring fills up and MISSILE LOCK appears.',do:()=>{ships.forEach(x=>{if(x!==station)x.dead=true;});tour.foe=passive(spawn('raven',add(ahead(2200),mul(P.o.u,320)),{}));tour.foe.energy=Math.min(tour.foe.energy,25);},aim:()=>tour.foe&&!tour.foe.dead&&tour.foe.pos,until:()=>msLocked,timeout:30},
+   {say:`Locked! Press ${k1('missile')} to fire.`,aim:()=>tour.foe&&!tour.foe.dead&&tour.foe.pos,tap:['m']},
+   {say:'Watch it home in…',until:()=>!tour.foe||tour.foe.dead,timeout:25},
+   {say:`Incoming missile behind us! Quick — press ${k1('ecm')} for the E.C.M. It destroys missiles flying nearby.`,do:()=>{const m=spawn('missile',add(P.pos,mul(P.o.f,-1800)),{target:'player',life:20,speed:220});m.own='enemy';},tap:['u']},
+   {say:`A clever trick: select a ship with ${k1('scan')}, then press ${k1('subsys')} to aim at its ENGINES, so it cannot escape, or its WEAPONS, so it cannot shoot back.`,do:()=>{tour.foe=passive(spawn('sparrow',ahead(1800),{}));},tap:['n',']',']']}]},
+  {id:'mining',icon:'⛏️',title:'Mining and scooping',desc:'Split an asteroid and scoop up what falls out.',setup:()=>{C.front='mining';C.equip.scoop=1;},steps:[launchStep(),
+   {say:'With a mining laser, asteroids are worth money. Bring that rock into your sights…',do:()=>{ships.forEach(x=>{if(x!==station)x.dead=true;});P.speed=0;P.throttle=0;tour.rock=spawn('asteroid',add(ahead(1100),mul(P.o.r,250)),{speed:0});tour.rock.speed=0;},aim:()=>tour.rock&&!tour.rock.dead&&tour.rock.pos,until:()=>aimed(tour.rock&&tour.rock.pos),timeout:25},
+   {say:'…and fire away!',aim:()=>tour.rock&&!tour.rock.dead&&tour.rock.pos,fire:()=>aimed(tour.rock&&tour.rock.pos),until:()=>!tour.rock||tour.rock.dead,timeout:35},
+   {say:'Cargo canisters float out. With fuel scoops, you just fly gently into one to collect it.',do:()=>{tour.c0=cargoT();},aim:()=>{const cn=ships.filter(x=>!x.dead&&x.T.role==='cargo').sort((a,b)=>len(sub(a.pos,P.pos))-len(sub(b.pos,P.pos)))[0];if(!cn&&!tour.made){tour.made=true;spawn('canister',ahead(600),{speed:0,cargo:4});}return cn&&cn.pos;},keys:()=>P.speed<90?[thrK()]:P.speed>150?[slwK()]:[],until:()=>cargoT()>tour.c0,timeout:45},
+   {say:`Scooped! Press ${k1('cargo')} to look in your hold. Minerals sell well at factory worlds.`,tap:['i']},
+   {say:'One warning: without fuel scoops, flying into a canister smashes it. A tractor beam from the shipyard can even pull canisters towards you.',tap:['i']}]},
+  {id:'stars',icon:'☀️',title:'Stars, fuel and planets',desc:'Scoop fuel from a star; heat and altitude.',setup:()=>{C.equip.scoop=1;C.fuel=3;},steps:[launchStep(),
+   {say:'Out of fuel and far from a station? With fuel scoops you can skim a star. Fly close, and fast — watch the FU gauge, your fuel, climb.',do:()=>{const sn=suns[0];if(sn){const d=norm(sub(P.pos,sn.pos));P.pos=add(sn.pos,mul(d,sn.R*1.9));const side=norm(cross(d,Math.abs(d[1])<.9?V(0,1,0):V(1,0,0)));P.o.f=side;P.o.u=d;P.o.r=cross(side,d);ortho(P.o);P.throttle=.7;}},keys:()=>[P.speed<180?thrK():''].filter(Boolean),dur:6},
+   {say:'But CT, the cabin temperature, rises too. Stay too long and you start losing energy — so dip in, then get out.',keys:()=>[P.speed<180?thrK():''].filter(Boolean),dur:4},
+   {say:'Near a planet, AL — your altitude — shows how high you are. Reach zero and you crash! You cannot land, but you can survey planets by flying past slowly.',do:()=>{if(planet){const d=norm(sub(P.pos,planet.pos));P.pos=add(planet.pos,mul(d,planet.R*1.25));P.o.f=norm(cross(d,V(0,1,0)));P.o.u=d;P.o.r=cross(P.o.f,d);ortho(P.o);P.throttle=.2;}},dur:5}]},
+  {id:'dock',icon:'🛬',title:'Docking',desc:'A real approach, levelling the slot, and the docking computer.',steps:[launchStep(),
+   {say:'Docking is the trickiest skill in the game, so let’s take it slowly. We are off to one side of the station — just like when you arrive from hyperspace.',do:()=>{ships.forEach(x=>{if(x!==station)x.dead=true;});const s0=station;P.pos=add(add(add(s0.pos,mul(s0.o.f,2600)),mul(s0.o.r,2800)),mul(s0.o.u,500));const f=norm(sub(s0.pos,P.pos)),side=norm(cross(f,s0.o.u));P.o={f:norm(add(f,mul(side,.9))),u:s0.o.u.slice(),r:V()};P.o.r=norm(cross(P.o.u,P.o.f));ortho(P.o);P.speed=0;P.throttle=0;}},
+   {say:'The slot is on the front of the station. First we fly to a point straight out in front of it — the start of the docking corridor.',aim:()=>station&&add(station.pos,mul(station.o.f,2300)),keys:()=>P.throttle<.45?[thrK()]:[],until:()=>station&&len(sub(P.pos,add(station.pos,mul(station.o.f,2300))))<420,timeout:80},
+   {say:'Good. Now slow right down, and turn to face the slot.',aim:()=>station&&station.pos,keys:()=>P.speed>15?[slwK()]:[],until:()=>aimed(station&&station.pos)&&P.speed<25,timeout:40},
+   {say:`See how the station spins? Roll until the slot looks level, then press ${k1('spin')} to match its spin.`,aim:()=>station&&station.pos,level:true,until:()=>tour.yDone&&rollLock,timeout:35},
+   {say:'Now the slot stays still. Ease forward along the corridor — slow and steady, under a hundred.',aim:()=>station&&station.pos,keys:()=>{const want=75/Math.max(1,P.max);return P.throttle<want-.03?[thrK()]:P.throttle>want+.03?[slwK()]:[];},until:()=>mode!=='flight',timeout:80},
+   {say:'And we are in! That is the hardest thing in the game, so well done.',until:()=>mode==='docked',timeout:40},
+   {say:'Now the easy way. A docking computer does all of that for you. Let’s launch again and try it.',do:()=>{C.equip.dock=1;},tap:['l'],until:()=>mode==='flight',timeout:45},
+   {say:`Press ${k1('dock')} near a station and the computer takes over. Press ${k1('time')} to speed things up while it works.`,tap:['c','t','t'],until:()=>mode!=='flight',timeout:150},
+   {say:'Home again. The docking computer costs fifteen hundred credits, at stations with tech level nine or more.',until:()=>mode==='docked',timeout:40}]},
+  {id:'cockpit',icon:'🎛️',title:'Your cockpit',desc:'The screens, looking around, side windows and the Mission Log.',steps:[launchStep(),
+   {say:'Let’s look around the cockpit. Along the console: ship systems on the left, the radar in the middle, and your flight instruments on the right.'},
+   {say:'In the Modern cockpit, hold the right mouse button and drag to look around. Left…',skip:()=>!PIT3D(),look:t=>t<5?[1.3,.05]:null,dur:4},
+   {say:'…right, and down at the console.',skip:()=>!PIT3D(),look:t=>t<2.5?[-1.3,0]:t<5?[0,-.6]:null,dur:5},
+   {say:'The mirror at the top shows what is behind you, and the side windows show left and right.'},
+   {say:`Press ${k1('missions')} for the Mission Log and ${k1('cargo')} for your hold. ${k1('tips')} turns hover help on and off — point at anything to learn what it does.`,tap:['k','k','i','i']},
+   {say:`${k1('mfd')} shows or hides the small cockpit screens, and the pause menu has settings for the style, sound, voice and controls.`}]},
+  {id:'seat',icon:'🪑',title:'Sitting in the station',desc:'Your cockpit on the pad, the pre-flight check and launching.',steps:[
+   {say:'You can sit in your cockpit while still docked, and look out over the shuttle bay. On the LAUNCH tab, choose COCKPIT: FLIGHT CONTROLS.',do:()=>{tab='launch';},click:'FLIGHT CONTROLS'},
+   {say:'Everything is where it is in flight. Your weapons are safe while you are docked, so nothing can fire. Look around with the arrow keys…',tap:['ArrowLeft','ArrowLeft','ArrowLeft','ArrowRight','ArrowRight','ArrowRight']},
+   {say:'The PRE-FLIGHT view gives you a checklist: fuel, mission, damage and missiles. If anything is amber, it warns you before you launch.',click:'PRE-FLIGHT'},
+   {say:'From here you can launch, change the view, open the settings, or go back to the station screens.',click:'STATION'}]},
+  {id:'rescue',icon:'🛟',title:'Rescues and surveys',desc:'Pick up escape capsules and survey planets.',setup:()=>{C.equip.scoop=1;},steps:[launchStep(),
+   {say:'Sometimes you will hear an SOS — an escape capsule drifting in space. With fuel scoops, fly gently into it to rescue the pilot.',do:()=>{ships.forEach(x=>{if(x!==station)x.dead=true;});tour.pod=spawn('capsule',ahead(900),{speed:0});tour.pod.rescue=true;tour.c0=C.rescued||0;},aim:()=>tour.pod&&!tour.pod.dead&&tour.pod.pos,keys:()=>P.speed<80?[thrK()]:P.speed>140?[slwK()]:[],until:()=>tour.pod&&tour.pod.dead,timeout:45},
+   {say:'Rescued! The station pays a reward for every survivor you bring in.'},
+   {say:'Surveys are easy money too. Fly slowly near a planet, moon or star and the survey bar fills. The data sells when you dock.',do:()=>{if(planet){const d=norm(sub(P.pos,planet.pos));P.pos=add(planet.pos,mul(d,planet.R*2.4));P.speed=0;P.throttle=0;}},until:()=>!!(C.codex[C.sys]||{}).planet,timeout:25},
+   {say:'Survey complete. Your Career record keeps count of every planet, moon and star you have surveyed.'}]},
+  {id:'law',icon:'🚓',title:'Police and the law',desc:'Legal status, illegal goods and clearing your name.',steps:[
+   {say:'The police care about how you behave. Your legal status is on the STATUS tab: Clean, Offender, or Fugitive.',click:'^STATUS$'},
+   {say:'Shooting traders or police makes you an Offender. Do it a lot and you become a Fugitive — then police ships will attack you on sight.'},
+   {say:'In the MARKET, goods marked with a warning sign are illegal. They pay well, but police scans can find them, and you will be fined.',click:'^MARKET$',do:()=>{sel=GOODS.findIndex(g=>g[6]);}},
+   {say:'To clear your name, look for an AMNESTY job on the MISSIONS board: help the police with some pirates and they will forgive you.',click:'^MISSIONS$'},
+   {say:'And a hidden cargo compartment from the shipyard keeps illegal goods out of sight — but the safest pilot is an honest one!'}]},
+  {id:'saving',icon:'💾',title:'Saving and settings',desc:'Save as, open, and the settings in the pause menu.',steps:[
+   {say:'The pause menu has everything for saving and settings. Click MENU, or press P or Escape.',click:'MENU$'},
+   {say:'SAVE keeps your game. SAVE AS lets you give it a name, so you can come back to this exact moment later.',click:'SAVE AS'},
+   {say:'Type a name in the box and press Enter. In this practice game nothing is really saved, but in your own game it is.'},
+   {say:'Your saves are listed below, with the day, the place and your credits. Opening one keeps your current game as “Where I was”, so you can never lose your place.',click:'BACK'},
+   {say:'The tabs along the top hold the settings: DISPLAY for the style and graphics, SOUND for music and Nova’s voice, and CONTROLS to change any key.',click:'DISPLAY'},
+   {say:'That’s it! Press RESUME, or P again, to carry on playing.',do:()=>{overlay=null;}}]}];
  function tourStart(id){const def=TOURS.find(t=>t.id===id);if(!def)return;if(mode!=='docked'&&mode!=='flight'){msg('START A TOUR WHEN DOCKED OR FLYING',2.5);return;}
   if(!tour){const realMode=mode;if(mode==='flight'&&P&&planet)C.flight={sys:C.sys,pos:P.pos.slice(),o:{r:P.o.r.slice(),u:P.o.u.slice(),f:P.o.f.slice()},speed:P.speed,throttle:P.throttle,shF:P.shF,shA:P.shA,energy:P.energy};
-   tour={real:{C:JSON.stringify(C),mode:realMode,tab}};}
-  const opt=JSON.parse(JSON.stringify(C.opt));C=newCommander();C.opt=opt;C.opt.cuts=false;C.opt.maths=false;C.introSeen=true;C.gx=0;GAL=SL.makeGalaxy(GSEED,COUNT);nbr=null;sandboxBase();if(def.setup)def.setup();
-  Object.assign(tour,{log:[],def,i:-1,t:0,paused:false,done:false,mouse:tour.mouse||{x:CX,y:CY+100,fx:CX,fy:CY+100,tx:null,ty:null,t:1,click:-9},flash:{},held:new Set(),dest:null,foe:null,rock:null,made:false});
+   tour={real:{C:JSON.stringify(C),mode:realMode,tab,menu:overlay==='menu'?menuTab:null}};}
+  const opt=JSON.parse(JSON.stringify(C.opt));C=newCommander();C.opt=opt;C.opt.maths=false;C.introSeen=true;C.gx=0;GAL=SL.makeGalaxy(GSEED,COUNT);nbr=null;sandboxBase();if(def.setup)def.setup();
+  Object.assign(tour,{lastA:undefined,rs:1,yDone:false,log:[],def,i:-1,t:0,paused:false,done:false,mouse:tour.mouse||{x:CX,y:CY+100,fx:CX,fy:CY+100,tx:null,ty:null,t:1,click:-9},flash:{},held:new Set(),dest:null,foe:null,rock:null,made:false});
   stopMusic();scene=null;dockComp=false;jump=false;timeScale=1;seat=null;overlay=null;ships=[];mode='docked';tab='status';hover=null;tourNext();}
  function tourNext(){if(!tour)return;tourRelease();tour.i++;tour.t=0;tour.tapI=0;tour.clicked=false;const st=tour.def.steps[tour.i];if(!st){tour.done=true;say('tourdone'+tour.def.id,`That is the end of “${tour.def.title}”. Well done, Commander!`,1);return;}
-  if(st.do)try{st.do();}catch(e){}tour.taps=st.tapFn?st.tapFn():(st.tap||[]);const txt=typeof st.say==='function'?st.say():st.say;tour.text=txt;if(txt)say('tour-'+tour.def.id+'-'+tour.i+'-'+Math.floor(clock),txt,1);}
- function tourRelease(){if(!tour||!tour.held)return;for(const k of tour.held)K[k]=false;tour.held.clear();}
+  if(st.skip&&st.skip()){tourNext();return;}if(st.do)try{st.do();}catch(e){}tour.taps=st.tapFn?st.tapFn():(st.tap||[]);const txt=typeof st.say==='function'?st.say():st.say;tour.text=txt;tour.spoken=!txt;tour.spokenT=0;tour.est=txt?txt.split(' ').length/2.5+.8:0;const idx=tour.i;
+  if(txt){aiGap['tour-'+tour.def.id+'-'+idx]=0;say('tour-'+tour.def.id+'-'+idx,txt,0,undefined,'tour',()=>{if(tour&&tour.i===idx&&!tour.spoken){tour.spoken=true;tour.spokenT=Math.max(tour.t,tour.t<tour.est*.5?tour.est*.85:0);}});}
+  tour.minDur=Math.max(st.dur||1.5,tour.taps.length?.9+tour.taps.length*.8+.6:0,(st.click||st.clickAt)?2.4:0);}
+ function tourRelease(){if(!tour||!tour.held)return;for(const k of tour.held)K[k]=false;tour.held.clear();if(tour.fireMouse){fireTouch=false;tour.fireMouse=false;}headDrag=false;}
  function tourEnd(){if(!tour)return;tourRelease();const r=tour.real;tour=null;C=JSON.parse(r.C);fixOpt();GAL=SL.makeGalaxy(GSEED+(C.gx||0)*1009,COUNT);nbr=null;pregenFor=null;stopMusic();scene=null;dockComp=false;jump=false;timeScale=1;overlay=null;seat=null;ships=[];
-  if(r.mode==='flight'&&C.flight&&C.flight.sys===C.sys)restoreFlight();else{mode='docked';tab=r.tab||'status';}if(r.mode!=='flight')C.flight=null;syncScore();msg('BACK TO YOUR OWN GAME',3,'#3cff6a');}
+  if(r.mode==='flight'&&C.flight&&C.flight.sys===C.sys)restoreFlight();else{mode='docked';tab=r.tab||'status';}if(r.mode!=='flight')C.flight=null;syncScore();if(r.menu){overlay='menu';menuTab=r.menu;}msg('BACK TO YOUR OWN GAME',3,'#3cff6a');}
  function simKey(k){if(!k)return;tour.sim=true;try{G.onKey('down',k);G.onKey('up',k);}finally{tour.sim=false;}tour.flash[k]=clock;tour.last=k;}
  function tourTick(dt){if(!tour||tour.done||tour.paused)return;const st=tour.def.steps[tour.i];if(!st)return;tour.t+=dt;hover=null;
   if(tour.tapI<tour.taps.length&&tour.t>=.9+tour.tapI*.8){simKey(tour.taps[tour.tapI]);tour.tapI++;}
   tourRelease();const want=[];if(st.hold&&tour.t>=(st.hold.from||.6)&&tour.t<=(st.hold.to||st.dur))want.push(...st.hold.k());
-  if(st.aim&&mode==='flight'&&P){const tp=st.aim();if(tp){const l=toLocal(P.o,sub(tp,P.pos)),ex=l[2]>0?l[0]/l[2]:(l[0]>=0?1:-1),ey=l[2]>0?l[1]/l[2]:0,th=.015;if(ey>th)want.push('ArrowUp');else if(ey<-th)want.push('ArrowDown');if(ex>th)want.push(turnR());else if(ex<-th)want.push(turnL());}}
-  if(st.keys&&mode==='flight'&&P)want.push(...st.keys());if(st.fire&&mode==='flight'&&st.fire())want.push(' ');
+  const mouseOK=MODN()&&!touchSeen&&mode==='flight';let mx=null,my=null;
+  if(st.aim&&mode==='flight'&&P){const tp=st.aim();if(tp){const l=toLocal(P.o,sub(tp,P.pos)),ex=l[2]>0?l[0]/l[2]:(l[0]>=0?1:-1),ey=l[2]>0?l[1]/l[2]:0,th=.015;
+   if(mouseOK){const cl=v=>Math.max(-1,Math.min(1,v));mx=CX+cl(ex*5)*(W/2)*.85;my=CY-cl(ey*5)*(VH/2)*.85;}else{if(ey>th)want.push('ArrowUp');else if(ey<-th)want.push('ArrowDown');if(ex>th)want.push(turnR());else if(ex<-th)want.push(turnL());}}}
+  if(st.steer&&mode==='flight'&&tour.t>=(st.steer.from||.6)&&tour.t<=(st.steer.to||2.5)){const sv=st.steer;if(mouseOK){mx=CX+(sv.dx||0)*(W/2)*.7;my=CY-(sv.dy||0)*(VH/2)*.7;}else{if(sv.dy>0)want.push('ArrowUp');if(sv.dy<0)want.push('ArrowDown');if(sv.dx>0)want.push(turnR());if(sv.dx<0)want.push(turnL());}}
+  if(mx!==null){const m=tour.mouse;m.x+=(mx-m.x)*Math.min(1,dt*6);m.y+=(my-m.y)*Math.min(1,dt*6);hover={x:m.x,y:m.y};tour.mouseOn=clock;tour.mdx=(mx-CX)/W;tour.mdy=(my-CY)/VH;}else tour.mdx=tour.mdy=0;
+  if(st.level&&mode==='flight'&&station&&P){const s0=station,a0=Math.atan2(dot(s0.o.r,P.o.u),dot(s0.o.r,P.o.r))*57.3;let a=a0>90?a0-180:a0<-90?a0+180:a0;tour.rs=tour.rs||1;
+   if(tour.lastA!==undefined&&tour.t-tour.lastAT>.5){if(Math.abs(a)>Math.abs(tour.lastA)+3&&tour.rollHeld)tour.rs*=-1;tour.lastA=a;tour.lastAT=tour.t;}if(tour.lastA===undefined){tour.lastA=a;tour.lastAT=tour.t;}
+   if(!tour.yDone){if(Math.abs(a)>5){const k=(a*tour.rs>0)?rollR():rollL();want.push(k);tour.rollHeld=true;}else{tour.rollHeld=false;if(tour.t>1.5){simKey(k1('spin')==='Y'?'y':(C.opt.keys.spin||['y'])[0]);tour.yDone=true;}}}}
+  if(st.keys&&mode==='flight'&&P)want.push(...st.keys());if(st.fire&&mode==='flight'&&st.fire()){if(mouseOK){fireTouch=true;tour.fireMouse=true;tour.flash.mouseL=clock;}else want.push(' ');}else if(tour.fireMouse){fireTouch=false;tour.fireMouse=false;}
+  if(st.look&&PIT3D()){const L=st.look(tour.t);headDrag=!!L;if(L){headYaw+=(L[0]-headYaw)*Math.min(1,dt*3);headPitch+=(L[1]-headPitch)*Math.min(1,dt*3);tour.flash.mouseR=clock;tour.mouseOn=clock;tour.mdx=L[0]/4;tour.mdy=-L[1]/4;}}
   for(const k of want){if(!k)continue;K[k]=true;tour.held.add(k);tour.flash[k]=clock;}
   const m=tour.mouse;let tgt=null,fnArgs=null;if(st.click&&!tour.clicked){const b=(G._lastBtns||[]).find(x=>x.label&&new RegExp(st.click,'i').test(x.label));if(b){tgt=[b.x+b.w/2,b.y+b.h/2];fnArgs=()=>b.fn();}}
   if(st.clickAt&&!tour.clicked){const p=st.clickAt();if(p){tgt=p;fnArgs=()=>{const b=(G._lastBtns||[]).slice().reverse().find(x=>p[0]>=x.x&&p[0]<=x.x+x.w&&p[1]>=x.y&&p[1]<=x.y+x.h);if(b)b.fn(p[0],p[1]);};}}
   if(tgt){if(m.tx!==tgt[0]||m.ty!==tgt[1]){m.fx=m.x;m.fy=m.y;m.tx=tgt[0];m.ty=tgt[1];m.t=0;}m.t=Math.min(1,m.t+dt/.7);const e=1-Math.pow(1-m.t,3);m.x=m.fx+(m.tx-m.fx)*e;m.y=m.fy+(m.ty-m.fy)*e;if(m.t>=1&&tour.t>1.3){tour.clicked=true;m.click=clock;tour.flash.mouseL=clock;fnArgs();}}
-  const ready=tour.t>=(st.dur||3)&&(!st.until||st.until());if(ready||tour.t>(st.timeout||(st.dur||3)+25)){(tour.log=tour.log||[]).push(ready?'ok':'TIMEOUT@'+tour.i);tourNext();}}
+  if(!tour.spoken&&tour.t>tour.est+5){tour.spoken=true;tour.spokenT=tour.t;}const ready=tour.t>=(tour.minDur||1.5)&&tour.spoken&&tour.t>=tour.spokenT+.6&&(!st.until||st.until());if(ready||tour.t>(st.timeout||tour.est+(st.dur||2)+25)){(tour.log=tour.log||[]).push(ready?'ok':'TIMEOUT@'+tour.i);tourNext();}}
  function tourKey(k){if(k==='Escape'){tourEnd();return;}if(k===' '||k==='p'){tour.paused=!tour.paused;if(tour.paused)tourRelease();return;}if(k==='ArrowRight'||k==='n'){if(tour.done)return;tourNext();return;}if(k==='k'){C.opt.tourKeys=!C.opt.tourKeys;return;}}
- function drawKeyboard(ctx,x,y){const S=17,G2=2,flash=k=>{const t=tour.flash[k];return tour.held.has(k)?2:t!==undefined&&clock-t<.7?1:0;};
-  ctx.fillStyle='rgba(4,8,20,.88)';ctx.strokeStyle='rgba(127,216,255,.6)';ctx.lineWidth=1.2;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y,342,126,8);else ctx.rect(x,y,342,126);ctx.fill();ctx.stroke();
-  const key=(k,lab,kx,ky,w=S)=>{const f=flash(k);ctx.fillStyle=f===2?'#3cff6a':f===1?'#ffe45e':'#1a2133';ctx.fillRect(kx,ky,w,S);ctx.strokeStyle=f?'#ffffff':'#4a5578';ctx.strokeRect(kx+.5,ky+.5,w-1,S-1);ctx.fillStyle=f?'#05101e':'#c8d0ff';ctx.font=`700 ${lab.length>2?7:9}px ${FF()}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(lab,kx+w/2,ky+S/2+1);};
-  const rows=[['1234567890'.split(''),x+8],['qwertyuiop[]'.split(''),x+14],["asdfghjkl".split(''),x+18],['zxcvbnm'.split(''),x+26]];rows.forEach(([r,rx],ri)=>r.forEach((k,i)=>key(k,k.toUpperCase(),rx+i*(S+G2),y+8+ri*(S+G2))));
-  key('Escape','ESC',x+8,y+8+4*(S+G2),24);key('Shift','SHIFT',x+34,y+8+4*(S+G2),34);key(' ','SPACE',x+70,y+8+4*(S+G2),104);key('Tab','TAB',x+176,y+8+4*(S+G2),24);key('Enter','ENTER',x+232,y+8+2*(S+G2),36);
-  const ax=x+236,ay=y+8+3*(S+G2);key('ArrowUp','↑',ax+S+G2,ay);key('ArrowLeft','←',ax,ay+S+G2);key('ArrowDown','↓',ax+S+G2,ay+S+G2);key('ArrowRight','→',ax+2*(S+G2),ay+S+G2);
-  const mx=x+300,my=y+14,mf=tour.flash.mouseL!==undefined&&clock-tour.flash.mouseL<.6;ctx.strokeStyle='#c8d0ff';ctx.lineWidth=1.5;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(mx,my,30,46,14);else ctx.rect(mx,my,30,46);ctx.stroke();ctx.fillStyle=mf?'#ffe45e':'rgba(255,255,255,.08)';ctx.fillRect(mx+2,my+2,12,18);ctx.fillStyle='rgba(255,255,255,.08)';ctx.fillRect(mx+16,my+2,12,18);
-  ctx.fillStyle='#9aa3c7';ctx.font=`600 8px ${FF()}`;ctx.textAlign='center';ctx.fillText('MOUSE',mx+15,my+56);
-  const lk=tour.held.size?[...tour.held][0]:tour.last&&clock-(tour.flash[tour.last]||-9)<1.2?tour.last:null,cap=lk?`${KN[lk]||(lk===' '?'SPACE':lk.length===1?lk.toUpperCase():lk)} — ${KEYCAP(lk)}`:mf?'Mouse click':'';if(cap){ctx.fillStyle='#ffe45e';ctx.font=`700 11px ${FF()}`;ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText(cap,x+10,y+112);}}
+ function drawKeyboard(ctx,x,y){const U=19,G2=3,PW=404,PH=150,state=k=>{const t=tour.flash[k];return tour.held.has(k)?2:t!==undefined&&clock-t<.7?1:0;};
+  ctx.save();ctx.fillStyle='rgba(10,14,24,.94)';ctx.strokeStyle='rgba(127,216,255,.55)';ctx.lineWidth=1.2;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y,PW,PH,10);else ctx.rect(x,y,PW,PH);ctx.fill();ctx.stroke();
+  const deck=ctx.createLinearGradient(0,y+6,0,y+122);deck.addColorStop(0,'#2a2f3c');deck.addColorStop(1,'#1a1e28');ctx.fillStyle=deck;ctx.fillRect(x+6,y+6,320,118);
+  const key=(k,lab,kx,ky,w=U)=>{const st=state(k),d=st?1.5:0,top=st===2?'#5dff8a':st===1?'#ffe45e':'#e9ecf3',side=st===2?'#1e9a46':st===1?'#b39320':'#9aa1b3';
+   ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(kx+1,ky+3,w,U);ctx.fillStyle=side;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(kx,ky+d,w,U-1,3);else ctx.rect(kx,ky+d,w,U-1);ctx.fill();
+   ctx.fillStyle=top;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(kx+1.5,ky+d+1,w-3,U-5,2.5);else ctx.rect(kx+1.5,ky+d+1,w-3,U-5);ctx.fill();if(st){ctx.fillStyle=st===2?'rgba(93,255,138,.35)':'rgba(255,228,94,.35)';ctx.beginPath();ctx.arc(kx+w/2,ky+U/2,w*.8,0,7);ctx.fill();}
+   ctx.fillStyle='#1c2130';ctx.font=`700 ${lab.length>2?7:9}px ${FF()}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(lab,kx+w/2,ky+d+U/2-1.5);};
+  const row=(arr,rx,ry)=>{let cx=rx;for(const it of arr){const[k,l,w]=Array.isArray(it)?it:[it,it.toUpperCase(),U];key(k,l,cx,ry,w);cx+=w+G2;}};const r0=y+10;
+  row([['Escape','ESC',26],'1','2','3','4','5','6','7','8','9','0'],x+10,r0);row([['Tab','TAB',30],'q','w','e','r','t','y','u','i','o','p','[',']'],x+10,r0+U+G2);
+  row([['CapsLock','CAPS',36],'a','s','d','f','g','h','j','k','l',['Enter','ENTER',40]],x+10,r0+2*(U+G2));row([['Shift','SHIFT',46],'z','x','c','v','b','n','m',',','.'],x+10,r0+3*(U+G2));row([[' ','SPACE',150]],x+86,r0+4*(U+G2));
+  const ax=x+262,ay=r0+3*(U+G2);key('ArrowUp','↑',ax+U+G2,ay);key('ArrowLeft','←',ax,ay+U+G2);key('ArrowDown','↓',ax+U+G2,ay+U+G2);key('ArrowRight','→',ax+2*(U+G2),ay+U+G2);
+  // the mouse
+  const mx=x+340,my=y+14,mw=52,mh=82,mL=tour.flash.mouseL!==undefined&&clock-tour.flash.mouseL<.5,mR=tour.flash.mouseR!==undefined&&clock-tour.flash.mouseR<.5,moving=tour.mouseOn&&clock-tour.mouseOn<.4;
+  const body=ctx.createLinearGradient(mx,my,mx+mw,my+mh);body.addColorStop(0,'#eef1f7');body.addColorStop(1,'#9aa1b3');ctx.fillStyle=body;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(mx,my,mw,mh,24);else ctx.rect(mx,my,mw,mh);ctx.fill();
+  ctx.fillStyle=mL?'#ffe45e':'rgba(0,0,0,.08)';ctx.beginPath();if(ctx.roundRect)ctx.roundRect(mx+3,my+3,mw/2-4,30,[20,2,2,2]);else ctx.rect(mx+3,my+3,mw/2-4,30);ctx.fill();ctx.fillStyle=mR?'#3fe0ff':'rgba(0,0,0,.08)';ctx.beginPath();if(ctx.roundRect)ctx.roundRect(mx+mw/2+1,my+3,mw/2-4,30,[2,20,2,2]);else ctx.rect(mx+mw/2+1,my+3,mw/2-4,30);ctx.fill();
+  ctx.strokeStyle='#6c7386';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(mx+mw/2,my+3);ctx.lineTo(mx+mw/2,my+34);ctx.stroke();ctx.fillStyle='#4a5066';ctx.fillRect(mx+mw/2-3,my+10,6,14);
+  if(moving&&(Math.abs(tour.mdx)>.02||Math.abs(tour.mdy)>.02)){const cx=mx+mw/2,cy=my+mh/2+12,a=Math.atan2(tour.mdy,tour.mdx);ctx.strokeStyle='#3cff6a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*22,cy+Math.sin(a)*22);ctx.stroke();ctx.fillStyle='#3cff6a';ctx.beginPath();ctx.arc(cx+Math.cos(a)*22,cy+Math.sin(a)*22,4,0,7);ctx.fill();}
+  ctx.fillStyle='#9aa3c7';ctx.font=`600 9px ${FF()}`;ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(mR?'RIGHT BUTTON':mL?'LEFT CLICK':moving?'MOVING':'MOUSE',mx+mw/2,my+mh+4);
+  const lk=tour.held.size?[...tour.held][0]:tour.last&&clock-(tour.flash[tour.last]||-9)<1.2?tour.last:null,cap=lk?`${KN[lk]||(lk===' '?'SPACE':lk.length===1?lk.toUpperCase():lk)} — ${KEYCAP(lk)}`:mL?'Left click — fire':mR?'Right button held — look around':moving?'Mouse — steer towards the pointer':'';
+  if(cap){ctx.fillStyle='#ffe45e';ctx.font=`700 11px ${FF()}`;ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText(cap,x+10,y+PH-18);}ctx.restore();}
  function drawTourUI(ctx){const st=tour.def.steps[tour.i],n=tour.def.steps.length,px=8,pw=520,py=4,ph=94,cover=(x,y,w,h)=>{if(LAYOUT)LAYOUT=LAYOUT.filter(e=>!(e.x<x+w&&e.x+(e.w||0)>x&&e.y<y+h&&e.y+(e.h||0)>y));};cover(px,py,pw,ph);ctx.fillStyle='rgba(6,12,28,.96)';ctx.strokeStyle='#ffe45e';ctx.lineWidth=1.5;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(px,py,pw,ph,10);else ctx.rect(px,py,pw,ph);ctx.fill();ctx.stroke();
   text(ctx,`🎓 ${tour.def.icon} ${tour.def.title}${tour.done?' · finished!':` · step ${Math.max(1,tour.i+1)} of ${n}`}${tour.paused?' · PAUSED':''}`,px+12,py+6,'#ffe45e',12,'left');ctx.save();ctx.beginPath();ctx.rect(px+10,py+22,pw-20,46);ctx.clip();wrap(ctx,tour.done?'Choose another tour, or go back to your own game.':(tour.text||''),px+12,py+23,pw-24,15,'#e6e9f2',12);ctx.restore();
   const by=py+ph-28,bw=120,bx=px+10;if(tour.done){const idx=TOURS.indexOf(tour.def),nx=TOURS[idx+1];if(nx)button(ctx,B(bx,by,240,24,`▶ NEXT TOUR: ${nx.icon} ${nx.title}`,()=>tourStart(nx.id),{fs:10,bg:'rgba(30,80,50,.92)'}));button(ctx,B(bx+250,by,240,24,'✕ BACK TO MY GAME',()=>tourEnd(),{fs:10}));}
   else{button(ctx,B(bx,by,bw,24,tour.paused?'▶ CARRY ON':'⏸ PAUSE',()=>{tour.paused=!tour.paused;if(tour.paused)tourRelease();},{fs:10}));button(ctx,B(bx+bw+4,by,bw,24,'⏭ NEXT STEP',()=>tourNext(),{fs:10}));button(ctx,B(bx+2*(bw+4),by,bw,24,`⌨ KEYS: ${C.opt.tourKeys!==false?'ON':'OFF'}`,()=>{C.opt.tourKeys=C.opt.tourKeys===false;},{fs:10}));button(ctx,B(bx+3*(bw+4),by,bw,24,'✕ END TOUR',()=>tourEnd(),{fs:10}));}
-  if(C.opt.tourKeys!==false){const kx=mode==='docked'?W-352:8,ky=mode==='docked'?H-212:VH-134;cover(kx,ky,342,126);drawKeyboard(ctx,kx,ky);}
-  const m=tour.mouse;if(m&&m.tx!==null&&(clock-m.click<1.2||m.t<1||(st&&(st.click||st.clickAt)&&!tour.clicked))){ctx.save();ctx.translate(m.x,m.y);ctx.fillStyle='#ffffff';ctx.strokeStyle='#05101e';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,18);ctx.lineTo(5,13);ctx.lineTo(9,21);ctx.lineTo(12,19);ctx.lineTo(8,12);ctx.lineTo(14,12);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
+  if(C.opt.tourKeys!==false){const kx=mode==='docked'?W-412:8,ky=mode==='docked'?H-238:VH-158;cover(kx,ky,404,150);drawKeyboard(ctx,kx,ky);}
+  const m=tour.mouse;if(m&&((tour.mouseOn&&clock-tour.mouseOn<.3)||(m.tx!==null&&(clock-m.click<1.2||m.t<1||(st&&(st.click||st.clickAt)&&!tour.clicked))))){ctx.save();ctx.translate(m.x,m.y);ctx.fillStyle='#ffffff';ctx.strokeStyle='#05101e';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,18);ctx.lineTo(5,13);ctx.lineTo(9,21);ctx.lineTo(12,19);ctx.lineTo(8,12);ctx.lineTo(14,12);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
    if(clock-m.click<.6){const r=6+(clock-m.click)*40;ctx.strokeStyle=`rgba(255,228,94,${1-(clock-m.click)/.6})`;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(m.x,m.y,r,0,7);ctx.stroke();}}}
  function renderTours(ctx){text(ctx,'🎓 TRAINING TOURS',CX,96,'#ffe45e',20,'center');text(ctx,'Watch Nova fly — the keys and mouse light up as they are used. Tours use a practice game, so your own game is never changed.',CX,124,'#9aa3c7',11,'center');
-  TOURS.forEach((t,i)=>{const x=40+(i%2)*365,y=146+Math.floor(i/2)*56;ctx.fillStyle='rgba(255,255,255,.045)';ctx.fillRect(x,y-3,355,50);button(ctx,B(x+4,y,347,24,`${t.icon} ${i+1}. ${t.title}`,()=>tourStart(t.id),{fs:12}));text(ctx,t.desc,x+10,y+28,'#9aa3c7',11,'left',false);});
+  TOURS.forEach((t,i)=>{const x=24+(i%3)*252,y=142+Math.floor(i/3)*56;ctx.fillStyle='rgba(255,255,255,.045)';ctx.fillRect(x,y-3,244,50);button(ctx,B(x+3,y,238,22,`${t.icon} ${i+1}. ${t.title}`,()=>tourStart(t.id),{fs:11}));ctx.save();ctx.beginPath();ctx.rect(x,y+24,244,24);ctx.clip();wrap(ctx,t.desc,x+8,y+26,230,11,'#9aa3c7',9);ctx.restore();});
   button(ctx,B(40,488,220,30,`⌨ KEYS DISPLAY: ${C.opt.tourKeys!==false?'ON':'OFF'}`,()=>{C.opt.tourKeys=C.opt.tourKeys===false;persist();},{fs:11}),C.opt.tourKeys!==false);button(ctx,B(CX-80,488,160,30,'◀ BACK',()=>{menuTab='main';},{fs:12}));}
  function renderDocked(ctx){if(seat){renderSeat(ctx);return;}btns=[];const s=here();if(tradeQ&&!overlay&&mode==='docked'){tradeQ=false;openMath('trade',ok=>{if(ok){const b=tradeBonus();C.credits+=b;msg(`TRADERS’ GUILD BONUS: +${b} CR`,3,'#3cff6a');syncScore();persist();}});}
   if(tab==='status'){frame(ctx,`COMMANDER ${((env.names&&env.names[0])||'PILOT').toUpperCase()}`);const L=[['Current System:',s.name],['Hyperspace System:',C.target!==null&&C.target!==undefined?GAL[C.target].name:'—'],['Condition:','Docked'],['Rating:',rankOf(C.killPts)],['Fuel:',`${C.fuel.toFixed(1)} Light Years`],['Cash:',`${C.credits.toFixed(1)} Cr`],['Legal Status:',legalName(C.legal)],['Stardate:',`Day ${C.day}`],['Kills:',String(C.kills)]];
@@ -1801,7 +1857,7 @@ function makeStarlane(env){
  G.onEnd=why=>{stopMusic();if(typeof StarAudio!=='undefined')StarAudio.stopAll();if(mode==='dead')return;if(mode==='hyper')arrive();if(mode==='launchScene')endLaunchScene();if(mode==='launch')mode='flight';
   if(mode==='dockScene'||mode==='dockAnim'){mode='docked';persist();return;}
   if(mode==='flight'){if(planet&&!interdicted)saveGame();else{finishDock();mode='docked';}return;}if(mode==='docked')persist();};
- G._dbg={get C(){return C;},get P(){return P;},get mode(){return mode;},get station(){return station;},get ships(){return ships;},get scene(){return scene;},get planet(){return planet;},get moons(){return moons;},get suns(){return suns;},get timeScale(){return timeScale;},get overlay(){return overlay;},get bh(){return bh;},get redOn(){return redOn;},get tour(){return tour;},tourStart,tourEnd,tourNext,slotSave,slotOpen,get TOURS(){return TOURS;},get rollLockNow(){return rollLock;},get lockRateNow(){return lockRate;},get headDragNow(){return headDrag;},get seat(){return seat;},enterSeat,exitSeat,seatLaunch,preflight,clearAI:()=>{aiLine=null;},get camModeNow(){return camMode;},setHeadDrag:v=>{headDrag=v;},get btns(){return btns;},misRecap,misTarget,persist:()=>persist(),get race(){return race;},galJump,genBoard,econTick,get GALn(){return GAL;},weakTopics,get clockNow(){return clock;},HELPF,TUTF,INTRO,CT,setTouch:v=>{touchSeen=v;},get headYaw(){return headYaw;},setHead:(y,p)=>{headYaw=y;headPitch=p;},PIT3D,story2Offer,get msLocked(){return msLocked;},academyStart,MF,market,get hoverPt(){return hover;},get keysDown(){return Object.keys(K).filter(k=>K[k]);},get ctrlOut(){try{return controls();}catch(e){return String(e)}},get tut(){return tut;},tutStart,navRank,openMath,layoutOn:()=>{LAYOUT=[];},layoutOff:()=>{LAYOUT=null;},get layout(){return G._lastLayout||[];},openIntro,careerScore,get lockOn(){return lockOn;},get jamT(){return jamT;},get aiRect(){return aiRect;},say,makeMathQ,kill,get msgs(){return msgs;},get tgt(){return radarTgt;},get mathQ(){return mathQ;},get rollLock(){return rollLock;},get aiLine(){return aiLine;},buyShip,storyOffer,accept,missionSpawns,finish:()=>finishDock(),get tips(){return tips;},
+ G._dbg={get C(){return C;},get P(){return P;},get mode(){return mode;},get station(){return station;},get ships(){return ships;},get scene(){return scene;},get planet(){return planet;},get moons(){return moons;},get suns(){return suns;},get timeScale(){return timeScale;},get overlay(){return overlay;},get bh(){return bh;},get redOn(){return redOn;},get menuTabNow(){return menuTab;},get tour(){return tour;},tourStart,tourEnd,tourNext,slotSave,slotOpen,get TOURS(){return TOURS;},get rollLockNow(){return rollLock;},get lockRateNow(){return lockRate;},get headDragNow(){return headDrag;},get seat(){return seat;},enterSeat,exitSeat,seatLaunch,preflight,clearAI:()=>{aiLine=null;},get camModeNow(){return camMode;},setHeadDrag:v=>{headDrag=v;},get btns(){return btns;},misRecap,misTarget,persist:()=>persist(),get race(){return race;},galJump,genBoard,econTick,get GALn(){return GAL;},weakTopics,get clockNow(){return clock;},HELPF,TUTF,INTRO,CT,setTouch:v=>{touchSeen=v;},get headYaw(){return headYaw;},setHead:(y,p)=>{headYaw=y;headPitch=p;},PIT3D,story2Offer,get msLocked(){return msLocked;},academyStart,MF,market,get hoverPt(){return hover;},get keysDown(){return Object.keys(K).filter(k=>K[k]);},get ctrlOut(){try{return controls();}catch(e){return String(e)}},get tut(){return tut;},tutStart,navRank,openMath,layoutOn:()=>{LAYOUT=[];},layoutOff:()=>{LAYOUT=null;},get layout(){return G._lastLayout||[];},openIntro,careerScore,get lockOn(){return lockOn;},get jamT(){return jamT;},get aiRect(){return aiRect;},say,makeMathQ,kill,get msgs(){return msgs;},get tgt(){return radarTgt;},get mathQ(){return mathQ;},get rollLock(){return rollLock;},get aiLine(){return aiLine;},buyShip,storyOffer,accept,missionSpawns,finish:()=>finishDock(),get tips(){return tips;},
   set:(k,v)=>{({helpTab:()=>helpTab=v,menuTab:()=>menuTab=v,yardMode:()=>yardMode=v,introI:()=>introI=v,dataSel:()=>dataSel=v,chartMode:()=>chartMode=v,mode:()=>mode=v,tab:()=>tab=v,overlay:()=>overlay=v,view:()=>view=v,camMode:()=>camMode=v})[k]();},launch,startHyper,toggleDock,spawn,buy,buyEq,accept,board,arrive:()=>arrive(),flight,kill:sh=>kill(sh,true),dock:()=>docked(),saveGame,hurt:(d)=>hurt(d,P.o.f),get tab(){return tab;}};
  if(C.flight&&C.flight.sys===C.sys&&GAL[C.sys])restoreFlight();
  if(!C.introSeen)setTimeout(()=>{if(mode==='docked'&&!overlay)openIntro();},600);
