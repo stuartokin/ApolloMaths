@@ -1,7 +1,22 @@
 {
- "version": "2.50",
+ "version": "2.51",
  "date": "10 November 2026",
  "releases": [
+  {
+   "v": "2.51",
+   "date": "10 November 2026",
+   "kids": [
+    "🎨 Starlane adventures look much better — real-looking planets and moons, and detailed pictures",
+    "🖥️ The adventure task now shows on your ship’s MISSION screen"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🚀 Starlane Trader: adventure pictures redrawn — planets, moons, Mars, gas giants, the Sun and asteroids are now rendered globes with lighting and atmospheres; space scenes have starfields and nebulae, ship scenes a lit metal cabin, and everything sits in a display frame. During an adventure’s flying task, the goal, timer and target distance appear on the MISSION screen (the right console wing in widescreen, or the small mission screen) — tap it to flip between ADVENTURE and MISSION. Without those screens, the panel sits top-left and ⇄ moves it above the console."
+   ]
+  },
   {
    "v": "2.50",
    "date": "10 November 2026",
@@ -129,22 +144,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: tours rebuilt — each step waits for Nova to finish speaking (with a timed fallback), movies stay on, Modern controls steer with the mouse pointer, and a realistic keyboard and mouse light up as they are used. New docking lesson (off-angle approach, levelling and spin-matching, then the docking computer) and five new tours: your cockpit, sitting in the station, rescues and surveys, police and the law, saving and settings. Ending a tour returns you to where you started it. Fixed: fuel scoops were missing from the Shipyard categories."
-   ]
-  },
-  {
-   "v": "2.41",
-   "date": "9 November 2026",
-   "kids": [
-    "🛒 Starlane: a bigger shipyard with pages — and new gear: Starburst laser (5), fire-control computer (6), plasma cannon, twin beams, shield booster, repair drones, tractor beam and afterburner",
-    "🖥️ Movies, rear and side views now fill a widescreen too",
-    "🔢 Nova says numbers like 6.2 properly"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🚀 Starlane Trader: Shipyard categories (Essentials, Weapons, Defence, Systems) with automatic pages and a description of each item; the Market pages automatically as goods are added. New: twin beam and plasma lasers, Starburst laser charges, shield booster, fire-control computer, repair drones, tractor beam, afterburner. After being destroyed you restart at the station where you last docked. Movies, the rear/side views and the outside camera use the full widescreen; ships in movies show their full detail.",
-    "🔊 Speech: numbers with a decimal point are read as “six point two”, everywhere in the app."
    ]
   }
  ]
