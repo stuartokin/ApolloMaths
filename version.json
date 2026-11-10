@@ -1,7 +1,21 @@
 {
- "version": "2.52",
+ "version": "2.53",
  "date": "10 November 2026",
  "releases": [
+  {
+   "v": "2.53",
+   "date": "10 November 2026",
+   "kids": [
+    "📱 Starlane is bigger on tablets and folds held sideways — the game now fills the full height of the screen"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🚀 Starlane Trader on touch screens in landscape full screen: the game uses the whole screen height (about a third more picture on a tablet); the score strip and Pause / Exit / Stop shrink into the top corners; in the Modern style the 3D space view fills the side margins behind the touch controls. Laptops and big screens with a mouse are unchanged."
+   ]
+  },
   {
    "v": "2.52",
    "date": "10 November 2026",
@@ -130,21 +144,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: after launch, the docking corridor, “line up / match the spin” hints and spin buttons stay hidden until you are 3.5 km clear of the station or turn back to face it. During tours other game voices stay quiet, so they can no longer cut off the lesson narration. Modern radar redesigned: glowing glass with tick marks and labelled range rings, a smooth sweep, ships as arrows pointing the way they fly, pulsing rings on hostile ships, a spinning station marker, shaded planets and a glowing sun, rim pointers for things out of range, and rotating target brackets."
-   ]
-  },
-  {
-   "v": "2.43",
-   "date": "9 November 2026",
-   "kids": [
-    "🧸 Starlane: make the cockpit your own — fuzzy dice, a bobble-head alien, fairy lights, a cat plush and more in the shipyard’s PERSONAL tab",
-    "🕹️ A real flight stick, deeper instrument panels and a lived-in cockpit (switch the clutter off in Display if you like it tidy)"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🚀 Starlane Trader (Modern cockpit): framed instrument screens with glare hoods, a proper flight stick, a cockpit floor, and lived-in clutter (mug, tablet, cables, tools, sticky notes) — Display → LIVED-IN COCKPIT turns it on or off. New PERSONAL shipyard category with ten cockpit items: fuzzy dice, bobble-head alien, pot plant, photo frame, scarf, trophy, toy rocket, cat plush, comic book and fairy lights. You can look further down to see the stick."
    ]
   }
  ]

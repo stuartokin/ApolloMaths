@@ -366,3 +366,14 @@ dialog.tour-front[open]{position:fixed;inset:0;margin:auto;z-index:91}
 .fam-log{list-style:none;padding:0;margin:6px 0;max-height:220px;overflow:auto}.fam-log li{padding:4px 0;border-bottom:1px solid #eef1fb}
 .fambanner{display:flex;gap:10px;align-items:center;justify-content:space-between;background:#fff4c2;border:2px solid #e0b400;border-radius:16px;padding:10px 14px;margin:10px 0;font-weight:700}
 .tabblock{position:fixed;inset:0;z-index:9999;background:rgba(10,14,40,.94);display:none;align-items:center;justify-content:center;text-align:center;color:#fff;padding:24px}.tabblock.on{display:flex}.tabblock>div{max-width:440px}
+
+/* Starlane on touch screens in landscape full screen: the game uses the whole height; the score strip and buttons shrink into the top corners */
+.arcade.arc-full.arc-tw .arc-body{padding:0}
+.arcade.arc-full.arc-tw .arc-game{position:relative}
+.arcade.arc-full.arc-tw .arc-hud{position:fixed!important;top:6px!important;left:10px!important;right:auto!important;bottom:auto!important;grid-area:auto;z-index:5;font-size:11px;gap:6px;opacity:.9;background:rgba(0,0,0,.45);padding:3px 8px;border-radius:8px}
+.arcade.arc-full.arc-tw .arc-ctl{position:fixed!important;top:6px!important;right:8px!important;left:auto!important;bottom:auto!important;grid-area:auto;z-index:5;gap:6px;margin:0;display:flex}
+.arcade.arc-full.arc-tw .arc-ctl button{font-size:12px;padding:4px 9px;min-height:0}
+@media (min-aspect-ratio:3/2){
+.arcade.arc-full.arc-tw .arc-hud{flex-direction:column;align-items:flex-start;gap:2px}
+.arcade.arc-full.arc-tw .arc-ctl{flex-direction:column;align-items:flex-end}
+}

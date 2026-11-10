@@ -80,7 +80,7 @@ const Arcade=(()=>{
  // ---- size the game: normal (CSS limits) or full screen (largest size that fits) ----
  function fit(){if(!cv||!game)return;const dpr=Math.min(2,window.devicePixelRatio||1),d=dlg();
   if(d.classList.contains('arc-full')){const land=window.matchMedia('(orientation:landscape) and (max-height:520px)').matches,padEl=d.querySelector('.arc-pad'),padOn=padEl&&getComputedStyle(padEl).display!=='none';
-   const extra=sim2()?(padOn&&!land?150:44):0,availW=innerWidth-(land&&padOn?(sim2()?240:250):24),availH=innerHeight-(land?96:(padOn?170:110))-extra,k=Math.max(.2,Math.min(availW/game.W,availH/game.H));
+   const tw=d.classList.contains('arc-tw'),extra=tw?0:sim2()?(padOn&&!land?150:44):0,availW=tw?innerWidth-6:innerWidth-(land&&padOn?(sim2()?240:250):24),availH=tw?innerHeight-6:innerHeight-(land?96:(padOn?170:110))-extra,k=Math.max(.2,Math.min(availW/game.W,availH/game.H));
    cv.style.width=Math.floor(game.W*k)+'px';cv.style.height=Math.floor(game.H*k)+'px';cv.style.maxHeight='none';cv.style.maxWidth='none';cv.classList.add('fitted');cv.width=Math.round(game.W*k*dpr);cv.height=Math.round(game.H*k*dpr);}
   else{cv.classList.remove('fitted');cv.style.width='';cv.style.height='';cv.style.maxHeight='';cv.style.maxWidth='';cv.width=game.W*dpr;cv.height=game.H*dpr;}}
  function setFull(on){const d=dlg();d.classList.toggle('arc-full',on);setTimeout(fit,0);setTimeout(fit,350);const fsEl=document.fullscreenElement||document.webkitFullscreenElement;

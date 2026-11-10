@@ -684,7 +684,7 @@ function makeStarlane(env){
  const B=(x,y,w,h,label,fn,o={})=>{btns.push({x,y,w,h,fn,label});return{x,y,w,h,label,...o};};
  let wideEl=null,wideCtx=null;
  function wideOff(remove){const cv=document.getElementById('arcCanvas');if(wideEl){wideEl.style.display='none';if(remove){wideEl.remove();wideEl=null;wideCtx=null;}}if(cv&&cv.__slWide){cv.style.background='';cv.style.borderColor='';cv.__slWide=false;const host=cv.parentElement;if(host)for(const sel of['.arc-ctl','.arc-hud']){const el=host.querySelector(sel);if(el&&el.__slOld!==undefined){el.setAttribute('style',el.__slOld);delete el.__slOld;}}}G._wings=false;G._swHov=null;}
- function wideState(){const cv=document.getElementById('arcCanvas'),ar=document.getElementById('arcade'),m3=STYLE()==='modern'&&typeof StarModern!=='undefined'&&StarModern.ready()&&C.opt.cock3d!==false&&!touchSeen,ok=PIT3D()||(m3&&(mode==='flight'||mode==='dockScene'||mode==='launchScene'||(seat&&seat.ui==='flight')));if(!cv||!ar||!ar.classList.contains('arc-full')||!ok){wideOff(false);return null;}
+ function wideState(){const cv=document.getElementById('arcCanvas'),ar=document.getElementById('arcade'),m3=STYLE()==='modern'&&typeof StarModern!=='undefined'&&StarModern.ready()&&(C.opt.cock3d!==false||touchWide())&&(!touchSeen||touchWide()),ok=PIT3D()||(m3&&(mode==='flight'||mode==='dockScene'||mode==='launchScene'||(seat&&seat.ui==='flight')));if(!cv||!ar||!ar.classList.contains('arc-full')||!ok){wideOff(false);return null;}
   const host=cv.parentElement,hr=host.getBoundingClientRect(),cr=cv.getBoundingClientRect();if(hr.width<cr.width*1.12){wideOff(false);return null;}
   if(!wideEl){wideEl=document.createElement('canvas');wideEl.id='slWide';wideEl.setAttribute('aria-hidden','true');wideEl.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;z-index:-1;pointer-events:none;background:#000';wideCtx=wideEl.getContext('2d');}
   if(wideEl.parentElement!==host){host.insertBefore(wideEl,host.firstChild);if(getComputedStyle(host).position==='static')host.style.position='relative';host.style.isolation='isolate';}
@@ -864,7 +864,7 @@ function makeStarlane(env){
  const SW_KIND=id=>['jump','dock','cam','tips'].includes(id)?'toggle':['time','view'].includes(id)?'knob':['bomb','pod'].includes(id)?'guard':'push';
  const SW_ON={jump:()=>jump,dock:()=>dockComp,cam:()=>camMode==='ext',tips:()=>C.opt.tips};
  let wingCv=[null,null];G._flash={};
- function deckState(wd){G._wings=false;if(!wd)return null;const xL=-wd.ox/wd.s,xR=(wd.w-wd.ox)/wd.s,L1=-12,L0=Math.max(xL+12,L1-320),R0=W+12,R1=Math.min(xR-12,R0+320);if(L1-L0<190||R1-R0<190)return null;
+ function deckState(wd){G._wings=false;if(!wd||isTouchDevice())return null;const xL=-wd.ox/wd.s,xR=(wd.w-wd.ox)/wd.s,L1=-12,L0=Math.max(xL+12,L1-320),R0=W+12,R1=Math.min(xR-12,R0+320);if(L1-L0<190||R1-R0<190)return null;
   const keys={};for(const k of deckKeys())keys[k.key]=k;const sws=[],wings=[];
   [[DECK_L,L0,L1],[DECK_R,R0,R1]].forEach(([ids,x0,x1],wi)=>{const w=x1-x0,sp=(w-16)/4;if(!wingCv[wi]||wingCv[wi].width!==Math.round(w*3)){wingCv[wi]=document.createElement('canvas');wingCv[wi].width=Math.round(w*3);wingCv[wi].height=552;}
    ids.forEach((id,i)=>{const k=keys[id];if(!k)return;const col=i%4,row=Math.floor(i/4);sws.push({id,wing:wi,kind:SW_KIND(id),x:x0+8+col*sp,y:500+row*46,w:sp,h:42,on:SW_ON[id]?SW_ON[id]():false,
@@ -1597,14 +1597,16 @@ function makeStarlane(env){
   const thrAt=e=>{if(!P)return;const r=p.track.getBoundingClientRect();P.throttle=Math.max(0,Math.min(1,1-(e.clientY-r.top)/r.height));};
   (host||document.body).appendChild(el);TD.el=el;}
  function tdRelease(){TD.fire=false;TD.boost=false;TD.x=0;TD.y=0;if(TD.rel)TD.rel.forEach(f=>f());}
- function tdUpdate(){const cv=document.getElementById('arcCanvas');const want=!!cv&&cv.offsetParent!==null&&isTouchDevice()&&mode==='flight'&&!overlay&&!tour&&!(seat);
+ const touchWide=()=>{const ar=document.getElementById('arcade');return!!ar&&ar.classList.contains('arc-tw');};
+ function twUpdate(){const ar=document.getElementById('arcade');if(!ar)return;const want=isTouchDevice()&&ar.classList.contains('arc-full')&&innerWidth>innerHeight;if(want!==ar.classList.contains('arc-tw')){ar.classList.toggle('arc-tw',want);setTimeout(()=>window.dispatchEvent(new Event('resize')),0);}}
+ function tdUpdate(){twUpdate();const cv=document.getElementById('arcCanvas');const want=!!cv&&cv.offsetParent!==null&&isTouchDevice()&&mode==='flight'&&!overlay&&!tour&&!(seat);
   let r=null,side=0,box=null;if(want){r=cv.getBoundingClientRect();const host=cv.closest('dialog')||document.body;box=host.getBoundingClientRect();side=Math.min(r.left-box.left,box.right-r.right);}const on=want&&side>=120&&innerWidth>innerHeight;
   if(want&&!on&&innerWidth>innerHeight&&!G._fsTip){G._fsTip=true;msg('TIP: TAP FULL SCREEN FOR BIGGER TOUCH CONTROLS',4,'#ffe45e');}
   if(!on){if(TD.on){TD.on=false;tdRelease();if(TD.el)TD.el.style.display='none';}return;}
   if(!TD.el)tdBuild(cv.closest('dialog')||document.body);TD.on=true;TD.el.style.display='block';const p=TD.parts,s=Math.min(side-16,innerHeight*.34,230),cy=r.top+r.height*.62,lx=box.left+(r.left-box.left)/2,rx=r.right+(box.right-r.right)/2;
   const put=(d,x,y,w,h)=>{d.style.left=(x-w/2)+'px';d.style.top=(y-h/2)+'px';d.style.width=w+'px';d.style.height=h+'px';};
   put(p.base,lx,cy,s,s);p.knob.style.left=`${29+TD.x*40}%`;p.knob.style.top=`${29+TD.y*40}%`;
-  const x0=r.right+8,x1=box.right-44,aw=Math.max(60,x1-x0),fc=x0+aw/2,f=Math.min(aw*.92,170),sm=Math.min(aw*.46,84);const fy=cy+f*.18,by2=fy-f/2-sm/2-12;put(p.fire,fc,fy,f,f);put(p.boost,fc-sm*.54,by2,sm,sm);put(p.msl,fc+sm*.54,by2,sm,sm);
+  const x0=r.right+8,x1=box.right-44,aw=Math.max(60,x1-x0),fc=x0+aw/2,f=Math.min(aw*.92,170),sm=Math.min(aw*.46,84);const fy=cy+f*.18,by2=fy-f/2-sm/2-12;put(p.fire,fc,fy,f,f);put(p.boost,fc-sm*.56,by2,sm,sm);put(p.msl,fc+sm*.56,by2,sm,sm);const lf=Math.max(9,Math.min(14,sm*.2))+'px';p.boost.style.fontSize=lf;p.msl.style.fontSize=lf;p.msl.textContent=sm<70?'MSL':'MISSILE';p.fire.style.fontSize=Math.max(13,Math.min(22,f*.15))+'px';
   const th=Math.min(innerHeight*.42,260),tx=box.right-22;put(p.track,tx,r.top+r.height*.3+8,26,th);p.handle.style.top=`${(1-(P?P.throttle:0))*(th-24)}px`;put(p.lab,tx,r.top+r.height*.3+th/2+24,60,16);}
  function drawAdvFX(ctx){if(!adv||!adv.st.fx||mode!=='flight'||!P)return;ctx.save();ctx.beginPath();ctx.rect(0,0,W,PIT3D()?VH*.72:VH);ctx.clip();
   for(const f of adv.st.fx){if(f.kind==='nebula'){const inside=len(sub(P.pos,f.pos))<f.R;if(inside){ctx.fillStyle=`rgba(${f.col},.10)`;ctx.fillRect(0,0,W,VH);}
@@ -2201,7 +2203,7 @@ function makeStarlane(env){
  const WR=Retro.intro(G,{title:'STARLANE TRADER',color:'#3fe0ff',sub:'TRADE - FIGHT - EXPLORE THE GALAXY',tableTitle:'SHIPS YOU WILL MEET',legend,stars:true,bg:'#000',hi:env.hi,hint:C.flight?'RESUMING YOUR SAVED FLIGHT - PRESS FIRE':C.day>1||C.credits!==100?`WELCOME BACK, COMMANDER - DAY ${C.day} - ${Math.floor(C.credits)} CR`:'A NEW COMMANDER WITH 100 CREDITS - PRESS FIRE'});
  const baseRender=WR.render,hintTxt=C.flight?'Resuming your saved flight':C.day>1||C.credits!==100?`Welcome back, Commander — day ${C.day} · ${Math.floor(C.credits)} Cr`:'A new commander with 100 credits';
  Object.defineProperty(WR,'noCrt',{get:()=>STYLE()==='modern',configurable:true});
- {const oe=WR.onEnd;WR.onEnd=function(w){try{wideOff(true);nameBoxSync(false);paintBoxSync(false);tdRelease();TD.on=false;if(TD.el)TD.el.style.display='none';}catch(e){}return oe?oe.apply(this,arguments):undefined;};}
+ {const oe=WR.onEnd;WR.onEnd=function(w){try{const ar=document.getElementById('arcade');if(ar&&ar.classList.contains('arc-tw')){ar.classList.remove('arc-tw');setTimeout(()=>window.dispatchEvent(new Event('resize')),0);}wideOff(true);nameBoxSync(false);paintBoxSync(false);tdRelease();TD.on=false;if(TD.el)TD.el.style.display='none';}catch(e){}return oe?oe.apply(this,arguments):undefined;};}
  WR.render=ctx=>{if(!WR.intro)return baseRender(ctx);try{DEMO.render(ctx,hintTxt,env.hi&&env.hi());}catch(e){baseRender(ctx);}};
  return WR;}
 GAME_LIST.push({id:'starlane',name:'Starlane Trader',icon:'🪐',desc:'Trade, fight and explore a whole galaxy. Your career is saved!',two:'none'});
