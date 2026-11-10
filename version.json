@@ -1,7 +1,23 @@
 {
- "version": "2.43",
- "date": "9 November 2026",
+ "version": "2.44",
+ "date": "10 November 2026",
  "releases": [
+  {
+   "v": "2.44",
+   "date": "10 November 2026",
+   "kids": [
+    "🚀 Starlane: leaving a station no longer shows the docking guide",
+    "🎓 Nova’s tour narration is no longer cut off by other voices",
+    "📡 A brand-new radar in the Modern cockpit"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🚀 Starlane Trader: after launch, the docking corridor, “line up / match the spin” hints and spin buttons stay hidden until you are 3.5 km clear of the station or turn back to face it. During tours other game voices stay quiet, so they can no longer cut off the lesson narration. Modern radar redesigned: glowing glass with tick marks and labelled range rings, a smooth sweep, ships as arrows pointing the way they fly, pulsing rings on hostile ships, a spinning station marker, shaded planets and a glowing sun, rim pointers for things out of range, and rotating target brackets."
+   ]
+  },
   {
    "v": "2.43",
    "date": "9 November 2026",
@@ -139,23 +155,6 @@
    ],
    "items": [
     "🚀 Starlane Trader (Modern, full screen on wide displays): console wings with a Cargo screen and a Mission screen (next step), and banks of 3D switches — toggle levers that stay set, spring-back levers, guarded red switches and rotary knobs for Time and View — clickable with hover help. The arcade’s own controls move to the top corners so nothing covers the console. In a smaller window the slide-up action bar is drawn as a row of switches."
-   ]
-  },
-  {
-   "v": "2.34",
-   "date": "9 November 2026",
-   "kids": [
-    "🚀 Starlane MODERN: a brand-new 3D cockpit — look around with the right mouse button and see the whole cabin!",
-    "🖥️ Your ship’s screens are now built into the console, and the action buttons slide up when you need them",
-    "🖼️ In full screen, Modern now fills your whole widescreen",
-    "📋 A Mission Log tells you where you are and exactly what to do next"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🚀 Starlane Trader (Modern style): an enclosed 3D cockpit (canopy, glass glare, side walls and consoles, red-alert cabin lighting, head sway); the dashboard rebuilt as live screens in the 3D console; a modern font and glass buttons; a slide-up action bar; true widescreen in full screen; the aim ring and pointer hide while looking around. New Mission Log with a recap and next step for every mission, read aloud on request, and a welcome-back recap after a break. The arcade’s “Retro screen” scanlines are skipped in Modern style."
    ]
   }
  ]
