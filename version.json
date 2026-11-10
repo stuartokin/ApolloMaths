@@ -1,7 +1,22 @@
 {
- "version": "2.51",
+ "version": "2.52",
  "date": "10 November 2026",
  "releases": [
+  {
+   "v": "2.52",
+   "date": "10 November 2026",
+   "kids": [
+    "📱 Starlane works properly on tablets and phones: the joystick steers, FIRE lets go when you lift your finger, and in full screen there are big controls at the sides"
+   ],
+   "tags": [
+    "games",
+    "fixes"
+   ],
+   "items": [
+    "🚀 Starlane Trader on touch screens: fixed the on-screen joystick (it never steered) and FIRE (it never switched off) — both were mistaken for subtitle dragging. In full-screen landscape on tablets and folds, the game now shows a joystick on the left and FIRE, BOOST, MISSILE and a speed slider on the right, outside the picture; each lets go reliably even if the touch is cancelled. Laptops and big screens with a mouse are unchanged.",
+    "👪 Grown-ups on iPads, tablets and phones: triple-tap the score strip at the top of a game (or the app title on the home page) instead of Ctrl+Shift+G."
+   ]
+  },
   {
    "v": "2.51",
    "date": "10 November 2026",
@@ -130,20 +145,6 @@
    ],
    "items": [
     "🚀 Starlane Trader (Modern cockpit): framed instrument screens with glare hoods, a proper flight stick, a cockpit floor, and lived-in clutter (mug, tablet, cables, tools, sticky notes) — Display → LIVED-IN COCKPIT turns it on or off. New PERSONAL shipyard category with ten cockpit items: fuzzy dice, bobble-head alien, pot plant, photo frame, scarf, trophy, toy rocket, cat plush, comic book and fairy lights. You can look further down to see the stick."
-   ]
-  },
-  {
-   "v": "2.42",
-   "date": "9 November 2026",
-   "kids": [
-    "🎓 Starlane tours rebuilt: 17 longer lessons, Nova talks you through each step, and you can see the real keyboard and mouse being used",
-    "🛬 A proper docking lesson — approach from the side, level the slot, then let the docking computer do it"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🚀 Starlane Trader: tours rebuilt — each step waits for Nova to finish speaking (with a timed fallback), movies stay on, Modern controls steer with the mouse pointer, and a realistic keyboard and mouse light up as they are used. New docking lesson (off-angle approach, levelling and spin-matching, then the docking computer) and five new tours: your cockpit, sitting in the station, rescues and surveys, police and the law, saving and settings. Ending a tour returns you to where you started it. Fixed: fuel scoops were missing from the Shipyard categories."
    ]
   }
  ]
