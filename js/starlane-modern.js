@@ -165,6 +165,25 @@ const StarModern=(()=>{
   const key=JSON.stringify(A.look)+A.m.rad;if(!pvShip||pvKey!==key){if(pvShip)pvScene.remove(pvShip);pvShip=new T.Group();const col=(A.look&&A.look.paint&&A.look.paint.main)||'#ffd84a';pvShip.add(new T.Mesh(geoOf(A.m),metal(col,{metal:.6})));detail(pvShip,A.m,col);shipLook(pvShip,A.m,A.look);pvScene.add(pvShip);pvKey=key;}
   pvShip.rotation.set(.25,A.t*.6,0);lookTick(pvShip,A.t);const r=A.m.rad;pvCam.aspect=w/h;pvCam.position.set(0,r*.9,r*3.4);pvCam.lookAt(0,0,0);pvCam.updateProjectionMatrix();
   if(gl.width!==w||gl.height!==h){R.setPixelRatio(1);R.setSize(w,h,false);}R.setScissorTest(false);R.setViewport(0,0,w,h);R.render(pvScene,pvCam);ctx.drawImage(gl,A.x,A.y,A.w,A.h);return true;}
+ // ---------------- adventure bodies: a real-looking Earth and Moon ----------------
+ const advMeshes=new Map();let earthT=null,cloudT=null,moonT=null;
+ function vnoise(){const P=new Uint8Array(512);for(let i=0;i<256;i++)P[i]=i;let sd=1234567;for(let i=255;i>0;i--){sd=(sd*16807)%2147483647;const j=sd%(i+1);[P[i],P[j]]=[P[j],P[i]];}for(let i=0;i<256;i++)P[i+256]=P[i];
+  const g=i=>P[i]/255,f=t=>t*t*(3-2*t),lerp=(a,b,t)=>a+(b-a)*t;
+  const n3=(x,y,z)=>{const X=Math.floor(x)&255,Y=Math.floor(y)&255,Z=Math.floor(z)&255,xf=x-Math.floor(x),yf=y-Math.floor(y),zf=z-Math.floor(z),u=f(xf),v=f(yf),w=f(zf),h=(a,b,c)=>g(P[P[P[a]+b]+c]);
+   return lerp(lerp(lerp(h(X,Y,Z),h(X+1,Y,Z),u),lerp(h(X,Y+1,Z),h(X+1,Y+1,Z),u),v),lerp(lerp(h(X,Y,Z+1),h(X+1,Y,Z+1),u),lerp(h(X,Y+1,Z+1),h(X+1,Y+1,Z+1),u),v),w);};
+  return(x,y,z,oct)=>{let s=0,a=.5,fr=1;for(let o=0;o<oct;o++){s+=a*n3(x*fr,y*fr,z*fr);a*=.5;fr*=2;}return s;};}
+ function sphereTex(w,h,pix){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d'),id=x.createImageData(w,h);for(let j=0;j<h;j++){const lat=(.5-j/h)*Math.PI;for(let i=0;i<w;i++){const lon=i/w*Math.PI*2,vx=Math.cos(lat)*Math.cos(lon),vy=Math.sin(lat),vz=Math.cos(lat)*Math.sin(lon),k=(j*w+i)*4,o=pix(vx,vy,vz,lat);id.data[k]=o[0];id.data[k+1]=o[1];id.data[k+2]=o[2];id.data[k+3]=o[3]??255;}}x.putImageData(id,0,0);const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;return t;}
+ function makeEarthTex(){const N=vnoise();earthT=sphereTex(512,256,(x,y,z,lat)=>{const n=N(x*2.2+5,y*2.2+5,z*2.2+5,5),ice=Math.abs(lat)>1.22-N(x*6,y*6,z*6,2)*.25;if(ice)return[236,242,250];
+   if(n<.5){const d=Math.max(0,Math.min(1,(.5-n)*5));return[Math.round(14+30*(1-d)),Math.round(52+70*(1-d)),Math.round(120+60*(1-d))];}const hgt=(n-.5)*4,dry=Math.abs(Math.abs(lat)-.4)<.18&&N(x*4+9,y*4,z*4,3)>.5;
+   if(dry)return[Math.round(190+30*hgt),Math.round(160+20*hgt),Math.round(100+10*hgt)];return hgt>.55?[120,110,95]:[Math.round(40+50*hgt),Math.round(110+40*hgt),Math.round(45+20*hgt)];});
+  const N2=vnoise();cloudT=sphereTex(512,256,(x,y,z)=>{const n=N2(x*3.5+11,y*3.5,z*3.5,5),a=Math.max(0,Math.min(1,(n-.52)*4.5));return[255,255,255,Math.round(a*235)];});
+  const N3=vnoise();moonT=sphereTex(512,256,(x,y,z)=>{let v=150+70*(N3(x*3,y*3,z*3,5)-.5);const m=N3(x*1.4+3,y*1.4,z*1.4,3);if(m>.6)v-=45;for(let k=0;k<5;k++){const cr=N3(x*(8+k*4),y*(8+k*4),z*(8+k*4),1);if(cr>.82)v-=40*(cr-.82)/.18;else if(cr>.76)v+=18;}v=Math.max(30,Math.min(235,v));return[v,v,Math.round(v*.98)];});}
+ function advBodies(A,dt){const want=new Set();for(const b of A.bodies||[]){want.add(b.kind);let g=advMeshes.get(b.kind);if(!g){if(!earthT)makeEarthTex();g=new T.Group();
+   if(b.kind==='earth'){g.add(new T.Mesh(new T.SphereGeometry(1,64,48),new T.MeshStandardMaterial({map:earthT,roughness:.85,metalness:0})));const cl=new T.Mesh(new T.SphereGeometry(1.012,64,48),new T.MeshStandardMaterial({map:cloudT,transparent:true,depthWrite:false,roughness:1}));cl.userData.clouds=true;g.add(cl);
+    const at=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:0x5fa8ff,blending:T.AdditiveBlending,depthWrite:false,transparent:true,opacity:.55}));at.scale.set(2.7,2.7,1);g.add(at);}
+   else g.add(new T.Mesh(new T.SphereGeometry(1,48,32),new T.MeshStandardMaterial({map:moonT,roughness:1,metalness:0})));root.add(g);advMeshes.set(b.kind,g);}
+  g.position.set(...M(b.pos));g.scale.setScalar(b.R);g.rotation.y+=dt*(b.kind==='earth'?.02:.005);g.children.forEach(ch=>{if(ch.userData.clouds)ch.rotation.y+=dt*.006;});g.visible=true;}
+  for(const[k,g]of advMeshes)if(!want.has(k))g.visible=false;}
  function playerObj(A){const g=new T.Group();const m=A.playerModel(),L=A.look||null,pc=(L&&L.paint&&L.paint.main)||'#ffd84a';g.add(new T.Mesh(geoOf(m),metal(pc,{metal:.6})));detail(g,m,pc);shipLook(g,m,L);g.userData.lk=JSON.stringify(L);const e=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:0x3fe0ff,blending:T.AdditiveBlending,depthWrite:false,transparent:true}));e.position.set(0,0,-98);e.scale.set(90,90,1);e.userData.engine=true;g.add(e);g.userData.model=m;root.add(g);return g;}
  // ---------------- particles ----------------
  const seenBoom=new WeakSet();
@@ -191,7 +210,7 @@ const StarModern=(()=>{
    b.children.forEach(x=>{if(x.userData.clouds)x.rotation.y+=dt*.01;});}
   sunLights.forEach(L=>{const s=L.userData.src;L.position.set(...M(s.pos));L.target.position.set(...p);});
   // ships and station
-  const live=new Set(),list=[...A.ships.filter(s=>!s.dead),...(A.station?[A.station]:[])];
+  advBodies(A,dt);const live=new Set(),list=[...A.ships.filter(s=>!s.dead),...(A.station?[A.station]:[])];
   for(const sh of list){live.add(sh);let g=objs.get(sh);if(!g){g=shipObj(sh,A);objs.set(sh,g);}setBasis(g,sh.pos,sh.o);
    g.children.forEach(x=>{if(x.userData.strobe!==undefined)x.visible=((A.clock+x.userData.strobe)%1.4)<.08;if(x.userData.bubble){const k=sh.hitFx!==undefined?1-(A.clock-sh.hitFx)/.35:0;x.visible=k>0;if(k>0)x.material.opacity=.35*k;}if(x.userData.blink!==undefined)x.visible=Math.floor(A.clock*2+(x.userData.blink>0?1:0))%2===0;if(x.userData.engine){const s2=40+Math.min(1,(sh.speed||0)/300)*60;x.scale.set(s2,s2,1);x.visible=!(sh.dmg>.7&&Math.random()<.35);}});
    if(sh.dmg>.35&&Math.random()<dt*6)burst(sh.pos,3,120,.4,[1,.8,.3]);}

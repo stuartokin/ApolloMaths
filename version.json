@@ -1,7 +1,21 @@
 {
- "version": "2.49",
+ "version": "2.50",
  "date": "10 November 2026",
  "releases": [
+  {
+   "v": "2.50",
+   "date": "10 November 2026",
+   "kids": [
+    "🌍 Starlane: a real-looking Earth and Moon in the time-warp adventure",
+    "📡 Click the sun, a planet or a moon on the radar to learn about it"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🚀 Starlane Trader: the time-warp adventure now shows a 3D Earth (oceans, continents, ice caps, drifting clouds and a glowing atmosphere) and a cratered Moon, lit by the sun. Fixed: an adventure could keep running after leaving test mode, leaving Earth floating in normal play — leaving test mode, tours or being destroyed now ends it, and the pause menu has ✕ ABANDON ADVENTURE. Radar: click a ship or the station to target it (details in the target panel), or the sun, a planet, a moon or a black hole for an information card — on the Modern console screen too. Test mode’s Adventures page now has pages."
+   ]
+  },
   {
    "v": "2.49",
    "date": "10 November 2026",
@@ -131,22 +145,6 @@
    "items": [
     "🚀 Starlane Trader: Shipyard categories (Essentials, Weapons, Defence, Systems) with automatic pages and a description of each item; the Market pages automatically as goods are added. New: twin beam and plasma lasers, Starburst laser charges, shield booster, fire-control computer, repair drones, tractor beam, afterburner. After being destroyed you restart at the station where you last docked. Movies, the rear/side views and the outside camera use the full widescreen; ships in movies show their full detail.",
     "🔊 Speech: numbers with a decimal point are read as “six point two”, everywhere in the app."
-   ]
-  },
-  {
-   "v": "2.40",
-   "date": "9 November 2026",
-   "kids": [
-    "💥 Starlane: you can see every hit now — shield flashes, spreading cracks and red warnings as your ship gets close to destruction",
-    "💾 Typing a save name now works properly",
-    "📋 Click a mission to read its recap"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🚀 Starlane Trader: hits show a shield arc (blue) or hull arc (red) at the front or rear; damage builds with lost energy (cracks, smoke, sparks, flicker); staged warnings — shield low, shield down, energy low, hull critical — with Nova, alarms and an escape-capsule prompt. Save-as name is a real text box (typing P no longer pauses the game). Click a mission under “Your missions” for its recap. Supply missions now say to buy the goods elsewhere and bring them back, and suggest where.",
-    "🕹️ Arcade: keys typed into text boxes are no longer treated as game keys."
    ]
   }
  ]
