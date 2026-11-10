@@ -1,7 +1,21 @@
 {
- "version": "2.48",
+ "version": "2.49",
  "date": "10 November 2026",
  "releases": [
+  {
+   "v": "2.49",
+   "date": "10 November 2026",
+   "kids": [
+    "🗺 Starlane: all 50 adventures are here — 25 in your ship and 25 out in space — plus pulsars, wormholes, ringed giants and planet Earth"
+   ],
+   "tags": [
+    "games",
+    "learning"
+   ],
+   "items": [
+    "🚀 Starlane Trader: 35 new adventures, making 50 (25 In-Ship, 25 Space), covering chemistry, biology, physics, computing, maths, earth science and space history. New flying tasks reach pulsars, wormholes, moon bases, ring gaps, satellites, meteor showers and space junk. New sights: pulsars with sweeping beams, swirling wormholes, moons, a ringed giant and a proper Earth for the time-warp. Some number puzzles now have a different answer for each puzzle level. Fully tested: every adventure, tour, scenario and screen."
+   ]
+  },
   {
    "v": "2.48",
    "date": "10 November 2026",
@@ -133,21 +147,6 @@
    "items": [
     "🚀 Starlane Trader: hits show a shield arc (blue) or hull arc (red) at the front or rear; damage builds with lost energy (cracks, smoke, sparks, flicker); staged warnings — shield low, shield down, energy low, hull critical — with Nova, alarms and an escape-capsule prompt. Save-as name is a real text box (typing P no longer pauses the game). Click a mission under “Your missions” for its recap. Supply missions now say to buy the goods elsewhere and bring them back, and suggest where.",
     "🕹️ Arcade: keys typed into text boxes are no longer treated as game keys."
-   ]
-  },
-  {
-   "v": "2.39",
-   "date": "9 November 2026",
-   "kids": [
-    "🎓 Starlane: 12 training tours — watch Nova fly while the keys and mouse light up",
-    "💾 Save your game under different names and go back to any of them",
-    "🛬 Matching the station’s spin now really works (it was turning the wrong way!)"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🚀 Starlane Trader: Save as… / Open… named saves (opening keeps the current game as “Where I was”); 12 training tours in a practice game (station screens, trading, upgrades, missions, flying, hyperspace, jump drive, lasers, missiles/ECM, mining and scooping, stars and planets, docking) with an on-screen keyboard and mouse; fixed the spin-match lock, which turned the ship the wrong way."
    ]
   }
  ]
