@@ -1,7 +1,21 @@
 {
- "version": "2.47",
+ "version": "2.48",
  "date": "10 November 2026",
  "releases": [
+  {
+   "v": "2.48",
+   "date": "10 November 2026",
+   "kids": [
+    "🗺 Starlane: nine more adventures — gravity failure, a dying greenhouse, lights out, a locked armoury, frozen pipes, a comet chase, a glowing nebula, a sleeping ship and a solar storm"
+   ],
+   "tags": [
+    "games",
+    "learning"
+   ],
+   "items": [
+    "🚀 Starlane Trader: 15 adventures now (8 In-Ship, 7 Space). New: Gravity Gone, Greenhouse Crisis, Lights Out, The Locked Armoury, Frozen Pipes, The Comet Chase, Lost in the Nebula, The Sleeping Ship and Solar Storm — covering forces, plants, circuits, binary and algorithms, states of matter, comets, light years, codes and the Sun. New sights in space: glowing nebulae and comets with tails. Adventure objects are always placed safely away from planets and stars, and the Adventure Log now has pages."
+   ]
+  },
   {
    "v": "2.47",
    "date": "10 November 2026",
@@ -134,20 +148,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: Save as… / Open… named saves (opening keeps the current game as “Where I was”); 12 training tours in a practice game (station screens, trading, upgrades, missions, flying, hyperspace, jump drive, lasers, missiles/ECM, mining and scooping, stars and planets, docking) with an on-screen keyboard and mouse; fixed the spin-match lock, which turned the ship the wrong way."
-   ]
-  },
-  {
-   "v": "2.38",
-   "date": "9 November 2026",
-   "kids": [
-    "🪑 Starlane: sit in your normal cockpit inside the station — every control where it is in flight, looking out at the shuttle bay"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🚀 Starlane Trader: a second way to sit in the cockpit at a station — “Cockpit: flight controls” shows the flight cockpit exactly as in flight (console screens, switch wings, mirror and side windows, widescreen in full screen) looking into the hangar. Weapons and flight systems are safe while docked; view, camera, map, missions, hold, tips and menu work; LAUNCH gives the pre-flight warning first. The pre-flight view is still there, and you can swap between them."
    ]
   }
  ]
