@@ -493,5 +493,19 @@ const StarAdv=(()=>{
  const SPACEY=new Set(['moon','earth','mars','ringed','sun','asteroid','flare','comet','blackhole','pulsar','wormhole','nebula','derelict','pulses','binary','ship']);
  function frame(c,x,y,w,h){const g=c.createLinearGradient(x,y,x,y+h*.5);g.addColorStop(0,'rgba(255,255,255,.06)');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(x,y,w,h*.5);const v=c.createRadialGradient(x+w/2,y+h/2,Math.min(w,h)*.35,x+w/2,y+h/2,Math.max(w,h)*.75);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.45)');c.fillStyle=v;c.fillRect(x,y,w,h);
   c.strokeStyle='#7fe9ff';c.lineWidth=2.5;const k=16;for(const[px,py,sx,sy]of[[x,y,1,1],[x+w,y,-1,1],[x,y+h,1,-1],[x+w,y+h,-1,-1]]){c.beginPath();c.moveTo(px+sx*k,py+sy*1.5);c.lineTo(px+sx*1.5,py+sy*1.5);c.lineTo(px+sx*1.5,py+sy*k);c.stroke();}}
+ // space adventures are staged in the world: what is placed in front of the ship for each (k: globe | sunfx | galaxy | ship)
+ const SCENES={mars:[{k:'globe',g:'mars',d:9000,R:2800}],
+  eclipse:[{k:'globe',g:'moon',d:12000,x:-1200,R:750},{k:'sunfx',d:52000,x:-24000,R:4200},{k:'globe',g:'earth',d:11000,x:4400,R:2400}],
+  aurora:[{k:'globe',g:'earth',d:8500,R:3000,aurora:true}],
+  goldilocks:[{k:'globe',g:'earth',d:12000,x:0,R:1200,label:'Just right?'},{k:'sunfx',d:52000,x:-26000,R:4200},{k:'globe',g:'mars',d:14000,x:-5200,R:950,label:'Too hot'},{k:'globe',g:'ice',d:14000,x:5600,R:1000,label:'Too cold'}],
+  starshell:[{k:'sunfx',d:30000,R:4200,shell:true}],
+  twinsuns:[{k:'sunfx',d:42000,x:-5200,R:3800},{k:'sunfx',d:46000,x:6400,R:2800,col:'255,120,90'}],
+  gasdive:[{k:'globe',g:'gas',d:9500,y:-900,R:6200,ring:true}],
+  galaxyedge:[{k:'galaxy',d:60000,R:44000}],
+  capsule1969:[{k:'ship',type:'capsule',d:260},{k:'globe',g:'earth',d:26000,x:9000,y:-3000,R:5200},{k:'globe',g:'moon',d:20000,x:-7000,y:2000,R:1500}],
+  moonbase:[{k:'globe',g:'moon',d:9000,R:2400,target:true}],
+  icemoon:[{k:'globe',g:'ice',d:9000,R:2400,target:true}]};
+ for(const adv of LIST){if(SCENES[adv.id])adv.scenes[0].setup=SCENES[adv.id];}
+ {const c=LIST.find(x=>x.id==='contact');if(c){c.scenes[0].signal=[2,3,5,7,11];c.scenes[1].signal=[2,3,5,7,11];c.scenes[1].q={young:'Watch the alien ship: its lights flash 2, 3, 5, 7, 11… these are prime numbers. Which prime comes next?',mid:'Count the flashes: 2, 3, 5, 7, 11… these are prime numbers. Which prime comes next?',older:'Count the flashes: 2, 3, 5, 7, 11… Which prime comes next?'};c.scenes[2].bits=[1,0,1];c.scenes[2].q={young:'Now three lamps: ON, off, ON — that is 1 0 1 in binary (fours, twos, ones). What number is that?',mid:'Now three lamps: ON, off, ON — 1 0 1 in binary (fours, twos, ones). What number is that?',older:'The lamps show 1 0 1 in binary. What number is that?'};c.scenes[4].signal=[1,1,1,1,1,1,1];}}
  return{LIST,art,frame,space,cabin,SPACEY,globe,find:id=>LIST.find(a=>a.id===id)};
 })();

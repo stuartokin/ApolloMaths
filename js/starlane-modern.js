@@ -92,6 +92,41 @@ const StarModern=(()=>{
    const ring=new T.Mesh(new T.TorusGeometry(b.R*1.08,b.R*.025,8,96),new T.MeshBasicMaterial({color:0xfff0d8}));g.add(ring);
    const gs=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:0xb45bd6,blending:T.AdditiveBlending,transparent:true,depthWrite:false,opacity:.5}));gs.scale.set(b.R*10,b.R*10,1);g.add(gs);root.add(g);bodies.push(g);bhGroup=g;}}
  // ---------------- ships, station and other objects ----------------
+ // ---------------- faction ships: each has its own hand-built look ----------------
+ const FDECO={
+  halo(g){const pearl=new T.MeshStandardMaterial({color:0xe8eef8,metalness:.5,roughness:.3}),glowM=c=>new T.MeshBasicMaterial({color:c});
+   const hull=new T.Mesh(new T.SphereGeometry(1,24,14),pearl);hull.scale.set(11,10,90);g.add(hull);
+   const ring=new T.Mesh(new T.TorusGeometry(62,7,12,48),pearl);g.add(ring);const rim=new T.Mesh(new T.TorusGeometry(62,1.4,6,48),glowM(0x7fe9ff));rim.position.z=7.4;g.add(rim);
+   for(let k=0;k<4;k++){const a=k*Math.PI/2+Math.PI/4,sp=new T.Mesh(new T.CylinderGeometry(1.2,1.2,62,6),pearl);sp.position.set(Math.cos(a)*31,Math.sin(a)*31,0);sp.rotation.z=a+Math.PI/2;g.add(sp);}
+   const core=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:0x7fe9ff,blending:T.AdditiveBlending,depthWrite:false,transparent:true,opacity:.8}));core.scale.set(90,90,1);g.add(core);
+   for(let k=0;k<4;k++){const a=k*Math.PI/2,sh=new T.Shape();sh.moveTo(0,0);sh.lineTo(60,10);sh.lineTo(8,34);sh.closePath();const sail=new T.Mesh(new T.ShapeGeometry(sh),new T.MeshBasicMaterial({color:0x7fe9ff,transparent:true,opacity:.35,side:T.DoubleSide,depthWrite:false}));sail.rotation.set(0,Math.PI/2,0);sail.rotation.z=a;sail.position.z=-70;const hold=new T.Group();hold.rotation.z=a;hold.add(sail);sail.rotation.z=0;g.add(hold);}
+   const eng=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:0x7fe9ff,blending:T.AdditiveBlending,depthWrite:false,transparent:true}));eng.position.set(0,0,-94);eng.scale.set(50,50,1);eng.userData.engine=true;g.add(eng);},
+  scrapjaw(g){const rust=new T.MeshStandardMaterial({color:0xb5622e,metalness:.5,roughness:.8,flatShading:true}),steel=new T.MeshStandardMaterial({color:0x6b6f78,metalness:.8,roughness:.5,flatShading:true}),red=new T.MeshBasicMaterial({color:0xff3d2e});
+   const add=(geo,m,x,y,z,rx=0,ry=0,rz=0)=>{const me=new T.Mesh(geo,m);me.position.set(x,y,z);me.rotation.set(rx,ry,rz);g.add(me);return me;};
+   add(new T.BoxGeometry(62,36,84),rust,0,0,-4);add(new T.BoxGeometry(40,18,50),steel,10,20,-10,0,.2,.1);add(new T.BoxGeometry(34,14,40),rust,-18,-20,8,0,-.15,0);
+   for(const sx of[-1,1]){add(new T.BoxGeometry(8,10,54),steel,sx*20,-2,62,0,sx*.28,0);add(new T.ConeGeometry(5,16,4),steel,sx*28,-2,92,Math.PI/2,0,0);}
+   for(const[x,z]of[[-18,-20],[4,-4],[20,16]])add(new T.ConeGeometry(4,22,4),steel,x,32,z);
+   add(new T.CylinderGeometry(13,15,22,10),steel,-14,4,-54,Math.PI/2,0,0);add(new T.CylinderGeometry(7,8,16,8),steel,18,-8,-52,Math.PI/2,0,0);add(new T.CylinderGeometry(6,7,14,8),steel,16,14,-50,Math.PI/2,0,0);
+   for(const[x,y,z]of[[-31.5,6,10],[31.5,-4,-6],[0,18.5,30]])add(new T.SphereGeometry(2.4,8,6),red,x,y,z);
+   for(const[x,y,s]of[[-14,4,60],[18,-8,34],[16,14,30]]){const e=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:0xff5030,blending:T.AdditiveBlending,depthWrite:false,transparent:true}));e.position.set(x,y,-66);e.scale.set(s,s,1);e.userData.engine=true;g.add(e);}},
+  ark(g){const hullM=new T.MeshStandardMaterial({color:0xc8ced8,metalness:.6,roughness:.4}),glass=new T.MeshStandardMaterial({color:0xbfe9ff,transparent:true,opacity:.35,roughness:.1,metalness:.1,side:T.DoubleSide,depthWrite:false}),green=new T.MeshStandardMaterial({color:0x3cb44a,roughness:.9});
+   const add=(geo,m,x,y,z,rx=0)=>{const me=new T.Mesh(geo,m);me.position.set(x,y,z);me.rotation.x=rx;g.add(me);return me;};
+   add(new T.BoxGeometry(14,10,300),hullM,0,-6,0);for(const sx of[-1,1])add(new T.CylinderGeometry(2,2,300,6),hullM,sx*16,-14,0,Math.PI/2);
+   for(let k=0;k<4;k++){const z=-90+k*62;add(new T.CylinderGeometry(27,27,4,24),hullM,0,0,z);add(new T.SphereGeometry(26,24,12,0,Math.PI*2,0,Math.PI/2),glass,0,2,z);const hill=add(new T.SphereGeometry(20,14,8,0,Math.PI*2,0,Math.PI/2),green,0,2,z);hill.scale.y=.45;for(let t=0;t<5;t++){const a=t*1.3+k;add(new T.ConeGeometry(3,10,6),green,Math.cos(a)*11,10,z+Math.sin(a)*11);}}
+   add(new T.BoxGeometry(46,40,50),hullM,0,-4,-170);add(new T.ConeGeometry(14,36,10),hullM,0,-4,168,Math.PI/2);
+   const lightM=new T.MeshBasicMaterial({color:0xffe8a0});for(let k=0;k<12;k++)add(new T.BoxGeometry(1,2,3),lightM,7.6,-4,-130+k*24);
+   const e=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:0xa8e070,blending:T.AdditiveBlending,depthWrite:false,transparent:true}));e.position.set(0,-4,-200);e.scale.set(110,110,1);e.userData.engine=true;g.add(e);},
+  quicksilver(g){const chrome=new T.MeshStandardMaterial({color:0xf2f4fa,metalness:1,roughness:.08}),vio=new T.MeshBasicMaterial({color:0xc77dff});
+   const hull=new T.Mesh(new T.SphereGeometry(1,28,16),chrome);hull.scale.set(9,7,80);g.add(hull);
+   for(const sx of[-1,1]){const sh=new T.Shape();sh.moveTo(0,0);sh.quadraticCurveTo(sx*34,-6,sx*52,-44);sh.quadraticCurveTo(sx*22,-26,0,-30);sh.closePath();const fin=new T.Mesh(new T.ExtrudeGeometry(sh,{depth:1.6,bevelEnabled:false}),chrome);fin.rotation.x=-Math.PI/2;fin.position.set(0,0,-6);g.add(fin);}
+   const line=new T.Mesh(new T.BoxGeometry(1,1,90),vio);line.position.set(0,7.2,10);g.add(line);
+   const e=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:0xc77dff,blending:T.AdditiveBlending,depthWrite:false,transparent:true}));e.position.set(0,0,-84);e.scale.set(60,60,1);e.userData.engine=true;g.add(e);
+   const tr=new T.Mesh(new T.ConeGeometry(4,160,8,1,true),new T.MeshBasicMaterial({color:0xc77dff,transparent:true,opacity:.35,blending:T.AdditiveBlending,depthWrite:false}));tr.rotation.x=Math.PI/2;tr.position.z=-160;g.add(tr);},
+  thornbloom(g){const mats=[0xb45bd6,0x3fb0c8,0xe080c0].map(c=>new T.MeshStandardMaterial({color:c,metalness:.3,roughness:.15,emissive:new T.Color(c),emissiveIntensity:.45,flatShading:true,transparent:true,opacity:.92}));
+   const dirs=[[0,1,0],[0,-1,0],[1,0,0],[-1,0,0],[0,0,1],[0,0,-1],[.7,.7,0],[-.7,.6,.3],[.6,-.6,.4],[-.5,-.7,-.4],[.4,.5,.8],[-.4,.4,-.8],[.8,-.2,-.6],[-.8,-.1,.6]];
+   dirs.forEach((d,i)=>{const L=40+((i*37)%5)*18,sh=new T.Mesh(new T.ConeGeometry(7+((i*13)%4)*2,L,5),mats[i%3]),v=new T.Vector3(d[0],d[1],d[2]).normalize();sh.position.copy(v.clone().multiplyScalar(L/2));sh.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),v);g.add(sh);});
+   g.add(new T.Mesh(new T.IcosahedronGeometry(18,0),mats[0]));const core=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:0xff9cf0,blending:T.AdditiveBlending,depthWrite:false,transparent:true}));core.scale.set(120,120,1);core.userData.pulse=true;g.add(core);},
+  seed(g){const leaf=new T.Mesh(new T.SphereGeometry(1,12,8),new T.MeshStandardMaterial({color:0xa8e070,metalness:.4,roughness:.4}));leaf.scale.set(8,3,20);g.add(leaf);const e=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:0xe8ffd0,blending:T.AdditiveBlending,depthWrite:false,transparent:true}));e.position.set(0,0,-22);e.scale.set(18,18,1);e.userData.engine=true;g.add(e);}};
  function shipObj(sh,A){const g=new T.Group(),col=sh===A.station?'#d8dce8':(sh.look&&sh.look.paint&&sh.look.paint.main)||(sh.T&&sh.T.color)||'#cccccc',role=sh.T&&sh.T.role;
   if(sh===A.station){g.add(new T.Mesh(geoOf(sh.m),metal('#c9cdd8',{emissive:'#ffffff',emissiveMap:windowTex(),ei:1.6})));
    const slot=new T.Mesh(new T.PlaneGeometry(220,72),new T.MeshBasicMaterial({color:0x02040a}));slot.position.set(0,0,332);g.add(slot);
@@ -99,6 +134,7 @@ const StarModern=(()=>{
    const glow=new T.Mesh(new T.PlaneGeometry(220,72),new T.MeshBasicMaterial({color:0x3fe0ff,transparent:true,opacity:.18,blending:T.AdditiveBlending,depthWrite:false}));glow.position.set(0,0,333.5);g.add(glow);
    for(const[x,c]of[[-135,0xff2d55],[135,0x3cff6a]]){const l=new T.Mesh(new T.SphereGeometry(9,12,8),new T.MeshBasicMaterial({color:c}));l.position.set(x,0,335);l.userData.blink=x;g.add(l);}
    for(const p of sh.parts||[])g.add(new T.Mesh(geoOf(p.m),metal(p.col==='#3f6fd6'?'#2a4fb0':p.col,{emissive:'#ffffff',emissiveMap:windowTex(),ei:1.2,metal:p.col==='#3f6fd6'?.9:.55})));}
+  else if(sh.type&&FDECO[sh.type]){FDECO[sh.type](g);}
   else if(role==='rock'){g.add(new T.Mesh(geoOf(sh.m),new T.MeshStandardMaterial({color:new T.Color('#8a7a68'),roughness:1,metalness:.05,flatShading:true,map:panelTex()})));}
   else if(role==='mine'){g.add(new T.Mesh(geoOf(sh.m),metal('#ff2d55',{metal:.8,rough:.3})));const l=new T.Mesh(new T.SphereGeometry(6,8,6),new T.MeshBasicMaterial({color:0xff2d55}));l.userData.blink=1;g.add(l);}
   else{g.add(new T.Mesh(geoOf(sh.m),metal(col)));for(const p of sh.parts||[])g.add(new T.Mesh(geoOf(p.m),metal(p.col,{metal:.7})));
