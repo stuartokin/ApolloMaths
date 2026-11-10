@@ -1,7 +1,21 @@
 {
- "version": "2.44",
+ "version": "2.45",
  "date": "10 November 2026",
  "releases": [
+  {
+   "v": "2.45",
+   "date": "10 November 2026",
+   "kids": [
+    "🧪 Grown-ups: a Starlane test mode for trying out every part of the game"
+   ],
+   "tags": [
+    "games",
+    "grown-ups"
+   ],
+   "items": [
+    "🚀 Starlane Trader: press Ctrl+Shift+G while playing and enter the parent passphrase (or Admin PIN) to open TEST MODE — a practice copy of the game. Jump straight into 22 scenarios (launch, docking approaches, the docking computer, races, battles, police, Vorn interdiction, hyperspace, black holes, flares, mining, scooping, rescues, derelicts, missiles, the jump drive, the hangar seat); add any mission or story; set credits, fuel, hull, legal status and rank; fit any equipment, laser or ship; visit any galaxy or system; and switch on cheats (invincible, infinite fuel and missiles, free shopping). EXIT TEST MODE returns you to exactly where you were; nothing is saved."
+   ]
+  },
   {
    "v": "2.44",
    "date": "10 November 2026",
@@ -140,21 +154,6 @@
    "items": [
     "🕹️ Arcade: in full screen the canvas was being stretched sideways (a height limit overrode the calculated size); every game now keeps its true shape and fits with its controls.",
     "🚀 Starlane Trader (Modern cockpit): upright console screens and wing panels with sharp, even text; switches drawn as toggle levers, push buttons, knobs and guarded covers; live LEFT/RIGHT side windows; visible damage — red hit flash across the whole width, cabin sparks, screen glitches, canopy cracks across widescreen, Hull gauge, HULL light and warning."
-   ]
-  },
-  {
-   "v": "2.35",
-   "date": "9 November 2026",
-   "kids": [
-    "🎛️ Starlane MODERN: real switches, levers and knobs on the cockpit console — flip them with the mouse!",
-    "🖥️ In full screen the console now stretches right across, with your cargo and next mission on the side screens"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🚀 Starlane Trader (Modern, full screen on wide displays): console wings with a Cargo screen and a Mission screen (next step), and banks of 3D switches — toggle levers that stay set, spring-back levers, guarded red switches and rotary knobs for Time and View — clickable with hover help. The arcade’s own controls move to the top corners so nothing covers the console. In a smaller window the slide-up action bar is drawn as a row of switches."
    ]
   }
  ]
