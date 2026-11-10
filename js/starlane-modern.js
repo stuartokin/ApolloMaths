@@ -92,7 +92,7 @@ const StarModern=(()=>{
    const ring=new T.Mesh(new T.TorusGeometry(b.R*1.08,b.R*.025,8,96),new T.MeshBasicMaterial({color:0xfff0d8}));g.add(ring);
    const gs=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:0xb45bd6,blending:T.AdditiveBlending,transparent:true,depthWrite:false,opacity:.5}));gs.scale.set(b.R*10,b.R*10,1);g.add(gs);root.add(g);bodies.push(g);bhGroup=g;}}
  // ---------------- ships, station and other objects ----------------
- function shipObj(sh,A){const g=new T.Group(),col=sh===A.station?'#d8dce8':(sh.T&&sh.T.color)||'#cccccc',role=sh.T&&sh.T.role;
+ function shipObj(sh,A){const g=new T.Group(),col=sh===A.station?'#d8dce8':(sh.look&&sh.look.paint&&sh.look.paint.main)||(sh.T&&sh.T.color)||'#cccccc',role=sh.T&&sh.T.role;
   if(sh===A.station){g.add(new T.Mesh(geoOf(sh.m),metal('#c9cdd8',{emissive:'#ffffff',emissiveMap:windowTex(),ei:1.6})));
    const slot=new T.Mesh(new T.PlaneGeometry(220,72),new T.MeshBasicMaterial({color:0x02040a}));slot.position.set(0,0,332);g.add(slot);
    const frame=new T.LineSegments(new T.EdgesGeometry(new T.PlaneGeometry(224,76)),new T.LineBasicMaterial({color:0x3fe0ff}));frame.position.set(0,0,333);g.add(frame);
@@ -105,6 +105,7 @@ const StarModern=(()=>{
    if(!['cargo','missile','beacon','derelict'].includes(role))detail(g,sh.m,col);
    if(sh.ant){const a=sh.ant;const lg=new T.BufferGeometry().setFromPoints([new T.Vector3(...a[0]),new T.Vector3(...a[1])]);g.add(new T.Line(lg,new T.LineBasicMaterial({color:col})));}
    if(!['cargo'].includes(role)){const e=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:sh.type==='missile'?0xff8a1c:0x3fe0ff,blending:T.AdditiveBlending,depthWrite:false,transparent:true}));e.position.set(0,0,(sh.rearZ||-30)-6);e.scale.set(60,60,1);e.userData.engine=true;g.add(e);}}
+  if(sh.look)shipLook(g,sh.m,sh.look);
   root.add(g);return g;}
  // engine nozzles with glowing cores, a glass canopy and navigation lights, sized from the model itself
  let navLights=[];
@@ -116,7 +117,55 @@ const StarModern=(()=>{
   for(const[sx,c]of[[-1,0xff2d55],[1,0x3cff6a]]){const L=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:c,blending:T.AdditiveBlending,depthWrite:false,transparent:true}));L.scale.set(rad*.16,rad*.16,1);L.position.set(sx*xmax*.98,0,0);g.add(L);}
   const st=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:0xffffff,blending:T.AdditiveBlending,depthWrite:false,transparent:true}));st.scale.set(rad*.22,rad*.22,1);st.position.set(0,ymax*1.02,zmin*.6);st.userData.strobe=Math.random()*2;g.add(st);
   const bub=new T.Mesh(new T.SphereGeometry(rad*1.25,24,16),new T.MeshBasicMaterial({color:0x5fd6ff,transparent:true,opacity:0,blending:T.AdditiveBlending,depthWrite:false}));bub.visible=false;bub.userData.bubble=true;g.add(bub);}
- function playerObj(A){const g=new T.Group();const m=A.playerModel();g.add(new T.Mesh(geoOf(m),metal('#ffd84a',{metal:.6})));detail(g,m,'#ffd84a');const e=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:0x3fe0ff,blending:T.AdditiveBlending,depthWrite:false,transparent:true}));e.position.set(0,0,-98);e.scale.set(90,90,1);e.userData.engine=true;g.add(e);g.userData.model=m;root.add(g);return g;}
+ // ---------------- your ship's look: fitted equipment you can see, paint, stripes, decals, name ----------------
+ const lookTex={};
+ function lookCanvas(key,w,h,draw){if(lookTex[key])return lookTex[key];const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;return(lookTex[key]=t);}
+ function shipLook(g,m,L){if(!L)return;const P0=m.pts,xs=P0.map(p=>p[0]),ys=P0.map(p=>p[1]),zs=P0.map(p=>p[2]),xmax=Math.max(...xs),ymax=Math.max(...ys),ymin=Math.min(...ys),zmax=Math.max(...zs),zmin=Math.min(...zs),rad=m.rad,len=zmax-zmin;
+  const paint=L.paint||{},trimC=paint.trim||'#2a2e38',gun=new T.MeshStandardMaterial({color:0x3a3f4a,metalness:.9,roughness:.3}),trim=new T.MeshStandardMaterial({color:trimC,metalness:.7,roughness:.35}),gl=c=>new T.MeshBasicMaterial({color:c});
+  const add=(geo,mat,x,y,z,rx=0,ry=0,rz=0)=>{const me=new T.Mesh(geo,mat);me.position.set(x,y,z);me.rotation.set(rx,ry,rz);g.add(me);return me;},cyl=(r1,r2,h,seg=12)=>new T.CylinderGeometry(r1,r2,h,seg);
+  const barrel=(x,y,z0,l,r,mat)=>add(cyl(r,r,l),mat,x,y,z0+l/2,Math.PI/2,0,0),ny=ymin*.3,nz=zmax*.8;
+  // the front laser
+  const f=L.front||'pulse';if(f==='pulse')barrel(0,ny,nz,rad*.32,rad*.03,gun);
+  else if(f==='beam'){barrel(0,ny,nz,rad*.46,rad*.035,gun);for(let k=0;k<3;k++)add(new T.TorusGeometry(rad*.05,rad*.012,6,14),gl(0x3fe0ff),0,ny,nz+rad*(.12+k*.11));}
+  else if(f==='twin'){for(const sx of[-1,1])barrel(sx*rad*.1,ny,nz,rad*.42,rad*.03,gun);add(new T.BoxGeometry(rad*.32,rad*.06,rad*.12),trim,0,ny,nz);}
+  else if(f==='military'){add(new T.BoxGeometry(rad*.36,rad*.1,rad*.24),trim,0,ny,nz);for(const sx of[-1,1])barrel(sx*rad*.1,ny,nz+rad*.1,rad*.6,rad*.035,gun);for(const sx of[-1,1])add(new T.SphereGeometry(rad*.022,8,6),gl(0x3fe0ff),sx*rad*.1,ny,nz+rad*.71);}
+  else if(f==='plasma'){barrel(0,ny,nz,rad*.4,rad*.075,gun);const core=add(new T.SphereGeometry(rad*.08,14,10),gl(0xc77dff),0,ny,nz+rad*.42);core.userData.pulse=true;for(let k=0;k<2;k++)add(new T.TorusGeometry(rad*.085,rad*.015,6,16),gl(0xc77dff),0,ny,nz+rad*(.12+k*.14));}
+  else if(f==='mining'){add(new T.ConeGeometry(rad*.08,rad*.3,12),new T.MeshStandardMaterial({color:0xff8a1c,metalness:.6,roughness:.4}),0,ny,nz+rad*.15,Math.PI/2,0,0);}
+  if(L.rear){add(new T.BoxGeometry(rad*.14,rad*.08,rad*.14),trim,0,ymax*.95,zmin*.55);barrel(0,ymax*.95,zmin*.55-rad*.28,rad*.28,rad*.025,gun);}
+  // missiles on pylons under the wings
+  for(let i=0;i<Math.min(4,L.missiles||0);i++){const sx=i%2?1:-1,x=sx*xmax*(.42+Math.floor(i/2)*.2),y=ymin*.55-rad*.06,z=zmin*.05;add(new T.BoxGeometry(rad*.02,rad*.06,rad*.18),trim,x,y+rad*.04,z);add(cyl(rad*.03,rad*.03,rad*.34,10),new T.MeshStandardMaterial({color:0xf2f2f2,metalness:.3,roughness:.5}),x,y,z,Math.PI/2,0,0);add(new T.ConeGeometry(rad*.03,rad*.08,10),gl(0xff2d55),x,y,z+rad*.21,Math.PI/2,0,0);}
+  const eq=L.eq||{};
+  if(eq.scoop)for(const sx of[-1,1]){const s2=add(cyl(rad*.06,rad*.075,rad*.2,14),new T.MeshStandardMaterial({color:0x1c2028,metalness:.8,roughness:.4,side:T.DoubleSide}),sx*xmax*.24,ymin*.7,zmax*.45,Math.PI/2,0,0);add(new T.TorusGeometry(rad*.065,rad*.012,6,16),gl(0xffb020),sx*xmax*.24,ymin*.7,zmax*.45+rad*.1);}
+  if(L.bigCargo){add(new T.BoxGeometry(xmax*.55,rad*.14,len*.38),trim,0,ymin-rad*.06,zmin*.15);add(new T.BoxGeometry(xmax*.56,rad*.02,len*.02),gl(0xffe45e),0,ymin-rad*.06,zmin*.15+len*.12);}
+  if(eq.ecm){add(cyl(rad*.008,rad*.012,rad*.32,6),gun,0,ymax+rad*.16,zmin*.35);const b=add(new T.SphereGeometry(rad*.025,8,6),gl(0xff2d55),0,ymax+rad*.33,zmin*.35);b.userData.blink=true;}
+  if(eq.dock){add(new T.SphereGeometry(rad*.07,14,8,0,Math.PI*2,0,Math.PI/2),new T.MeshStandardMaterial({color:0x3fa9ff,metalness:.2,roughness:.1,transparent:true,opacity:.75,emissive:new T.Color(0x0a3a66)}),0,ymax*.95,zmax*.25);}
+  if(eq.afterburner)for(const sx of xmax>rad*.45?[-1,1]:[0])add(new T.TorusGeometry(rad*.15,rad*.025,8,20),gl(0xff8a1c),sx*xmax*.28,0,zmin-rad*.02);
+  if(eq.tractor){add(cyl(rad*.09,rad*.06,rad*.03,16),gun,0,ymin*.92,zmax*.2);add(new T.TorusGeometry(rad*.08,rad*.012,6,18),gl(0x3cff6a),0,ymin*.92-rad*.02,zmax*.2,Math.PI/2,0,0);}
+  if(eq.shieldboost)for(const sx of[-1,1])add(new T.SphereGeometry(rad*.04,10,8),gl(0x5fd6ff),sx*xmax*.97,0,zmin*.25);
+  if(eq.energy)add(new T.BoxGeometry(rad*.03,rad*.012,len*.45),gl(0x3cff6a),0,ymax*1.005,0);
+  if(eq.firectl){add(cyl(rad*.035,rad*.035,rad*.16,10),trim,xmax*.5,ymin*.25,zmax*.35,Math.PI/2,0,0);add(new T.SphereGeometry(rad*.025,8,6),gl(0xff2d55),xmax*.5,ymin*.25,zmax*.35+rad*.09);}
+  if(eq.repairbot)for(const sx of[-1,1]){add(new T.BoxGeometry(rad*.08,rad*.05,rad*.08),trim,sx*xmax*.3,ymax*.85,zmin*.6);add(new T.SphereGeometry(rad*.012,6,4),gl(0xffe45e),sx*xmax*.3,ymax*.85+rad*.03,zmin*.6);}
+  if(L.starburst>0)for(let k=0;k<6;k++){const a=k/6*Math.PI*2;add(new T.SphereGeometry(rad*.025,8,6),gl(0xffe45e),Math.cos(a)*xmax*.55,Math.sin(a)*Math.max(ymax,-ymin)*.8,zmin*.05);}
+  // paint: stripes, a decal and the ship's name and number
+  const strC=paint.stripeCol||trimC;
+  if(paint.stripe==='racing')for(const sx of[-1,1])add(new T.BoxGeometry(rad*.05,rad*.008,len*.85),new T.MeshStandardMaterial({color:strC,roughness:.4}),sx*rad*.09,ymax*1.008,(zmax+zmin)/2);
+  else if(paint.stripe==='centre')add(new T.BoxGeometry(rad*.12,rad*.008,len*.85),new T.MeshStandardMaterial({color:strC,roughness:.4}),0,ymax*1.008,(zmax+zmin)/2);
+  else if(paint.stripe==='wings')for(const sx of[-1,1])add(new T.BoxGeometry(xmax*.5,rad*.008,rad*.07),new T.MeshStandardMaterial({color:strC,roughness:.4}),sx*xmax*.5,ymax*.4,zmin*.3);
+  if(paint.decal&&paint.decal!=='none'){const tx=lookCanvas('decal-'+paint.decal+strC,128,128,(c,w,h)=>{c.clearRect(0,0,w,h);c.fillStyle=strC;c.strokeStyle='#ffffff';c.lineWidth=4;c.beginPath();
+    if(paint.decal==='star'){for(let i=0;i<10;i++){const r=i%2?24:56,a=i/10*Math.PI*2-Math.PI/2;c.lineTo(64+Math.cos(a)*r,64+Math.sin(a)*r);}}else if(paint.decal==='bolt'){[[70,6],[30,70],[60,70],[46,122],[100,50],[68,50],[86,6]].forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));}
+    else if(paint.decal==='flames'){for(let i=0;i<5;i++){c.moveTo(10,30+i*18);c.quadraticCurveTo(70,16+i*18,120,28+i*18);c.quadraticCurveTo(70,40+i*18,10,44+i*18);}}else if(paint.decal==='planet'){c.arc(64,64,36,0,7);c.fill();c.stroke();c.beginPath();c.ellipse(64,64,58,14,-.3,0,7);}
+    c.closePath();c.fill();c.stroke();});add(new T.PlaneGeometry(rad*.32,rad*.32),new T.MeshBasicMaterial({map:tx,transparent:true,side:T.DoubleSide,depthWrite:false}),0,ymax*1.012,zmin*.45,-Math.PI/2,0,0);}
+  if(paint.name||paint.num){const label=`${paint.name||''}${paint.num?' '+String(paint.num).padStart(2,'0'):''}`.trim().toUpperCase(),tx=lookCanvas('name-'+label+strC,256,64,(c,w,h)=>{c.clearRect(0,0,w,h);c.font='bold 34px sans-serif';c.textAlign='center';c.textBaseline='middle';c.lineWidth=6;c.strokeStyle='rgba(0,0,0,.6)';c.strokeText(label,w/2,h/2);c.fillStyle='#ffffff';c.fillText(label,w/2,h/2);});
+   for(const sx of[-1,1])add(new T.PlaneGeometry(len*.42,len*.105),new T.MeshBasicMaterial({map:tx,transparent:true,side:T.DoubleSide,depthWrite:false}),sx*xmax*.72,ymax*.18,zmin*.15,0,sx*Math.PI/2,0);}}
+ function lookTick(g,clock){g.traverse(o=>{const u=o.userData;if(u.blink)o.visible=(clock%1.2)<.6;if(u.pulse){const k=1+Math.sin(clock*6)*.15;o.scale.set(k,k,k);}});}
+ // a turntable preview of your ship for the shipyard
+ let pvScene=null,pvCam=null,pvShip=null,pvKey='';
+ function preview(ctx,A){if(!ready()||!R)return false;const w=Math.round(A.w*A.k),h=Math.round(A.h*A.k);
+  if(!pvScene){pvScene=new T.Scene();pvScene.background=new T.Color(0x0a0f1e);pvScene.add(new T.AmbientLight(0x8090b0,.7));const d=new T.DirectionalLight(0xffffff,1.4);d.position.set(1,1.2,.8);pvScene.add(d);const d2=new T.DirectionalLight(0x6fa8ff,.6);d2.position.set(-1,-.4,-.6);pvScene.add(d2);pvCam=new T.PerspectiveCamera(35,1,1,20000);}
+  const key=JSON.stringify(A.look)+A.m.rad;if(!pvShip||pvKey!==key){if(pvShip)pvScene.remove(pvShip);pvShip=new T.Group();const col=(A.look&&A.look.paint&&A.look.paint.main)||'#ffd84a';pvShip.add(new T.Mesh(geoOf(A.m),metal(col,{metal:.6})));detail(pvShip,A.m,col);shipLook(pvShip,A.m,A.look);pvScene.add(pvShip);pvKey=key;}
+  pvShip.rotation.set(.25,A.t*.6,0);lookTick(pvShip,A.t);const r=A.m.rad;pvCam.aspect=w/h;pvCam.position.set(0,r*.9,r*3.4);pvCam.lookAt(0,0,0);pvCam.updateProjectionMatrix();
+  if(gl.width!==w||gl.height!==h){R.setPixelRatio(1);R.setSize(w,h,false);}R.setScissorTest(false);R.setViewport(0,0,w,h);R.render(pvScene,pvCam);ctx.drawImage(gl,A.x,A.y,A.w,A.h);return true;}
+ function playerObj(A){const g=new T.Group();const m=A.playerModel(),L=A.look||null,pc=(L&&L.paint&&L.paint.main)||'#ffd84a';g.add(new T.Mesh(geoOf(m),metal(pc,{metal:.6})));detail(g,m,pc);shipLook(g,m,L);g.userData.lk=JSON.stringify(L);const e=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:0x3fe0ff,blending:T.AdditiveBlending,depthWrite:false,transparent:true}));e.position.set(0,0,-98);e.scale.set(90,90,1);e.userData.engine=true;g.add(e);g.userData.model=m;root.add(g);return g;}
  // ---------------- particles ----------------
  const seenBoom=new WeakSet();
  function burst(pos,n,spd,life,col,sys=fire){n=Math.max(2,Math.round(n*pmul));for(let i=0;i<n;i++){if(sys.list.length>=sys.n)sys.list.shift();const u=Math.random()*2-1,a=Math.random()*7,s=Math.sqrt(1-u*u),v=spd*(.3+Math.random()*.7);sys.list.push({p:[...pos],v:[s*Math.cos(a)*v,u*v,s*Math.sin(a)*v],t:0,life:life*(.6+Math.random()*.6),c:col});}}
@@ -147,7 +196,7 @@ const StarModern=(()=>{
    g.children.forEach(x=>{if(x.userData.strobe!==undefined)x.visible=((A.clock+x.userData.strobe)%1.4)<.08;if(x.userData.bubble){const k=sh.hitFx!==undefined?1-(A.clock-sh.hitFx)/.35:0;x.visible=k>0;if(k>0)x.material.opacity=.35*k;}if(x.userData.blink!==undefined)x.visible=Math.floor(A.clock*2+(x.userData.blink>0?1:0))%2===0;if(x.userData.engine){const s2=40+Math.min(1,(sh.speed||0)/300)*60;x.scale.set(s2,s2,1);x.visible=!(sh.dmg>.7&&Math.random()<.35);}});
    if(sh.dmg>.35&&Math.random()<dt*6)burst(sh.pos,3,120,.4,[1,.8,.3]);}
   // the player's own ship (outside camera)
-  if(A.camMode==='ext'){let g=objs.get('me');if(!g||g.userData.model!==A.playerModel()){if(g)root.remove(g);g=playerObj(A);objs.set('me',g);}live.add('me');setBasis(g,A.P.pos,A.P.o);g.children.forEach(x=>{if(x.userData.engine){const s2=50+A.P.throttle*90;x.scale.set(s2,s2,1);}});}
+  if(A.camMode==='ext'){let g=objs.get('me');if(!g||g.userData.model!==A.playerModel()||g.userData.lk!==JSON.stringify(A.look||null)){if(g)root.remove(g);g=playerObj(A);objs.set('me',g);}live.add('me');setBasis(g,A.P.pos,A.P.o);g.children.forEach(x=>{if(x.userData.engine){const s2=50+A.P.throttle*90;x.scale.set(s2,s2,1);}});}
   for(const[o,g]of objs)if(!live.has(o)){root.remove(g);objs.delete(o);}
   // explosions, sparks and engine trails
   for(const b of A.booms){if(seenBoom.has(b))continue;seenBoom.add(b);if(b.spark)burst(b.pos,8,260,.35,[1,.9,.5]);else{const L=boomLights.slice().sort((a,b)=>a.intensity-b.intensity)[0];if(L){L.position.set(...M(b.pos));L.intensity=9;L.userData.t=0;}burst(b.pos,160,560,1.3,[1.6,.9,.3]);burst(b.pos,70,260,1.6,[1.8,1.6,1.1]);burst(b.pos,30,90,2.6,[.45,.45,.5],smoke);}}
@@ -272,7 +321,7 @@ const StarModern=(()=>{
   pitLamp=new T.PointLight(0x3fe0ff,.85,520,1.4);pitLamp.position.set(0,70,10);g.add(pitLamp);
   cabinExtras(g,A,onS,Zs);deckObjs=null;wingTex=[];if(deck&&deck.wings.length)buildDeck(A,g,deck,onS);
   root.add(g);return g;}
- function cockpit(A,on,red,clock,dash,deck){if(!ready())return;if(pit&&pit.parent&&pit.parent!==root)root.add(pit);if(!on){if(pit)pit.visible=false;return;}const key=A.W+'x'+A.VH+'x'+A.CY+'|'+(deck?deck.key:'')+'|'+JSON.stringify(A.cab||{});if(!pit||pitKey!==key){if(pit)root.remove(pit);pitLights=[];pitGlow=[];pit=buildPit(A,deck);pitKey=key;}pit.visible=true;cabinTick(clock);if(deck)updDeck(deck,clock);
+ function cockpit(A,on,red,clock,dash,deck){if(!ready())return;if(pit&&pit.parent&&pit.parent!==root)root.add(pit);if(!on){if(pit)pit.visible=false;return;}const key=A.W+'x'+A.VH+'x'+A.CY+'|'+(deck?deck.key:'')+'|'+JSON.stringify(A.cab||{});if(!pit||pitKey!==key){if(pit)root.remove(pit);pitLights=[];pitGlow=[];pit=buildPit(A,deck);pitKey=key;}pit.visible=true;cabinTick(clock);{const me=objs.get('me');if(me)lookTick(me,clock);}if(deck)updDeck(deck,clock);
   if(dash&&dashTex){if(dashTex.image!==dash)dashTex.image=dash;dashTex.needsUpdate=true;}
   // head sway: the cabin shifts a little against acceleration and turns, then settles
   const P=A.P,acc=(P.speed-lastSpeed);lastSpeed=P.speed;const want=[-(P.yaw||0)*2.6+(P.roll||0)*.8,(P.pitch||0)*2.2-Math.max(-2,Math.min(2,acc*.05)),-Math.max(-3,Math.min(3,acc*.12))];for(let i=0;i<3;i++)sway[i]+=(want[i]-sway[i])*.08;
@@ -300,7 +349,7 @@ const StarModern=(()=>{
    for(const[dx,dz]of[[-140,-140],[140,-140],[140,140],[-140,140]]){const L=put(new T.Mesh(new T.SphereGeometry(7,10,8),new T.MeshBasicMaterial({color:0xffb020})),x+dx,F+8,z+dz);L.userData.blink=x+z+dx;}}
   for(let i=0;i<14;i++){const st=put(box(50,2,8,0xffd23a,{basic:true}),-X+60+i*((2*X-120)/13),F+1,60);st.rotation.y=.6;}}
  function hangar(ctx,A,H){if(!ready())return false;if(!hs)buildHangar(A.HG,A.PADS);const W=A.W;const live=new Set();
-  for(const o of A.objs){live.add(o.key);let g=hobjs.get(o.key);if(!g){g=new T.Group();g.add(new T.Mesh(geoOf(o.m),metal(o.col,{metal:.6})));if(/^(me|p\d+|other)$/.test(o.key))detail(g,o.m,o.col);if(o.engine){const e=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:0x3fe0ff,blending:T.AdditiveBlending,depthWrite:false,transparent:true}));e.position.set(0,0,-98);e.scale.set(80,80,1);e.userData.engine=true;g.add(e);}if(o.blink){const l=new T.Mesh(new T.SphereGeometry(6,8,6),new T.MeshBasicMaterial({color:0xff2d55}));l.position.set(0,14,0);l.userData.b=true;g.add(l);}hs.add(g);hobjs.set(o.key,g);}
+  for(const o of A.objs){live.add(o.key);let g=hobjs.get(o.key);if(g&&o.look&&g.userData.lk!==JSON.stringify(o.look)){hs.remove(g);hobjs.delete(o.key);g=null;}if(!g){g=new T.Group();g.add(new T.Mesh(geoOf(o.m),metal(o.col,{metal:.6})));if(/^(me|p\d+|other)$/.test(o.key))detail(g,o.m,o.col);if(o.look){shipLook(g,o.m,o.look);g.userData.lk=JSON.stringify(o.look);}if(o.engine){const e=new T.Sprite(new T.SpriteMaterial({map:glowTex(),color:0x3fe0ff,blending:T.AdditiveBlending,depthWrite:false,transparent:true}));e.position.set(0,0,-98);e.scale.set(80,80,1);e.userData.engine=true;g.add(e);}if(o.blink){const l=new T.Mesh(new T.SphereGeometry(6,8,6),new T.MeshBasicMaterial({color:0xff2d55}));l.position.set(0,14,0);l.userData.b=true;g.add(l);}hs.add(g);hobjs.set(o.key,g);}
    setBasis(g,o.pos,o.o);g.children.forEach(x=>{if(x.userData.engine)x.visible=o.engine>0;if(x.userData.b)x.material.color.setHex(Math.floor(A.t*3)%2?0xff2d55:0x3cff6a);});}
   for(const[k,g]of hobjs)if(!live.has(k)){hs.remove(g);hobjs.delete(k);}
   hs.traverse(x=>{if(x.userData&&x.userData.blink!==undefined)x.visible=Math.sin(A.t*4+x.userData.blink)>0;});
@@ -328,5 +377,5 @@ const StarModern=(()=>{
  function setQuality(q){if(q==='auto'){quality.auto=true;return;}quality.auto=false;Object.assign(quality,PRESET[q]||PRESET.high);}
  function pregen(seed){try{terrain((seed^0x5151)>>>0);terrain(seed^0x5151);}catch(e){}}
  function profile(dev){if(dev==='phone'){Object.assign(quality,{pr:.6,bloom:false,views:false});pmul=.4;}else if(dev==='tablet'){Object.assign(quality,{pr:.8,views:false});pmul=.7;}else pmul=1;}
- return{viewHangar,setQuality,pregen,cockpit,hangar,profile,load,ready,render,views,get state(){return state;},get quality(){return quality;}};
+ return{preview,viewHangar,setQuality,pregen,cockpit,hangar,profile,load,ready,render,views,get state(){return state;},get quality(){return quality;}};
 })();

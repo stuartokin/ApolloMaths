@@ -1,7 +1,21 @@
 {
- "version": "2.45",
+ "version": "2.46",
  "date": "10 November 2026",
  "releases": [
+  {
+   "v": "2.46",
+   "date": "10 November 2026",
+   "kids": [
+    "🎨 Starlane: paint your ship — colours, stripes, a decal and your own name — and see every upgrade on the hull"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🚀 Starlane Trader: your ship now shows what is fitted — each laser type looks different (pulse, beam, twin, military, plasma, mining drill), missiles hang under the wings, and scoops, cargo pod, ECM antenna, docking-computer dome, afterburners, tractor dish, shield emitters, energy strip, fire-control pod, repair drones and Starburst emitters all appear. New shipyard page 🎨 EXTERIOR: main, trim and stripe colours, stripes, decals, a name and number, with a turning preview; applying costs 150 Cr. Your look appears in the hangar, the outside camera and the movies."
+   ]
+  },
   {
    "v": "2.45",
    "date": "10 November 2026",
@@ -136,24 +150,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: “Sit in the cockpit” from the station’s Launch tab — look around (right-drag or arrow keys), Front/Left/Right/Rear/Outside views, settings, and a pre-flight check that warns about no mission, low fuel, damage, no missiles or police trouble before launch. Movies: the far camera now shows the station, all hangar cameras stay inside the hangar, the cockpit no longer appears in movies, and five outside and five hangar camera styles are mixed at random. Missions board: station services in one row under the title."
-   ]
-  },
-  {
-   "v": "2.36",
-   "date": "9 November 2026",
-   "kids": [
-    "🖥️ Full screen now shows every arcade game at its true shape — no more stretched text",
-    "🪟 Starlane: your LEFT and RIGHT side windows are back",
-    "💥 You can really see damage now — sparks, cracks, flickering screens and a hull gauge",
-    "🎛️ Clearer cockpit screens and proper switches, knobs and guarded buttons"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🕹️ Arcade: in full screen the canvas was being stretched sideways (a height limit overrode the calculated size); every game now keeps its true shape and fits with its controls.",
-    "🚀 Starlane Trader (Modern cockpit): upright console screens and wing panels with sharp, even text; switches drawn as toggle levers, push buttons, knobs and guarded covers; live LEFT/RIGHT side windows; visible damage — red hit flash across the whole width, cabin sparks, screen glitches, canopy cracks across widescreen, Hull gauge, HULL light and warning."
    ]
   }
  ]
