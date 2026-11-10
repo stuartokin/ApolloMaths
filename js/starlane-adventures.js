@@ -493,5 +493,5 @@ const StarAdv=(()=>{
  const SPACEY=new Set(['moon','earth','mars','ringed','sun','asteroid','flare','comet','blackhole','pulsar','wormhole','nebula','derelict','pulses','binary','ship']);
  function frame(c,x,y,w,h){const g=c.createLinearGradient(x,y,x,y+h*.5);g.addColorStop(0,'rgba(255,255,255,.06)');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(x,y,w,h*.5);const v=c.createRadialGradient(x+w/2,y+h/2,Math.min(w,h)*.35,x+w/2,y+h/2,Math.max(w,h)*.75);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.45)');c.fillStyle=v;c.fillRect(x,y,w,h);
   c.strokeStyle='#7fe9ff';c.lineWidth=2.5;const k=16;for(const[px,py,sx,sy]of[[x,y,1,1],[x+w,y,-1,1],[x,y+h,1,-1],[x+w,y+h,-1,-1]]){c.beginPath();c.moveTo(px+sx*k,py+sy*1.5);c.lineTo(px+sx*1.5,py+sy*1.5);c.lineTo(px+sx*1.5,py+sy*k);c.stroke();}}
- return{LIST,art,frame,space,cabin,SPACEY,find:id=>LIST.find(a=>a.id===id)};
+ return{LIST,art,frame,space,cabin,SPACEY,globe,find:id=>LIST.find(a=>a.id===id)};
 })();

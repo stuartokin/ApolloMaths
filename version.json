@@ -1,7 +1,24 @@
 {
- "version": "2.53",
+ "version": "2.54",
  "date": "10 November 2026",
  "releases": [
+  {
+   "v": "2.54",
+   "date": "10 November 2026",
+   "kids": [
+    "🛟 Starlane flight assists — easier flying on tablets: a joystick that appears under your thumb, a ship that stays level, help with aiming and docking",
+    "🗺️ Much better-looking maps, with planets, mission icons and a card for each system"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🚀 Starlane Trader flight assists (Pause → Controls → FLIGHT ASSISTS), with separate settings for touch screens (on by default) and mouse & keyboard (off by default): floating joystick with fine control near the middle (touch), auto-level, aim assist, auto-fire (off by default everywhere), turn to target (tap a radar icon, the 🎯 button or key 7), docking assist (lines up the slot and matches the spin — you control speed) and pop-up DOCK / JUMP / E.C.M. buttons (touch).",
+    "🗺️ Maps: space backdrop with spiral arms, stars coloured by economy, government or tech on every map, visited systems solid, mission and hazard icons, glowing fuel range and route, animated target, rendered planets on the short-range chart, a grid and slow rotation on the 3D map, and a system card with a planet picture, details, fuel and trading tips.",
+    "🛒 Shipyard: category tabs evenly spaced, description under the list, one fuel button."
+   ]
+  },
   {
    "v": "2.53",
    "date": "10 November 2026",
@@ -128,22 +145,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: press Ctrl+Shift+G while playing and enter the parent passphrase (or Admin PIN) to open TEST MODE — a practice copy of the game. Jump straight into 22 scenarios (launch, docking approaches, the docking computer, races, battles, police, Vorn interdiction, hyperspace, black holes, flares, mining, scooping, rescues, derelicts, missiles, the jump drive, the hangar seat); add any mission or story; set credits, fuel, hull, legal status and rank; fit any equipment, laser or ship; visit any galaxy or system; and switch on cheats (invincible, infinite fuel and missiles, free shopping). EXIT TEST MODE returns you to exactly where you were; nothing is saved."
-   ]
-  },
-  {
-   "v": "2.44",
-   "date": "10 November 2026",
-   "kids": [
-    "🚀 Starlane: leaving a station no longer shows the docking guide",
-    "🎓 Nova’s tour narration is no longer cut off by other voices",
-    "📡 A brand-new radar in the Modern cockpit"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🚀 Starlane Trader: after launch, the docking corridor, “line up / match the spin” hints and spin buttons stay hidden until you are 3.5 km clear of the station or turn back to face it. During tours other game voices stay quiet, so they can no longer cut off the lesson narration. Modern radar redesigned: glowing glass with tick marks and labelled range rings, a smooth sweep, ships as arrows pointing the way they fly, pulsing rings on hostile ships, a spinning station marker, shaded planets and a glowing sun, rim pointers for things out of range, and rotating target brackets."
    ]
   }
  ]
