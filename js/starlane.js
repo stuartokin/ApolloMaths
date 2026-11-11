@@ -710,7 +710,7 @@ function makeStarlane(env){
   return{cv:wideEl,ctx:wideCtx,w:hr.width,h:hr.height,ox:cr.left-hr.left+cv.clientLeft,oy:cr.top-hr.top+cv.clientTop,s:cv.clientWidth/W};}
  const cabState=()=>({clutter:C.opt.clutter!==false,items:EQUIP.filter(e=>e.personal&&C.equip[e.id]).map(e=>e.id)});
  let profDone=false;const applyProfile=()=>{if(profDone)return;if(typeof StarModern!=='undefined'&&StarModern.profile){StarModern.profile(C.opt.device||'desktop');if(C.opt.quality&&C.opt.quality!=='auto'&&StarModern.setQuality)StarModern.setQuality(C.opt.quality);profDone=true;}};
- const MAPI={get bodies(){if(!adv||!adv.st.fx)return[];const out=[];for(const f of adv.st.fx){if(f.kind==='earth'){out.push({kind:'earth',pos:f.pos,R:f.R});out.push({kind:'moon',pos:add(f.pos,V(f.R*3.2,f.R*.6,f.R*1.4)),R:f.R*.27});}else if(f.kind==='moon')out.push({kind:'moon',pos:f.pos,R:f.R});}return out;},get look(){return lookState();},get cab(){return cabState();},get lastHitT(){return lastHitT;},CX,get CY(){return CY;},H,get full(){return PIT3D();},get fog(){return !!G._fogOn&&!!adv;},get wide(){return wideState();},get P(){return P;},get CAM(){return CAM;},get ships(){return ships;},get station(){return station;},get planet(){return planet;},get moons(){return moons;},get suns(){return suns;},get bh(){return bh;},get booms(){return booms;},get smokes(){return smokes;},get dust(){return dust;},get camMode(){return camMode;},get clock(){return clock;},W,get VH(){return VH;},FOC,toWorld,here:()=>here(),playerModel:()=>MODELS[shipCls().model]||MODELS.kestrel};
+ const MAPI={get bodies(){if(show&&show.bodies)return show.bodies;if(!adv||!adv.st.fx)return[];const out=[];for(const f of adv.st.fx){if(f.kind==='earth'){out.push({kind:'earth',pos:f.pos,R:f.R});out.push({kind:'moon',pos:add(f.pos,V(f.R*3.2,f.R*.6,f.R*1.4)),R:f.R*.27});}else if(f.kind==='moon')out.push({kind:'moon',pos:f.pos,R:f.R});}return out;},get look(){return lookState();},get cab(){return cabState();},get lastHitT(){return lastHitT;},CX,get CY(){return CY;},H,get full(){return PIT3D();},get fog(){return !!G._fogOn&&!!adv;},get wide(){return wideState();},get P(){return P;},get CAM(){return CAM;},get ships(){return ships;},get station(){return station;},get planet(){return planet;},get moons(){return moons;},get suns(){return suns;},get bh(){return bh;},get booms(){return booms;},get smokes(){return smokes;},get dust(){return dust;},get camMode(){return camMode;},get clock(){return clock;},W,get VH(){return VH;},FOC,toWorld,here:()=>here(),playerModel:()=>MODELS[shipCls().model]||MODELS.kestrel};
  const FF=()=>STYLE()==='modern'?'"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Roboto,Arial,sans-serif':'"Courier New",monospace';
  let LAYOUT=null;const lay=(k,x,y,w,h,s,extra)=>{if(LAYOUT)LAYOUT.push({k,x,y,w,h,s,...extra});};
  function button(ctx,b,on){const mod=STYLE()==='modern';let fsz=b.fs||13;if(b.label){ctx.font=`bold ${fsz}px ${FF()}`;while(fsz>8&&ctx.measureText(b.label).width>b.w-8){fsz--;ctx.font=`bold ${fsz}px ${FF()}`;}}
@@ -1708,7 +1708,7 @@ function makeStarlane(env){
   if(!has('scoop'))return;const full=cargoT()>=C.cap;for(const x of ships){if(x.dead||x.T.role!=='cargo'||x.seenFull)continue;x.seenFull=true;if(full&&len(sub(x.pos,P.pos))<9000&&clock-(G._hfT||-99)>20){G._hfT=clock;msg('📦 CARGO HOLD FULL — NO ROOM FOR THAT CANISTER',3.5,'#ffb020');say('holdfull','Our cargo hold is full, Commander — there is no room for that canister. Sell or jettison some cargo if you want to pick it up.',30);}}}
  // ---------------- 🎬 SHOWCASE: a hands-free trailer and a narrated overview, played in a sandbox copy ----------------
  var show=null;
- const SHOW_LINES={w:'Hello, Commander! I’m Nova, your ship’s computer. In Starlane Trader you fly your own starship across a huge galaxy of worlds.',
+ const SHOW_LINES={vo:'Welcome aboard, Commander. In Starlane Trader you fly, trade and explore a whole galaxy — and learn as you go.',w:'Hello, Commander! I’m Nova, your ship’s computer. In Starlane Trader you fly your own starship across a huge galaxy of worlds.',
   f:'Launch from the space station and fly anywhere you like — with mouse, keyboard, gamepad or touch. The radar shows everything around you.',
   t:'Buy goods cheaply on one world and sell them where they’re wanted. The charts show what each planet needs — then jump through hyperspace to get there.',
   m:'Take on missions from the station board: deliveries, passengers and bounties. But watch out for pirates — shields up and lasers ready!',
@@ -1719,12 +1719,13 @@ function makeStarlane(env){
  function sDockTab(t,setup){if(adv)advAbandon();if(mode!=='docked')tDock();scene=null;mode='docked';overlay=null;tab=t;camMode='cockpit';show.cam=null;if(setup)setup();}
  function sScene(kind,t){if(adv)advAbandon();if(mode!=='flight')tFly();tClear();overlay=null;camMode='cockpit';show.cam=null;scene=makeScene(kind);scene.hv=0;scene.t=t;mode=kind==='dock'?'dockScene':'launchScene';G._freezeScene=false;}
  function sView(inside,camFn){if(inside){camMode='cockpit';view='front';show.cam=null;C.opt.cockpit=true;}else{camMode='ext';show.cam=camFn;if(show.kind==='trailer')C.opt.cockpit=false;}}
- const sideCam=(side=1)=>()=>{const tgt=show.focus||add(P.pos,mul(P.o.f,600)),mid=add(mul(P.pos,.45),mul(tgt,.55));return[add(add(add(P.pos,mul(P.o.r,430*side)),mul(P.o.u,170)),mul(P.o.f,-280)),mid,P.o.u];};
+ const sideCam=(side=1)=>()=>{const tgt=show.focus||add(P.pos,mul(P.o.f,600)),mid=add(mul(P.pos,.4),mul(tgt,.6));return[add(add(add(P.pos,mul(P.o.r,300*side)),mul(P.o.u,120)),mul(P.o.f,-170)),mid,P.o.u];};
+ function sAwaySun(){const sn=suns[0];if(!sn||!P)return;let f=norm(sub(P.pos,sn.pos));if(planet)f=norm(add(f,norm(sub(P.pos,planet.pos))));P.o.f=f;P.o.u=Math.abs(P.o.f[1])>.9?V(1,0,0):V(0,1,0);P.o.r=norm(cross(P.o.u,P.o.f));ortho(P.o);}
  function sNear(){const cur=GAL[C.sys];return GAL.filter(g=>g.i!==C.sys).sort((a,b)=>SL.dist(cur,a)-SL.dist(cur,b));}
  const SH={
   star:d=>({d,card:'star',go(){sDockTab('status');}}),
   card:d=>({d,card:'title',go(){sDockTab('status');}}),
-  attract:d=>({d,card:'attract',go(){sDockTab('status');try{DEMO.reset();}catch(e){}}}),
+  attract:d=>({d,card:'attract',go(){sDockTab('status');try{DEMO.reset();}catch(e){}if(show.kind==='trailer')say('showvo',SHOW_LINES.vo,0);}}),
   launch:d=>({d,go(){sScene('launch',.7);}}),
   station:d=>({d,go(){sFly();const s=station;P.pos=add(s.pos,mul(s.o.f,1700));P.o={f:s.o.f.slice(),u:s.o.u.slice(),r:s.o.r.slice()};P.speed=150;P.throttle=.45;camMode='ext';
     show.cam=t=>{const a=.5+t*.28,c=add(s.pos,add(add(mul(s.o.r,Math.cos(a)*2700),mul(s.o.u,750)),mul(s.o.f,Math.sin(a)*1500+900)));return[c,add(s.pos,mul(s.o.f,500)),s.o.u];};}}),
@@ -1737,26 +1738,29 @@ function makeStarlane(env){
     show.cam=()=>[add(add(P.pos,mul(P.o.u,160)),mul(P.o.f,-220)),show.ark.pos,P.o.u];}}),
   thorn:d=>({d,go(){sFly();P.pos=tOpenSpace(30000);faceClear();P.speed=0;P.throttle=0;const tb=spawn('thornbloom',tAhead(820,0,60),{});tb.T={...tb.T,speed:0,turn:0,laser:0};tb.speed=0;show.flash=tb;}}),
   hyper:d=>({d,go(){sFly();P.pos=tOpenSpace(30000);faceClear();C.fuel=7;const n=sNear()[0];C.target=n.i;hyperT=0;startHyper(true);hyperT=.05;}}),
-  arrive:d=>({d,tick(){if(mode==='flight'&&!show.placed&&planet){show.placed=true;tClear();const sn=suns[0],toSun=sn?norm(sub(sn.pos,planet.pos)):V(0,0,1);P.pos=add(planet.pos,mul(toSun,planet.R*2.7));P.o.f=norm(sub(planet.pos,P.pos));P.o.u=Math.abs(P.o.f[1])>.9?V(1,0,0):V(0,1,0);P.o.r=norm(cross(P.o.u,P.o.f));ortho(P.o);P.speed=120;P.throttle=.3;}}}),
+  arrive:d=>({d,tick(){if(mode==='flight'&&!show.placed){show.placed=true;tClear();P.pos=tOpenSpace(40000);const sn=suns[0];P.o.f=sn?norm(sub(P.pos,sn.pos)):P.o.f;P.o.u=Math.abs(P.o.f[1])>.9?V(1,0,0):V(0,1,0);P.o.r=norm(cross(P.o.u,P.o.f));ortho(P.o);P.speed=260;P.throttle=.5;
+    const R=3000,E=add(add(P.pos,mul(P.o.f,10500)),mul(P.o.r,-1300));show.bodies=[{kind:'earth',pos:E,R},{kind:'moon',pos:add(add(E,mul(P.o.r,R*2.4)),add(mul(P.o.u,R*.7),mul(P.o.f,-R*1.6))),R:R*.27}];}}}),
   tab:(d,t,setup)=>({d,go(){sDockTab(t,setup);}}),
   menu:(d,mt)=>({d,go(){sDockTab('status');overlay='menu';menuTab=mt;}}),
   docking:d=>({d,go(){sScene('dock',.4);}}),
   montage:d=>({d,tick(dt,t){const k=Math.floor(t/(d/4));if(k===show.mk)return;show.mk=k;if(k===0)sDockTab('chart',()=>{chartMode='galaxy';C.target=sNear()[2].i;});else if(k===1)sDockTab('chart',()=>{chartMode='3d';});else if(k===2)sDockTab('shipyard',()=>{yardMode='paint';});else sScene('dock',.6);}}),
-  fight:d=>({d,go(){sFly();P.pos=tOpenSpace(30000);faceClear();P.speed=140;P.throttle=.4;C.missiles=4;
-    const a=spawn('scrapjaw',tAhead(950,-120,50),{}),b=spawn('scrapjaw',tAhead(700,260,-60),{});for(const x of[a,b]){x.angry=true;x.target='player';x.T={...x.T,laser:0,speed:170};x.energy=500;}
+  fight:d=>({d,go(){sFly();P.pos=tOpenSpace(60000);sAwaySun();P.speed=140;P.throttle=.4;C.missiles=4;
+    const LOOK={front:'military',rear:true,missiles:2,starburst:0,bigCargo:false,eq:{afterburner:true,ecm:true,energy:true,shieldboost:true,firectl:true},paint:{main:'#23262f',trim:'#ff2d55',stripeCol:'#ff2d55',stripe:'racing',decal:'flames',name:'',num:0}};
+    const a=spawn('raven',tAhead(720,-100,40),{}),b=spawn('raven',tAhead(520,200,-50),{});for(const x of[a,b]){x.look=LOOK;x.angry=true;x.target='player';x.T={...x.T,laser:0,speed:170,color:'#23262f'};x.energy=500;}
     show.a=a;show.b=b;show.aim=a;show.focus=a.pos.slice();show.ph=-1;show.mf=false;},
    tick(dt,t){const ph=t<d*.2?0:t<d*.4?1:t<d*.6?2:t<d*.8?3:4,A=show.a,Bs=show.b;
     if(ph<=2){if(A&&!A.dead)show.focus=A.pos.slice();show.aim=A;}else{if(Bs&&!Bs.dead)show.focus=Bs.pos.slice();show.aim=Bs;}
     if(ph!==show.ph){show.ph=ph;sView(ph===1||ph===3,sideCam(ph===2||ph===4?-1:1));}
     show.fire=ph===3;
-    if(ph===1&&t>=d*.3&&!show.mf&&A&&!A.dead){show.mf=true;radarTgt=A;msTgt=A;msLocked=true;try{fireMissile();}catch(e){}}
-    if(ph===2&&t>=d*.5&&A&&!A.dead)kill(A,false);
+    if(ph===1&&A&&!A.dead){radarTgt=A;msTgt=A;msT=Math.min(1.2,(t-d*.2)/(d*.2)*1.4);msLocked=msT>=1.2;}
+    if(ph===2&&!show.mf&&A&&!A.dead){show.mf=true;msTgt=A;msLocked=true;try{fireMissile();}catch(e){}}
+    if(ph===2&&t>=d*.56&&A&&!A.dead)kill(A,false);
     if(ph===4&&t>=d*.86&&Bs&&!Bs.dead)kill(Bs,false);}}),
-  contact:d=>({d,go(){sFly();P.pos=tOpenSpace(30000);faceClear();P.speed=25;P.throttle=.05;const tb=spawn('thornbloom',tAhead(620,0,60),{});tb.T={...tb.T,speed:0,turn:0,laser:0};tb.speed=0;show.flash=tb;show.focus=tb.pos.slice();show.ph=-1;},
+  contact:d=>({d,go(){sFly();P.pos=tOpenSpace(60000);sAwaySun();P.speed=25;P.throttle=.05;const tb=spawn('thornbloom',tAhead(620,0,60),{});tb.T={...tb.T,speed:0,turn:0,laser:0};tb.speed=0;show.flash=tb;show.focus=tb.pos.slice();show.ph=-1;},
    tick(dt,t){const ph=t<d*.5?0:1;if(ph!==show.ph){show.ph=ph;sView(ph===0,()=>[add(add(add(P.pos,mul(P.o.r,-300)),mul(P.o.u,110)),mul(P.o.f,-260)),add(mul(P.pos,.35),mul(show.flash.pos,.65)),P.o.u]);}}}),
   advs:(d,id,steps)=>({d,go(){sFly();P.pos=tOpenSpace(28000);faceClear();advStart(id);for(let k=0;k<steps;k++)advNext();}})};
  const say1=(k,sh)=>{sh.say=k;return sh;},cap1=(c,sh)=>{sh.cap=c;return sh;};
- function TRAILER(){return[SH.star(1.3),SH.launch(3.1),SH.attract(4.2),SH.fight(8.5),SH.ark(2.5),SH.contact(3.8),SH.hyper(3.2),SH.arrive(2.3),SH.montage(3.8),SH.card(3.2)];}
+ function TRAILER(){return[SH.star(1.3),SH.launch(3.2),SH.station(2.4),SH.fight(8.5),SH.ark(2.5),SH.contact(3.8),SH.hyper(3.2),SH.arrive(3),SH.montage(3.8),SH.attract(7),SH.card(3.2)];}
  function OVERVIEW(){return[cap1('Welcome',say1('w',SH.station(7))),SH.ark(5),
   cap1('1 · Fly your ship',say1('f',SH.launch(5))),SH.cruise(8),
   cap1('2 · Trade and earn',say1('t',SH.tab(5,'market'))),SH.tab(5,'chart',()=>{chartMode='galaxy';C.target=sNear()[1].i;}),SH.hyper(3.4),SH.arrive(3),
@@ -1770,11 +1774,11 @@ function makeStarlane(env){
   C.paint={main:'#3fb8ff',trim:'#20242e',stripeCol:'#ffe45e',stripe:'racing',decal:'star',name:'Starlane',num:1};C.equip=Object.assign(C.equip||{},{scoop:1,dock:1,ecm:1});C.missiles=4;C.fuel=7;C.credits=Math.max(C.credits,2500);msgs=[];
   tut=null;if(!show.cd)nextShot();}
  function stopShow(){if(!show)return;const r=show.real,fi=show.fromIntro,ts=show.tutSave;show=null;G._freezeScene=false;camMode='cockpit';view='front';if(adv)advAbandon();restoreReal(r);tut=ts;msgs=[];if(fi)openIntro();}
- function nextShot(){show.i++;if(show.i>=show.shots.length){stopShow();return;}show.t=0;show.mk=-1;show.placed=false;show.focus=null;show.ph=-1;if(show.kind==='trailer')C.opt.cockpit=false;const sh=show.shots[show.i];show.cam=null;show.fire=false;show.aim=null;show.flash=null;
+ function nextShot(){show.i++;if(show.i>=show.shots.length){stopShow();return;}show.t=0;show.mk=-1;show.placed=false;show.focus=null;show.ph=-1;show.bodies=null;if(show.kind==='trailer')C.opt.cockpit=false;const sh=show.shots[show.i];show.cam=null;show.fire=false;show.aim=null;show.flash=null;
   try{sh.go&&sh.go();}catch(e){console.warn('show shot',e);}msgs=[];if(sh.say)say('show'+sh.say,SHOW_LINES[sh.say],0);}
  function showTick(dt){if(show.hold)return;show.wall+=dt;if(show.cd>0){show.cd-=dt;if(show.cd<=0)nextShot();return;}show.t+=dt;const sh=show.shots[show.i];if(!sh)return;try{sh.tick&&sh.tick(dt,show.t);}catch(e){}if(show.t>=sh.d)nextShot();}
  function drawShow(ctx){const sh=show.shots[show.i];
-  if(sh&&sh.card==='attract'){try{DEMO.render(ctx,'',0,true);}catch(e){}}
+  if(sh&&sh.card==='attract'){try{DEMO.render(ctx,'',0,true);}catch(e){}if(show.kind==='trailer'){ctx.globalAlpha=Math.min(1,show.t/.8);ctx.save();ctx.beginPath();ctx.rect(60,H-110,W-120,70);ctx.clip();wrap(ctx,'NOVA: '+SHOW_LINES.vo,80,H-100,W-160,20,'#bff4ff',15);ctx.restore();ctx.globalAlpha=1;}}
   else if(show.cd>0||(sh&&sh.card)){ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);for(const[x,y,b]of bgStars){ctx.fillStyle=`rgba(255,255,255,${(.2+b*.6)*(sh&&sh.card==='star'?Math.min(1,show.t*.8):1)})`;ctx.fillRect(x,y,b>.8?2:1,b>.8?2:1);}}
   if(show.cd>0){text(ctx,String(Math.ceil(show.cd)),CX,H/2-60,'#ffe45e',96,'center');text(ctx,'🎬 Recording starts in…',CX,H/2-110,'#9aa3c7',16,'center');return;}
   if(sh&&sh.card==='star'){const k=Math.min(1,show.t/1.6),g=ctx.createRadialGradient(CX,H/2,0,CX,H/2,40+k*260);g.addColorStop(0,`rgba(255,255,255,${k})`);g.addColorStop(.15,`rgba(190,230,255,${.8*k})`);g.addColorStop(1,'rgba(60,120,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(CX,H/2,40+k*260,0,7);ctx.fill();}

@@ -1,7 +1,21 @@
 {
- "version": "2.63",
+ "version": "2.64",
  "date": "11 November 2026",
  "releases": [
+  {
+   "v": "2.64",
+   "date": "11 November 2026",
+   "kids": [
+    "🎬 New Starlane trailer: sleek pirate fighters, Earth and the Moon, and Nova introducing the game at the end"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🎬 Starlane Trader trailer re-sequenced: star, launch with the station fly-by, fight, Verdant Ark, First Contact, hyperspace, arrival at Earth and the Moon, montage, the title screen with Nova’s voice-over, and the end card. The enemies are now fully fitted pirate fighters in dark-and-red livery; the cockpit shows the missile lock, then the missile strike is seen from outside; fights are staged away from the sun and planets so the cockpit is not washed out by glare."
+   ]
+  },
   {
    "v": "2.63",
    "date": "11 November 2026",
@@ -139,23 +153,6 @@
    "items": [
     "🚀 Starlane Trader — five original faction ships with their own 3D looks (Halo Seeker, Scrapjaw, Verdant Ark with Seed fighters, Quicksilver, Thorn Bloom). They visit systems from time to time; Scrapjaw packs raid lawless systems; the radar card shows each faction. Test mode has a “Meet the faction ships” scenario.",
     "🌌 Space adventures are staged in the world: puzzles appear in a compact panel over the live view; the ship turns to open space; Lost in the Nebula has real fog and scanner interference; Solar Storm shows the growing corona, particle streams, cabin heat and an aurora in the planet’s shadow; First Contact has the Lathari ship flashing real light patterns; The Sleeping Ship is a Verdant Ark; Mars, Eclipse, Aurora, Goldilocks, Star Shell, Twin Suns, Gas Dive, Galaxy Edge, Capsule 1969, Moon Base and Ice Moon each show their own scene."
-   ]
-  },
-  {
-   "v": "2.54",
-   "date": "10 November 2026",
-   "kids": [
-    "🛟 Starlane flight assists — easier flying on tablets: a joystick that appears under your thumb, a ship that stays level, help with aiming and docking",
-    "🗺️ Much better-looking maps, with planets, mission icons and a card for each system"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🚀 Starlane Trader flight assists (Pause → Controls → FLIGHT ASSISTS), with separate settings for touch screens (on by default) and mouse & keyboard (off by default): floating joystick with fine control near the middle (touch), auto-level, aim assist, auto-fire (off by default everywhere), turn to target (tap a radar icon, the 🎯 button or key 7), docking assist (lines up the slot and matches the spin — you control speed) and pop-up DOCK / JUMP / E.C.M. buttons (touch).",
-    "🗺️ Maps: space backdrop with spiral arms, stars coloured by economy, government or tech on every map, visited systems solid, mission and hazard icons, glowing fuel range and route, animated target, rendered planets on the short-range chart, a grid and slow rotation on the 3D map, and a system card with a planet picture, details, fuel and trading tips.",
-    "🛒 Shipyard: category tabs evenly spaced, description under the list, one fuel button."
    ]
   }
  ]
