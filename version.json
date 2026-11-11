@@ -1,7 +1,22 @@
 {
- "version": "2.61",
+ "version": "2.62",
  "date": "11 November 2026",
  "releases": [
+  {
+   "v": "2.62",
+   "date": "11 November 2026",
+   "kids": [
+    "🎬 A better Starlane trailer — the space fight and First Contact now cut between the cockpit and outside the ship"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🎬 Starlane Trader trailer: the space fight cuts like a film — outside as two raiders close in, inside the 3D cockpit with lasers firing, outside as the raider explodes, and inside as a missile launches. First Contact shows the Thorn Bloom from the cockpit, then your ship facing it. The overview’s fight uses the same sequence.",
+    "🧹 Videos are cleaner: no guided-flight panel or adventure offers (your guided flight is restored afterwards), no mouse pointer, and no missile-lock ring or target card on outside shots."
+   ]
+  },
   {
    "v": "2.61",
    "date": "11 November 2026",
@@ -141,21 +156,6 @@
    ],
    "items": [
     "🚀 Starlane Trader on touch screens in landscape full screen: the game uses the whole screen height (about a third more picture on a tablet); the score strip and Pause / Exit / Stop shrink into the top corners; in the Modern style the 3D space view fills the side margins behind the touch controls. Laptops and big screens with a mouse are unchanged."
-   ]
-  },
-  {
-   "v": "2.52",
-   "date": "10 November 2026",
-   "kids": [
-    "📱 Starlane works properly on tablets and phones: the joystick steers, FIRE lets go when you lift your finger, and in full screen there are big controls at the sides"
-   ],
-   "tags": [
-    "games",
-    "fixes"
-   ],
-   "items": [
-    "🚀 Starlane Trader on touch screens: fixed the on-screen joystick (it never steered) and FIRE (it never switched off) — both were mistaken for subtitle dragging. In full-screen landscape on tablets and folds, the game now shows a joystick on the left and FIRE, BOOST, MISSILE and a speed slider on the right, outside the picture; each lets go reliably even if the touch is cancelled. Laptops and big screens with a mouse are unchanged.",
-    "👪 Grown-ups on iPads, tablets and phones: triple-tap the score strip at the top of a game (or the app title on the home page) instead of Ctrl+Shift+G."
    ]
   }
  ]
