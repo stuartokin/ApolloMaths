@@ -377,3 +377,8 @@ dialog.tour-front[open]{position:fixed;inset:0;margin:auto;z-index:91}
 .arcade.arc-full.arc-tw .arc-hud{flex-direction:column;align-items:flex-start;gap:2px}
 .arcade.arc-full.arc-tw .arc-ctl{flex-direction:column;align-items:flex-end}
 }
+
+/* Starlane showcase videos: nothing but the picture */
+.arcade.arc-show .arc-hud,.arcade.arc-show .arc-ctl{visibility:hidden}
+.arcade.arc-show .arc-game{background:#000}
+.arcade.arc-show #arcCanvas{border-color:transparent;box-shadow:none}

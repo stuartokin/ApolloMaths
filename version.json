@@ -1,7 +1,21 @@
 {
- "version": "2.60",
+ "version": "2.61",
  "date": "11 November 2026",
  "releases": [
+  {
+   "v": "2.61",
+   "date": "11 November 2026",
+   "kids": [
+    "🎬 Starlane has two videos you can watch from the Pause menu: a 30-second trailer and a 2-minute tour with Nova"
+   ],
+   "tags": [
+    "games",
+    "new"
+   ],
+   "items": [
+    "🎬 Starlane Trader: Pause → 🎬 WATCH (replacing “Nova’s Intro”, which is now on that page) offers a 30-second TRAILER (full-screen cinematic shots: launch, station, dogfight, Verdant Ark, Thorn Bloom, hyperspace, a planet, the charts, the paint shop, docking and the title card) and a 2-minute GAME OVERVIEW WITH NOVA in seven chapters with narrated captions. Both play hands-free in a sandbox copy — any key or tap stops them and you return exactly where you were. A 3-second countdown switch helps with screen recording. New players are offered the overview on Nova’s first welcome slide. Test mode lists both too."
+   ]
+  },
   {
    "v": "2.60",
    "date": "11 November 2026",
@@ -142,21 +156,6 @@
    "items": [
     "🚀 Starlane Trader on touch screens: fixed the on-screen joystick (it never steered) and FIRE (it never switched off) — both were mistaken for subtitle dragging. In full-screen landscape on tablets and folds, the game now shows a joystick on the left and FIRE, BOOST, MISSILE and a speed slider on the right, outside the picture; each lets go reliably even if the touch is cancelled. Laptops and big screens with a mouse are unchanged.",
     "👪 Grown-ups on iPads, tablets and phones: triple-tap the score strip at the top of a game (or the app title on the home page) instead of Ctrl+Shift+G."
-   ]
-  },
-  {
-   "v": "2.51",
-   "date": "10 November 2026",
-   "kids": [
-    "🎨 Starlane adventures look much better — real-looking planets and moons, and detailed pictures",
-    "🖥️ The adventure task now shows on your ship’s MISSION screen"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🚀 Starlane Trader: adventure pictures redrawn — planets, moons, Mars, gas giants, the Sun and asteroids are now rendered globes with lighting and atmospheres; space scenes have starfields and nebulae, ship scenes a lit metal cabin, and everything sits in a display frame. During an adventure’s flying task, the goal, timer and target distance appear on the MISSION screen (the right console wing in widescreen, or the small mission screen) — tap it to flip between ADVENTURE and MISSION. Without those screens, the panel sits top-left and ⇄ moves it above the console."
    ]
   }
  ]
