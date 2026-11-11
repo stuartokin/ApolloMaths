@@ -1,7 +1,24 @@
 {
- "version": "2.55",
+ "version": "2.56",
  "date": "10 November 2026",
  "releases": [
+  {
+   "v": "2.56",
+   "date": "10 November 2026",
+   "kids": [
+    "🌫️ The nebula is now real fog all around your ship, and hyperspace fills the whole screen"
+   ],
+   "tags": [
+    "games",
+    "fixes",
+    "look"
+   ],
+   "items": [
+    "🚀 Starlane Trader: fixed the nebula appearing as a rectangle on wide screens — in the Modern style it is now real 3D fog (stars hidden, distant objects fade, cockpit stays clear) and all adventure effects (fog, solar storm, planets, suns) are drawn across the whole wide view. Hyperspace now fills the full screen in the Modern style when there is room at the sides.",
+    "🧪 Test mode stages adventures where they would really happen: hyperspace adventures make a real jump first; the rest start cruising in open space (after-battle ones with wreckage ahead). Test scenarios start in open space. Leaving test mode returns you to exactly where you were.",
+    "🛸 Faction ships no longer arrive during the guided first flight."
+   ]
+  },
   {
    "v": "2.55",
    "date": "10 November 2026",
@@ -133,20 +150,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: the first six adventures — three In-Ship (The Ticking Canister, Radio Silence, The Stowaway) and three Space (The Black-Hole Time-Warp, First Contact, Planet-Killer) — mixing science and maths puzzles with flying tasks. They appear after you have some experience (after a fight, in hyperspace or on a quiet flight), never more than one every 20 minutes. Rewards include credits, a bobble-head alien and a prototype tractor beam; failing only costs something small. Completed adventures can be replayed from the new 🗺 ADVENTURE LOG in the pause menu, which also sets the puzzle level (younger, middle, older). Test mode has an ADVENTURES page."
-   ]
-  },
-  {
-   "v": "2.46",
-   "date": "10 November 2026",
-   "kids": [
-    "🎨 Starlane: paint your ship — colours, stripes, a decal and your own name — and see every upgrade on the hull"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🚀 Starlane Trader: your ship now shows what is fitted — each laser type looks different (pulse, beam, twin, military, plasma, mining drill), missiles hang under the wings, and scoops, cargo pod, ECM antenna, docking-computer dome, afterburners, tractor dish, shield emitters, energy strip, fire-control pod, repair drones and Starburst emitters all appear. New shipyard page 🎨 EXTERIOR: main, trim and stripe colours, stripes, decals, a name and number, with a turning preview; applying costs 150 Cr. Your look appears in the hangar, the outside camera and the movies."
    ]
   }
  ]

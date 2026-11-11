@@ -229,7 +229,8 @@ const StarModern=(()=>{
   P.needsUpdate=true;C.needsUpdate=true;sys.p.geometry.setDrawRange(0,k);}
  // ---------------- per-frame ----------------
  let lastT=performance.now(),trailT=0;
- function render(ctx,A){if(!ready())return false;if(A.full===undefined&&pit)pit.visible=false;const t0=performance.now(),dt=Math.min(.1,(t0-lastT)/1000);lastT=t0;
+ function render(ctx,A){if(!ready())return false;if(A.full===undefined&&pit)pit.visible=false;
+  if(A.fog){if(!scene.fog)scene.fog=new T.FogExp2(0x4a2f86,.00030);scene.background.set(0x3a2670);if(nebula)nebula.visible=false;if(bloom)bloom.enabled=false;}else if(scene.fog){scene.fog=null;scene.background.set(0x000004);if(nebula)nebula.visible=true;if(bloom)bloom.enabled=true;}const t0=performance.now(),dt=Math.min(.1,(t0-lastT)/1000);lastT=t0;
   const W=A.W,VH=A.VH,CXa=A.CX??W/2,CYa=A.CY??VH/2,Hv=A.full&&A.H?A.H:VH,k=Math.max(1,Math.min(ctx.canvas.width/W,1920/W)),pr=quality.pr*k,wd=A.wide||null;let w,h,ppx,ppy,foc;
   if(wd){const dpr=Math.min(window.devicePixelRatio||1,2)*quality.pr,sc=Math.min(dpr,2400/wd.w);w=Math.round(wd.w*sc);h=Math.round(wd.h*sc);ppx=(wd.ox+CXa*wd.s)*sc;ppy=(wd.oy+CYa*wd.s)*sc;foc=A.FOC*wd.s*sc;}
   else{w=Math.round(W*pr);h=Math.round(Hv*pr);ppx=CXa*pr;ppy=CYa*pr;foc=A.FOC*pr;}
@@ -263,7 +264,7 @@ const StarModern=(()=>{
   {const P2=smoke.p.geometry.attributes.position,C2=smoke.p.geometry.attributes.color;stepParticles(smoke,dt,true);let k2=smoke.p.geometry.drawRange.count;for(const sm of A.smokes){if(k2>=smoke.n)break;const m=M(sm.pos),f2=.55*(1-sm.t/1.6);P2.setXYZ(k2,m[0],m[1],m[2]);C2.setXYZ(k2,f2,f2,f2*1.05);k2++;}smoke.p.geometry.setDrawRange(0,k2);P2.needsUpdate=true;C2.needsUpdate=true;}
   // space dust
   {const D=dustPts.geometry.attributes.position;let n=0;for(const d of A.dust){if(n>=400)break;const m=M(d);D.setXYZ(n++,m[0],m[1],m[2]);}dustPts.geometry.setDrawRange(0,n);D.needsUpdate=true;}
-  bloom.enabled=quality.bloom;comp.render();if(wd){if(wd.cv.width!==w||wd.cv.height!==h){wd.cv.width=w;wd.cv.height=h;}wd.ctx.drawImage(gl,0,0);ctx.clearRect(0,0,W,Hv);}else ctx.drawImage(gl,0,0,W,Hv);flare(ctx,A,CXa,CYa);
+  bloom.enabled=quality.bloom&&!(A&&A.fog);comp.render();if(wd){if(wd.cv.width!==w||wd.cv.height!==h){wd.cv.width=w;wd.cv.height=h;}wd.ctx.drawImage(gl,0,0);ctx.clearRect(0,0,W,Hv);}else ctx.drawImage(gl,0,0,W,Hv);flare(ctx,A,CXa,CYa);
   // keep it smooth: drop the glow, then the resolution, if frames get slow (and raise them again when there is room)
   const ms=performance.now()-t0;if(quality.auto===false){slow=fast=0;}else if(ms>22){slow++;fast=0;}else if(ms<9){fast++;slow=0;}
   if(slow>40){slow=0;if(quality.views)quality.views=false;else if(quality.bloom)quality.bloom=false;else quality.pr=Math.max(.6,quality.pr-.15);}if(fast>240){fast=0;if(quality.pr<1)quality.pr=Math.min(1,quality.pr+.15);else if(!quality.bloom)quality.bloom=true;else if(!quality.views)quality.views=true;}
