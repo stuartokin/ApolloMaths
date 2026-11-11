@@ -114,6 +114,7 @@ No server and nothing written to GitHub — each family sets their own codes in 
 - **v2.62:** trailer shots `SH.fight` (phases outside/cockpit/outside/cockpit via `sView()` and `sideCam()`) and `SH.contact` (cockpit then outside); `advMaybe` returns while `show`; `tut` is set aside in `startShow` and restored in `stopShow`; `.arc-show` hides the cursor; `drawRadarInfo` and the outside missile-lock ring are hidden during videos.
 - **v2.63:** trailer `SH.attract` uses `DEMO.render(ctx,'',0,true)` (clean: no prompt, hint or high score; 1.4 s per style; `DEMO.reset()`); `SH.fight` has five phases (missile kill via `msTgt`/`msLocked` + `fireMissile`, then lasers); the trailer’s no-cockpit look clears the dashboard strip; `drawTarget` is skipped in videos; title card without the ApolloMaths line.
 - **v2.64:** trailer order star, launch, station, fight, ark, contact, hyper, arrive, montage, attract (with `SHOW_LINES.vo` spoken and shown), card. Fight enemies are `raven` with a fitted `look`; `sAwaySun()` faces away from the sun and planet; lock-on in the cockpit (`msT`), missile fired on the outside cut. Arrival supplies `show.bodies` (3D Earth and Moon) through `MAPI.bodies`.
+- **v2.65:** trailer star 2.8 s and card 5.5 s; the outside-camera sight square is not drawn while `show` is playing.
 - **Layout checker:** `_dbg.layoutOn()` records every text and button box for one frame (`_dbg.layout`); the test harness flags overlaps on every screen (38 screens clean in v2.27).
 
 ## Starlane Trader (js/starlane.js)

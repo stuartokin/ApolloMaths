@@ -845,7 +845,7 @@ function makeStarlane(env){
   if(hyperT>0&&hyperT<1.6){drawStreaks(ctx,(1.6-hyperT)*.18,.5);}
   if(exitT>0){const k=exitT/1.6;drawStreaks(ctx,1.6*k*k,k);if(exitT>1.35){ctx.fillStyle=`rgba(255,255,255,${(exitT-1.35)*3})`;ctx.fillRect(0,0,W,VH);}}
   // sights and view name
-  if(camMode==='ext'){const t=cam(add(P.pos,mul(P.o.f,2600)));if(t[2]>5){const p=proj(t);ctx.strokeStyle='#ffe45e';ctx.lineWidth=1.5;ctx.strokeRect(p[0]-9,p[1]-9,18,18);}}
+  if(camMode==='ext'&&!show){const t=cam(add(P.pos,mul(P.o.f,2600)));if(t[2]>5){const p=proj(t);ctx.strokeStyle='#ffe45e';ctx.lineWidth=1.5;ctx.strokeRect(p[0]-9,p[1]-9,18,18);}}
   else if((view==='front'||view==='rear')&&!headAway()){ctx.strokeStyle='#ffe45e';ctx.lineWidth=2;ctx.beginPath();for(const[a,b,c,d]of[[CX-26,CY,CX-8,CY],[CX+8,CY,CX+26,CY],[CX,CY-22,CX,CY-7],[CX,CY+7,CX,CY+22]]){ctx.moveTo(a,b);ctx.lineTo(c,d);}ctx.stroke();}
   if(!cockpit&&!show)text(ctx,camMode==='ext'?'Outside View':{front:'Front View',rear:'Rear View',left:'Left View',right:'Right View'}[view],CX,8,'#c8d0ff',16,'center');
   if(timeScale>1)text(ctx,`TIME ×${timeScale}`,W-12,cockpit?40:8,'#3cff6a',16,'right');
@@ -1760,7 +1760,7 @@ function makeStarlane(env){
    tick(dt,t){const ph=t<d*.5?0:1;if(ph!==show.ph){show.ph=ph;sView(ph===0,()=>[add(add(add(P.pos,mul(P.o.r,-300)),mul(P.o.u,110)),mul(P.o.f,-260)),add(mul(P.pos,.35),mul(show.flash.pos,.65)),P.o.u]);}}}),
   advs:(d,id,steps)=>({d,go(){sFly();P.pos=tOpenSpace(28000);faceClear();advStart(id);for(let k=0;k<steps;k++)advNext();}})};
  const say1=(k,sh)=>{sh.say=k;return sh;},cap1=(c,sh)=>{sh.cap=c;return sh;};
- function TRAILER(){return[SH.star(1.3),SH.launch(3.2),SH.station(2.4),SH.fight(8.5),SH.ark(2.5),SH.contact(3.8),SH.hyper(3.2),SH.arrive(3),SH.montage(3.8),SH.attract(7),SH.card(3.2)];}
+ function TRAILER(){return[SH.star(2.8),SH.launch(3.2),SH.station(2.4),SH.fight(8.5),SH.ark(2.5),SH.contact(3.8),SH.hyper(3.2),SH.arrive(3),SH.montage(3.8),SH.attract(7),SH.card(5.5)];}
  function OVERVIEW(){return[cap1('Welcome',say1('w',SH.station(7))),SH.ark(5),
   cap1('1 · Fly your ship',say1('f',SH.launch(5))),SH.cruise(8),
   cap1('2 · Trade and earn',say1('t',SH.tab(5,'market'))),SH.tab(5,'chart',()=>{chartMode='galaxy';C.target=sNear()[1].i;}),SH.hyper(3.4),SH.arrive(3),
@@ -1781,7 +1781,7 @@ function makeStarlane(env){
   if(sh&&sh.card==='attract'){try{DEMO.render(ctx,'',0,true);}catch(e){}if(show.kind==='trailer'){ctx.globalAlpha=Math.min(1,show.t/.8);ctx.save();ctx.beginPath();ctx.rect(60,H-110,W-120,70);ctx.clip();wrap(ctx,'NOVA: '+SHOW_LINES.vo,80,H-100,W-160,20,'#bff4ff',15);ctx.restore();ctx.globalAlpha=1;}}
   else if(show.cd>0||(sh&&sh.card)){ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);for(const[x,y,b]of bgStars){ctx.fillStyle=`rgba(255,255,255,${(.2+b*.6)*(sh&&sh.card==='star'?Math.min(1,show.t*.8):1)})`;ctx.fillRect(x,y,b>.8?2:1,b>.8?2:1);}}
   if(show.cd>0){text(ctx,String(Math.ceil(show.cd)),CX,H/2-60,'#ffe45e',96,'center');text(ctx,'🎬 Recording starts in…',CX,H/2-110,'#9aa3c7',16,'center');return;}
-  if(sh&&sh.card==='star'){const k=Math.min(1,show.t/1.6),g=ctx.createRadialGradient(CX,H/2,0,CX,H/2,40+k*260);g.addColorStop(0,`rgba(255,255,255,${k})`);g.addColorStop(.15,`rgba(190,230,255,${.8*k})`);g.addColorStop(1,'rgba(60,120,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(CX,H/2,40+k*260,0,7);ctx.fill();}
+  if(sh&&sh.card==='star'){const k=Math.min(1,show.t/(sh.d*.85)),g=ctx.createRadialGradient(CX,H/2,0,CX,H/2,40+k*260);g.addColorStop(0,`rgba(255,255,255,${k})`);g.addColorStop(.15,`rgba(190,230,255,${.8*k})`);g.addColorStop(1,'rgba(60,120,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(CX,H/2,40+k*260,0,7);ctx.fill();}
   if(sh&&sh.card==='title'){const k=Math.min(1,show.t/1.2),g=ctx.createRadialGradient(CX,H/2,0,CX,H/2,W*.6);g.addColorStop(0,`rgba(40,70,160,${.55*k})`);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.globalAlpha=k;
    text(ctx,'STARLANE TRADER',CX,H/2-70,'#ffe45e',54,'center');text(ctx,'fly, trade, explore… and learn',CX,H/2+4,'#bff4ff',24,'center');ctx.globalAlpha=1;}
   if(show.flash&&!show.flash.dead){const c=cam(show.flash.pos);if(c[2]>20){const q=proj(c),pat=[2,3,5];let tot=0;const seg=pat.map(n=>{const s0=tot;tot+=n*.34+.7;return[s0,n];}),tt=show.t%(tot+.6);let on=false;seg.forEach(([s0,n])=>{if(tt>=s0&&tt<s0+n*.34)on=((tt-s0)%.34)<.2;});

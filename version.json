@@ -1,7 +1,21 @@
 {
- "version": "2.64",
+ "version": "2.65",
  "date": "11 November 2026",
  "releases": [
+  {
+   "v": "2.65",
+   "date": "11 November 2026",
+   "kids": [
+    "🎬 Trailer polish: a longer opening star and end card"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🎬 Starlane Trader trailer: the opening star (2.8 s, swelling slowly) and the end card (5.5 s) last longer for anticipation, and the small yellow outside-camera aiming square no longer appears in videos."
+   ]
+  },
   {
    "v": "2.64",
    "date": "11 November 2026",
@@ -137,22 +151,6 @@
     "🚀 Starlane Trader: fixed the nebula appearing as a rectangle on wide screens — in the Modern style it is now real 3D fog (stars hidden, distant objects fade, cockpit stays clear) and all adventure effects (fog, solar storm, planets, suns) are drawn across the whole wide view. Hyperspace now fills the full screen in the Modern style when there is room at the sides.",
     "🧪 Test mode stages adventures where they would really happen: hyperspace adventures make a real jump first; the rest start cruising in open space (after-battle ones with wreckage ahead). Test scenarios start in open space. Leaving test mode returns you to exactly where you were.",
     "🛸 Faction ships no longer arrive during the guided first flight."
-   ]
-  },
-  {
-   "v": "2.55",
-   "date": "10 November 2026",
-   "kids": [
-    "🛸 Five new kinds of ship to meet in Starlane: the Halo Seeker, Scrapjaw raiders, the giant Verdant Ark, the super-fast Quicksilver and the crystal Thorn Bloom",
-    "🌌 Space adventures now happen out in space — real nebula fog, a solar storm you can see, and an alien ship that flashes its lights at you"
-   ],
-   "tags": [
-    "games",
-    "new"
-   ],
-   "items": [
-    "🚀 Starlane Trader — five original faction ships with their own 3D looks (Halo Seeker, Scrapjaw, Verdant Ark with Seed fighters, Quicksilver, Thorn Bloom). They visit systems from time to time; Scrapjaw packs raid lawless systems; the radar card shows each faction. Test mode has a “Meet the faction ships” scenario.",
-    "🌌 Space adventures are staged in the world: puzzles appear in a compact panel over the live view; the ship turns to open space; Lost in the Nebula has real fog and scanner interference; Solar Storm shows the growing corona, particle streams, cabin heat and an aurora in the planet’s shadow; First Contact has the Lathari ship flashing real light patterns; The Sleeping Ship is a Verdant Ark; Mars, Eclipse, Aurora, Goldilocks, Star Shell, Twin Suns, Gas Dive, Galaxy Edge, Capsule 1969, Moon Base and Ice Moon each show their own scene."
    ]
   }
  ]
