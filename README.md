@@ -108,6 +108,7 @@ No server and nothing written to GitHub — each family sets their own codes in 
 - **v2.56:** wide-view effects — `advWide()` draws `drawAdvFX(ctx,wide)` onto the wide layer with view extents (X0/X1/Y0/Y1) instead of the central 800-wide rect; Modern fog is `scene.fog` (FogExp2) via `MAPI.fog` (sky sphere hidden, bloom off); hyperspace tunnel (`tun(c)`) drawn on the wide layer in Modern. Test staging — `tStageAdv(id)` (hyper trigger: real jump with `G._advForce`; others: `tOpenSpace()` cruise), `tFly()` starts in open space.
 - **v2.57:** `surround()` sets a generated bulkhead image (`bulkheadURL()`, drawn once to a canvas → JPEG data URL) as the background of the canvas host in full screen; removed on end. `renderAdv` uses `sm` (canvas CSS width < 620) for larger puzzle text. `phonechk.py`-style sweep: every adventure scene + feedback at 844×390.
 - **v2.58:** adventures exclusive — `spawnTick` skips while `adv`; `say()` drops non-`adv*` ids while `adv` (calls `onEnd`); space `advStart` clears non-adventure ships (`advSpawn` marks `s.adv`); `touchControls` hidden while any overlay.
+- **v2.59:** tractor beam reads `G._fireIn` (the frame’s combined FIRE from `controls()` + assists) plus `TD.fire`; `tractorWanted()` holds the lasers while grabbing/towing the adventure meteor.
 - **Layout checker:** `_dbg.layoutOn()` records every text and button box for one frame (`_dbg.layout`); the test harness flags overlaps on every screen (38 screens clean in v2.27).
 
 ## Starlane Trader (js/starlane.js)

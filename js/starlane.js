@@ -503,7 +503,7 @@ function makeStarlane(env){
  // ---------------- input state ----------------
  const K={};let stick=null,thrPtr=null,pad={x:0,y:0},gp=null;
  // ---------------- flight update ----------------
- function flight(dt){const I=controls();assistTick(I,dt);
+ function flight(dt){const I=controls();assistTick(I,dt);G._fireIn=!!I.fire;
   // rotation: roll and pitch build up smoothly, like the classic
   const cls=shipCls(),wantR=dockComp?0:I.roll,wantP=dockComp?0:I.pitch,wantY=dockComp?0:I.yaw;
   if(rollLock&&!dockComp){if(I.roll)lockRate=Math.max(-1.6,Math.min(1.6,lockRate+I.roll*dt*.5));P.roll=lockRate;}else P.roll+=(wantR*1.6*cls.turn-P.roll)*Math.min(1,dt*6);
@@ -557,7 +557,7 @@ function makeStarlane(env){
   P.pos=add(P.pos,mul(P.o.f,P.speed*dt));
   // energy, shields, laser heat
   const rech=has('energy')?6:3;P.energy=Math.min(100,P.energy+rech*dt);for(const k of['shF','shA'])if(P[k]<100&&P.energy>10){const g=Math.min(100-P[k],7*(has('shieldboost')?2:1)*(1-.6*(P.hull||0))*dt);P[k]+=g;P.energy-=g*.35;}
-  P.heat=Math.max(0,P.heat-dt*.18);P.cool-=dt;if(I.fire&&P.cool<=0&&!dockComp)playerFire();if(ecmT>0)ecmT-=dt;if(podArm>0)podArm-=dt;
+  P.heat=Math.max(0,P.heat-dt*.18);P.cool-=dt;if(I.fire&&P.cool<=0&&!dockComp&&!tractorWanted())playerFire();if(ecmT>0)ecmT-=dt;if(podArm>0)podArm-=dt;
   // planet, sun
   if(planet){const alt=len(sub(P.pos,planet.pos))-planet.R;P.alt=alt;if(alt<0){msg('YOU FLEW INTO THE PLANET!',3,'#ff2d55');P.energy=0;die();return;}}
   if(suns.length){let heat=20,near=null;for(const sn of suns){const ds=len(sub(P.pos,sn.pos));if(ds<sn.R*1.05){msg('FLEW INTO A STAR!',3,'#ff2d55');P.energy=0;die();return;}const h=20+Math.max(0,(sn.R*3-ds)/(sn.R*2))*235;if(h>heat){heat=h;near=sn;}}P.cabin=Math.min(255,heat);
@@ -1540,7 +1540,7 @@ function makeStarlane(env){
   if(sc.task){const tp=advTarget();if(sc.task==='reach'&&tp){if(len(sub(P.pos,tp))<(sc.r||900)&&(!sc.maxSpeed||P.speed<=sc.maxSpeed)){fl.hold+=dt;if(fl.hold>=(sc.hold||0))res='ok';}else fl.hold=Math.max(0,fl.hold-dt);}
    else if(sc.task==='waypoints'&&tp){if(len(sub(P.pos,tp))<1000){st.wi++;msg(`🛰 BEACON ${st.wi} OF ${st.pts.length}`,2,'#3cff6a');if(st.wi>=st.pts.length)res='ok';}}
    else if(sc.task==='chase'&&tp){if(len(sub(P.pos,tp))<800)res='ok';}}
-  if(sc.setup==='meteor'){const m=st.met,sat=st.sat;if(!m||m.dead||!sat||sat.dead)res='fail';else{if(!fl.attached){const l=toLocal(P.o,sub(m.pos,P.pos));if(len(l)<1500&&l[2]>0&&(held('fire')||fireTouch)){fl.attached=true;msg('🧲 TRACTOR BEAM LOCKED — TOW IT INTO THE SATELLITE',3,'#3cff6a');}}
+  if(sc.setup==='meteor'){const m=st.met,sat=st.sat;if(!m||m.dead||!sat||sat.dead)res='fail';else{if(!fl.attached){const l=toLocal(P.o,sub(m.pos,P.pos));if(len(l)<1500&&l[2]>0&&(G._fireIn||held('fire')||fireTouch||TD.fire)){fl.attached=true;msg('🧲 TRACTOR BEAM LOCKED — TOW IT INTO THE SATELLITE',3,'#3cff6a');}}
     else{const want=add(P.pos,mul(P.o.f,380));m.pos=add(m.pos,mul(sub(want,m.pos),Math.min(1,dt*3)));if(len(sub(m.pos,sat.pos))<380){sat.dead=true;boom(sat);m.dead=true;boom(m);res='ok';}}}}
   else if(sc.setup==='slingshot'){if(len(sub(P.pos,st.pt))<1300&&P.speed>250)res='ok';}
   else if(sc.setup==='tractor'){const rk=st.rock;if(!rk||rk.dead)res='fail';else if(len(sub(P.pos,rk.pos))<650&&P.speed<60){fl.hold+=dt;if(fl.hold>=15)res='ok';}else fl.hold=Math.max(0,fl.hold-dt*.5);}
@@ -1696,6 +1696,8 @@ function makeStarlane(env){
   try{G._bulk=cv.toDataURL('image/jpeg',.82);}catch(e){G._bulk='';}return G._bulk;}
  function surround(on){const cv=document.getElementById('arcCanvas'),ar=document.getElementById('arcade');if(!cv||!ar)return;const host=cv.parentElement,want=on&&ar.classList.contains('arc-full');if(want===!!host.__slBulk)return;
   if(want){const u=bulkheadURL();if(!u)return;host.__slBulk={bg:host.style.background};host.style.background=`#05080f url(${u}) center/cover no-repeat`;}else{host.style.background=host.__slBulk.bg||'';host.__slBulk=null;}}
+ // in the meteor-towing task FIRE works the tractor beam, so the lasers stay quiet near the meteor
+ function tractorWanted(){if(!adv||!P||!adv.fl)return false;const sc=adv.def.scenes[adv.si];if(!sc||sc.setup!=='meteor')return false;const m=adv.st.met;if(!m||m.dead)return false;if(adv.fl.attached)return true;const l=toLocal(P.o,sub(m.pos,P.pos));return len(l)<2500&&l[2]>0;}
  function factionVisit(){if(tour||tut||test||!P||interdicted||adv)return;const g=here(),f=SL.features(GAL[C.sys])||{},q=Math.random();
   if(g.gov<=1&&Math.random()<.35){const p0=aroundPlayer(6500);for(let i=0;i<2;i++)spawn('scrapjaw',add(p0,V(i*420,60*i,0)),{angry:true,target:'player'});}
   if(q<.12)spawn('halo',aroundPlayer(7000,1.2),{});else if(q<.18){const a=spawn('ark',aroundPlayer(9500,1.2),{});for(let i=0;i<3;i++)spawn('seed',add(a.pos,V((i-1)*320,140,220)),{});}

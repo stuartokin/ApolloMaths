@@ -1,7 +1,21 @@
 {
- "version": "2.58",
+ "version": "2.59",
  "date": "11 November 2026",
  "releases": [
+  {
+   "v": "2.59",
+   "date": "11 November 2026",
+   "kids": [
+    "🧲 The tractor beam in the Black-Hole Time-Warp works with every FIRE button"
+   ],
+   "tags": [
+    "games",
+    "fixes"
+   ],
+   "items": [
+    "🚀 Starlane Trader: the tractor beam in “The Black-Hole Time-Warp” now responds to every FIRE control — keyboard, mouse, gamepad and both touch FIRE buttons (it ignored the side FIRE button on tablets and folds). While you are grabbing or towing the meteor, FIRE works the beam only, so your lasers no longer shoot the meteor you are trying to catch."
+   ]
+  },
   {
    "v": "2.58",
    "date": "11 November 2026",
@@ -138,20 +152,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: the time-warp adventure now shows a 3D Earth (oceans, continents, ice caps, drifting clouds and a glowing atmosphere) and a cratered Moon, lit by the sun. Fixed: an adventure could keep running after leaving test mode, leaving Earth floating in normal play — leaving test mode, tours or being destroyed now ends it, and the pause menu has ✕ ABANDON ADVENTURE. Radar: click a ship or the station to target it (details in the target panel), or the sun, a planet, a moon or a black hole for an information card — on the Modern console screen too. Test mode’s Adventures page now has pages."
-   ]
-  },
-  {
-   "v": "2.49",
-   "date": "10 November 2026",
-   "kids": [
-    "🗺 Starlane: all 50 adventures are here — 25 in your ship and 25 out in space — plus pulsars, wormholes, ringed giants and planet Earth"
-   ],
-   "tags": [
-    "games",
-    "learning"
-   ],
-   "items": [
-    "🚀 Starlane Trader: 35 new adventures, making 50 (25 In-Ship, 25 Space), covering chemistry, biology, physics, computing, maths, earth science and space history. New flying tasks reach pulsars, wormholes, moon bases, ring gaps, satellites, meteor showers and space junk. New sights: pulsars with sweeping beams, swirling wormholes, moons, a ringed giant and a proper Earth for the time-warp. Some number puzzles now have a different answer for each puzzle level. Fully tested: every adventure, tour, scenario and screen."
    ]
   }
  ]
