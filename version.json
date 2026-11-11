@@ -1,7 +1,21 @@
 {
- "version": "2.62",
+ "version": "2.63",
  "date": "11 November 2026",
  "releases": [
+  {
+   "v": "2.63",
+   "date": "11 November 2026",
+   "kids": [
+    "🎬 The Starlane trailer now shows the title screen and a bigger space battle"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🎬 Starlane Trader trailer: after the launch it shows the title screen cycling through the Modern, Original and Retro looks (without “press fire”); the fight now has two raiders — one destroyed by a missile, the other by lasers — cutting between the cockpit and outside; the end card no longer shows the ApolloMaths line; the target card and bracket are hidden in videos."
+   ]
+  },
   {
    "v": "2.62",
    "date": "11 November 2026",
@@ -142,20 +156,6 @@
     "🚀 Starlane Trader flight assists (Pause → Controls → FLIGHT ASSISTS), with separate settings for touch screens (on by default) and mouse & keyboard (off by default): floating joystick with fine control near the middle (touch), auto-level, aim assist, auto-fire (off by default everywhere), turn to target (tap a radar icon, the 🎯 button or key 7), docking assist (lines up the slot and matches the spin — you control speed) and pop-up DOCK / JUMP / E.C.M. buttons (touch).",
     "🗺️ Maps: space backdrop with spiral arms, stars coloured by economy, government or tech on every map, visited systems solid, mission and hazard icons, glowing fuel range and route, animated target, rendered planets on the short-range chart, a grid and slow rotation on the 3D map, and a system card with a planet picture, details, fuel and trading tips.",
     "🛒 Shipyard: category tabs evenly spaced, description under the list, one fuel button."
-   ]
-  },
-  {
-   "v": "2.53",
-   "date": "10 November 2026",
-   "kids": [
-    "📱 Starlane is bigger on tablets and folds held sideways — the game now fills the full height of the screen"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🚀 Starlane Trader on touch screens in landscape full screen: the game uses the whole screen height (about a third more picture on a tablet); the score strip and Pause / Exit / Stop shrink into the top corners; in the Modern style the 3D space view fills the side margins behind the touch controls. Laptops and big screens with a mouse are unchanged."
    ]
   }
  ]
