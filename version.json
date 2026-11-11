@@ -1,7 +1,26 @@
 {
- "version": "2.59",
+ "version": "2.60",
  "date": "11 November 2026",
  "releases": [
+  {
+   "v": "2.60",
+   "date": "11 November 2026",
+   "kids": [
+    "🛡 Starlane: your weapons switch off near space stations so you can’t hit one by accident",
+    "📦 Nova tells you when your hold is too full to pick up a canister",
+    "🚀 Launching and docking now go properly through the hangar door, and your ship’s name sits on the hull"
+   ],
+   "tags": [
+    "games",
+    "fixes"
+   ],
+   "items": [
+    "🚀 Starlane Trader: weapons safe near stations (Pause → Controls → Flight assists, on by default, all devices) — within 10 km of a station lasers and missiles are held, and they arm again at once if you are attacked. Tours and the guided flight are not affected.",
+    "📦 Full cargo hold: when a canister appears and there is no room, Nova and the screen say so; flying into it no longer smashes it or damages the ship, and the radar card explains why it cannot be scooped.",
+    "🎬 Launch and docking cut scenes: the ship now flies through the middle of the hangar opening (it used to pass through the wall below it), and the cameras stay inside the hangar and look out through the opening.",
+    "🎨 Your ship’s name is painted onto the hull surface on both sides instead of floating beside it."
+   ]
+  },
   {
    "v": "2.59",
    "date": "11 November 2026",
@@ -138,20 +157,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: adventure pictures redrawn — planets, moons, Mars, gas giants, the Sun and asteroids are now rendered globes with lighting and atmospheres; space scenes have starfields and nebulae, ship scenes a lit metal cabin, and everything sits in a display frame. During an adventure’s flying task, the goal, timer and target distance appear on the MISSION screen (the right console wing in widescreen, or the small mission screen) — tap it to flip between ADVENTURE and MISSION. Without those screens, the panel sits top-left and ⇄ moves it above the console."
-   ]
-  },
-  {
-   "v": "2.50",
-   "date": "10 November 2026",
-   "kids": [
-    "🌍 Starlane: a real-looking Earth and Moon in the time-warp adventure",
-    "📡 Click the sun, a planet or a moon on the radar to learn about it"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🚀 Starlane Trader: the time-warp adventure now shows a 3D Earth (oceans, continents, ice caps, drifting clouds and a glowing atmosphere) and a cratered Moon, lit by the sun. Fixed: an adventure could keep running after leaving test mode, leaving Earth floating in normal play — leaving test mode, tours or being destroyed now ends it, and the pause menu has ✕ ABANDON ADVENTURE. Radar: click a ship or the station to target it (details in the target panel), or the sun, a planet, a moon or a black hole for an information card — on the Modern console screen too. Test mode’s Adventures page now has pages."
    ]
   }
  ]

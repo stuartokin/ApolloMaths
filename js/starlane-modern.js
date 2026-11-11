@@ -156,7 +156,7 @@ const StarModern=(()=>{
  // ---------------- your ship's look: fitted equipment you can see, paint, stripes, decals, name ----------------
  const lookTex={};
  function lookCanvas(key,w,h,draw){if(lookTex[key])return lookTex[key];const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;return(lookTex[key]=t);}
- function shipLook(g,m,L){if(!L)return;const P0=m.pts,xs=P0.map(p=>p[0]),ys=P0.map(p=>p[1]),zs=P0.map(p=>p[2]),xmax=Math.max(...xs),ymax=Math.max(...ys),ymin=Math.min(...ys),zmax=Math.max(...zs),zmin=Math.min(...zs),rad=m.rad,len=zmax-zmin;
+ function shipLook(g,m,L){if(!L)return;const hullMeshes=g.children.filter(o=>o.isMesh).slice(0,1),P0=m.pts,xs=P0.map(p=>p[0]),ys=P0.map(p=>p[1]),zs=P0.map(p=>p[2]),xmax=Math.max(...xs),ymax=Math.max(...ys),ymin=Math.min(...ys),zmax=Math.max(...zs),zmin=Math.min(...zs),rad=m.rad,len=zmax-zmin;
   const paint=L.paint||{},trimC=paint.trim||'#2a2e38',gun=new T.MeshStandardMaterial({color:0x3a3f4a,metalness:.9,roughness:.3}),trim=new T.MeshStandardMaterial({color:trimC,metalness:.7,roughness:.35}),gl=c=>new T.MeshBasicMaterial({color:c});
   const add=(geo,mat,x,y,z,rx=0,ry=0,rz=0)=>{const me=new T.Mesh(geo,mat);me.position.set(x,y,z);me.rotation.set(rx,ry,rz);g.add(me);return me;},cyl=(r1,r2,h,seg=12)=>new T.CylinderGeometry(r1,r2,h,seg);
   const barrel=(x,y,z0,l,r,mat)=>add(cyl(r,r,l),mat,x,y,z0+l/2,Math.PI/2,0,0),ny=ymin*.3,nz=zmax*.8;
@@ -192,7 +192,14 @@ const StarModern=(()=>{
     else if(paint.decal==='flames'){for(let i=0;i<5;i++){c.moveTo(10,30+i*18);c.quadraticCurveTo(70,16+i*18,120,28+i*18);c.quadraticCurveTo(70,40+i*18,10,44+i*18);}}else if(paint.decal==='planet'){c.arc(64,64,36,0,7);c.fill();c.stroke();c.beginPath();c.ellipse(64,64,58,14,-.3,0,7);}
     c.closePath();c.fill();c.stroke();});add(new T.PlaneGeometry(rad*.32,rad*.32),new T.MeshBasicMaterial({map:tx,transparent:true,side:T.DoubleSide,depthWrite:false}),0,ymax*1.012,zmin*.45,-Math.PI/2,0,0);}
   if(paint.name||paint.num){const label=`${paint.name||''}${paint.num?' '+String(paint.num).padStart(2,'0'):''}`.trim().toUpperCase(),tx=lookCanvas('name-'+label+strC,256,64,(c,w,h)=>{c.clearRect(0,0,w,h);c.font='bold 34px sans-serif';c.textAlign='center';c.textBaseline='middle';c.lineWidth=6;c.strokeStyle='rgba(0,0,0,.6)';c.strokeText(label,w/2,h/2);c.fillStyle='#ffffff';c.fillText(label,w/2,h/2);});
-   for(const sx of[-1,1])add(new T.PlaneGeometry(len*.42,len*.105),new T.MeshBasicMaterial({map:tx,transparent:true,side:T.DoubleSide,depthWrite:false}),sx*xmax*.72,ymax*.18,zmin*.15,0,sx*Math.PI/2,0);}}
+   // lay the name flat on the real hull surface on each side
+   g.updateMatrixWorld(true);const rc=new T.Raycaster(),inv=new T.Matrix4().copy(g.matrixWorld).invert(),nm=new T.Matrix3().getNormalMatrix(inv);
+   for(const sx of[-1,1]){let best=null;for(const yy of[0,ymax*.2,ymin*.2,ymax*.4])for(const zz of[zmin*.1,zmax*.1,zmin*.3]){const o=g.localToWorld(new T.Vector3(sx*xmax*3+sx*rad,yy,zz)),d=g.localToWorld(new T.Vector3(0,yy,zz)).sub(o).normalize();rc.set(o,d);const hit=rc.intersectObjects(hullMeshes,false)[0];if(!hit||!hit.face)continue;
+      const pL=g.worldToLocal(hit.point.clone()),nW=hit.face.normal.clone().transformDirection(hit.object.matrixWorld),nL=nW.applyMatrix3(nm).normalize();if(nL.x*sx<0)nL.negate();const score=Math.abs(nL.x)-Math.abs(zz)/(len*4);if(!best||score>best.score)best={p:pL,n:nL,score};}
+    if(!best||Math.abs(best.n.x)<.25){add(new T.PlaneGeometry(len*.42,len*.105),new T.MeshBasicMaterial({map:tx,transparent:true,side:T.DoubleSide,depthWrite:false}),sx*xmax*.72,ymax*.18,zmin*.15,0,sx*Math.PI/2,0);continue;}
+    const n=best.n,up=new T.Vector3(0,1,0).sub(n.clone().multiplyScalar(n.y)).normalize(),xa=new T.Vector3().crossVectors(up,n).normalize(),wq=Math.min(len*.42,rad*1.1),
+     me=new T.Mesh(new T.PlaneGeometry(wq,wq*.25),new T.MeshBasicMaterial({map:tx,transparent:true,side:T.FrontSide,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}));
+    me.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(xa,up,n));me.position.copy(best.p.clone().add(n.clone().multiplyScalar(rad*.012)));g.add(me);}}}
  function lookTick(g,clock){g.traverse(o=>{const u=o.userData;if(u.blink)o.visible=(clock%1.2)<.6;if(u.pulse){const k=1+Math.sin(clock*6)*.15;o.scale.set(k,k,k);}});}
  // a turntable preview of your ship for the shipyard
  let pvScene=null,pvCam=null,pvShip=null,pvKey='';
