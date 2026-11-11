@@ -1,7 +1,37 @@
 {
- "version": "2.56",
- "date": "10 November 2026",
+ "version": "2.58",
+ "date": "11 November 2026",
  "releases": [
+  {
+   "v": "2.58",
+   "date": "11 November 2026",
+   "kids": [
+    "🌌 Adventures in Starlane now have your full attention — no pirates or other chatter interrupting the story"
+   ],
+   "tags": [
+    "games",
+    "fixes"
+   ],
+   "items": [
+    "🚀 Starlane Trader: adventures are exclusive — random arrivals pause, other ships nearby leave when a space adventure starts, and only the adventure’s own lines are spoken, so the narration and its words stay in step.",
+    "📱 On touch screens the on-screen FIRE and joystick are hidden while a puzzle panel is showing (the game is paused until you answer), so it no longer looks as though FIRE has stopped working."
+   ]
+  },
+  {
+   "v": "2.57",
+   "date": "11 November 2026",
+   "kids": [
+    "🚀 Starlane now sits inside a spaceship wall with portholes, instead of plain black edges"
+   ],
+   "tags": [
+    "games",
+    "look"
+   ],
+   "items": [
+    "🚀 Starlane Trader: wherever the game picture does not fill the screen (docked screens, menus, in-ship adventures, Retro flight, phones), the surround is now a ship’s bulkhead with ribbed panels, strip lights and portholes instead of plain black.",
+    "📱 Adventure puzzles use slightly larger text on small screens; every scene of all 50 adventures was checked at phone size. One over-long answer in “The Rusty Robot” was shortened. The 1969 capsule now floats closer so it can be seen."
+   ]
+  },
   {
    "v": "2.56",
    "date": "10 November 2026",
@@ -122,34 +152,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: 35 new adventures, making 50 (25 In-Ship, 25 Space), covering chemistry, biology, physics, computing, maths, earth science and space history. New flying tasks reach pulsars, wormholes, moon bases, ring gaps, satellites, meteor showers and space junk. New sights: pulsars with sweeping beams, swirling wormholes, moons, a ringed giant and a proper Earth for the time-warp. Some number puzzles now have a different answer for each puzzle level. Fully tested: every adventure, tour, scenario and screen."
-   ]
-  },
-  {
-   "v": "2.48",
-   "date": "10 November 2026",
-   "kids": [
-    "🗺 Starlane: nine more adventures — gravity failure, a dying greenhouse, lights out, a locked armoury, frozen pipes, a comet chase, a glowing nebula, a sleeping ship and a solar storm"
-   ],
-   "tags": [
-    "games",
-    "learning"
-   ],
-   "items": [
-    "🚀 Starlane Trader: 15 adventures now (8 In-Ship, 7 Space). New: Gravity Gone, Greenhouse Crisis, Lights Out, The Locked Armoury, Frozen Pipes, The Comet Chase, Lost in the Nebula, The Sleeping Ship and Solar Storm — covering forces, plants, circuits, binary and algorithms, states of matter, comets, light years, codes and the Sun. New sights in space: glowing nebulae and comets with tails. Adventure objects are always placed safely away from planets and stars, and the Adventure Log now has pages."
-   ]
-  },
-  {
-   "v": "2.47",
-   "date": "10 November 2026",
-   "kids": [
-    "🗺 Starlane adventures! Puzzles and missions that pop up while you play — defuse a bomb, fix the radio, meet aliens, travel back in time"
-   ],
-   "tags": [
-    "games",
-    "learning"
-   ],
-   "items": [
-    "🚀 Starlane Trader: the first six adventures — three In-Ship (The Ticking Canister, Radio Silence, The Stowaway) and three Space (The Black-Hole Time-Warp, First Contact, Planet-Killer) — mixing science and maths puzzles with flying tasks. They appear after you have some experience (after a fight, in hyperspace or on a quiet flight), never more than one every 20 minutes. Rewards include credits, a bobble-head alien and a prototype tractor beam; failing only costs something small. Completed adventures can be replayed from the new 🗺 ADVENTURE LOG in the pause menu, which also sets the puzzle level (younger, middle, older). Test mode has an ADVENTURES page."
    ]
   }
  ]

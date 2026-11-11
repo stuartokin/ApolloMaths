@@ -285,7 +285,7 @@ const StarAdv=(()=>{
    {type:'story',art:'snow',say:'Orange flakes are growing on the cargo bay walls — rust! If we leave it, it will eat into the metal.'},
    {type:'choose',many:true,art:'snow',q:q('Iron needs TWO things to rust. Which?','Which TWO things make iron rust?','Select the TWO reactants needed for rusting.'),options:['Water','Oxygen (air)','Sunlight','Music'],answer:[0,1],explain:'Iron rusts when it meets both water and oxygen. Remove either one and rusting stops.'},
    {type:'choose',art:'snow',q:q('How can we stop the walls rusting?','What is a good way to prevent rust?','Which method prevents corrosion of iron?'),options:['Paint them to keep water and air out','Pour water on them','Leave them alone','Add more iron'],answer:0,explain:'Paint, oil or a layer of zinc keeps water and air away from the iron, so it cannot rust.'},
-   {type:'choose',art:'snow',q:q('Is rusting a change you can undo easily?','Rusting is a…?','Is rusting reversible or irreversible?'),options:['A change that cannot easily be undone (a new substance forms)','Just like melting','Like dissolving sugar','Not a change at all'],answer:0,explain:'Rusting is a chemical change — a new substance (rust) is made, and you cannot simply turn it back into iron.'},
+   {type:'choose',art:'snow',q:q('Is rusting a change you can undo easily?','Rusting is a…?','Is rusting reversible or irreversible?'),options:['It cannot easily be undone — a new substance forms','Just like melting','Like dissolving sugar','Not a change at all'],answer:0,explain:'Rusting is a chemical change — a new substance (rust) is made, and you cannot simply turn it back into iron.'},
    {type:'story',art:'snow',say:'With the rust scraped off and fresh paint on, the walls shine again. The ship inspector awards a bonus!'}]},
   {id:'clock',kind:'ship',icon:'⏰',title:'The Clock Stopped',subject:'Maths · Physics',trigger:'calm',reward:{cr:150},fail:A=>{A.loseDays(1);return'Without a clock you overslept by a whole day. Still, very refreshing!';},scenes:[
    {type:'story',art:'keypad',say:'The ship’s clock has stopped — and the alarm for the next delivery will not go off! Let’s work out the time ourselves.'},
@@ -502,7 +502,7 @@ const StarAdv=(()=>{
   twinsuns:[{k:'sunfx',d:42000,x:-5200,R:3800},{k:'sunfx',d:46000,x:6400,R:2800,col:'255,120,90'}],
   gasdive:[{k:'globe',g:'gas',d:9500,y:-900,R:6200,ring:true}],
   galaxyedge:[{k:'galaxy',d:60000,R:44000}],
-  capsule1969:[{k:'ship',type:'capsule',d:260},{k:'globe',g:'earth',d:26000,x:9000,y:-3000,R:5200},{k:'globe',g:'moon',d:20000,x:-7000,y:2000,R:1500}],
+  capsule1969:[{k:'ship',type:'capsule',d:110},{k:'globe',g:'earth',d:26000,x:9000,y:-3000,R:5200},{k:'globe',g:'moon',d:20000,x:-7000,y:2000,R:1500}],
   moonbase:[{k:'globe',g:'moon',d:9000,R:2400,target:true}],
   icemoon:[{k:'globe',g:'ice',d:9000,R:2400,target:true}]};
  for(const adv of LIST){if(SCENES[adv.id])adv.scenes[0].setup=SCENES[adv.id];}
