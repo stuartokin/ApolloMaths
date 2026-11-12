@@ -1,7 +1,18 @@
 {
- "version": "2.65",
- "date": "11 November 2026",
+ "version": "2.66",
+ "date": "12 November 2026",
  "releases": [
+  {
+   "v": "2.66",
+   "date": "12 November 2026",
+   "kids": [],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🚀 Starlane Trader: the game file now has a question socket (window.StarlaneQuestions) so the standalone Starlane site and ApolloMaths can supply its maths questions; the game files are identical in both repos. No change in play."
+   ]
+  },
   {
    "v": "2.65",
    "date": "11 November 2026",
@@ -134,23 +145,6 @@
    "items": [
     "🚀 Starlane Trader: wherever the game picture does not fill the screen (docked screens, menus, in-ship adventures, Retro flight, phones), the surround is now a ship’s bulkhead with ribbed panels, strip lights and portholes instead of plain black.",
     "📱 Adventure puzzles use slightly larger text on small screens; every scene of all 50 adventures was checked at phone size. One over-long answer in “The Rusty Robot” was shortened. The 1969 capsule now floats closer so it can be seen."
-   ]
-  },
-  {
-   "v": "2.56",
-   "date": "10 November 2026",
-   "kids": [
-    "🌫️ The nebula is now real fog all around your ship, and hyperspace fills the whole screen"
-   ],
-   "tags": [
-    "games",
-    "fixes",
-    "look"
-   ],
-   "items": [
-    "🚀 Starlane Trader: fixed the nebula appearing as a rectangle on wide screens — in the Modern style it is now real 3D fog (stars hidden, distant objects fade, cockpit stays clear) and all adventure effects (fog, solar storm, planets, suns) are drawn across the whole wide view. Hyperspace now fills the full screen in the Modern style when there is room at the sides.",
-    "🧪 Test mode stages adventures where they would really happen: hyperspace adventures make a real jump first; the rest start cruising in open space (after-battle ones with wreckage ahead). Test scenarios start in open space. Leaving test mode returns you to exactly where you were.",
-    "🛸 Faction ships no longer arrive during the guided first flight."
    ]
   }
  ]
