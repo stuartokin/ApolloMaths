@@ -1,7 +1,18 @@
 {
- "version": "2.68",
- "date": "13 November 2026",
+ "version": "2.69",
+ "date": "14 November 2026",
  "releases": [
+  {
+   "v": "2.69",
+   "date": "14 November 2026",
+   "kids": [],
+   "tags": [
+    "parents"
+   ],
+   "items": [
+    "📚 Exam sources updated after the exam-watch agent’s first run: Tiffin’s illustrative maths questions, its admissions FAQs and Tiffin Girls’ Year 7 page; GL Assessment’s free familiarisation materials (new address); ISEB’s Pre-Test page for families and the 13+ Common Entrance timetable. Eton’s site blocks automated checks, so the agent now lists it to check by hand."
+   ]
+  },
   {
    "v": "2.68",
    "date": "13 November 2026",
@@ -131,20 +142,6 @@
     "📦 Full cargo hold: when a canister appears and there is no room, Nova and the screen say so; flying into it no longer smashes it or damages the ship, and the radar card explains why it cannot be scooped.",
     "🎬 Launch and docking cut scenes: the ship now flies through the middle of the hangar opening (it used to pass through the wall below it), and the cameras stay inside the hangar and look out through the opening.",
     "🎨 Your ship’s name is painted onto the hull surface on both sides instead of floating beside it."
-   ]
-  },
-  {
-   "v": "2.59",
-   "date": "11 November 2026",
-   "kids": [
-    "🧲 The tractor beam in the Black-Hole Time-Warp works with every FIRE button"
-   ],
-   "tags": [
-    "games",
-    "fixes"
-   ],
-   "items": [
-    "🚀 Starlane Trader: the tractor beam in “The Black-Hole Time-Warp” now responds to every FIRE control — keyboard, mouse, gamepad and both touch FIRE buttons (it ignored the side FIRE button on tablets and folds). While you are grabbing or towing the meteor, FIRE works the beam only, so your lasers no longer shoot the meteor you are trying to catch."
    ]
   }
  ]

@@ -15,7 +15,7 @@ const plain=html=>html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style
 const jsonIn=t=>{const m=t.match(/```json\s*([\s\S]*?)```/)||t.match(/(\[[\s\S]*\]|\{[\s\S]*\})/);try{return JSON.parse(m?m[1]:t);}catch(e){return null;}};
 // 1) official pages
 const changed=[];report.push('## Official pages','');
-for(const p of cfg.pages){let txt='',status='';try{const r=await fetch(p.url,{redirect:'follow',headers:{'user-agent':'ApolloMaths exam-watch (GitHub Actions)'}});status=String(r.status);txt=r.ok?plain(await r.text()).slice(0,20000):'';}catch(e){status='unreachable';}
+for(const p of cfg.pages){if(p.manual){report.push(`- 🔗 check by hand (the site blocks automated checks) — [${p.label}](${p.url})`);continue;}let txt='',status='';try{const r=await fetch(p.url,{redirect:'follow',headers:{'user-agent':'ApolloMaths exam-watch (GitHub Actions)'}});status=String(r.status);txt=r.ok?plain(await r.text()).slice(0,20000):'';}catch(e){status='unreachable';}
  const h=txt?crypto.createHash('sha256').update(txt).digest('hex'):'',old=state.pages[p.url];
  const tag=!txt?`⚠️ could not read (${status})`:!old?'🆕 first check':old.hash!==h?'✏️ CHANGED':'✓ no change';
  if(txt&&old&&old.hash!==h)changed.push({...p,text:txt});report.push(`- ${tag} — [${p.label}](${p.url})`);if(txt)state.pages[p.url]={hash:h,checked:today};}

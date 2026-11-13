@@ -3,8 +3,18 @@
  "pages": [
   {
    "exam": "tiffin1",
-   "label": "Tiffin School — Year 7 admissions (illustrative questions, policy and FAQs under “Important Documents”)",
+   "label": "Tiffin School — illustrative maths questions (PDF)",
+   "url": "https://www.tiffinschool.co.uk/wp-content/uploads/2024/05/Illustrative-questions-Maths.pdf"
+  },
+  {
+   "exam": "tiffin1",
+   "label": "Tiffin School — Year 7 admissions",
    "url": "https://www.tiffinschool.co.uk/admissions/year-7-admissions"
+  },
+  {
+   "exam": "tiffin1",
+   "label": "Tiffin School — admissions FAQs, entry September 2027 (PDF)",
+   "url": "https://www.tiffinschool.co.uk/wp-content/uploads/2026/04/FREQUENTLY-ASKED-QUESTIONS-FAQs-Entry-Sept-2027.pdf"
   },
   {
    "exam": "tiffin1",
@@ -18,13 +28,13 @@
   },
   {
    "exam": "tiffin1",
-   "label": "The Tiffin Girls’ School — admissions",
-   "url": "https://www.tiffingirls.org"
+   "label": "The Tiffin Girls’ School — Year 7 admissions",
+   "url": "https://www.tiffingirls.org/admissions/year-7/"
   },
   {
    "exam": "grammar11",
-   "label": "GL Assessment — 11+ familiarisation materials",
-   "url": "https://www.gl-assessment.co.uk/support/11-familiarisation-materials/"
+   "label": "GL Assessment — free 11+ familiarisation materials",
+   "url": "https://11plus.gl-assessment.co.uk/free-materials/"
   },
   {
    "exam": "grammar11",
@@ -33,13 +43,14 @@
   },
   {
    "exam": "iseb",
-   "label": "ISEB — Common Pre-Test information and familiarisation test",
-   "url": "https://www.iseb.co.uk/"
+   "label": "ISEB — Common Pre-Test for families (dates and familiarisation)",
+   "url": "https://www.iseb.co.uk/assessments/common-pre-tests/for-families/"
   },
   {
    "exam": "iseb",
    "label": "Eton College — Year 9 (13+) admissions",
-   "url": "https://www.etoncollege.com/admissions/year-9-13/"
+   "url": "https://www.etoncollege.com/admissions/year-9-13/",
+   "manual": true
   },
   {
    "exam": "iseb",
@@ -50,6 +61,11 @@
    "exam": "ce13",
    "label": "Harrow School — admissions process (Academic Scholarship past papers on its scholarships page)",
    "url": "https://www.harrowschool.org.uk/admissions/admissions-process"
+  },
+  {
+   "exam": "ce13",
+   "label": "ISEB — Common Entrance 13+ timetable",
+   "url": "https://www.iseb.co.uk/ce-case-exam-dates/ce-13-exam-timetable/"
   }
  ],
  "schoolsToTrack": [
