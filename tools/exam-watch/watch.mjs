@@ -33,7 +33,7 @@ const ids=['tiffin1','tiffin2','grammar11','iseb','ce13'],fresh=(jsonIn(datesTxt
 const keep=oldDates.filter(x=>x.date>=new Date(Date.now()-60*864e5).toISOString().slice(0,10)),merged=[...keep];let added=0;
 for(const x of fresh){if(!merged.some(y=>y.exam===x.exam&&y.date===x.date&&y.label===x.label)){merged.push({exam:x.exam,date:x.date,label:x.label.slice(0,140),source:x.source});added++;report.push(`- ✨ ${x.date} — ${x.label} (${x.exam}) — [source](${x.source})`);}}
 if(!added)report.push('No new dates found this time.');
-if(added||merged.length!==oldDates.length){merged.sort((a,b)=>a.date.localeCompare(b.date));fs.writeFileSync(DF,`'use strict';\n// DATA: key dates proposed by the exam-watch agent (from official sources) and approved by merging its pull request.\n// Each entry: {exam:'iseb', date:'YYYY-MM-DD', label:'…', source:'https://…'}. Shown in Key dates with ✨.\nwindow.EXAM_DATES_AGENT=${JSON.stringify(merged,null,1)};\n`);}
+merged.sort((a,b)=>a.date.localeCompare(b.date));fs.writeFileSync(DF,`'use strict';\n// DATA: key dates found by the exam-watch AI agent from official sources. This file is maintained automatically.\n// Each entry: {exam:'iseb', date:'YYYY-MM-DD', label:'…', source:'https://…'}. Shown in Key dates with ✨.\nwindow.EXAM_WATCH_LAST=${JSON.stringify(today)};\nwindow.EXAM_DATES_AGENT=${JSON.stringify(merged,null,1)};\n`);
 // 4) question generators in the style of any new official material — run 50 times in a sandbox, then checked again by a second solve
 const proposed=[];
 if(changed.length){report.push('','## Proposed question generators','');

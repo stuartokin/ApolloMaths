@@ -1,7 +1,18 @@
 {
- "version": "2.79",
+ "version": "2.80",
  "date": "14 November 2026",
  "releases": [
+  {
+   "v": "2.80",
+   "date": "14 November 2026",
+   "kids": [],
+   "tags": [
+    "parents"
+   ],
+   "items": [
+    "🤖 Exam information is now AI-maintained: the exam-watch agent’s checked updates (key dates and new questions) go live automatically, and Key dates shows “Kept up to date by an AI agent — last checked …”."
+   ]
+  },
   {
    "v": "2.79",
    "date": "14 November 2026",
@@ -155,19 +166,6 @@
     "🏆 Mocks follow the exam: question count, timing and multiple choice where the real test uses it.",
     "➕ Adding a player now asks what they are preparing for (or “not sure yet”) and their school.",
     "✏️ New original questions for 13+ Common Entrance / scholarship (algebra, probability, polygons, circles, prisms, reverse percentages, the nth term, indices, compound interest) and quick-fire questions for Tiffin Stage 1, 11+ grammar and the ISEB Pre-Test. Each is only used for those exams, in practice and in Starlane."
-   ]
-  },
-  {
-   "v": "2.70",
-   "date": "14 November 2026",
-   "kids": [],
-   "tags": [
-    "parents",
-    "games"
-   ],
-   "items": [
-    "🚀 Starlane maths in the parent overview: each maths question answered in Starlane is recorded with where it came from (the child’s exam and topic, or Starlane’s own space questions) and whether it was right, with a weekly summary and the recent questions.",
-    "🔍 “Check Starlane questions” on the parent overview opens Starlane in the background and asks it for 10 questions through the same connection the game uses — showing each question’s source and a ✅ if they match the chosen exam. No playing needed."
    ]
   }
  ]
