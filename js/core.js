@@ -1,6 +1,8 @@
 'use strict';
 // CORE: shared maths helpers and the question registry. No DOM, no HTML.
-const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+// QDIFF leans the numbers a question uses: −1 smaller (warm-up), 0 even, +1 bigger (stretch). Only set while a question is being made.
+var QDIFF=0;
+const R=(a,b)=>{let t=Math.random();if(QDIFF>0)t=1-(1-t)*(1-t);else if(QDIFF<0)t=t*t;return Math.floor(t*(b-a+1))+a;};
 const pick=a=>a[R(0,a.length-1)];
 const money=n=>'£'+n.toFixed(2).replace(/\.00$/,'');
 const hcf=(a,b)=>b?hcf(b,a%b):Math.abs(a);

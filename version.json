@@ -1,7 +1,24 @@
 {
- "version": "2.71",
+ "version": "2.72",
  "date": "14 November 2026",
  "releases": [
+  {
+   "v": "2.72",
+   "date": "14 November 2026",
+   "kids": [
+    "⬆️ Questions now get harder as you get them right — just like the real ISEB test"
+   ],
+   "tags": [
+    "parents",
+    "new"
+   ],
+   "items": [
+    "⬆️ Difficulty levels for every exam: each question type is rated easy, medium or hard, and the numbers lean smaller at Warm-up and bigger at Stretch. Match-day practice and mocks are now adaptive — three right first time in a row steps up a level, two misses steps down — like the real adaptive ISEB Pre-Test. Warm-up and Boss stay as fixed levels. Starlane follows the child’s level too.",
+    "✏️ Twelve new stretch question types within the Year 5 curriculum for Tiffin, the 11+ grammars and the ISEB Pre-Test: square and cube numbers, primes, factors, L-shaped areas and perimeters, chained percentages, fractions of a remainder, Roman numerals, “who am I?” number clues, negative temperatures, overnight timetables and decimal calculations.",
+    "🧹 Questions that came out too easy by accident (equal ratio parts such as 5:5, fractions like 4/4, × 1 or + 0) are thrown away and made again.",
+    "⏱ Quick-fire exams show a pace guide (about a minute a question) and the current level on the question screen."
+   ]
+  },
   {
    "v": "2.71",
    "date": "14 November 2026",
@@ -125,21 +142,6 @@
    ],
    "items": [
     "🎬 Starlane Trader trailer: after the launch it shows the title screen cycling through the Modern, Original and Retro looks (without “press fire”); the fight now has two raiders — one destroyed by a missile, the other by lasers — cutting between the cockpit and outside; the end card no longer shows the ApolloMaths line; the target card and bracket are hidden in videos."
-   ]
-  },
-  {
-   "v": "2.62",
-   "date": "11 November 2026",
-   "kids": [
-    "🎬 A better Starlane trailer — the space fight and First Contact now cut between the cockpit and outside the ship"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🎬 Starlane Trader trailer: the space fight cuts like a film — outside as two raiders close in, inside the 3D cockpit with lasers firing, outside as the raider explodes, and inside as a missile launches. First Contact shows the Thorn Bloom from the cockpit, then your ship facing it. The overview’s fight uses the same sequence.",
-    "🧹 Videos are cleaner: no guided-flight panel or adventure offers (your guided flight is restored afterwards), no mouse pointer, and no missile-lock ring or target card on outside shots."
    ]
   }
  ]

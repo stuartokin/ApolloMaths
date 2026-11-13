@@ -47,7 +47,7 @@ const EXAM_KIND_TOPICS={fuel:['ratio','units','percent','speed'],trade:['percent
 function examQuestion(kind,s){if(typeof bank==='undefined')return null;if(Math.random()<.4)return null; // leave room for Starlane's own space-themed questions
  const all=Object.keys(bank).filter(k=>bank[k]&&bank[k].length&&examWeight(k,s)>0),pref=(EXAM_KIND_TOPICS[kind]||[]).filter(k=>all.includes(k));
  const pickW=list=>{const tot=list.reduce((n,k)=>n+examWeight(k,s),0);let v=Math.random()*tot;for(const k of list){v-=examWeight(k,s);if(v<=0)return k;}return list[0];};
- for(let t=0;t<40;t++){const tp=pref.length&&Math.random()<.6?pickW(pref):pickW(all),list0=bank[tp],list=list0.filter(g=>suitsExam(g,s)).length?list0.filter(g=>suitsExam(g,s)):list0;let q;try{q=list[Math.floor(Math.random()*list.length)]();}catch(e){continue;}
+ for(let t=0;t<40;t++){const tp=pref.length&&Math.random()<.6?pickW(pref):pickW(all),list0=bank[tp],list1=list0.filter(g=>suitsExam(g,s)).length?list0.filter(g=>suitsExam(g,s)):list0,list=typeof diffFilter==='function'?diffFilter(list1,list1.map((_,i)=>i),'match').map(i=>list1[i]):list1;let q;try{if(typeof setQDiff==='function')setQDiff('match');q=list[Math.floor(Math.random()*list.length)]();QDIFF=0;if(typeof qOK==='function'&&!qOK(q))continue;}catch(e){continue;}
   if(!q||typeof q.q!=='string'||q.fig||q.table||!Number.isFinite(+q.a)||q.q.length>230||/which|\bnot\b|odd one/i.test(q.q)||(String(q.a).split('.')[1]||'').length>2)continue;
   const a=+q.a,dp=(String(q.a).split('.')[1]||'').length,fm=v=>dp?(+v).toFixed(dp):String(Math.round(v)),set=new Set([fm(a)]),d=[1,2,5,10,Math.max(1,Math.round(a*.1)),Math.max(1,Math.round(a*.5)),3];let k=0;
   while(set.size<4&&k<40){const v=a+(Math.random()<.5?-1:1)*d[k%d.length]*(dp?Math.pow(10,-dp)*10:1);if(v>=0||a<0)set.add(fm(v));k++;}
@@ -122,7 +122,7 @@ function examHeader(){if(typeof stats==='undefined'||!document.querySelector('.h
 if(typeof window!=='undefined'){window.addEventListener('load',()=>{examHeader();setInterval(examHeader,1500);});}
 // ---------- multiple-choice answers for exams that use them (in mocks) ----------
 function examMCQ(cur,mode){const host=document.getElementById('answer');if(!host)return;let box=document.getElementById('mcqBox');if(!box){box=document.createElement('div');box.id='mcqBox';box.className='mcq-box';host.parentElement.insertAdjacentElement('afterend',box);}
- const mt=document.getElementById('methodTag');if(mt)mt.textContent+=` · ${examProfile().short} style`;
+ const mt=document.getElementById('methodTag');if(mt)mt.textContent+=` · ${examProfile().short} style${typeof curLevel==='function'?' · '+LEVEL_NAMES[curLevel(mode==='mock'?'match':(typeof level!=='undefined'?level:'match'))]:''}${examProfile().style==='quick'?' · ⏱ aim for about a minute each':''}`;
  const use=mode==='mock'&&examMock().mcq&&cur&&!cur.kind&&Number.isFinite(+cur.a);if(!use){box.innerHTML='';box.classList.add('hidden');return;}
  const a=+cur.a,dp=(String(cur.a).split('.')[1]||'').length,fm=v=>dp?(+v).toFixed(dp):String(Math.round(v)),set=new Set([fm(a)]),d=[1,2,5,10,Math.max(1,Math.round(a*.1)),Math.max(1,Math.round(a*.25)),3,4];let k=0;
  while(set.size<5&&k<60){const v=a+(Math.random()<.5?-1:1)*d[k%d.length]*(dp?Math.pow(10,-dp)*10:1);if(v>=0||a<0)set.add(fm(v));k++;}
