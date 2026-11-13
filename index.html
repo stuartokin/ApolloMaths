@@ -25,7 +25,7 @@
 <div class="lk-main"><div class="lk-avatar"></div><div class="lk-body"></div></div></dialog>
 <dialog class="players" id="players" aria-label="Who's playing?"><div class="lk-head"><h2>👋 Who’s playing?</h2><button class="ghost lk-close" data-close type="button" aria-label="Close">✕</button></div><div class="pl-body"></div></dialog>
 <dialog class="parent" id="parent" aria-label="Parent dashboard"><div class="lk-head"><h2>👪 Parent dashboard</h2><span class="pd-who"></span><button class="ghost lk-close" data-close type="button" aria-label="Close">✕</button></div>
-<div class="lk-tabs pd-tabs"><button class="chip" data-ptab="overview">📋 Overview</button><button class="chip" data-ptab="focus">🎯 Focus areas</button><button class="chip" data-ptab="learning">🧠 Learning</button><button class="chip" data-ptab="time">⏱️ Time</button><button class="chip" data-ptab="topics">📚 Topics</button><button class="chip" data-ptab="types">🧩 Question types & mistakes</button><button class="chip" data-ptab="mocks">🏆 Mocks</button><button class="chip" data-ptab="shop">🛍️ Shop</button><button class="chip" data-ptab="activity">📜 Activity</button><button class="chip" data-ptab="settings">⚙️ Settings & export</button></div>
+<div class="lk-tabs pd-tabs pd-groups"><button class="chip" data-ptab="overview">🏠 Overview</button><span class="pd-grp"><b>📋 Plan</b><button class="chip" data-ptab="plan">Exam plan &amp; dates</button></span><span class="pd-grp"><b>📈 Progress</b><button class="chip" data-ptab="ready">Readiness</button><button class="chip" data-ptab="focus">Focus areas</button><button class="chip" data-ptab="topics">Topics</button><button class="chip" data-ptab="types">Question types &amp; mistakes</button><button class="chip" data-ptab="mocks">Mocks</button><button class="chip" data-ptab="learning">Learning</button></span><span class="pd-grp"><b>⏱️ Time &amp; activity</b><button class="chip" data-ptab="time">Time</button><button class="chip" data-ptab="activity">Activity</button></span><span class="pd-grp"><b>🎮 Games &amp; rewards</b><button class="chip" data-ptab="games">Starlane</button><button class="chip" data-ptab="shop">Shop</button></span><span class="pd-grp"><b>⚙️ Settings &amp; data</b><button class="chip" data-ptab="settings">Settings &amp; export</button></span><input class="pd-find" type="search" placeholder="🔎 Find anything (e.g. mock, export, Starlane)" aria-label="Find anything in the parent dashboard"></div>
 <div class="pd-body"></div></dialog>
 <dialog class="learn" id="learn" aria-label="Learn Studio"><div class="lk-head"><h2 class="ln-title">📘 Learn</h2><button class="ghost lk-close" data-close type="button" aria-label="Close">✕</button></div><div class="ln-body"></div></dialog>
 <dialog id="updateDlg" class="updatedlg" aria-label="New version"><button class="dlg-x" type="button" onclick="this.closest('dialog').close()" aria-label="Close">✕</button><div id="upBody"></div></dialog>
@@ -90,6 +90,6 @@
 <script src="js/update.js"></script>
 <script src="js/tips.js"></script>
 <script src="js/windows.js"></script>
-<script src="js/app.js"></script>
+<script src="js/app.js"></script><script src="js/hub.js"></script>
 </body>
 </html>

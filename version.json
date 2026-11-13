@@ -1,7 +1,23 @@
 {
- "version": "2.72",
+ "version": "2.73",
  "date": "14 November 2026",
  "releases": [
+  {
+   "v": "2.73",
+   "date": "14 November 2026",
+   "kids": [
+    "🧭 A tidier app: Today, Practise, Mock exam, Learn and Rewards along the top (or the bottom on a phone)"
+   ],
+   "tags": [
+    "new",
+    "parents"
+   ],
+   "items": [
+    "🧭 New layout: the home page is organised into five areas — 🎯 Today (with one big “next best thing” button), ✏️ Practise, 🏆 Mock exam, 📚 Learn and 🎁 Rewards — shown one at a time, with the bar at the bottom on phones. Starting practice from anywhere jumps to Practise; “⛶ Focus on the question” hides everything else. The header buttons (switch player, help, sound, voices, install) are in ⚙️ Menu, and the save banner shrinks to a chip once progress is saved.",
+    "👪 Parent dashboard regrouped: Overview (summary cards), 📋 Plan (exam plan and key dates), 📈 Progress (readiness, focus areas, topics, question types, mocks, learning), ⏱️ Time & activity, 🎮 Games & rewards (Starlane, shop) and ⚙️ Settings & data — plus a “find anything” box.",
+    "📱 Fixed: on narrow phones the save banner no longer makes the page scroll sideways."
+   ]
+  },
   {
    "v": "2.72",
    "date": "14 November 2026",
@@ -128,20 +144,6 @@
    ],
    "items": [
     "🎬 Starlane Trader trailer re-sequenced: star, launch with the station fly-by, fight, Verdant Ark, First Contact, hyperspace, arrival at Earth and the Moon, montage, the title screen with Nova’s voice-over, and the end card. The enemies are now fully fitted pirate fighters in dark-and-red livery; the cockpit shows the missile lock, then the missile strike is seen from outside; fights are staged away from the sun and planets so the cockpit is not washed out by glare."
-   ]
-  },
-  {
-   "v": "2.63",
-   "date": "11 November 2026",
-   "kids": [
-    "🎬 The Starlane trailer now shows the title screen and a bigger space battle"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🎬 Starlane Trader trailer: after the launch it shows the title screen cycling through the Modern, Original and Retro looks (without “press fire”); the fight now has two raiders — one destroyed by a missile, the other by lasers — cutting between the cockpit and outside; the end card no longer shows the ApolloMaths line; the target card and bracket are hidden in videos."
    ]
   }
  ]
