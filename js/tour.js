@@ -10,7 +10,7 @@ const Tour=(()=>{
  const byTitle=t=>()=>{const h=[...document.querySelectorAll('main h2')].find(x=>x.textContent.includes(t));return h&&h.closest('.panel');};
  const visible=e=>e&&e.offsetParent!==null&&!e.classList.contains('hidden');
  function playerSteps(){const n=esc(playerName());return[
-  {title:`Hi ${n}! 👋 Let’s look around`,text:`This is <b>your</b> maths training ground for the Tiffin Stage 2 exam. Every question you get right earns <b>⚡ power points</b>, wins medals and unlocks cool stuff. Use <b>Next</b> (or the → key) to follow the tour.`},
+  {title:`Hi ${n}! 👋 Let’s look around`,text:`This is <b>your</b> maths training ground for the ${typeof examProfile==='function'?examProfile().name:'Tiffin Stage 2'} exam. Every question you get right earns <b>⚡ power points</b>, wins medals and unlocks cool stuff. Use <b>Next</b> (or the → key) to follow the tour.`},
   {el:'.whoplays',title:'Your name, clock and Help',text:'Here’s who is playing (tap <b>🔁 Switch player</b> to swap), the <b>⏱️ clock</b> for this session and in total, and <b>❓ Help</b> if you ever get stuck — you can rerun this tour from there too.'},
   {el:'#playerCard',title:'🧍 My player',text:`This is your footballer! It shows your <b>⚡ to spend</b>, your next goal, and the <b>🎁 daily bonus</b> (get ${REWARDS.dailyTarget} right today for +${REWARDS.dailyBonus} ⚡). Tap <b>🎨 Change my look</b> to change your style or your name.`},
   {el:'#openShop',title:'🛍️ The Kit Shop',text:'Spend your ⚡ on kits, boots, hats, sidekicks, celebrations, titles, frames, amazing <b>experiences</b> and <b>Maths Legend cards</b>. <b>🔥 For you</b> shows things you can buy now or very soon, and there’s a <b>deal of the day</b>. Points only come from doing maths — no real money, ever.'},

@@ -1,7 +1,25 @@
 {
- "version": "2.70",
+ "version": "2.71",
  "date": "14 November 2026",
  "releases": [
+  {
+   "v": "2.71",
+   "date": "14 November 2026",
+   "kids": [
+    "🎯 The top of the app now shows which school and test you are training for, with a countdown"
+   ],
+   "tags": [
+    "parents",
+    "new"
+   ],
+   "items": [
+    "🎯 Exam plan: each child has a plan of tests (test, school, date, result). The app trains for the next upcoming one, and moves on when a test has passed. The header shows it — “Training for: Eton College — ISEB Common Pre-Test · 30 November 2026 · 17 days to go” — with a countdown sticker in the last 60 days. Tapping it opens the plan (grown-ups only).",
+    "📈 Readiness for the chosen exam, topic by topic (including maths answered in Starlane), with a printable report; 📅 key dates for the plan’s exams from the official timelines (Tiffin, ISEB, Eton, Common Entrance).",
+    "🏆 Mocks follow the exam: question count, timing and multiple choice where the real test uses it.",
+    "➕ Adding a player now asks what they are preparing for (or “not sure yet”) and their school.",
+    "✏️ New original questions for 13+ Common Entrance / scholarship (algebra, probability, polygons, circles, prisms, reverse percentages, the nth term, indices, compound interest) and quick-fire questions for Tiffin Stage 1, 11+ grammar and the ISEB Pre-Test. Each is only used for those exams, in practice and in Starlane."
+   ]
+  },
   {
    "v": "2.70",
    "date": "14 November 2026",
@@ -122,20 +140,6 @@
    "items": [
     "🎬 Starlane Trader trailer: the space fight cuts like a film — outside as two raiders close in, inside the 3D cockpit with lasers firing, outside as the raider explodes, and inside as a missile launches. First Contact shows the Thorn Bloom from the cockpit, then your ship facing it. The overview’s fight uses the same sequence.",
     "🧹 Videos are cleaner: no guided-flight panel or adventure offers (your guided flight is restored afterwards), no mouse pointer, and no missile-lock ring or target card on outside shots."
-   ]
-  },
-  {
-   "v": "2.61",
-   "date": "11 November 2026",
-   "kids": [
-    "🎬 Starlane has two videos you can watch from the Pause menu: a 30-second trailer and a 2-minute tour with Nova"
-   ],
-   "tags": [
-    "games",
-    "new"
-   ],
-   "items": [
-    "🎬 Starlane Trader: Pause → 🎬 WATCH (replacing “Nova’s Intro”, which is now on that page) offers a 30-second TRAILER (full-screen cinematic shots: launch, station, dogfight, Verdant Ark, Thorn Bloom, hyperspace, a planet, the charts, the paint shop, docking and the title card) and a 2-minute GAME OVERVIEW WITH NOVA in seven chapters with narrated captions. Both play hands-free in a sandbox copy — any key or tap stops them and you return exactly where you were. A 3-second countdown switch helps with screen recording. New players are offered the overview on Nova’s first welcome slide. Test mode lists both too."
    ]
   }
  ]
