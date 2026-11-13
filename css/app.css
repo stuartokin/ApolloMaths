@@ -515,5 +515,20 @@ body.student #saveBar{display:none!important}
  body.student[data-area-now="learn"] [data-slot="lessons"]{grid-column:1/4}body.student[data-area-now="learn"] [data-slot="tips"]{grid-column:4/13}
 }
 /* very large displays: everything scales up so it stays readable and fills the screen */
-@media (min-width:2400px){html{zoom:1.2}}
-@media (min-width:3200px){html{zoom:1.4}}
+@media (min-width:2400px){body.student .shell,body.student .s-rail{zoom:1.2}}
+@media (min-width:3200px){body.student .shell,body.student .s-rail{zoom:1.4}}
+
+/* the parent dashboard keeps one size: fixed header and tabs, only the content scrolls */
+dialog.parent[open]{display:flex;flex-direction:column;width:min(1320px,96vw);height:min(960px,94dvh);max-height:94dvh;max-width:96vw}
+dialog.parent .lk-head,dialog.parent .pd-tabs{flex:none}
+dialog.parent .pd-body{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain}
+@media (min-width:1800px){dialog.parent[open]{width:min(1600px,92vw)}}
+dialog.parent.win-max[open]{width:100vw;height:100dvh;max-width:100vw;max-height:100dvh}
+/* "not saved" is impossible to miss: red on laptops, a red ribbon and red button on phones */
+.s-save.warn{background:#e51c35!important;color:#fff;border-color:#7a0f1d;animation:savePulse 2s ease-in-out infinite}
+.s-save-mini.warn{background:#e51c35!important;color:#fff;border-color:#7a0f1d;animation:savePulse 2s ease-in-out infinite}
+@keyframes savePulse{0%,100%{box-shadow:0 3px 0 var(--dark)}50%{box-shadow:0 0 0 5px rgba(229,28,53,.35),0 3px 0 var(--dark)}}
+.save-ribbon{display:none}
+@media (max-width:1099px){body.student.unsaved .save-ribbon{display:block;position:fixed;top:0;left:0;right:118px;z-index:69;background:#e51c35;color:#fff;font-weight:900;font-size:13px;padding:7px 12px;border:0;border-bottom:3px solid #7a0f1d;text-align:left;border-radius:0 0 12px 0}
+ body.student.unsaved{padding-top:30px}}
+@media (prefers-reduced-motion:reduce){.s-save.warn,.s-save-mini.warn{animation:none}}

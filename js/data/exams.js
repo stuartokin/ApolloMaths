@@ -142,10 +142,10 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
  const d=e.target.closest&&e.target.closest('[data-plan-del]');if(d){const pl=examPlan(stats);if(pl.length>1){pl.splice(+d.dataset.planDel,1);planChanged(d.closest('[data-exam-box]'));}else if(typeof toast==='function')toast('Keep at least one test in the plan');}});
 function setExamOld(id){setExam(id);}
 setExam=function(id){if(!EXAMS[id]||typeof stats==='undefined')return;const c=currentEntry(stats);c.id=id;planChanged(null);};
-function readiness(s){const p=examProfile(s),sl={};(Array.isArray(s.slMaths)?s.slMaths:[]).forEach(x=>{if(x.topic){const o=sl[x.topic]||(sl[x.topic]={seen:0,first:0});o.seen++;if(x.ok)o.first++;}});
+function examReadiness(s){const p=examProfile(s),sl={};(Array.isArray(s.slMaths)?s.slMaths:[]).forEach(x=>{if(x.topic){const o=sl[x.topic]||(sl[x.topic]={seen:0,first:0});o.seen++;if(x.ok)o.first++;}});
  return Object.keys(topics).filter(k=>bank[k]&&bank[k].length&&examWeight(k,s)>0).map(k=>{const b=(s.byTopic&&s.byTopic[k])||{seen:0,first:0},o=sl[k]||{seen:0,first:0},seen=(b.seen||0)+o.seen,first=(b.first||0)+o.first,pc=seen?Math.round(100*first/seen):null;
   const st=seen<3?['⚪','Not tried yet']:pc<60?['🔴','Needs work']:pc<80?['🟠','Getting there']:['🟢','Strong'];return{k,label:topics[k].label,w:examWeight(k,s),seen,pc,st,sl:o.seen};}).sort((a,b)=>b.w-a.w||a.label.localeCompare(b.label));}
-function readinessBlock(s){const p=examProfile(s),R=readiness(s),n=t=>R.filter(r=>r.st[1]===t).length;
+function readinessBlock(s){const p=examProfile(s),R=examReadiness(s),n=t=>R.filter(r=>r.st[1]===t).length;
  return `<section class="exam-box"><h3>📈 Readiness for ${esc(p.name)}</h3><p class="section-note">🟢 ${n('Strong')} strong · 🟠 ${n('Getting there')} getting there · 🔴 ${n('Needs work')} need work · ⚪ ${n('Not tried yet')} not tried yet — out of ${R.length} topics in this exam, most important first. Includes maths answered in Starlane.</p>
  <div class="plan-wrap"><table class="plan"><tr><th>Topic</th><th>How much it counts</th><th>Answered</th><th>Right first time</th><th></th></tr>${R.map(r=>`<tr><td>${esc(r.label)}</td><td>${r.w>=1.3?'★★★':r.w>=1.05?'★★':'★'}</td><td>${r.seen}${r.sl?` <span class="section-note">(${r.sl} in Starlane)</span>`:''}</td><td>${r.pc===null?'—':r.pc+'%'}</td><td>${r.st[0]} ${r.st[1]}</td></tr>`).join('')}</table></div>
  <p><button type="button" data-exam-print>🖨️ Print readiness report</button></p></section>`;}
@@ -162,7 +162,7 @@ window.addEventListener('load',()=>{try{const raw=sessionStorage.getItem('am-new
 function planTab(s){return examBlock(s)+datesBlock(s);}
 function readyTab(s){return readinessBlock(s);}
 function gamesTab(s){return starlaneBlock(s);}
-function overviewCards(s){const c=currentEntry(s),p=EXAMS[c.id],d=daysTo(c.date),R=readiness(s),weak=R.filter(r=>r.st[1]==='Needs work').length,untried=R.filter(r=>r.st[1]==='Not tried yet').length;
+function overviewCards(s){const c=currentEntry(s),p=EXAMS[c.id],d=daysTo(c.date),R=examReadiness(s),weak=R.filter(r=>r.st[1]==='Needs work').length,untried=R.filter(r=>r.st[1]==='Not tried yet').length;
  const wk=[...Array(7)].map((_,i)=>{const x=new Date();x.setDate(x.getDate()-i);return (s.time&&s.time.byDay&&s.time.byDay[`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`]||{}).app||0;}).reduce((a,b)=>a+b,0);
  const sl=(Array.isArray(s.slMaths)?s.slMaths:[]).filter(x=>Date.now()-x.t<7*864e5).length,best=(s.mocks||[]).reduce((m,x)=>Math.max(m,Math.round(100*x.score/x.total)),-1);
  const card=(tab,icon,big,small)=>`<button type="button" class="ov-card" data-goto="${tab}"><span class="ov-icon">${icon}</span><b>${big}</b><span>${small}</span></button>`;
