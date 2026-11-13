@@ -1,5 +1,5 @@
 'use strict';
-// DATA: Apollo's player (avatar) options, the Kit Shop catalogue and the reward rules.
+// DATA: Apollo's player (avatar) options, the Shop catalogue and the reward rules.
 // Points are only earned by answering maths questions. Spending never removes "Power points" earned (lifetime score);
 // it reduces the wallet: wallet = points earned − points spent. No random boxes, no timers, nothing costs real money.
 const avatarOptions={

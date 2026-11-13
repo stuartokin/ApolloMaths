@@ -1,5 +1,5 @@
 'use strict';
-// DATA: the big Kit Shop expansion (Nov 2026). Items with "art" + "style" are drawn by generic painters in js/render/avatar.js.
+// DATA: the big Shop expansion (Nov 2026). Items with "art" + "style" are drawn by generic painters in js/render/avatar.js.
 // Prices form a dense ladder (40 → 8,000 ⚡) so there is always something just within reach.
 const SHOP_VERSION=2;
 const S=(id,slot,cat,name,icon,price,desc,extra={})=>({id,slot,cat,name,icon,price,desc,nw:true,...extra});

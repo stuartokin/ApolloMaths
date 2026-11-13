@@ -1,5 +1,5 @@
 'use strict';
-// PRESENTATION: painters for the Kit Shop expansion. Each takes (stroke attrs, style) and returns SVG drawn on the 240×300 player.
+// PRESENTATION: painters for the Shop expansion. Each takes (stroke attrs, style) and returns SVG drawn on the 240×300 player.
 const K='#121625';
 const TOP_PAT={
  hoops:(c1,c2)=>[160,180,200,220].map(y=>`<rect x="50" y="${y}" width="140" height="10" fill="${c2}"/>`).join(''),

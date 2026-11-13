@@ -1,5 +1,5 @@
 'use strict';
-// PRESENTATION + INTERACTION: Apollo's player card, the Locker Room (look editor, Kit Shop, My stuff, Skill unlocks)
+// PRESENTATION + INTERACTION: Apollo's player card, the Locker Room (look editor, Shop, My stuff, Skill unlocks)
 // and the goal celebrations. Rules and prices live in js/data/shop.js; drawing lives in js/render/avatar.js.
 const Locker=(()=>{
  let tab='shop',cat='foryou',preview=null,confirmId=null,welcome=false,newsI=0;
@@ -12,12 +12,12 @@ const Locker=(()=>{
  const frameCls=eq=>{const f=eq&&eq.frame&&itemById[eq.frame];return f?' frame-'+f.frame:'';};
  const celebOf=id=>{const it=itemById[id];return CELEB[id]||(it&&it.celeb?[it.celeb.anim,it.celeb.msg,it.celeb.parts]:CELEB.fistpump);};
  function cardHTML(it,own){return `<div class="lcard${own?'':' locked'}"><div class="lc-icon">${it.icon}</div><b>${esc(it.name)}</b><small>${esc(it.era)}</small>${own?`<p>${fracHTML(it.desc)}</p><div class="lc-puzzle">🧩 <b>Try this:</b> ${fracHTML(it.puzzle)} <button class="linkbtn" data-reveal type="button">Show answer</button><span class="lc-ans hidden">${fracHTML(it.ans)}</span></div>`:`<p class="mini">Collect this Maths Legend card to read their true story and a puzzle.</p>`}</div>`;}
- function news(){const m=[],d=dealOfDay(stats,who()),g=nextGoal(stats),w=wallet(stats),can=shopItems.filter(i=>buyable(i)&&!owns(stats,i.id)&&price(i)<=w).length,cards=shopItems.filter(i=>i.cat==='cards'),got=cards.filter(i=>owns(stats,i.id)).length;
+ function news(){const m=[],d=dealOfDay(stats,who()),g=nextGoal(stats),w=wallet(stats),can=shopItems.filter(i=>buyable(i)&&!owns(stats,i.id)&&(typeof Student==='undefined'||Student.itemForTheme(i))&&price(i)<=w).length,cards=shopItems.filter(i=>i.cat==='cards'),got=cards.filter(i=>owns(stats,i.id)).length;
   if(d)m.push(`🔥 Deal of the day: ${d.item.icon} ${d.item.name} — ${d.price.toLocaleString('en-GB')} ⚡ (was ${d.item.price.toLocaleString('en-GB')})`);
   if(can)m.push(`🛍️ You can afford ${can} item${can>1?'s':''} right now!`);
   if(g&&g.need>0)m.push(`🎯 Just ${g.need.toLocaleString('en-GB')} ⚡ more for the ${g.item.icon} ${g.item.name}`);
   m.push(`🃏 Maths Legend cards: ${got}/${cards.length} collected`);
-  if(stats.newSince&&Date.now()-stats.newSince<7*86400000)m.push(`🆕 ${shopItems.filter(i=>i.nw).length} new items in the Kit Shop this week!`);
+  if(stats.newSince&&Date.now()-stats.newSince<7*86400000)m.push(`🆕 ${shopItems.filter(i=>i.nw).length} new items in the Shop this week!`);
   return m;}
 
  // ---------- player card + mission avatar ----------
@@ -27,7 +27,7 @@ const Locker=(()=>{
   get('missionAvatar').innerHTML=drawAvatar(stats.avatar,{scene:false});
   get('walletAmt').textContent=wallet(stats).toLocaleString('en-GB');
   const g=nextGoal(stats);
-  get('goalBox').innerHTML=!g?'🏆 You own everything in the shop. Absolute legend!':g.need===0?`🛍️ You can afford the <b>${esc(g.item.name)}</b>! Open the Kit Shop.`:
+  get('goalBox').innerHTML=!g?'🏆 You own everything in the shop. Absolute legend!':g.need===0?`🛍️ You can afford the <b>${esc(g.item.name)}</b>! Open the Shop.`:
    `<div class="goaltext">🎯 Next: ${g.item.icon} <b>${esc(g.item.name)}</b> — <b>${g.need.toLocaleString('en-GB')} ⚡</b> to go</div><div class="progressOuter slim"><div class="progressInner" style="width:${g.pct}%"></div></div>`;
   const d=stats.daily,today=dayKey(),n=d.day===today?d.correct:0,got=d.day===today&&d.bonus;
   get('dailyLine').textContent=got?'🎁 Daily bonus collected — come back tomorrow for another!':`🎁 Daily bonus: get ${REWARDS.dailyTarget} right today for +${REWARDS.dailyBonus} ⚡ (${Math.min(n,REWARDS.dailyTarget)}/${REWARDS.dailyTarget})`;
@@ -47,7 +47,7 @@ const Locker=(()=>{
  function lookTab(){const a=stats.avatar,o=avatarOptions;
   const sw=(key,list)=>list.map(([c,l],i)=>`<button class="swatch${a[key]===i?' on':''}" style="background:${c}" data-look="${key}" data-val="${i}" aria-label="${l}" title="${l}"></button>`).join('');
   const ch=(key,list)=>list.map(([v,l])=>`<button class="chip${a[key]===v?' active':''}" data-look="${key}" data-val="${v}">${l}</button>`).join('');
-  return `${welcome?`<div class="note">👋 <b>Welcome, ${esc(playerName())}!</b> Design your player. Every right answer earns ⚡ power points to spend on kits, boots, sidekicks and experiences in the Kit Shop.</div>`:''}
+  return `${welcome?`<div class="note">👋 <b>Welcome, ${esc(playerName())}!</b> Design your player. Every right answer earns ⚡ power points to spend on kits, boots, sidekicks and experiences in the Shop.</div>`:''}
   <div class="lookrow"><b>Name</b><div class="namerow"><input id="nameInput" maxlength="20" value="${esc(playerName())}" aria-label="Player name" autocomplete="off"><button class="secondary" data-savename="1" type="button">Save name</button></div></div><div class="lookrow"><b>Player</b><div class="choices">${ch('body',o.body)}</div></div><div class="lookrow"><b>Skin tone</b><div>${o.skinOrder.map(i=>{const[c,l]=o.skins[i];return `<button class="swatch${a.skin===i?' on':''}" style="background:${c}" data-look="skin" data-val="${i}" aria-label="${l}" title="${l}"></button>`;}).join('')}</div></div><div class="lookrow"><b>Hair style</b><div class="choices">${ch('hair',o.hair)}</div></div>
   <div class="lookrow"><b>Hair colour</b><div>${sw('hairCol',o.hairColours)}</div></div><div class="lookrow"><b>Head covering</b><div class="choices">${ch('cover',o.covers)}</div></div>${a.cover&&a.cover!=='none'?`<div class="lookrow"><b>Covering colour</b><div>${sw('coverCol',o.coverCols)}</div></div>`:''}<div class="lookrow"><b>Eyes</b><div class="choices">${ch('eyes',o.eyes)}</div></div>
   <div class="lookrow"><b>Face</b><div class="choices">${ch('mouth',o.mouths)}</div></div><div class="lookrow"><b>Kit colour</b><div>${sw('kit',o.kits)}</div></div>
@@ -57,7 +57,7 @@ const Locker=(()=>{
   if(cat==='foryou'){list=forYou(stats);head=`${d?`<div class="dealbox">🔥 <b>Deal of the day</b> — ${d.item.icon} ${esc(d.item.name)}: <b>${d.price.toLocaleString('en-GB')} ⚡</b> instead of ${d.item.price.toLocaleString('en-GB')} (today only)</div>`:''}<p class="mini">Picked for you: things you can buy now or very soon with your <b>${w.toLocaleString('en-GB')} ⚡</b>.</p>`;if(d&&!list.includes(d.item))list.unshift(d.item);}
   else list=shopItems.filter(i=>i.cat===cat);
   return `<div class="choices cats">${shopCats.map(([k,l])=>`<button class="chip${cat===k?' active':''}" data-cat="${k}">${l}</button>`).join('')}</div>${head}${cat!=='foryou'?'<p class="mini">Tap an item to try it on. Fancier items cost more ⚡ — every right answer gets you closer.</p>':''}<div class="items">${list.map(card).join('')}</div>`;}
- function stuffTab(){const mine=shopItems.filter(i=>owns(stats,i.id)).sort((a,b)=>(a.cat==='cards')-(b.cat==='cards'));return `<p class="mini">Everything you own. Tap “Wear it” to put it on.</p><div class="items">${mine.map(card).join('')}</div>`;}
+ function stuffTab(){const mine=shopItems.filter(i=>owns(stats,i.id)&&(!i.theme||typeof Student==='undefined'||Student.itemForTheme(i))).sort((a,b)=>(a.cat==='cards')-(b.cat==='cards'));return `<p class="mini">Everything you own. Tap “Wear it” to put it on.</p><div class="items">${mine.map(card).join('')}</div>`;}
  function skillTab(){return `<p class="mini">These can’t be bought — only earned by mastering your Focus Zone topics. “Right first time” means no hints, no method, first try.</p><div class="items">${shopItems.filter(i=>i.unlock).map(card).join('')}</div>`;}
  function render(){const d=dlg(),pv=preview&&preview.slot?{[preview.slot]:preview.id}:{};
   d.querySelector('.lk-wallet').textContent=wallet(stats).toLocaleString('en-GB')+' ⚡ to spend';
@@ -98,11 +98,11 @@ const Locker=(()=>{
   for(let i=0;i<n;i++){const s=document.createElement('span');s.textContent=pick(parts);s.style.left=(r.left+r.width/2)+'px';s.style.top=(r.top+r.height/2)+'px';
    s.style.setProperty('--dx',(Math.random()*240-120)+'px');s.style.setProperty('--dy',(-60-Math.random()*170)+'px');s.style.animationDelay=(Math.random()*.15)+'s';burst.appendChild(s);setTimeout(()=>s.remove(),1500);}}
  function nudge(){const el=get('nudge'),g=nextGoal(stats);if(!g){el.classList.add('hidden');return;}
-  el.innerHTML=g.need===0?`🛍️ You can afford the ${g.item.icon} <b>${esc(g.item.name)}</b>! <button class="linkbtn" data-openshop="1">Open the Kit Shop</button>`:`🎯 <b>${g.need.toLocaleString('en-GB')} ⚡</b> to go until the ${g.item.icon} ${esc(g.item.name)} — keep going!`;el.classList.remove('hidden');}
+  el.innerHTML=g.need===0?`🛍️ You can afford the ${g.item.icon} <b>${esc(g.item.name)}</b>! <button class="linkbtn" data-openshop="1">Open the Shop</button>`:`🎯 <b>${g.need.toLocaleString('en-GB')} ⚡</b> to go until the ${g.item.icon} ${esc(g.item.name)} — keep going!`;el.classList.remove('hidden');}
  // Tell the player when something new becomes affordable (one message, not a flood).
- function announce(){const w=wallet(stats),fresh=shopItems.filter(i=>buyable(i)&&!owns(stats,i.id)&&price(i)<=w&&!stats.announced.includes(i.id));if(!fresh.length)return;
+ function announce(){const w=wallet(stats),fresh=shopItems.filter(i=>buyable(i)&&!owns(stats,i.id)&&(typeof Student==='undefined'||Student.itemForTheme(i))&&price(i)<=w&&!stats.announced.includes(i.id));if(!fresh.length)return;
   const best=fresh.sort((a,b)=>b.price-a.price)[0];stats.announced.push(...fresh.map(i=>i.id));if(stats.announced.length>500)stats.announced.splice(0,stats.announced.length-500);
-  toast(`🔔 You can now afford the ${best.icon} ${best.name}${fresh.length>1?` (and ${fresh.length-1} more)`:''}! Open the Kit Shop.`);}
+  toast(`🔔 You can now afford the ${best.icon} ${best.name}${fresh.length>1?` (and ${fresh.length-1} more)`:''}! Open the Shop.`);}
  function onCorrect(){celebrate();nudge();announce();refresh();}
  function init(){dlg().addEventListener('click',onClick);dlg().addEventListener('close',()=>{if(!stats.avatar.created){stats.avatar.created=true;save();}preview=null;});
   dlg().addEventListener('click',e=>{if(e.target===dlg())close();});
@@ -112,7 +112,7 @@ const Locker=(()=>{
   get('shopNews').addEventListener('click',()=>open('shop'));
   setInterval(()=>{newsI++;const nm=news();get('shopNews').textContent=nm[newsI%nm.length]||'';},6000);
   // first visit after the shop update: announce the new items; once a day: announce the deal (gently, once)
-  if(stats.shopVer<SHOP_VERSION&&Storage.current()){stats.shopVer=SHOP_VERSION;stats.newSince=Date.now();stats.announced=shopItems.filter(i=>buyable(i)&&price(i)<=wallet(stats)).map(i=>i.id);save(false);setTimeout(()=>toast(`🆕 ${shopItems.filter(i=>i.nw).length} new items have arrived in the Kit Shop — kits, pets, experiences, titles and Maths Legend cards!`),1500);}
+  if(stats.shopVer<SHOP_VERSION&&Storage.current()){stats.shopVer=SHOP_VERSION;stats.newSince=Date.now();stats.announced=shopItems.filter(i=>buyable(i)&&price(i)<=wallet(stats)).map(i=>i.id);save(false);setTimeout(()=>toast(`🆕 ${shopItems.filter(i=>i.nw).length} new items have arrived in the Shop — kits, pets, experiences, titles and Maths Legend cards!`),1500);}
   if(stats.dealSeen!==dayKey()&&Storage.current()){const d=dealOfDay(stats,who());stats.dealSeen=dayKey();save(false);if(d)setTimeout(()=>toast(`🔥 Today’s deal: ${d.item.icon} ${d.item.name} for ${d.price.toLocaleString('en-GB')} ⚡ (25% off)`),3000);}
   refresh();setTimeout(()=>{if(!stats.avatar.created&&Storage.current()&&!get('players').open)open('look',true);},450);}
  return{init,refresh,open,checkUnlocks,celebrationText,onCorrect,announce};

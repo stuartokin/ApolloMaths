@@ -52,7 +52,7 @@ const Tips=(()=>{
   ['[data-ptab=topics]','How ready the child is in every topic, with time spent and help used.','self'],
   ['[data-ptab=types]','Every question type, how it is going, and the exact wrong answers typed — shows the misunderstanding.','self'],
   ['[data-ptab=mocks]','Every online mock and any paper mock scores you have added.','self'],
-  ['[data-ptab=shop]','What has been bought in the Kit Shop and time spent there.','self'],
+  ['[data-ptab=shop]','What has been bought in the Shop and time spent there.','self'],
   ['[data-ptab=activity]','The last 150 questions answered, newest first.','self'],
   ['[data-ptab=settings]','Exam name and date, downloads (CSV files) and a printable report.','self'],
   ['#pdWho','Choose which player’s progress to look at.','label'],

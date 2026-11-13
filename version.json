@@ -1,7 +1,26 @@
 {
- "version": "2.74",
+ "version": "2.75",
  "date": "14 November 2026",
  "releases": [
+  {
+   "v": "2.75",
+   "date": "14 November 2026",
+   "kids": [
+    "🏠 Your own room, your own character and a Shop that matches what you love — animals, space, music or football"
+   ],
+   "tags": [
+    "new",
+    "parents"
+   ],
+   "items": [
+    "🧭 A new student space: on laptops a side rail with your character, name, points and streak, the five areas (Today, Practise, Mock exam, Learn, 🏠 My room), a pinned 🔊 sound button and 👪 Grown-ups; a slim header; the page uses the full width. On phones the bar stays at the bottom with sound pinned at the top right.",
+    "🏠 My room (was Rewards): your character, the 🛍️ Shop (renamed from Kit Shop), 🎨 My theme, medals, the leaderboard and — once found — your games.",
+    "🛍️ Each theme has its own Shop: animals (ranger shirts, wellies, binoculars, hedgehog, fox, owl, forest and ocean scenes), space (flight suits, helmets, robot buddy, moon base) and music & art (smocks, guitars, headphones, parrot, stage and gallery). Football themes keep the original Shop. Arcade game names follow the theme (e.g. Garden Guardians, Pony Derby).",
+    "👧 Adding a player asks what they love (theme), whether their character is a girl or a boy, and their team for football. New children start with their theme’s starter items and focus topics chosen from their exam.",
+    "👪 Grown-ups: the parent dashboard now has 👨‍👩‍👧 Family & data (save, open, export, every-question export, players and family codes), and the parent box has left the children’s screen. ⚙️ Menu is in the usual order: switch player, theme & character, sound, voices, help, install, grown-ups.",
+    "🐞 Fixed “undefined%” on the Keep training bars for new players."
+   ]
+  },
   {
    "v": "2.74",
    "date": "14 November 2026",
@@ -131,20 +150,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: the game file now has a question socket (window.StarlaneQuestions) so the standalone Starlane site and ApolloMaths can supply its maths questions; the game files are identical in both repos. No change in play."
-   ]
-  },
-  {
-   "v": "2.65",
-   "date": "11 November 2026",
-   "kids": [
-    "🎬 Trailer polish: a longer opening star and end card"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🎬 Starlane Trader trailer: the opening star (2.8 s, swelling slowly) and the end card (5.5 s) last longer for anticipation, and the small yellow outside-camera aiming square no longer appears in videos."
    ]
   }
  ]

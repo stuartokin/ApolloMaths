@@ -4,7 +4,7 @@
 // a "next best thing" button, focus mode for questions, a ⚙️ menu for the header buttons and a compact save chip.
 const Hub=(()=>{
  let ready=false,pending=null;
- const AREAS=[['today','🎯','Today'],['practise','✏️','Practise'],['mock','🏆','Mock exam'],['learn','📚','Learn'],['rewards','🎁','Rewards']];
+ const AREAS=[['today','🎯','Today'],['practise','✏️','Practise'],['mock','🏆','Mock exam'],['learn','📚','Learn'],['rewards','🏠','My room']];
  const sec=el=>el&&(el.closest('section')||el);
  function tag(){const T=(el,areas,slot)=>{const s=sec(el);if(s){s.dataset.area=areas;if(slot)s.dataset.slot=slot;}};
   T(document.getElementById('planCard'),'today','plan');T(document.getElementById('focusZone'),'today practise','focus');T(document.getElementById('dashboard'),'today','parent');

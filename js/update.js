@@ -1,13 +1,13 @@
 'use strict';
 // PRESENTATION: "a new version is ready!" When online, the app reads version.json from the website (never from a cache)
 // and compares it with the version it is running. If there is a newer one it explains what's new in child-friendly
-// words (with headlines for new games and Kit Shop items) and how to save and update.
+// words (with headlines for new games and Shop items) and how to save and update.
 // After an update, the same window shows "You're on the new version!" with what changed.
 const Update=(()=>{
  let remote=null,lastCheck=0,shownThisLoad=false;
  const KEY='apollo-maths-update-shown',newer=(a,b)=>{const x=String(a).split('.').map(Number),y=String(b).split('.').map(Number);for(let i=0;i<Math.max(x.length,y.length);i++){const d=(x[i]||0)-(y[i]||0);if(d)return d>0;}return false;};
  const dlg=()=>get('updateDlg');
- const HEAD={games:'🤫 Psst… the secret arcade has something new!',shop:'🛍️ New things in the Kit Shop!',look:'🎨 New ways to style your player!'};
+ const HEAD={games:'🤫 Psst… the secret arcade has something new!',shop:'🛍️ New things in the Shop!',look:'🎨 New ways to style your player!'};
  // What's new between two versions (newest first)
  function changes(releases,from,to){const list=releases.filter(r=>newer(r.v,from)&&!newer(r.v,to));const tags=[...new Set(list.flatMap(r=>r.tags||[]))];
   const lines=list.flatMap(r=>(r.kids&&r.kids.length?r.kids:r.items.slice(0,2))).slice(0,7);return{list,tags,lines};}
@@ -20,7 +20,7 @@ const Update=(()=>{
     <li>Tap <b>🔄 Update now</b>.</li>
     <li>Still looks the same? Close the app completely and open it again (on iPad or iPhone, swipe it away first).</li></ol></div>
    <div class="actions" style="justify-content:center"><button class="primary" data-up="go" type="button" autofocus>🔄 Update now</button><button class="ghost" data-up="later" type="button">Later</button></div>`);
-  try{localStorage.setItem(KEY,remote.version)}catch(e){}Speech.announce(`A new version is ready! ${c.tags.includes('games')?'The secret arcade has something new! ':''}${c.tags.includes('shop')?'There are new things in the Kit Shop! ':''}`);}
+  try{localStorage.setItem(KEY,remote.version)}catch(e){}Speech.announce(`A new version is ready! ${c.tags.includes('games')?'The secret arcade has something new! ':''}${c.tags.includes('shop')?'There are new things in the Shop! ':''}`);}
  // After an update: "you're on the new version"
  function showWhatsNew(prev){const c=changes(versionHistory.map(r=>({v:r.v,kids:r.kids,tags:r.tags,items:r.items})),prev,APP_VERSION);if(!c.lines.length)return;
   whenFree(()=>{try{localStorage.setItem('apollo-maths-version',APP_VERSION)}catch(e){}open(`<div class="up-hero"><div class="up-big">🎉</div><h2>You’re on the new version!</h2><p class="mini">Version ${esc(APP_VERSION)} — here’s what’s new</p></div>${body(c)}<div class="actions" style="justify-content:center"><button class="primary" data-up="close" type="button" autofocus>Brilliant! 👍</button><button class="ghost" data-up="history" type="button">Full version history</button></div>`);});}
