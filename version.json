@@ -1,7 +1,20 @@
 {
- "version": "2.77",
+ "version": "2.78",
  "date": "14 November 2026",
  "releases": [
+  {
+   "v": "2.78",
+   "date": "14 November 2026",
+   "kids": [
+    "🕹️ Every arcade game now lets you choose: 🧍 My player or 👾 Classic"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🕹️ Every arcade game except Starlane now has the 🧍 My player / 👾 Classic choice that Invaders had. My player puts your character and theme into the game; Classic is the original game with its original items. Each game remembers its own choice."
+   ]
+  },
   {
    "v": "2.77",
    "date": "14 November 2026",
@@ -145,23 +158,6 @@
    ],
    "items": [
     "📚 Exam sources updated after the exam-watch agent’s first run: Tiffin’s illustrative maths questions, its admissions FAQs and Tiffin Girls’ Year 7 page; GL Assessment’s free familiarisation materials (new address); ISEB’s Pre-Test page for families and the 13+ Common Entrance timetable. Eton’s site blocks automated checks, so the agent now lists it to check by hand."
-   ]
-  },
-  {
-   "v": "2.68",
-   "date": "13 November 2026",
-   "kids": [
-    "🎓 Practice now follows the exam you are preparing for"
-   ],
-   "tags": [
-    "parents",
-    "new"
-   ],
-   "items": [
-    "🎓 Exam profiles: Tiffin Stage 1, Tiffin Stage 2, 11+ grammar (multiple choice), ISEB Common Pre-Test (Eton, Harrow and others) and 13+ Common Entrance / scholarship. Each child picks one in the parent overview (“🎓 Exam & sources”); mixed and focus practice weight topics to match it. Existing children are recognised from their exam name — Apollo stays on Tiffin Stage 2.",
-    "📚 Sources: each exam lists the official pages our original questions are modelled on (Tiffin’s illustrative questions and admissions policy, ISEB, Eton and Harrow admissions and scholarship pages), with the date they were last checked.",
-    "🚀 Starlane’s maths questions now follow the child’s exam, whether played from the Starlane site or the built-in copy.",
-    "🤖 Exam-watch agent (tools/exam-watch): a scheduled GitHub Action that checks the official pages and admissions news, drafts and double-checks new original questions, and opens a pull request with a report for review."
    ]
   }
  ]

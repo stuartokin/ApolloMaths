@@ -18,7 +18,7 @@ const fmtN=n=>Math.round(n).toLocaleString('en-GB');
 // =====================================================================================================
 // the child's avatar head as the player (or mascot), in a ring of their theme colour
 const AVH_CACHE=new WeakMap();
-function AVH(env,ctx,x,y,s){const im=env&&env.avatar;if(!im||!im.complete)return false;
+function AVH(env,ctx,x,y,s){if(env&&env.theme==='classic')return false;const im=env&&env.avatar;if(!im||!im.complete)return false;
  // the avatar is an SVG with no pixel size of its own: draw it once onto a 240×300 canvas, then crop the head from that
  let cv=AVH_CACHE.get(im);if(!cv){cv=document.createElement('canvas');cv.width=240;cv.height=300;try{cv.getContext('2d').drawImage(im,0,0,240,300);}catch(e){return false;}AVH_CACHE.set(im,cv);}
  const cx=120,cy=84,r=70;
