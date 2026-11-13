@@ -6,19 +6,20 @@ const Hub=(()=>{
  let ready=false,pending=null;
  const AREAS=[['today','🎯','Today'],['practise','✏️','Practise'],['mock','🏆','Mock exam'],['learn','📚','Learn'],['rewards','🎁','Rewards']];
  const sec=el=>el&&(el.closest('section')||el);
- function tag(){const T=(el,areas)=>{const s=sec(el);if(s)s.dataset.area=areas;};
-  T(document.getElementById('planCard'),'today');T(document.getElementById('focusZone'),'today practise');T(document.getElementById('dashboard'),'today');
-  T(document.getElementById('topics'),'practise mock');T(document.getElementById('mission'),'practise mock');T(document.getElementById('coach'),'practise');
-  T(document.getElementById('modes'),'practise mock');T(document.getElementById('report'),'practise mock');
-  T(document.getElementById('examNote'),'learn');T(document.getElementById('playerCard'),'rewards');T(document.getElementById('medals'),'rewards');T(document.getElementById('leaderboard'),'rewards');}
+ function tag(){const T=(el,areas,slot)=>{const s=sec(el);if(s){s.dataset.area=areas;if(slot)s.dataset.slot=slot;}};
+  T(document.getElementById('planCard'),'today','plan');T(document.getElementById('focusZone'),'today practise','focus');T(document.getElementById('dashboard'),'today','parent');
+  T(document.getElementById('topics'),'practise mock','pick');T(document.getElementById('mission'),'practise mock','question');T(document.getElementById('coach'),'practise','side');
+  T(document.getElementById('modes'),'practise mock','side');T(document.getElementById('report'),'practise mock','side');
+  T(document.getElementById('examNote'),'learn','tips');T(document.getElementById('playerCard'),'rewards','player');T(document.getElementById('medals'),'rewards','medals');T(document.getElementById('leaderboard'),'rewards','board');}
+ function flatten(){const lay=document.querySelector('.layout');if(!lay)return;document.querySelectorAll('.layout [data-area]').forEach(p=>{let el=p.parentElement;while(el&&el!==lay){if(!el.dataset.area)el.classList.add('hub-flat');el=el.parentElement;}});}
  function nav(){if(document.getElementById('hubNav'))return;const n=document.createElement('nav');n.id='hubNav';n.className='hub-nav';n.setAttribute('aria-label','Areas');
   n.innerHTML=AREAS.map(([k,i,l])=>`<button type="button" data-area-go="${k}"><span aria-hidden="true">${i}</span> ${l}</button>`).join('');
   const st=document.querySelector('section.stats');(st||document.querySelector('header.hero')).insertAdjacentElement('afterend',n);
   // Today: one big "next best thing"
-  const lay=document.querySelector('.layout');if(lay&&!document.getElementById('nextBest')){const c=document.createElement('section');c.id='nextBest';c.className='panel next-best';c.dataset.area='today';c.innerHTML=`<h2>🎯 Next best thing</h2><p id="nextBestTxt" class="mini"></p><button type="button" class="primary big" id="nextBestGo">▶ Let’s go!</button>`;lay.insertAdjacentElement('afterbegin',c);
+  const lay=document.querySelector('.layout');if(lay&&!document.getElementById('nextBest')){const c=document.createElement('section');c.id='nextBest';c.className='panel next-best';c.dataset.area='today';c.dataset.slot='next';c.innerHTML=`<h2>🎯 Next best thing</h2><p id="nextBestTxt" class="mini"></p><button type="button" class="primary big" id="nextBestGo">▶ Let’s go!</button>`;lay.insertAdjacentElement('afterbegin',c);
    c.querySelector('#nextBestGo').addEventListener('click',()=>{const go=[...document.querySelectorAll('#planCard button')].find(b=>/^\s*go\s*$/i.test(b.textContent)&&!b.disabled);if(go){go.click();}else{const m=document.querySelector('[data-level="match"]');if(m)m.click();}show('practise');});}
   // Learn: a way into the lessons
-  if(lay&&!document.getElementById('learnCard')){const c=document.createElement('section');c.id='learnCard';c.className='panel';c.dataset.area='learn';c.innerHTML=`<h2>📚 Learn</h2><p class="mini">Step-by-step lessons and explainers for every topic.</p><button type="button" class="primary" id="learnGo">📘 Open the lessons</button>`;lay.insertAdjacentElement('afterbegin',c);
+  if(lay&&!document.getElementById('learnCard')){const c=document.createElement('section');c.id='learnCard';c.className='panel';c.dataset.area='learn';c.dataset.slot='lessons';c.innerHTML=`<h2>📚 Learn</h2><p class="mini">Step-by-step lessons and explainers for every topic.</p><button type="button" class="primary" id="learnGo">📘 Open the lessons</button>`;lay.insertAdjacentElement('afterbegin',c);
    c.querySelector('#learnGo').addEventListener('click',()=>{try{if(typeof Learn!=='undefined'&&Learn.open)Learn.open();}catch(e){}});}
   n.addEventListener('click',e=>{const b=e.target.closest('[data-area-go]');if(!b)return;const k=b.dataset.areaGo;if(k==='mock'){const m=document.querySelector('[data-mode="mock"]');if(m&&!m.classList.contains('active'))m.click();}show(k);});}
  function nextText(){const t=document.getElementById('nextBestTxt');if(!t)return;const row=[...document.querySelectorAll('#planCard button')].find(b=>/^\s*go\s*$/i.test(b.textContent)&&!b.disabled);
@@ -36,7 +37,8 @@ const Hub=(()=>{
  // the header: a ⚙️ menu for the buttons
  function menu(){const w=document.querySelector('.whoplays');if(!w||document.getElementById('hubMenuBtn'))return;const btn=document.createElement('button');btn.type='button';btn.className='heroBtn';btn.id='hubMenuBtn';btn.textContent='⚙️ Menu';btn.setAttribute('aria-expanded','false');
   const pop=document.createElement('div');pop.id='hubMenu';pop.className='hub-menu hidden';['#switchPlayer','[data-help="guide"]','#muteBtn','#voiceBtn','#installBtn'].forEach(sel=>{const el=w.querySelector(sel);if(el)pop.appendChild(el);});
-  w.appendChild(btn);w.appendChild(pop);btn.addEventListener('click',e=>{e.stopPropagation();pop.classList.toggle('hidden');btn.setAttribute('aria-expanded',String(!pop.classList.contains('hidden')));});
+  w.appendChild(btn);document.body.appendChild(pop);const place=()=>{const r=btn.getBoundingClientRect();pop.style.left=Math.max(8,Math.min(r.left,window.innerWidth-pop.offsetWidth-8))+'px';pop.style.top=(r.bottom+6)+'px';};
+  btn.addEventListener('click',e=>{e.stopPropagation();pop.classList.toggle('hidden');if(!pop.classList.contains('hidden'))place();btn.setAttribute('aria-expanded',String(!pop.classList.contains('hidden')));});window.addEventListener('scroll',()=>pop.classList.add('hidden'),{passive:true});window.addEventListener('resize',()=>pop.classList.add('hidden'));
   document.addEventListener('click',e=>{if(!pop.contains(e.target)&&e.target!==btn)pop.classList.add('hidden');});pop.addEventListener('click',e=>{if(e.target.closest('button'))setTimeout(()=>pop.classList.add('hidden'),0);});}
  // the save banner shrinks to a chip once progress is saved
  function saveChip(){const bar=document.getElementById('saveBar'),t=document.getElementById('saveTitle');if(!bar||!t)return;const upd=()=>{const ok=/saved/i.test(t.textContent)&&!/not saved/i.test(t.textContent);bar.classList.toggle('compact',ok&&!bar.dataset.open);};
@@ -46,7 +48,7 @@ const Hub=(()=>{
   new MutationObserver(()=>{const now=qtext();if(now===last)return;const first=!last;last=now;if(first)return;const a=document.body.dataset.areaNow;if(a!=='practise'&&a!=='mock')show(typeof mode!=='undefined'&&mode==='mock'?'mock':'practise');}).observe(m,{childList:true,subtree:true,characterData:true});}
  // the app's own "start practising" actions always bring Practise into view
  function hookStarts(){['pickTopic','practiseLike','restartSession'].forEach(n=>{const f=window[n];if(typeof f!=='function'||f.__hub)return;const w=function(...a){const r=f.apply(this,a);const want=typeof mode!=='undefined'&&mode==='mock'?'mock':'practise';if(!ready){pending=want;return r;}const now=document.body.dataset.areaNow;if(now!=='practise'&&now!=='mock')show(want);return r;};w.__hub=true;window[n]=w;});}
- function init(){try{tag();nav();focusBtn();menu();saveChip();autoSwitch();followQuestions();hookStarts();let k='today';try{k=sessionStorage.getItem('am-area')||'today';}catch(e){}ready=true;show(pending||k);}catch(e){console.warn('hub',e);}}
+ function init(){try{tag();nav();focusBtn();menu();saveChip();autoSwitch();flatten();followQuestions();hookStarts();let k='today';try{k=sessionStorage.getItem('am-area')||'today';}catch(e){}ready=true;show(pending||k);}catch(e){console.warn('hub',e);}}
  hookStarts();   // straight away, so practice started before the page finishes loading still lands in Practise
  return{init,show};})();
 window.addEventListener('load',()=>setTimeout(()=>Hub.init(),50));

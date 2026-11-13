@@ -1,7 +1,22 @@
 {
- "version": "2.73",
+ "version": "2.74",
  "date": "14 November 2026",
  "releases": [
+  {
+   "v": "2.74",
+   "date": "14 November 2026",
+   "kids": [
+    "🎨 Choose your own theme: Football (any team), Space, Animals or Music & art — even the questions change!"
+   ],
+   "tags": [
+    "new"
+   ],
+   "items": [
+    "🖥️ Wide screens use the space: Today shows the next best thing beside today’s plan; Practise and Mock exam have missions on the left, the question in the middle and the coach and game modes on the right; Rewards puts your player beside medals and the leaderboard. Phones still stack.",
+    "⚙️ The menu now drops down under its button instead of hiding behind the header.",
+    "🎨 Themes (⚙️ Menu → 🎨 Theme), chosen per child: ⚽ Anfield (the original), ⚽ Football — my team (any club name and team colour), 🚀 Space, 🐾 Animals & nature and 🎵 Music & art. Each changes the colours, background, header and sticker, and the stories in the questions — in practice and in Starlane — while the maths stays the same."
+   ]
+  },
   {
    "v": "2.73",
    "date": "14 November 2026",
@@ -130,20 +145,6 @@
    ],
    "items": [
     "🎬 Starlane Trader trailer: the opening star (2.8 s, swelling slowly) and the end card (5.5 s) last longer for anticipation, and the small yellow outside-camera aiming square no longer appears in videos."
-   ]
-  },
-  {
-   "v": "2.64",
-   "date": "11 November 2026",
-   "kids": [
-    "🎬 New Starlane trailer: sleek pirate fighters, Earth and the Moon, and Nova introducing the game at the end"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🎬 Starlane Trader trailer re-sequenced: star, launch with the station fly-by, fight, Verdant Ark, First Contact, hyperspace, arrival at Earth and the Moon, montage, the title screen with Nova’s voice-over, and the end card. The enemies are now fully fitted pirate fighters in dark-and-red livery; the cockpit shows the missile lock, then the missile strike is seen from outside; fights are staged away from the sun and planets so the cockpit is not washed out by glare."
    ]
   }
  ]

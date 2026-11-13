@@ -51,7 +51,7 @@ function examQuestion(kind,s){if(typeof bank==='undefined')return null;if(Math.r
   if(!q||typeof q.q!=='string'||q.fig||q.table||!Number.isFinite(+q.a)||q.q.length>230||/which|\bnot\b|odd one/i.test(q.q)||(String(q.a).split('.')[1]||'').length>2)continue;
   const a=+q.a,dp=(String(q.a).split('.')[1]||'').length,fm=v=>dp?(+v).toFixed(dp):String(Math.round(v)),set=new Set([fm(a)]),d=[1,2,5,10,Math.max(1,Math.round(a*.1)),Math.max(1,Math.round(a*.5)),3];let k=0;
   while(set.size<4&&k<40){const v=a+(Math.random()<.5?-1:1)*d[k%d.length]*(dp?Math.pow(10,-dp)*10:1);if(v>=0||a<0)set.add(fm(v));k++;}
-  return{how:(Array.isArray(q.s)&&q.s.length?q.s:Array.isArray(q.h)?q.h:[]).map(x=>String(x).replace(/<[^>]+>/g,'')).join(' ').slice(0,300),q:q.q.replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' '),opts:[...set].sort(()=>Math.random()-.5),ans:fm(a),u:q.u||'',topic:tp,exam:examId(s)};}
+  if(typeof themeText==='function')q=themeText(q,s);return{how:(Array.isArray(q.s)&&q.s.length?q.s:Array.isArray(q.h)?q.h:[]).map(x=>String(x).replace(/<[^>]+>/g,'')).join(' ').slice(0,300),q:q.q.replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' '),opts:[...set].sort(()=>Math.random()-.5),ans:fm(a),u:q.u||'',topic:tp,exam:examId(s)};}
  return null;}
 // the built-in Starlane copy uses the same socket
 if(typeof window!=='undefined')window.StarlaneQuestions={themedShare:.9,get:k=>examQuestion(k)};
@@ -112,7 +112,7 @@ function examHeader(){if(typeof stats==='undefined'||!document.querySelector('.h
   b.addEventListener('click',()=>{const go=()=>{try{Parent.open('overview');}catch(e){}};if(typeof Family!=='undefined'&&Family.guard)Family.guard('Change the exam plan',go);else go();});}
  b.innerHTML=badge;
  const sub=document.getElementById('heroSub');if(sub)sub.textContent=`Train your brain for ${p.name} with hundreds of changing puzzles, comic chaos, proper coaching and epic mock exams!`;
- const st=hero.querySelector('.sticker');if(st)st.innerHTML=!done&&d!==null&&d===0?'TEST<br>DAY!<br>GO!':!done&&d!==null&&d>0&&d<=60?`${d}<br>DAY${d===1?'':'S'}<br>TO GO!`:'BAM!<br>YOU\'VE<br>GOT THIS!';
+ const st=hero.querySelector('.sticker');if(st)st.innerHTML=!done&&d!==null&&d===0?'TEST<br>DAY!<br>GO!':!done&&d!==null&&d>0&&d<=60?`${d}<br>DAY${d===1?'':'S'}<br>TO GO!`:(window.THEME_STICKER||'BAM!<br>YOU\'VE<br>GOT THIS!');
  const m=examMock(),mi=document.getElementById('mockInfo');if(mi)mi.textContent=`Mocks: ${m.n} mixed questions in ${m.mins} minutes${m.mcq?', multiple choice like the real test':''}, no hints until review. ${p.format} These are original practice questions, not official past papers.`;
  const mc=document.querySelector('[data-mode="mock"]');if(mc)mc.textContent=`🏆 ${m.n}-question mock`;
  const lk=document.getElementById('examLink');if(lk){lk.href=p.sources[0][1];lk.textContent=`📄 ${p.short}: official material`;}
