@@ -55,3 +55,30 @@ function examQuestion(kind,s){if(typeof bank==='undefined')return null;if(Math.r
  return null;}
 // the built-in Starlane copy uses the same socket
 if(typeof window!=='undefined')window.StarlaneQuestions={themedShare:.9,get:k=>examQuestion(k)};
+// ---------------- Starlane maths: a record of what the game asked, and a one-tap check ----------------
+function slRecord(rec){if(typeof stats==='undefined'||!rec)return;const L=(stats.slMaths=Array.isArray(stats.slMaths)?stats.slMaths:[]);
+ L.push({t:Date.now(),ok:!!rec.ok,exam:rec.exam||null,topic:rec.topic||null,q:String(rec.q||'').slice(0,140)});if(L.length>200)L.splice(0,L.length-200);if(typeof save==='function')save(false);}
+if(typeof window!=='undefined'&&window.StarlaneQuestions)window.StarlaneQuestions.report=slRecord;  // the built-in copy reports here too
+function starlaneBlock(s){const L=Array.isArray(s.slMaths)?s.slMaths:[],wk=L.filter(x=>Date.now()-x.t<7*864e5),right=wk.filter(x=>x.ok).length,ex=wk.filter(x=>x.exam),mine=examId(s);
+ const byExam={};ex.forEach(x=>{byExam[x.exam]=(byExam[x.exam]||0)+1;});const examTxt=Object.keys(byExam).length?Object.entries(byExam).map(([k,n])=>`${n} × ${esc((EXAMS[k]||{}).name||k)}`).join(', '):'none yet';
+ const recent=L.slice(-8).reverse().map(x=>`<li>${x.ok?'✅':'❌'} ${esc(x.q)} <span class="section-note">— ${x.exam?esc((EXAMS[x.exam]||{}).short||x.exam)+' · '+esc(x.topic||''):'Starlane’s own space question'}</span></li>`).join('');
+ const mineOK=ex.length&&ex.every(x=>x.exam===mine);
+ return `<section class="exam-box" data-sl-box><h3>🚀 Starlane maths</h3>
+ <p class="section-note">${wk.length?`This week: <b>${wk.length}</b> question${wk.length>1?'s':''} in Starlane, <b>${right}</b> right first time. From the exam: ${examTxt}${ex.length?(mineOK?' ✅ all match the chosen exam':' ⚠️ some came from a different exam (it was changed during the week)'):''}.`:'No Starlane maths questions yet this week.'}</p>
+ ${recent?`<details><summary>Recent questions</summary><ul>${recent}</ul></details>`:''}
+ ${s===(typeof stats!=='undefined'?stats:null)?`<p><button type="button" data-sl-check>🔍 Check Starlane questions</button> <span class="section-note">Opens Starlane in the background and asks it for 10 questions — no playing needed.</span></p><div data-sl-result></div>`:''}</section>`;}
+// The check: open Starlane quietly, exactly as the arcade does, and ask it for questions through the same connection
+function slCheck(btn){const box=btn.closest('[data-sl-box]'),out=box&&box.querySelector('[data-sl-result]');if(!out)return;const show=h=>{out.innerHTML=h;};
+ if(!/^https?:/.test(location.protocol)){show('<p>⚠️ This check works on the live site (it needs the Starlane site alongside ApolloMaths).</p>');return;}
+ if(window.StarlaneHost&&!window.StarlaneHost.probe){show('<p>Starlane is open in the arcade right now — close it first, then try again.</p>');return;}
+ const mine=examId();btn.disabled=true;show('<p>Checking Starlane…</p>');
+ window.StarlaneHost={version:1,probe:true,profile:()=>({name:typeof playerName==='function'?playerName():'Commander',band:'11-12'}),loadSave:()=>null,saveSave:()=>{},high:()=>0,bank:()=>typeof bank!=='undefined'?bank:null,
+  question:(kind)=>examQuestion(kind),requestTest:()=>{},exit:()=>{},report:()=>{}};
+ const f=document.createElement('iframe');f.src=new URL('../Starlane/?host=apollo&probe=1',location.href).href;f.title='Starlane check';f.style.cssText='position:absolute;width:1px;height:1px;left:-9999px;border:0';document.body.appendChild(f);
+ const t0=Date.now(),done=h=>{clearInterval(tm);f.remove();window.StarlaneHost=null;btn.disabled=false;show(h);};
+ const tm=setInterval(()=>{let w=null;try{w=f.contentWindow;}catch(e){}if(w&&w.StarlaneSite&&w.StarlaneSite.ready&&typeof w.StarlaneSite.probe==='function'){let r;try{r=w.StarlaneSite.probe(10);}catch(e){done(`<p>⚠️ Starlane answered, but the check failed: ${esc(e.message)}</p>`);return;}
+   const qs=r.questions||[],match=qs.filter(q=>q.exam===mine).length,own=qs.filter(q=>!q.exam).length;
+   const verdict=!r.hosted?'⚠️ Starlane did not recognise ApolloMaths, so it would use its own built-in questions.':!r.socket?'⚠️ Starlane is not asking ApolloMaths for questions.':match===qs.length&&qs.length?`✅ All ${qs.length} questions came from ApolloMaths and match <b>${esc(EXAMS[mine].name)}</b>.`:`⚠️ ${match} of ${qs.length} matched ${esc(EXAMS[mine].name)}${own?` (${own} came from Starlane’s own pack)`:''}.`;
+   done(`<p>${verdict}</p><ol>${qs.map(q=>`<li>${esc(q.q)} <b>→ ${esc(q.ans)}${q.u?' '+esc(q.u):''}</b> <span class="section-note">— ${q.exam?esc((EXAMS[q.exam]||{}).name||q.exam)+' · '+esc(q.topic||'')+' · from ApolloMaths':'Starlane’s own pack'}</span></li>`).join('')}</ol>`);return;}
+  if(Date.now()-t0>12000)done('<p>⚠️ Starlane can’t be reached right now. Check the internet connection and that the Starlane site is published.</p>');},300);}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-sl-check]');if(b)slCheck(b);});

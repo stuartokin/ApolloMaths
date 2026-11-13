@@ -1,7 +1,20 @@
 {
- "version": "2.69",
+ "version": "2.70",
  "date": "14 November 2026",
  "releases": [
+  {
+   "v": "2.70",
+   "date": "14 November 2026",
+   "kids": [],
+   "tags": [
+    "parents",
+    "games"
+   ],
+   "items": [
+    "🚀 Starlane maths in the parent overview: each maths question answered in Starlane is recorded with where it came from (the child’s exam and topic, or Starlane’s own space questions) and whether it was right, with a weekly summary and the recent questions.",
+    "🔍 “Check Starlane questions” on the parent overview opens Starlane in the background and asks it for 10 questions through the same connection the game uses — showing each question’s source and a ✅ if they match the chosen exam. No playing needed."
+   ]
+  },
   {
    "v": "2.69",
    "date": "14 November 2026",
@@ -123,25 +136,6 @@
    ],
    "items": [
     "🎬 Starlane Trader: Pause → 🎬 WATCH (replacing “Nova’s Intro”, which is now on that page) offers a 30-second TRAILER (full-screen cinematic shots: launch, station, dogfight, Verdant Ark, Thorn Bloom, hyperspace, a planet, the charts, the paint shop, docking and the title card) and a 2-minute GAME OVERVIEW WITH NOVA in seven chapters with narrated captions. Both play hands-free in a sandbox copy — any key or tap stops them and you return exactly where you were. A 3-second countdown switch helps with screen recording. New players are offered the overview on Nova’s first welcome slide. Test mode lists both too."
-   ]
-  },
-  {
-   "v": "2.60",
-   "date": "11 November 2026",
-   "kids": [
-    "🛡 Starlane: your weapons switch off near space stations so you can’t hit one by accident",
-    "📦 Nova tells you when your hold is too full to pick up a canister",
-    "🚀 Launching and docking now go properly through the hangar door, and your ship’s name sits on the hull"
-   ],
-   "tags": [
-    "games",
-    "fixes"
-   ],
-   "items": [
-    "🚀 Starlane Trader: weapons safe near stations (Pause → Controls → Flight assists, on by default, all devices) — within 10 km of a station lasers and missiles are held, and they arm again at once if you are attacked. Tours and the guided flight are not affected.",
-    "📦 Full cargo hold: when a canister appears and there is no room, Nova and the screen say so; flying into it no longer smashes it or damages the ship, and the radar card explains why it cannot be scooped.",
-    "🎬 Launch and docking cut scenes: the ship now flies through the middle of the hangar opening (it used to pass through the wall below it), and the cameras stay inside the hangar and look out through the opening.",
-    "🎨 Your ship’s name is painted onto the hull surface on both sides instead of floating beside it."
    ]
   }
  ]

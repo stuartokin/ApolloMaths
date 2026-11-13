@@ -70,6 +70,7 @@ const Arcade=(()=>{
    high:()=>stats.arcade.high[hsKey()]||0,
    bank:()=>typeof bank!=='undefined'?bank:null,
    question:(kind,ctx)=>typeof examQuestion==='function'?examQuestion(kind):null, // Starlane's questions follow this child's exam profile
+   report:rec=>{if(typeof slRecord==='function')slRecord(rec);},
    requestTest:cb=>{const go=()=>{try{if(typeof Family!=='undefined'&&Family.log)Family.log('A grown-up opened Starlane test mode');}catch(e){}cb();};if(typeof Family!=='undefined'&&Family.guard)Family.guard('Open Starlane test mode',go);else go();},
    exit:res=>{const sc=Math.max(0,+(res&&res.score)||0);if(sc>(stats.arcade.high[hsKey()]||0))stats.arcade.high[hsKey()]=sc;try{recordTable(hsKey(),playerName(),sc);}catch(e){}save(false);closeRemote();view='menu';menu(admin?null:arcadeStatus(stats));}};
   const o=document.createElement('div');o.id='slRemote';o.style.cssText='position:fixed;inset:0;z-index:2147483000;background:#000;display:flex;align-items:center;justify-content:center';
