@@ -2,6 +2,11 @@
 
 Open `index.html` (or the GitHub Pages site). Works offline; no accounts, no adverts.
 
+
+> **Developers and AI assistants: start with `CLAUDE.md` and `docs/`** (knowledge base, lessons learned, roadmap)
+> and the test rig in `tests/`. The changelog lines below (`vX.Y:`) are accurate; some older prose sections describe
+> features since changed or removed (see `docs/ROADMAP.md`).
+
 ## How the code is organised
 | Layer | Files | What it does |
 |---|---|---|
