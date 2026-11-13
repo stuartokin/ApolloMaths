@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>ApolloMaths question engine</title>
+<!-- The question engine on its own, for other sites on stuartokin.github.io (such as Starlane) to use in a hidden frame.
+     It loads only the question files — no screens, no saved progress — and answers Engine.ask(kind, exam, name). -->
+<script>var stats={exam:{profile:'grammar11'},adapt:{}};window.esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));function save(){}</script>
+<script src="js/core.js"></script><script src="js/data/topics.js"></script>
+<script src="js/data/questions-core.js"></script><script src="js/data/questions-focus.js"></script><script src="js/data/questions-extra.js"></script>
+<script src="js/data/questions-agent.js"></script><script src="js/data/questions-exams.js"></script><script src="js/data/difficulty.js"></script><script src="js/data/exams.js"></script>
+<script>
+window.Engine={ready:true,exams:()=>EXAM_ORDER.map(k=>({id:k,name:EXAMS[k].name})),
+ ask(kind,exam,name){if(EXAMS[exam])stats.exam.profile=exam;const nm=String(name||'Commander').slice(0,20),fix=t=>String(t==null?'':t).replace(/\bApollo(’s|'s)?\b/g,(m,p)=>nm+(p||''));
+  for(let i=0;i<10;i++){const q=examQuestion(kind);if(q){q.q=fix(q.q);q.how=fix(q.how);return q;}}return null;}};
+</script></head><body></body></html>

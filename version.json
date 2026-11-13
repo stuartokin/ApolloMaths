@@ -1,7 +1,28 @@
 {
- "version": "2.78",
+ "version": "2.79",
  "date": "14 November 2026",
  "releases": [
+  {
+   "v": "2.79",
+   "date": "14 November 2026",
+   "kids": [
+    "🧭 A refreshed tour, and your Focus Zone now names your own exam"
+   ],
+   "tags": [
+    "parents",
+    "fix"
+   ],
+   "items": [
+    "🛡️ Deleting a player now needs their name typed exactly (plus the grown-up passphrase), and deleted players go to a ♻️ recycle bin for 30 days — restore them from “Who’s playing?” with all their progress.",
+    "🪐 Starlane now always opens from its own site (stuartokin.github.io/Starlane); the copy built into ApolloMaths has been removed, so the app is smaller and faster.",
+    "🚀 Maths questions sent to Starlane now use the child’s own name and theme (never “Apollo”).",
+    "⭐ The Focus Zone names each child’s own exam, and existing players on other exams get focus topics from their exam (unless a grown-up chose them).",
+    "👪 The family-codes reminder moved from the children’s screen to the Grown-ups button (⚠️). Setup adds “🙂 I’ll design my own” for the character.",
+    "🎓 The guided tour and Help are updated for the new layout — the tour now visits every area (16 steps).",
+    "🤖 Exam watch: it now proposes key dates from official sources (shown with ✨ once you merge) and drafts whole question generators, each run 50 times in a sandbox and checked by a second solve.",
+    "🧩 engine.html: the question engine on its own, so the Starlane site can offer exam practice."
+   ]
+  },
   {
    "v": "2.78",
    "date": "14 November 2026",
@@ -147,17 +168,6 @@
    "items": [
     "🚀 Starlane maths in the parent overview: each maths question answered in Starlane is recorded with where it came from (the child’s exam and topic, or Starlane’s own space questions) and whether it was right, with a weekly summary and the recent questions.",
     "🔍 “Check Starlane questions” on the parent overview opens Starlane in the background and asks it for 10 questions through the same connection the game uses — showing each question’s source and a ✅ if they match the chosen exam. No playing needed."
-   ]
-  },
-  {
-   "v": "2.69",
-   "date": "14 November 2026",
-   "kids": [],
-   "tags": [
-    "parents"
-   ],
-   "items": [
-    "📚 Exam sources updated after the exam-watch agent’s first run: Tiffin’s illustrative maths questions, its admissions FAQs and Tiffin Girls’ Year 7 page; GL Assessment’s free familiarisation materials (new address); ISEB’s Pre-Test page for families and the 13+ Common Entrance timetable. Eton’s site blocks automated checks, so the agent now lists it to check by hand."
    ]
   }
  ]

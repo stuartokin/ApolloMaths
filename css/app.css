@@ -532,3 +532,7 @@ dialog.parent.win-max[open]{width:100vw;height:100dvh;max-width:100vw;max-height
 @media (max-width:1099px){body.student.unsaved .save-ribbon{display:block;position:fixed;top:0;left:0;right:118px;z-index:69;background:#e51c35;color:#fff;font-weight:900;font-size:13px;padding:7px 12px;border:0;border-bottom:3px solid #7a0f1d;text-align:left;border-radius:0 0 12px 0}
  body.student.unsaved{padding-top:30px}}
 @media (prefers-reduced-motion:reduce){.s-save.warn,.s-save-mini.warn{animation:none}}
+
+/* the family-codes reminder lives on the Grown-ups button, not on the children's screen */
+body.student #famBanner{display:none!important}
+.plbin{margin:10px 0;padding:8px 10px;border:2px dashed rgba(0,0,0,.25);border-radius:12px;background:#fff8e6}.plbin-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px}

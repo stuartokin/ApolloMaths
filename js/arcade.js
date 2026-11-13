@@ -2,6 +2,9 @@
 // PRESENTATION + INTERACTION: the hidden arcade shell — game picker, shared time limits, controls, scores.
 // The games themselves are in js/games.js (all original). Admin play is unlimited and not counted.
 let arcadeOpen=false;
+// Starlane Trader now lives on its own site (stuartokin.github.io/Starlane); the arcade lists it and opens it there.
+if(typeof GAME_LIST!=='undefined'&&!GAME_LIST.some(g=>g.id==='starlane'))GAME_LIST.push({id:'starlane',name:'Starlane Trader',icon:'🪐',desc:'Trade, fight and explore a whole galaxy. Your career is saved!',two:'none'});
+if(typeof GAMES!=='undefined'&&!GAMES.starlane)GAMES.starlane=()=>null;
 const Arcade=(()=>{
  let sess=null,mp=null,keysP=[{},{}],latchP=[{},{}],padP=[{},{}],latch={},cv,ctx,raf=0,view='menu',admin=false,cap=0,played=0,last=0,paused=false,keys={},pad={l:false,r:false,u:false,d:false,f:false},game=null,gameId='invaders',avImg=null,ac=null;
  const dlg=()=>get('arcade');
@@ -80,14 +83,14 @@ const Arcade=(()=>{
   let ok=false;const t0=Date.now();
   slTimer=setInterval(()=>{let ready=false;try{ready=!!(f.contentWindow&&f.contentWindow.StarlaneSite&&f.contentWindow.StarlaneSite.ready);}catch(e){}
    if(ready&&!ok){ok=true;try{f.focus();}catch(e){}}
-   if(!ok&&Date.now()-t0>9000){clearInterval(slTimer);o.innerHTML=`<div style="color:#fff;text-align:center;font:16px system-ui;max-width:420px;padding:20px"><h3 style="color:#ffe45e">Starlane can’t be reached right now</h3><p>Check the internet connection and try again, or play the copy built into ApolloMaths.</p><p><button id="slRetry" type="button">Try again</button> <button id="slLocalBtn" type="button">Play built-in version</button> <button id="slBack" type="button">Back</button></p></div>`;
-    o.querySelector('#slRetry').onclick=()=>openRemoteStarlane();o.querySelector('#slLocalBtn').onclick=()=>{closeRemote();slLocal=true;start();slLocal=false;};o.querySelector('#slBack').onclick=()=>{closeRemote();view='menu';menu(admin?null:arcadeStatus(stats));};return;}
+   if(!ok&&Date.now()-t0>9000){clearInterval(slTimer);o.innerHTML=`<div style="color:#fff;text-align:center;font:16px system-ui;max-width:420px;padding:20px"><h3 style="color:#ffe45e">Starlane can’t be reached right now</h3><p>Check the internet connection and try again, then try again.</p><p><button id="slRetry" type="button">Try again</button> <button id="slBack" type="button">Back</button></p></div>`;
+    o.querySelector('#slRetry').onclick=()=>openRemoteStarlane();o.querySelector('#slBack').onclick=()=>{closeRemote();view='menu';menu(admin?null:arcadeStatus(stats));};return;}
    // play time keeps counting while Starlane runs on its own site
    if(ok&&!admin){played+=1;if(played>=cap){try{f.contentWindow.StarlaneSite.forceExit();}catch(e){}closeRemote();endSession('time');locked(arcadeStatus(stats));}}},1000);}
  function start(){if(!admin){if(!sess){const st=arcadeStatus(stats);if(!st.canPlay){locked(st);return;}sess={cap:st.sessionSecs,played:0,carried:st.bank};if(stats.arcade.bank.secs){stats.arcade.bank={secs:0,day:''};save(false);}}
   if(sessLeft()<10){endSession('time');locked(arcadeStatus(stats));return;}}
   cap=admin?Infinity:sessLeft();played=0;paused=false;keys={};Object.keys(pad).forEach(k=>pad[k]=false);
-  if(gameId==='starlane'&&remoteStarlane()){openRemoteStarlane();return;}
+  if(gameId==='starlane'){if(remoteStarlane())openRemoteStarlane();else{view='menu';card(`<div class="arc-card"><h3>🪐 Starlane Trader</h3><p>Starlane opens from its own website, so it needs the internet and the app opened from <b>stuartokin.github.io</b>.</p><div class="actions" style="justify-content:center"><button class="primary" data-arc="menu" type="button">◀ Other games</button></div></div>`);}return;}
   if(gameId!=='starlane'&&(gameId==='invaders'||lookOf(gameId)==='player')){avImg=new Image();avImg.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(drawAvatar(stats.avatar,{scene:false}));}
   keysP=[{},{}];latchP=[{},{}];padP=[{},{}];
   const myLook=lookOf(gameId)==='player';if(!myLook&&gameId!=='invaders')avImg=null;
