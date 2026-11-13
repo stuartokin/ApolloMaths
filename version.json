@@ -1,7 +1,24 @@
 {
- "version": "2.75",
+ "version": "2.76",
  "date": "14 November 2026",
  "releases": [
+  {
+   "v": "2.76",
+   "date": "14 November 2026",
+   "kids": [
+    "💾 One save button that tells you whether you’re saved — and themed starter outfits"
+   ],
+   "tags": [
+    "parents",
+    "fix"
+   ],
+   "items": [
+    "💾 Saving has one clear home: a save button in the side rail (top right on phones) that shows “✅ Saved 15:13” or “⚠️ Not saved — tap to save”, and opens Save, Open, Save as and Export. Fixed: the save buttons had been hidden on the child’s screen when progress wasn’t saved yet.",
+    "🖥️ Large desktops use the whole width (four columns above 1,800 pixels), and very large displays scale everything up (120% from 2,400 pixels, 140% from 3,200) so it stays readable.",
+    "ℹ️ The footer shows just the essentials — name, Help, version and ℹ️ About — with the rest behind ℹ️.",
+    "👕 Each theme has a starter outfit (nature, mission or rainbow T-shirt) with its own held item and scene. Switching theme swaps the starter items; anything bought stays owned."
+   ]
+  },
   {
    "v": "2.75",
    "date": "14 November 2026",
@@ -139,17 +156,6 @@
    ],
    "items": [
     "🚀 Starlane Trader now runs from its own site (stuartokin.github.io/Starlane) when opened from the arcade: one shared copy of the game. ApolloMaths passes the child’s name, level and question bank, keeps the saved commander in the child’s progress, runs the grown-up check for test mode, and records the score when the player leaves. Arcade play time still counts. If the Starlane site cannot be reached, a message offers to try again or play the built-in copy, which stays as a fallback."
-   ]
-  },
-  {
-   "v": "2.66",
-   "date": "12 November 2026",
-   "kids": [],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🚀 Starlane Trader: the game file now has a question socket (window.StarlaneQuestions) so the standalone Starlane site and ApolloMaths can supply its maths questions; the game files are identical in both repos. No change in play."
    ]
   }
  ]

@@ -40,7 +40,7 @@ const Student=(()=>{
  function refresh(){try{const av=document.getElementById('sAv');if(av&&typeof drawAvatar==='function'&&typeof stats!=='undefined'){const sig=JSON.stringify([stats.avatar,themeGroup()]);if(av.dataset.sig!==sig){av.dataset.sig=sig;av.innerHTML=drawAvatar(stats.avatar,{});}}
   const n=document.getElementById('sName');if(n&&typeof playerName==='function')n.textContent=playerName();const p=document.getElementById('sPts');if(p)p.textContent=txt('points');const st=document.getElementById('sStreak');if(st)st.textContent=txt('streak');
   const now=document.body.dataset.areaNow;document.querySelectorAll('#sRail [data-go]').forEach(b=>b.classList.toggle('active',b.dataset.go===now&&!b.classList.contains('s-me')));
-  const snd=soundLabel();const a=document.getElementById('sSound');if(a)a.textContent=snd;const b=document.getElementById('sSoundMini');if(b){b.textContent=snd.slice(0,2);b.title=snd;}}catch(e){}}
+  saveState();const snd=soundLabel();const a=document.getElementById('sSound');if(a)a.textContent=snd;const b=document.getElementById('sSoundMini');if(b){b.textContent=snd.slice(0,2);b.title=snd;}}catch(e){}}
  // ---- the menu, in the usual order ----
  function menuOrder(){const m=document.getElementById('hubMenu');if(!m)return;if(!document.getElementById('menuGrown')){const g=document.createElement('button');g.type='button';g.className='heroBtn';g.id='menuGrown';g.textContent='👪 Grown-ups';g.addEventListener('click',openGrownups);m.appendChild(g);}
   const tb=document.getElementById('themeBtn');if(tb)tb.textContent='🎨 Theme & character';
@@ -55,8 +55,28 @@ const Student=(()=>{
   if(played&&!document.getElementById('roomGames')){const g=document.createElement('section');g.id='roomGames';g.className='panel';g.dataset.area='rewards';g.dataset.slot='board';g.innerHTML='<h2>🕹️ My games</h2><p class="mini">Your arcade games — themed to match you. Play time is earned with maths.</p><button type="button" class="primary" id="roomGamesGo">🕹️ Open the arcade</button>';lay.appendChild(g);g.querySelector('#roomGamesGo').addEventListener('click',()=>{try{Arcade.open();}catch(e){}});}
   if(typeof Hub!=='undefined'&&document.body.dataset.areaNow)document.querySelectorAll('#roomThemes,#roomGames').forEach(el=>el.classList.toggle('area-on',el.dataset.area.split(' ').includes(document.body.dataset.areaNow)));}
  function grownupsOut(){const d=document.getElementById('dashboard');const s=d&&(d.closest('section')||d);if(s){s.dataset.area='grownups';s.classList.remove('area-on');}}
- function init(){try{const h1=document.querySelector('.hero h1');if(h1&&/<br/i.test(h1.innerHTML))h1.innerHTML=h1.innerHTML.replace(/<br\s*\/?>/i,' ');rail();menuOrder();myRoom();grownupsOut();document.body.classList.add('student');refresh();setInterval(()=>{refresh();myRoom();},1000);}catch(e){console.warn('student',e);}}
- return{init,itemForTheme,refresh,openGrownups};})();
+ function init(){try{setTimeout(()=>{saveHome();footer();},50);const h1=document.querySelector('.hero h1');if(h1&&/<br/i.test(h1.innerHTML))h1.innerHTML=h1.innerHTML.replace(/<br\s*\/?>/i,' ');rail();menuOrder();myRoom();grownupsOut();document.body.classList.add('student');refresh();setInterval(()=>{refresh();myRoom();},1000);}catch(e){console.warn('student',e);}}
+ // the theme's starter outfit, held item and scene replace items that belong to a different theme
+ function starters(){if(typeof stats==='undefined'||!stats.avatar||!stats.avatar.eq)return;const g=themeGroup(),eq=stats.avatar.eq,pre={animals:'an_',space:'sp_',music:'mu_'}[g],dflt=typeof defaultAvatar==='function'?defaultAvatar().eq:{};
+  for(const slot of ['top','hand','scene','hat','pet','boots']){const it=eq[slot]&&itemById[eq[slot]],fits=it?(g==='football'?!it.theme:it.theme===g):true;if(fits)continue;
+   const st=pre&&shopItems.find(i=>i.free&&i.slot===slot&&i.id.startsWith(pre));eq[slot]=st?st.id:(dflt[slot]!==undefined?dflt[slot]:null);}
+  if(pre)for(const slot of ['top','hand','scene']){const it=eq[slot]&&itemById[eq[slot]];if(!it||!it.theme){const st=shopItems.find(i=>i.free&&i.slot===slot&&i.id.startsWith(pre));if(st)eq[slot]=st.id;}}
+  if(typeof save==='function')save(false);try{if(typeof Locker!=='undefined'&&Locker.refresh)Locker.refresh();}catch(e){}refresh();}
+ // ---- saving: one clear home — a 💾 button in the rail (and at the top on phones) that opens the save options ----
+ function saveHome(){const btns=document.querySelector('#saveBar .savebtns');if(!btns||document.getElementById('savePop'))return;
+  const pop=document.createElement('div');pop.id='savePop';pop.className='save-pop hidden';pop.innerHTML='<b id="savePopTitle"></b><span class="mini" id="savePopDetail"></span>';pop.appendChild(btns);document.body.appendChild(pop);
+  const mk=(id,cls,host)=>{const b=document.createElement('button');b.type='button';b.id=id;b.className=cls;b.addEventListener('click',e=>{e.stopPropagation();const open=pop.classList.contains('hidden');pop.classList.toggle('hidden');if(open){const z=parseFloat(getComputedStyle(document.documentElement).zoom)||1,r=b.getBoundingClientRect(),W=window.innerWidth/z,H=window.innerHeight/z,L=r.left/z,B=r.bottom/z,T=r.top/z;let top=B+6;if(top+pop.offsetHeight>H-8)top=Math.max(8,T-pop.offsetHeight-6);pop.style.left=Math.max(8,Math.min(L,W-pop.offsetWidth-8))+'px';pop.style.top=top+'px';}});host.appendChild(b);return b;};
+  const foot=document.querySelector('#sRail .s-foot');if(foot){const b=mk('sSave','s-save',foot);foot.insertBefore(b,foot.firstChild);}mk('sSaveMini','s-save-mini',document.body);
+  document.addEventListener('click',e=>{if(!pop.contains(e.target))pop.classList.add('hidden');});pop.addEventListener('click',e=>{if(e.target.closest('button'))setTimeout(()=>pop.classList.add('hidden'),300);});}
+ function saveState(){const t=txt('saveTitle'),ok=/saved/i.test(t)&&!/not saved/i.test(t),chip=txt('fileChip').replace(/^\W+/,''),time=(chip.match(/\d{1,2}:\d{2}/)||[''])[0];
+  const lbl=ok?`✅ Saved${time?' '+time:''}`:'⚠️ Not saved — tap to save';const a=document.getElementById('sSave');if(a){a.textContent=lbl;a.classList.toggle('warn',!ok);}
+  const m=document.getElementById('sSaveMini');if(m){m.textContent=ok?'💾':'⚠️';m.title=lbl;m.classList.toggle('warn',!ok);}
+  const pt=document.getElementById('savePopTitle');if(pt)pt.textContent=t;const pd=document.getElementById('savePopDetail');if(pd)pd.textContent=chip||txt('saveDetail');}
+ // ---- the footer: the essentials, with the rest behind ℹ️ ----
+ function footer(){const f=document.querySelector('footer.footer');if(!f||f.dataset.slim)return;f.dataset.slim='1';const more=document.createElement('div');more.id='footMore';more.className='foot-more hidden';
+  [...f.childNodes].forEach(n=>{const keep=n.nodeType===1&&(n.matches('.pname,[data-help]')||n.id==='appVersion');if(n.nodeType===1&&n.classList.contains('aidisc'))more.appendChild(n);else if(n.nodeType===3&&/Original|adverts|required/i.test(n.textContent)){more.appendChild(document.createTextNode(n.textContent.replace(/^\s*❤️?\s*·?/,'').trim()+' '));n.textContent=' ❤️ · ';}else if(!keep&&n.nodeType===1&&!n.matches('.pname'))more.appendChild(n);});
+  const info=document.createElement('button');info.type='button';info.className='linkbtn';info.textContent='ℹ️ About';info.addEventListener('click',()=>more.classList.toggle('hidden'));f.appendChild(document.createTextNode(' · '));f.appendChild(info);f.appendChild(more);}
+ return{init,itemForTheme,refresh,openGrownups,starters,saveHome,saveState,footer};})();
 window.addEventListener('load',()=>setTimeout(()=>Student.init(),400));
 // a new player's interests and character (chosen on the add-player form) are applied as their profile opens
 window.addEventListener('load',()=>setTimeout(()=>{try{const raw=sessionStorage.getItem('am-new-look');if(!raw||typeof stats==='undefined')return;const n=JSON.parse(raw),cur=Storage.current&&Storage.current();if(!cur||cur.id!==n.pid)return;sessionStorage.removeItem('am-new-look');

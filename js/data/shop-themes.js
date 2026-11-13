@@ -5,6 +5,7 @@
 const T=(theme,list)=>list.map(([id,slot,cat,name,em,price,desc,extra])=>Object.assign({id:theme.slice(0,2)+'_'+id,slot,cat,name,icon:em,em,price,desc,theme},price===0?{free:true}:{},extra||{}));
 const items=[
  ...T('animals',[
+  ['tee','top','kits','Nature T-shirt','🌱',0,'Your starter shirt for the great outdoors.',{col:'#5bb36a'}],
   ['magnifier','hand','hands','Magnifying glass','🔍',0,'For spotting bugs, footprints and tricky numbers.'],
   ['meadow','scene','scenes','Wildflower meadow','🌼',0,'Bees, butterflies and a sunny sky.',{bg:'linear',sky:'#bfe9ff',ground:'#8fd694',dec:['🌼','🦋','🌷']}],
   ['ranger','top','kits','Ranger shirt','🌿',60,'Khaki shirt with a leaf badge.',{col:'#7a8a4a'}],
@@ -23,6 +24,7 @@ const items=[
   ['ocean','scene','scenes','Ocean reef','🐠',800,'Coral, turtles and bright fish.',{sky:'#9fe3ff',ground:'#3aa6c9',dec:['🐠','🐢','🪸']}],
   ['safari','scene','scenes','Safari sunset','🦁',1600,'Lions, giraffes and a golden sky.',{sky:'#ffcf8a',ground:'#d9a24a',dec:['🦒','🦁','🌳']}]]),
  ...T('space',[
+  ['tee','top','kits','Mission T-shirt','🚀',0,'Your starter shirt for space training.',{col:'#2c3e8f'}],
   ['wrench','hand','hands','Space wrench','🔧',0,'Fixes satellites and sums.'],
   ['launchpad','scene','scenes','Launch pad','🚀',0,'Countdown complete — ready for lift-off.',{sky:'#1b1f4b',ground:'#4b4f70',dec:['⭐','🚀','✨']}],
   ['flightsuit','top','kits','Flight suit','👨‍🚀',60,'Orange flight suit with mission patches.',{col:'#f28c28'}],
@@ -40,6 +42,7 @@ const items=[
   ['moonbase','scene','scenes','Moon base','🌕',400,'Craters, domes and the Earth rising.',{sky:'#0e1230',ground:'#9aa0b5',dec:['🌍','🛰️','⭐']}],
   ['saturn','scene','scenes','Saturn’s rings','🪐',900,'The best view in the solar system.',{sky:'#271a52',ground:'#5b4a8a',dec:['🪐','✨','🌠']}]]),
  ...T('music',[
+  ['tee','top','kits','Rainbow T-shirt','🌈',0,'Your starter shirt for the studio and the stage.',{col:'#f28ab2'}],
   ['brush','hand','hands','Paintbrush','🖌️',0,'Ready for a masterpiece.'],
   ['studio','scene','scenes','Art studio','🎨',0,'Easels, paint pots and sunshine.',{sky:'#fff0f6',ground:'#e9c6d8',dec:['🎨','🖼️','✏️']}],
   ['artsmock','top','kits','Artist’s smock','🎨',60,'Splattered with every colour.',{col:'#f2f2f2'}],

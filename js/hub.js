@@ -10,6 +10,7 @@ const Hub=(()=>{
   T(document.getElementById('planCard'),'today','plan');T(document.getElementById('focusZone'),'today practise','focus');T(document.getElementById('dashboard'),'today','parent');
   T(document.getElementById('topics'),'practise mock','pick');T(document.getElementById('mission'),'practise mock','question');T(document.getElementById('coach'),'practise','side');
   T(document.getElementById('modes'),'practise mock','side');T(document.getElementById('report'),'practise mock','side');
+  [['coach','a'],['modes','a'],['report','b']].forEach(([id,c])=>{const s=sec(document.getElementById(id));if(s)s.dataset.col=c;});
   T(document.getElementById('examNote'),'learn','tips');T(document.getElementById('playerCard'),'rewards','player');T(document.getElementById('medals'),'rewards','medals');T(document.getElementById('leaderboard'),'rewards','board');}
  function flatten(){const lay=document.querySelector('.layout');if(!lay)return;document.querySelectorAll('.layout [data-area]').forEach(p=>{let el=p.parentElement;while(el&&el!==lay){if(!el.dataset.area)el.classList.add('hub-flat');el=el.parentElement;}});}
  function nav(){if(document.getElementById('hubNav'))return;const n=document.createElement('nav');n.id='hubNav';n.className='hub-nav';n.setAttribute('aria-label','Areas');
@@ -37,7 +38,7 @@ const Hub=(()=>{
  // the header: a ⚙️ menu for the buttons
  function menu(){const w=document.querySelector('.whoplays');if(!w||document.getElementById('hubMenuBtn'))return;const btn=document.createElement('button');btn.type='button';btn.className='heroBtn';btn.id='hubMenuBtn';btn.textContent='⚙️ Menu';btn.setAttribute('aria-expanded','false');
   const pop=document.createElement('div');pop.id='hubMenu';pop.className='hub-menu hidden';['#switchPlayer','[data-help="guide"]','#muteBtn','#voiceBtn','#installBtn'].forEach(sel=>{const el=w.querySelector(sel);if(el)pop.appendChild(el);});
-  w.appendChild(btn);document.body.appendChild(pop);const place=()=>{const r=btn.getBoundingClientRect();pop.style.left=Math.max(8,Math.min(r.left,window.innerWidth-pop.offsetWidth-8))+'px';pop.style.top=(r.bottom+6)+'px';};
+  w.appendChild(btn);document.body.appendChild(pop);const place=()=>{const z=parseFloat(getComputedStyle(document.documentElement).zoom)||1,r=btn.getBoundingClientRect();pop.style.left=Math.max(8,Math.min(r.left/z,window.innerWidth/z-pop.offsetWidth-8))+'px';pop.style.top=(r.bottom/z+6)+'px';};
   btn.addEventListener('click',e=>{e.stopPropagation();pop.classList.toggle('hidden');if(!pop.classList.contains('hidden'))place();btn.setAttribute('aria-expanded',String(!pop.classList.contains('hidden')));});window.addEventListener('scroll',()=>pop.classList.add('hidden'),{passive:true});window.addEventListener('resize',()=>pop.classList.add('hidden'));
   document.addEventListener('click',e=>{if(!pop.contains(e.target)&&e.target!==btn)pop.classList.add('hidden');});pop.addEventListener('click',e=>{if(e.target.closest('button'))setTimeout(()=>pop.classList.add('hidden'),0);});}
  // the save banner shrinks to a chip once progress is saved
