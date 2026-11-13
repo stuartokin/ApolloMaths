@@ -1,7 +1,24 @@
 {
- "version": "2.67",
+ "version": "2.68",
  "date": "13 November 2026",
  "releases": [
+  {
+   "v": "2.68",
+   "date": "13 November 2026",
+   "kids": [
+    "🎓 Practice now follows the exam you are preparing for"
+   ],
+   "tags": [
+    "parents",
+    "new"
+   ],
+   "items": [
+    "🎓 Exam profiles: Tiffin Stage 1, Tiffin Stage 2, 11+ grammar (multiple choice), ISEB Common Pre-Test (Eton, Harrow and others) and 13+ Common Entrance / scholarship. Each child picks one in the parent overview (“🎓 Exam & sources”); mixed and focus practice weight topics to match it. Existing children are recognised from their exam name — Apollo stays on Tiffin Stage 2.",
+    "📚 Sources: each exam lists the official pages our original questions are modelled on (Tiffin’s illustrative questions and admissions policy, ISEB, Eton and Harrow admissions and scholarship pages), with the date they were last checked.",
+    "🚀 Starlane’s maths questions now follow the child’s exam, whether played from the Starlane site or the built-in copy.",
+    "🤖 Exam-watch agent (tools/exam-watch): a scheduled GitHub Action that checks the official pages and admissions news, drafts and double-checks new original questions, and opens a pull request with a report for review."
+   ]
+  },
   {
    "v": "2.67",
    "date": "13 November 2026",
@@ -128,21 +145,6 @@
    ],
    "items": [
     "🚀 Starlane Trader: the tractor beam in “The Black-Hole Time-Warp” now responds to every FIRE control — keyboard, mouse, gamepad and both touch FIRE buttons (it ignored the side FIRE button on tablets and folds). While you are grabbing or towing the meteor, FIRE works the beam only, so your lasers no longer shoot the meteor you are trying to catch."
-   ]
-  },
-  {
-   "v": "2.58",
-   "date": "11 November 2026",
-   "kids": [
-    "🌌 Adventures in Starlane now have your full attention — no pirates or other chatter interrupting the story"
-   ],
-   "tags": [
-    "games",
-    "fixes"
-   ],
-   "items": [
-    "🚀 Starlane Trader: adventures are exclusive — random arrivals pause, other ships nearby leave when a space adventure starts, and only the adventure’s own lines are spoken, so the narration and its words stay in step.",
-    "📱 On touch screens the on-screen FIRE and joystick are hidden while a puzzle panel is showing (the game is paused until you answer), so it no longer looks as though FIRE has stopped working."
    ]
   }
  ]

@@ -1,0 +1,63 @@
+{
+ "checked": "2026-11",
+ "pages": [
+  {
+   "exam": "tiffin1",
+   "label": "Tiffin School — Year 7 admissions (illustrative questions, policy and FAQs under “Important Documents”)",
+   "url": "https://www.tiffinschool.co.uk/admissions/year-7-admissions"
+  },
+  {
+   "exam": "tiffin1",
+   "label": "Tiffin School admissions policy 2027–28 (test procedure, section 7)",
+   "url": "https://www.tiffinschool.co.uk/wp-content/uploads/2026/09/Admissions-Policy-2027-28-Adopted-February-2026.pdf"
+  },
+  {
+   "exam": "tiffin1",
+   "label": "Quest Assessments — Tiffin familiarisation guidance",
+   "url": "https://questassessments.com/parent-guidance-consortium/tiffin-11-plus"
+  },
+  {
+   "exam": "tiffin1",
+   "label": "The Tiffin Girls’ School — admissions",
+   "url": "https://www.tiffingirls.org"
+  },
+  {
+   "exam": "grammar11",
+   "label": "GL Assessment — 11+ familiarisation materials",
+   "url": "https://www.gl-assessment.co.uk/support/11-familiarisation-materials/"
+  },
+  {
+   "exam": "grammar11",
+   "label": "Your local authority or consortium admissions pages (test dates and familiarisation papers)",
+   "url": "https://www.gov.uk/schools-admissions"
+  },
+  {
+   "exam": "iseb",
+   "label": "ISEB — Common Pre-Test information and familiarisation test",
+   "url": "https://www.iseb.co.uk/"
+  },
+  {
+   "exam": "iseb",
+   "label": "Eton College — Year 9 (13+) admissions",
+   "url": "https://www.etoncollege.com/admissions/year-9-13/"
+  },
+  {
+   "exam": "iseb",
+   "label": "Harrow School — Year 9 entry",
+   "url": "https://www.harrowschool.org.uk/admissions/year-9-entry"
+  },
+  {
+   "exam": "ce13",
+   "label": "Harrow School — admissions process (Academic Scholarship past papers on its scholarships page)",
+   "url": "https://www.harrowschool.org.uk/admissions/admissions-process"
+  }
+ ],
+ "schoolsToTrack": [
+  "Tiffin School",
+  "The Tiffin Girls’ School",
+  "Eton College",
+  "Harrow School",
+  "ISEB Common Pre-Test schools",
+  "London and Surrey grammar schools"
+ ]
+}

@@ -383,3 +383,8 @@ dialog.tour-front[open]{position:fixed;inset:0;margin:auto;z-index:91}
 .arcade.arc-show .arc-game{background:#000}
 .arcade.arc-show #arcCanvas{border-color:transparent;box-shadow:none}
 .arcade.arc-show,.arcade.arc-show *{cursor:none!important}
+
+/* exam & sources (parent page) */
+.exam-box{border:2px solid #3b4a8f;border-radius:14px;padding:10px 14px;margin:8px 0 14px;background:rgba(43,52,112,.06)}
+.exam-box select{font-size:15px;padding:6px 8px;border-radius:8px;margin-left:6px}
+.exam-box ul{margin:6px 0 4px 18px;padding:0}.exam-box li{margin:3px 0}
