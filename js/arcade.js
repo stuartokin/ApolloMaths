@@ -54,9 +54,37 @@ const Arcade=(()=>{
   stats.arcade.bank=st.carry&&reason!=='time'&&left>=30?{secs:Math.min(st.maxCarryMins*60,left),day:dayKey()}:{secs:0,day:''};sess=null;save();
   if(stats.arcade.bank.secs)toast(`🕹️ ${fmt(stats.arcade.bank.secs)} of arcade time saved for next time — you won’t miss out!`);}
  const sessLeft=()=>sess?Math.max(0,sess.cap-sess.played):0;
+ // ---------------- Starlane, played from its own site (stuartokin.github.io/Starlane) ----------------
+ // ApolloMaths opens the Starlane site full screen and offers it this host: the child's name and question bank,
+ // Apollo's saved commander, the grown-up check for test mode, and a way back with the score.
+ // If the site cannot be reached, the built-in copy is offered instead.
+ let slLocal=false,slTimer=0;
+ function remoteStarlane(){return !slLocal&&!(window.APP_CONFIG&&window.APP_CONFIG.starlaneRemote===false)&&/^https?:/.test(location.protocol);}
+ function slBand(){const a=+(stats.age||(stats.profile&&stats.profile.age)||11);return a<=8?'7-8':a<=10?'9-10':a<=12?'11-12':'13-14';}
+ function closeRemote(){clearInterval(slTimer);const o=document.getElementById('slRemote');if(o)o.remove();window.StarlaneHost=null;}
+ function openRemoteStarlane(){closeRemote();view='remote';
+  window.StarlaneHost={version:1,
+   profile:()=>({name:playerName(),band:slBand()}),
+   loadSave:()=>stats.arcade.saves.starlane||null,
+   saveSave:v=>{stats.arcade.saves.starlane=v;save(false);},
+   high:()=>stats.arcade.high[hsKey()]||0,
+   bank:()=>typeof bank!=='undefined'?bank:null,
+   question:null, // later: ApolloMaths can answer Starlane's question socket from the child's exam bank
+   requestTest:cb=>{const go=()=>{try{if(typeof Family!=='undefined'&&Family.log)Family.log('A grown-up opened Starlane test mode');}catch(e){}cb();};if(typeof Family!=='undefined'&&Family.guard)Family.guard('Open Starlane test mode',go);else go();},
+   exit:res=>{const sc=Math.max(0,+(res&&res.score)||0);if(sc>(stats.arcade.high[hsKey()]||0))stats.arcade.high[hsKey()]=sc;try{recordTable(hsKey(),playerName(),sc);}catch(e){}save(false);closeRemote();view='menu';menu(admin?null:arcadeStatus(stats));}};
+  const o=document.createElement('div');o.id='slRemote';o.style.cssText='position:fixed;inset:0;z-index:2147483000;background:#000;display:flex;align-items:center;justify-content:center';
+  const f=document.createElement('iframe');f.src=new URL('../Starlane/?host=apollo',location.href).href;f.title='Starlane Trader';f.allow='fullscreen; autoplay; gamepad';f.style.cssText='border:0;width:100%;height:100%;display:block';o.appendChild(f);dlg().appendChild(o);
+  let ok=false;const t0=Date.now();
+  slTimer=setInterval(()=>{let ready=false;try{ready=!!(f.contentWindow&&f.contentWindow.StarlaneSite&&f.contentWindow.StarlaneSite.ready);}catch(e){}
+   if(ready&&!ok){ok=true;try{f.focus();}catch(e){}}
+   if(!ok&&Date.now()-t0>9000){clearInterval(slTimer);o.innerHTML=`<div style="color:#fff;text-align:center;font:16px system-ui;max-width:420px;padding:20px"><h3 style="color:#ffe45e">Starlane can’t be reached right now</h3><p>Check the internet connection and try again, or play the copy built into ApolloMaths.</p><p><button id="slRetry" type="button">Try again</button> <button id="slLocalBtn" type="button">Play built-in version</button> <button id="slBack" type="button">Back</button></p></div>`;
+    o.querySelector('#slRetry').onclick=()=>openRemoteStarlane();o.querySelector('#slLocalBtn').onclick=()=>{closeRemote();slLocal=true;start();slLocal=false;};o.querySelector('#slBack').onclick=()=>{closeRemote();view='menu';menu(admin?null:arcadeStatus(stats));};return;}
+   // play time keeps counting while Starlane runs on its own site
+   if(ok&&!admin){played+=1;if(played>=cap){try{f.contentWindow.StarlaneSite.forceExit();}catch(e){}closeRemote();endSession('time');locked(arcadeStatus(stats));}}},1000);}
  function start(){if(!admin){if(!sess){const st=arcadeStatus(stats);if(!st.canPlay){locked(st);return;}sess={cap:st.sessionSecs,played:0,carried:st.bank};if(stats.arcade.bank.secs){stats.arcade.bank={secs:0,day:''};save(false);}}
   if(sessLeft()<10){endSession('time');locked(arcadeStatus(stats));return;}}
   cap=admin?Infinity:sessLeft();played=0;paused=false;keys={};Object.keys(pad).forEach(k=>pad[k]=false);
+  if(gameId==='starlane'&&remoteStarlane()){openRemoteStarlane();return;}
   if(['invaders','ladder'].includes(gameId)){avImg=new Image();avImg.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(drawAvatar(stats.avatar,{scene:false}));}
   keysP=[{},{}];latchP=[{},{}];padP=[{},{}];
   game=GAMES[gameId]({theme:stats.arcade.theme,avatar:avImg,beep,noise,engine,hi:()=>stats.arcade.high[hsKey()]||0,players:sim2()?2:1,names:mp?mp.names:[playerName()],touch:matchMedia('(pointer:coarse)').matches,store:{get:()=>stats.arcade.saves[gameId]||null,set:v=>{stats.arcade.saves[gameId]=v;save(false);}}});if(!game.scores)game.scores=[0,0];view='game';

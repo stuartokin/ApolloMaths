@@ -1,7 +1,20 @@
 {
- "version": "2.66",
- "date": "12 November 2026",
+ "version": "2.67",
+ "date": "13 November 2026",
  "releases": [
+  {
+   "v": "2.67",
+   "date": "13 November 2026",
+   "kids": [
+    "🚀 Starlane now opens from its own website inside ApolloMaths — same game, same saved commander"
+   ],
+   "tags": [
+    "games"
+   ],
+   "items": [
+    "🚀 Starlane Trader now runs from its own site (stuartokin.github.io/Starlane) when opened from the arcade: one shared copy of the game. ApolloMaths passes the child’s name, level and question bank, keeps the saved commander in the child’s progress, runs the grown-up check for test mode, and records the score when the player leaves. Arcade play time still counts. If the Starlane site cannot be reached, a message offers to try again or play the built-in copy, which stays as a fallback."
+   ]
+  },
   {
    "v": "2.66",
    "date": "12 November 2026",
@@ -130,21 +143,6 @@
    "items": [
     "🚀 Starlane Trader: adventures are exclusive — random arrivals pause, other ships nearby leave when a space adventure starts, and only the adventure’s own lines are spoken, so the narration and its words stay in step.",
     "📱 On touch screens the on-screen FIRE and joystick are hidden while a puzzle panel is showing (the game is paused until you answer), so it no longer looks as though FIRE has stopped working."
-   ]
-  },
-  {
-   "v": "2.57",
-   "date": "11 November 2026",
-   "kids": [
-    "🚀 Starlane now sits inside a spaceship wall with portholes, instead of plain black edges"
-   ],
-   "tags": [
-    "games",
-    "look"
-   ],
-   "items": [
-    "🚀 Starlane Trader: wherever the game picture does not fill the screen (docked screens, menus, in-ship adventures, Retro flight, phones), the surround is now a ship’s bulkhead with ribbed panels, strip lights and portholes instead of plain black.",
-    "📱 Adventure puzzles use slightly larger text on small screens; every scene of all 50 adventures was checked at phone size. One over-long answer in “The Rusty Robot” was shortened. The 1969 capsule now floats closer so it can be seen."
    ]
   }
  ]
