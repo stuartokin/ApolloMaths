@@ -33,3 +33,4 @@ jobs:
             tools/exam-watch/latest-report.md
             tools/exam-watch/reports/*
             js/data/questions-agent.js
+            js/data/exam-dates.js
