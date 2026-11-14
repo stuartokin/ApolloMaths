@@ -41,8 +41,11 @@ Starlane is **not** built into this app any more (since 2.79). The arcade opens 
 ## How Stuart likes work delivered
 
 - Plan first for anything major; a short list of thoughts before code.
-- Only changed files, zipped with the repo's folder structure (built by diffing against a fresh clone of the
-  live repo). A single changed `index.html` can go alone. He adds `.github/` files by hand and deletes removed
-  files himself — always list them.
-- Brief summary of what changed, then a short numbered list of things to try. Direct and concise; say what was
-  and wasn't tested.
+- **Work through pull requests** (since 14 Nov 2026 the Claude GitHub App has write access to his repos):
+  attach the repo to the session with push access, work on a branch named `claude/<short-description>`,
+  never push to `main`, and open a pull request with a plain-English summary, what was tested (rig results),
+  and a short numbered list of things to try. Stuart reviews and merges on GitHub; Pages then republishes.
+- Deletions, `.github/` workflow files and dotfiles go in the pull request like any other change.
+- Only if a session cannot get push access: fall back to a zip of changed files with folder structure (built by
+  diffing against a fresh clone), and list files to delete.
+- Direct and concise; say what was and wasn't tested.
