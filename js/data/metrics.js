@@ -76,7 +76,10 @@ const fmtDur=sec=>{sec=Math.round(sec);if(sec<60)return sec+'s';const h=Math.flo
 
 // ---------- Focus areas: chosen per player by a parent (default = the original five) ----------
 const DEFAULT_FOCUS=['volume','equivfrac','shapes','measure','data'];
-function cleanFocus(s){const f=Array.isArray(s.focus)?[...new Set(s.focus.filter(k=>typeof k==='string'&&topics[k]))]:[];s.focus=f.length===5?f:DEFAULT_FOCUS.slice();return s;}
+function cleanFocus(s){const f=Array.isArray(s.focus)?[...new Set(s.focus.filter(k=>typeof k==='string'&&topics[k]))]:[];s.focus=f.length===5?f:DEFAULT_FOCUS.slice();
+ // focusMine: a grown-up chose these five (Grown-ups → Focus areas). Otherwise focus follows the exam (exams.js examFocusFor).
+ if(typeof s.focusMine!=='boolean'){const same=a=>a.length===s.focus.length&&a.every(k=>s.focus.includes(k)),autos=[DEFAULT_FOCUS,...(typeof EXAM_ORDER!=='undefined'&&typeof examFocusFor==='function'?EXAM_ORDER.map(examFocusFor):[])];s.focusMine=!autos.some(same);}
+ return s;}
 // Make the chosen five the Focus topics everywhere (bonuses, streaks, readiness, plan, Focus Zone).
 function applyFocus(list){for(const k of Object.keys(topics))topics[k].focus=list.includes(k);focusKeys.splice(0,focusKeys.length,...list);}
 // Suggest five Focus areas from how the player is actually doing. Each topic gets a "need" score (higher = needs more help) and a reason.

@@ -1,7 +1,7 @@
 # Roadmap and open items
 
 *Stuart Okin — personal project, written in a personal capacity.*
-*As of 15 November 2026 (version 2.81). Items marked **(stated)** are Stuart's own requirements; the rest are
+*As of 15 November 2026 (version 2.82). Items marked **(stated)** are Stuart's own requirements; the rest are
 known gaps found during the work, for him to prioritise.*
 
 Starlane's future requirements (adult science questions, the science-research and adventure workflows) are in the
@@ -42,11 +42,11 @@ Starlane repo's `docs/ROADMAP.md`.
 - **15 Nov 2026 (2.81)**: checked the question bank against every exam (no question types leak between exams);
   changing the exam now refreshes the child's page straight away; Fix-it keeps to the exam; the exam plan works on
   phones and tablets. New `exams` test suite.
+- **15 Nov 2026 (2.82)** — decision (Stuart): focus areas **always follow the exam initially**, until a parent changes
+  them in Grown-ups → Focus areas; “↺ Follow the exam again” returns to automatic.
 
 ## Known gaps (for Stuart to prioritise)
 
-- **Focus topics and the exam**: since 2.81 focus topics follow the exam unless a grown-up has picked their own. If
-  Stuart would rather they always follow the exam (or never), that is a one-line change.
 - **The rest of the dashboard on phones**: the Plan tab was fixed in 2.81; other wide tables (Readiness, Topics,
   Question types) still scroll sideways inside their box on a phone. Readable, but cards would be nicer.
 

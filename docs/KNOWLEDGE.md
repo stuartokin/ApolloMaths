@@ -1,7 +1,7 @@
 # Apollo's Maths Missions — knowledge base
 
 *Stuart Okin — personal project, written in a personal capacity.*
-*Last full update: 13 November 2026 (version 2.80); exam switching updated 15 November 2026 (2.81).*
+*Last full update: 13 November 2026 (version 2.80); exam switching updated 15 November 2026 (2.82).*
 
 Written so that a future person or AI model, starting cold, can understand the whole app and why it is the way
 it is. Lessons learned are in `LESSONS.md`, future requirements in `ROADMAP.md`, the test rig in
@@ -111,7 +111,8 @@ Starlane follow them), a style, and **official sources** shown under 🎓 Exam &
 missions, mocks, Fix-it (`fixFits`) and Starlane (`examQuestion`) use the same filter. Whenever the exam being trained
 for changes — Plan tab, a test date passing, a new player — the wrapped `syncExam` calls `examSwitched(prev)`: focus
 topics move to `examFocusFor(id)` (Tiffin: the original five; others: the five most-weighted) unless a grown-up chose
-their own, then `examRefreshPage` replaces the unanswered question, restarts a running mock at the new length and
+their own (`stats.focusMine`, set by saving in Grown-ups → Focus areas, cleared by “↺ Follow the exam again”; focus is also
+brought into line on load), then `examRefreshPage` replaces the unanswered question, restarts a running mock at the new length and
 redraws topics, focus cards, today's plan and "Next best thing" (`Hub.nextText`). `tests/test_exams.py` checks all of
 this at phone, tablet, laptop and huge sizes.
 
@@ -172,3 +173,4 @@ changed files (folder structure kept); list files to delete.
 | 2.71–2.80 | 13 Nov: exam plans and badge, mocks per exam, adaptive difficulty and stretch questions, the five-area layout, themes, student space and themed Shop/arcade, save button, fixed dashboard, per-game looks, profile protection, built-in Starlane removed, exam watch auto-merge |
 | 13 Nov | This knowledge base and the test rig |
 | 2.81 | 15 Nov: changing the exam refreshes the child's page (question, focus, plan, mock); Fix-it keeps to the exam; exam plan as cards on phones/tablets; `exams` test suite |
+| 2.82 | 15 Nov: focus areas always follow the exam until a grown-up chooses their own (`focusMine`) |

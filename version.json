@@ -1,7 +1,19 @@
 {
- "version": "2.81",
+ "version": "2.82",
  "date": "15 November 2026",
  "releases": [
+  {
+   "v": "2.82",
+   "date": "15 November 2026",
+   "kids": [],
+   "tags": [
+    "parents",
+    "fix"
+   ],
+   "items": [
+    "🎯 Focus areas follow the exam automatically — when the app opens and whenever the exam changes — until a grown-up chooses their own in Grown-ups → Focus areas. The Focus areas tab says which it is, and “↺ Follow the exam again” goes back to automatic."
+   ]
+  },
   {
    "v": "2.81",
    "date": "15 November 2026",
@@ -147,23 +159,6 @@
     "🧭 New layout: the home page is organised into five areas — 🎯 Today (with one big “next best thing” button), ✏️ Practise, 🏆 Mock exam, 📚 Learn and 🎁 Rewards — shown one at a time, with the bar at the bottom on phones. Starting practice from anywhere jumps to Practise; “⛶ Focus on the question” hides everything else. The header buttons (switch player, help, sound, voices, install) are in ⚙️ Menu, and the save banner shrinks to a chip once progress is saved.",
     "👪 Parent dashboard regrouped: Overview (summary cards), 📋 Plan (exam plan and key dates), 📈 Progress (readiness, focus areas, topics, question types, mocks, learning), ⏱️ Time & activity, 🎮 Games & rewards (Starlane, shop) and ⚙️ Settings & data — plus a “find anything” box.",
     "📱 Fixed: on narrow phones the save banner no longer makes the page scroll sideways."
-   ]
-  },
-  {
-   "v": "2.72",
-   "date": "13 November 2026",
-   "kids": [
-    "⬆️ Questions now get harder as you get them right — just like the real ISEB test"
-   ],
-   "tags": [
-    "parents",
-    "new"
-   ],
-   "items": [
-    "⬆️ Difficulty levels for every exam: each question type is rated easy, medium or hard, and the numbers lean smaller at Warm-up and bigger at Stretch. Match-day practice and mocks are now adaptive — three right first time in a row steps up a level, two misses steps down — like the real adaptive ISEB Pre-Test. Warm-up and Boss stay as fixed levels. Starlane follows the child’s level too.",
-    "✏️ Twelve new stretch question types within the Year 5 curriculum for Tiffin, the 11+ grammars and the ISEB Pre-Test: square and cube numbers, primes, factors, L-shaped areas and perimeters, chained percentages, fractions of a remainder, Roman numerals, “who am I?” number clues, negative temperatures, overnight timetables and decimal calculations.",
-    "🧹 Questions that came out too easy by accident (equal ratio parts such as 5:5, fractions like 4/4, × 1 or + 0) are thrown away and made again.",
-    "⏱ Quick-fire exams show a pace guide (about a minute a question) and the current level on the question screen."
    ]
   }
  ]

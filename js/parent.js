@@ -32,12 +32,12 @@ const Parent=(()=>{
  function focusTab(s,mine){const{name}=viewed(),sug=suggestFocus(s),rank=Object.fromEntries(sug.ranked.map((x,i)=>[x.k,i+1]));if(!pending)pending=s.focus.slice();
   const chip=k=>`<span class="fz-chip">${topics[k].emoji} ${esc(topics[k].label)}</span>`;
   return `<p class="section-note">Choose <b>five Focus areas</b> for ${esc(name)}. They get the Focus Zone cards (📘 Learn, 🎲 Examples, ⚽ Practise), bonus points, streaks, mastery rewards, readiness bars and Today’s plan. Every topic has its own Learn mission. Changes are saved with ${esc(name)}’s progress.</p>
-  <div class="fz-current"><b>Now:</b> ${s.focus.map(chip).join('')}</div>
+  <div class="fz-current"><b>Now:</b> ${s.focus.map(chip).join('')} <span class="mini">${s.focusMine?'— chosen by a grown-up (they stay when the exam changes)':'— following the exam automatically'}</span></div>
   <div class="dealbox">💡 <b>Suggested for ${esc(name)}:</b> ${sug.top.map(chip).join('')}<div class="actions"><button class="secondary" data-usesug type="button">Use these suggestions</button></div><span class="mini">Based on right-first-time scores, how often help (hints, explainers, methods) was needed, skipped questions and lesson checks — the topics that need most help come first. Untried topics are included when there isn’t enough evidence yet.</span></div>
   <p class="fz-count" id="fzCount"><b>${pending.length} of 5</b> chosen</p>
   ${table(['Pick','Topic','Need rank','Right first time','Tried','Why'],sug.ranked.map(x=>[`<input type="checkbox" data-fz="${x.k}"${pending.includes(x.k)?' checked':''} aria-label="Focus on ${esc(x.label)}">`,`${x.emoji} ${esc(x.label)}${sug.top.includes(x.k)?' <span class="badge new">SUGGESTED</span>':''}`,`#${rank[x.k]}`,x.first===null?'—':x.first+'%',x.n,esc(x.why)]),'small')}
-  <div class="actions"><button class="primary" data-savefocus type="button">💾 Save focus areas</button><button class="ghost" data-defocus type="button">Reset to the original five</button></div>`;}
- function saveFocus(list){const{s,mine}=viewed();s.focus=list.slice();if(mine){applyFocus(stats.focus);save();updateStats();if(typeof drawTopics==='function')drawTopics();}else Storage.writeProfile(viewId,{stats:s});pending=null;toast(`🎯 Focus areas saved: ${list.map(k=>topics[k].label).join(', ')}`);render();}
+  <div class="actions"><button class="primary" data-savefocus type="button">💾 Save focus areas</button><button class="ghost" data-defocus type="button">↺ Follow the exam again</button></div>`;}
+ function saveFocus(list,auto){const{s,mine}=viewed();s.focus=list.slice();s.focusMine=!auto;if(mine){applyFocus(stats.focus);save();updateStats();if(typeof drawTopics==='function')drawTopics();}else Storage.writeProfile(viewId,{stats:s});pending=null;toast(auto?`🎯 Focus areas now follow the exam: ${list.map(k=>topics[k].label).join(', ')}`:`🎯 Focus areas saved: ${list.map(k=>topics[k].label).join(', ')}`);render();}
  function timeTab(s){const D=dailySeries(s,14),max=Math.max(1,...D.map(d=>d.app/60));
   return `<h3>Minutes in the app — last 14 days (by date)</h3>${barSVG(D.map(d=>String(+d.day.slice(8))),D.map(d=>Math.round(d.app/60)),niceStep(max),'Minutes')}
   <h3>Right first time — last 14 days</h3>${D.some(d=>d.firstPct!==null)?lineSVG(D.map(d=>String(+d.day.slice(8))),D.map(d=>d.firstPct??0),10,'% right first time'):'<p class="muted">No questions answered yet.</p>'}
@@ -82,7 +82,7 @@ const Parent=(()=>{
   if(ds.close!==undefined){close();return;}
   if(ds.ptab){tab=ds.ptab;pending=null;render();return;}
   if(ds.usesug!==undefined){pending=suggestFocus(viewed().s).top;render();return;}
-  if(ds.defocus!==undefined){pending=DEFAULT_FOCUS.slice();render();return;}
+  if(ds.defocus!==undefined){const s=viewed().s;saveFocus(typeof examFocusFor==='function'?examFocusFor(examId(s)):DEFAULT_FOCUS.slice(),true);return;}
   if(ds.savefocus!==undefined){if(pending.length!==5){toast('Please choose exactly 5 Focus areas.');return;}saveFocus(pending);return;}
   if(ds.csv){exportCsv(ds.csv);return;}
   if(ds.report){printReport();return;}

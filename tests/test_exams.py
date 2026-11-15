@@ -61,11 +61,31 @@ async def main(p):
     labels = await pg.evaluate("stats.focus.map(k=>topics[k].label)")
     R.check(all(l in after['grid'] for l in labels), 'the focus cards show the new focus topics', labels)
 
-    # 3. a grown-up's own focus topics are kept when the exam changes
-    await pg.evaluate("stats.focus=['time','units','data','area','logic'];applyFocus(stats.focus);drawFocus()")
+    # 3. focus topics follow the exam until a grown-up chooses their own (Grown-ups → Focus areas)
+    R.check(await pg.evaluate("stats.focusMine") is False, 'a new child’s focus topics follow the exam')
+    await pg.evaluate("Parent.open('focus')"); await pg.wait_for_timeout(300)
+    await pg.evaluate("document.querySelector('#parent [data-ptab=\"focus\"]').click()"); await pg.wait_for_timeout(300)
+    auto_note = await pg.evaluate("document.querySelector('#parent .fz-current').textContent")
+    await pg.evaluate("""(()=>{const want=['time','units','data','area','logic'];const box=()=>[...document.querySelectorAll('#parent [data-fz]')];box().filter(c=>c.checked&&!want.includes(c.dataset.fz)).forEach(c=>c.click());box().filter(c=>!c.checked&&want.includes(c.dataset.fz)).forEach(c=>c.click());
+      document.querySelector('#parent [data-savefocus]').click();})()"""); await pg.wait_for_timeout(400)
+    mine_note = await pg.evaluate("document.querySelector('#parent .fz-current').textContent")
+    R.check('automatically' in auto_note and 'grown-up' in mine_note and await pg.evaluate("stats.focusMine"), 'saving focus areas marks them as the grown-up’s choice', mine_note[-60:])
+    await close_dialogs(pg)
     await plan_select(pg, 'grammar11')
-    R.check(await pg.evaluate("stats.focus.join()") == 'time,units,data,area,logic', 'focus topics a grown-up chose are kept')
-    await pg.evaluate("stats.focus=examFocusFor('grammar11');applyFocus(stats.focus)")
+    R.check(await pg.evaluate("[...stats.focus].sort().join()") == 'area,data,logic,time,units', 'focus topics a grown-up chose stay when the exam changes')
+    await pg.evaluate("Parent.open('focus')"); await pg.wait_for_timeout(300)
+    await pg.evaluate("document.querySelector('#parent [data-ptab=\"focus\"]').click()"); await pg.wait_for_timeout(300)
+    await pg.evaluate("document.querySelector('#parent [data-defocus]').click()"); await pg.wait_for_timeout(400)
+    back = await pg.evaluate("({mine:stats.focusMine,same:stats.focus.join()===examFocusFor('grammar11').join(),flags:Object.keys(topics).filter(k=>topics[k].focus).sort().join()===[...stats.focus].sort().join()})")
+    await close_dialogs(pg)
+    R.check(back == {'mine': False, 'same': True, 'flags': True}, '“Follow the exam again” goes back to the exam’s focus topics', back)
+    await plan_select(pg, 'iseb')
+    R.check(await pg.evaluate("stats.focus.join()===examFocusFor('iseb').join()"), 'after that, focus follows the next exam change again')
+    # an automatic focus that is out of step with the exam is put right when the app opens
+    await pg.evaluate("stats.focus=['time','units','data','area','logic'];stats.focusMine=false;save(false);Storage.flush&&Storage.flush()")
+    await pg.reload(); await pg.wait_for_timeout(2500); await close_dialogs(pg)
+    R.check(await pg.evaluate("stats.focus.join()===examFocusFor(examId()).join()&&focusKeys.join()===stats.focus.join()"), 'on opening, focus topics are brought into line with the exam')
+    await pg.evaluate("setExam('grammar11')"); await pg.wait_for_timeout(300)
 
     # 4. a mock in progress starts again at the new exam's length
     await pg.evaluate("document.querySelector('[data-mode=mock]').click()"); await pg.wait_for_timeout(300)

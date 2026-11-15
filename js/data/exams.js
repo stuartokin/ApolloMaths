@@ -147,9 +147,11 @@ setExam=function(id){if(!EXAMS[id]||typeof stats==='undefined')return;const c=cu
 // suit it (unless a grown-up chose their own), and today's plan, "Next best thing", the topic grid and focus cards redrawn.
 function examFocusFor(id){if(!EXAMS[id]||/^tiffin/.test(id))return DEFAULT_FOCUS.slice();const w=EXAMS[id].weights||{};return Object.keys(topics).filter(k=>k!=='tiffin').sort((a,b)=>(w[b]||1)-(w[a]||1)).slice(0,5);}
 {const base=syncExam;syncExam=function(s){const mine=typeof stats!=='undefined'&&(!s||s===stats),was=mine?examId(stats):null;base(s);if(mine&&was!==examId(stats))examSwitched(was);};}
-function examSwitched(prev){try{const now=examId(stats),f=Array.isArray(stats.focus)?stats.focus:[],same=(a,b)=>a.length===b.length&&a.every(k=>b.includes(k));
- if(!f.length||same(f,examFocusFor(prev))||same(f,DEFAULT_FOCUS)){stats.focus=examFocusFor(now);if(typeof applyFocus==='function')applyFocus(stats.focus);}
- stats.focusExamSet=true;setTimeout(()=>examRefreshPage(prev),0);}catch(e){console.warn('exam switch',e);}}
+// focus topics follow the exam until a grown-up chooses their own (stats.focusMine); returns true if they changed
+function focusFollowExam(s){s=s||stats;if(!s||s.focusMine)return false;const want=examFocusFor(examId(s)),f=Array.isArray(s.focus)?s.focus:[];
+ if(f.length===want.length&&want.every(k=>f.includes(k)))return false;s.focus=want;if(s===stats&&typeof applyFocus==='function')applyFocus(s.focus);return true;}
+function examSwitched(prev){try{focusFollowExam(stats);stats.focusExamSet=true;setTimeout(()=>examRefreshPage(prev),0);}catch(e){console.warn('exam switch',e);}}
+window.addEventListener('load',()=>{try{if(typeof stats!=='undefined'&&focusFollowExam(stats)){stats.focusExamSet=true;if(typeof save==='function')save(false);examRefreshPage(null);}}catch(e){console.warn('focus follow',e);}});
 function examRefreshPage(prev){if(typeof stats==='undefined'||typeof newQuestion!=='function'||!document.getElementById('question'))return;
  try{if(current&&!finished){const running=mode==='mock'&&EXAMS[prev]&&target===(EXAMS[prev].mock||{}).n;if(mode==='mock'&&typeof setMode==='function')setMode('mock');if(running){const area=document.body.dataset.areaNow;restartSession();if(area&&typeof Hub!=='undefined'&&Hub.show&&document.body.dataset.areaNow!==area)Hub.show(area);}else if(!done)newQuestion();}}catch(e){console.warn('exam question',e);}
  try{drawTopics();drawFocus();updateStats();if(typeof Hub!=='undefined'&&Hub.nextText)Hub.nextText();hdrLast='';examHeader();if(typeof save==='function')save(false);}catch(e){console.warn('exam redraw',e);}}
