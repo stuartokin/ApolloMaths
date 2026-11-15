@@ -1,7 +1,23 @@
 {
- "version": "2.80",
- "date": "13 November 2026",
+ "version": "2.81",
+ "date": "15 November 2026",
  "releases": [
+  {
+   "v": "2.81",
+   "date": "15 November 2026",
+   "kids": [
+    "🎯 When your exam changes, your questions, Focus Zone and today’s plan change with it straight away"
+   ],
+   "tags": [
+    "parents",
+    "fix"
+   ],
+   "items": [
+    "🎓 Changing the exam in Grown-ups → Plan now refreshes the child’s page at once: the question on screen is replaced by one from the new exam, focus topics move to the new exam (unless you chose your own), and today’s plan, Next best thing and the mock length follow. A mock in progress starts again at the new exam’s length.",
+    "🔧 The Fix-it list no longer brings back question types from a different exam.",
+    "📱 On phones and tablets the exam plan shows one card per test (no sideways scrolling), and on phones the dashboard tabs sit in one scrolling strip so the content has room."
+   ]
+  },
   {
    "v": "2.80",
    "date": "13 November 2026",
@@ -148,24 +164,6 @@
     "✏️ Twelve new stretch question types within the Year 5 curriculum for Tiffin, the 11+ grammars and the ISEB Pre-Test: square and cube numbers, primes, factors, L-shaped areas and perimeters, chained percentages, fractions of a remainder, Roman numerals, “who am I?” number clues, negative temperatures, overnight timetables and decimal calculations.",
     "🧹 Questions that came out too easy by accident (equal ratio parts such as 5:5, fractions like 4/4, × 1 or + 0) are thrown away and made again.",
     "⏱ Quick-fire exams show a pace guide (about a minute a question) and the current level on the question screen."
-   ]
-  },
-  {
-   "v": "2.71",
-   "date": "13 November 2026",
-   "kids": [
-    "🎯 The top of the app now shows which school and test you are training for, with a countdown"
-   ],
-   "tags": [
-    "parents",
-    "new"
-   ],
-   "items": [
-    "🎯 Exam plan: each child has a plan of tests (test, school, date, result). The app trains for the next upcoming one, and moves on when a test has passed. The header shows it — “Training for: Eton College — ISEB Common Pre-Test · 30 November 2026 · 17 days to go” — with a countdown sticker in the last 60 days. Tapping it opens the plan (grown-ups only).",
-    "📈 Readiness for the chosen exam, topic by topic (including maths answered in Starlane), with a printable report; 📅 key dates for the plan’s exams from the official timelines (Tiffin, ISEB, Eton, Common Entrance).",
-    "🏆 Mocks follow the exam: question count, timing and multiple choice where the real test uses it.",
-    "➕ Adding a player now asks what they are preparing for (or “not sure yet”) and their school.",
-    "✏️ New original questions for 13+ Common Entrance / scholarship (algebra, probability, polygons, circles, prisms, reverse percentages, the nth term, indices, compound interest) and quick-fire questions for Tiffin Stage 1, 11+ grammar and the ISEB Pre-Test. Each is only used for those exams, in practice and in Starlane."
    ]
   }
  ]

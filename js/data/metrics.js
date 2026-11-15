@@ -38,7 +38,9 @@ function fixUpdate(s,tp,g,firstTry,qText){const i=s.fix.findIndex(f=>f.tp===tp&&
  if(firstTry){if(i<0)return null;const f=s.fix[i];f.streak++;if(f.streak>=FIX.needed){s.fix.splice(i,1);s.fixed++;return'fixed';}f.due=s.qn+FIX.afterRight;return'progress';}
  if(i<0){s.fix.push({tp,g,due:s.qn+FIX.afterWrong,streak:0,added:Date.now(),q:qText.slice(0,220)});if(s.fix.length>40)s.fix.shift();return'added';}
  const f=s.fix[i];f.streak=0;f.due=s.qn+FIX.afterWrong;return'reset';}
-const fixDue=s=>s.fix.filter(f=>f.due<=s.qn);
+// a Fix-it item only comes back if its question type still exists and suits the child's current exam
+const fixFits=(f,s)=>{const g=bank[f.tp]&&bank[f.tp][f.g];return typeof g==='function'&&(typeof suitsExam!=='function'||suitsExam(g,s));};
+const fixDue=s=>s.fix.filter(f=>f.due<=s.qn&&fixFits(f,s));
 
 // ---------- Readiness: recent right-first-time rate, scaled by how much evidence there is ----------
 function readiness(s,tp){const recent=s.log.filter(e=>e.tp===tp).slice(-12);let n=recent.length,rate;

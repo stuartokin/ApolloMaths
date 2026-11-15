@@ -1,7 +1,7 @@
 # Apollo's Maths Missions — knowledge base
 
 *Stuart Okin — personal project, written in a personal capacity.*
-*Last full update: 13 November 2026 (version 2.80).*
+*Last full update: 13 November 2026 (version 2.80); exam switching updated 15 November 2026 (2.81).*
 
 Written so that a future person or AI model, starting cold, can understand the whole app and why it is the way
 it is. Lessons learned are in `LESSONS.md`, future requirements in `ROADMAP.md`, the test rig in
@@ -106,6 +106,15 @@ Profiles (`EXAMS`): `tiffin1` Tiffin Stage 1 (quick, computer-marked), `tiffin2`
 Year 5 curriculum), `ce13` 13+ Common Entrance / scholarship (Year 8). Each has topic **weights** (practice and
 Starlane follow them), a style, and **official sources** shown under 🎓 Exam & sources.
 
+**How the question bank follows the exam.** Mixed practice picks a topic by the exam's weights (`randomTopic` →
+`examWeight`), then only generators that suit the exam (`suitsExam`: no `fn.exams`, or the exam is listed); single-topic
+missions, mocks, Fix-it (`fixFits`) and Starlane (`examQuestion`) use the same filter. Whenever the exam being trained
+for changes — Plan tab, a test date passing, a new player — the wrapped `syncExam` calls `examSwitched(prev)`: focus
+topics move to `examFocusFor(id)` (Tiffin: the original five; others: the five most-weighted) unless a grown-up chose
+their own, then `examRefreshPage` replaces the unanswered question, restarts a running mock at the new length and
+redraws topics, focus cards, today's plan and "Next best thing" (`Hub.nextText`). `tests/test_exams.py` checks all of
+this at phone, tablet, laptop and huge sizes.
+
 Each child has an **exam plan** (several tests with school, date and result); the app trains for the next
 upcoming one, the header badge counts down, and a passed test asks "what's next?". Apollo: Tiffin Stage 2
 (12 Nov 2026, result due March) then Eton via the ISEB Pre-Test (Eton's deadline 30 Nov 2026 for Sept 2029 entry).
@@ -162,3 +171,4 @@ changed files (folder structure kept); list files to delete.
 | 2.67–2.70 | 13 Nov: Starlane opened from its own site; exam profiles and sources; exam watch; Starlane maths in the dashboard |
 | 2.71–2.80 | 13 Nov: exam plans and badge, mocks per exam, adaptive difficulty and stretch questions, the five-area layout, themes, student space and themed Shop/arcade, save button, fixed dashboard, per-game looks, profile protection, built-in Starlane removed, exam watch auto-merge |
 | 13 Nov | This knowledge base and the test rig |
+| 2.81 | 15 Nov: changing the exam refreshes the child's page (question, focus, plan, mock); Fix-it keeps to the exam; exam plan as cards on phones/tablets; `exams` test suite |

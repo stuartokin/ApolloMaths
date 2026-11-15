@@ -51,5 +51,5 @@ const Hub=(()=>{
  function hookStarts(){['pickTopic','practiseLike','restartSession'].forEach(n=>{const f=window[n];if(typeof f!=='function'||f.__hub)return;const w=function(...a){const r=f.apply(this,a);const want=typeof mode!=='undefined'&&mode==='mock'?'mock':'practise';if(!ready){pending=want;return r;}const now=document.body.dataset.areaNow;if(now!=='practise'&&now!=='mock')show(want);return r;};w.__hub=true;window[n]=w;});}
  function init(){try{tag();nav();focusBtn();menu();saveChip();autoSwitch();flatten();followQuestions();hookStarts();let k='today';try{k=sessionStorage.getItem('am-area')||'today';}catch(e){}ready=true;show(pending||k);}catch(e){console.warn('hub',e);}}
  hookStarts();   // straight away, so practice started before the page finishes loading still lands in Practise
- return{init,show};})();
+ return{init,show,nextText};})();
 window.addEventListener('load',()=>setTimeout(()=>Hub.init(),50));

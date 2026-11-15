@@ -36,7 +36,7 @@ function newQuestion(){if(finished)return;if(mode!=='endless' && matchDone>=targ
  let fixItem=null;
  if(forceGen&&mode!=='mock'){fixItem={tp:forceGen.tp,g:forceGen.g,forced:true,twin:forceGen.twin};forceGen=null;}
  else if(mode!=='mock'){const due=fixDue(stats);
-  if(chosenTopic==='fixit'){fixItem=due[0]||stats.fix.slice().sort((a,b)=>a.due-b.due)[0]||null;if(!fixItem){chosenTopic='focus';toast('🔧 Your Fix-it list is empty — brilliant! Here’s a Focus mix instead.');}}
+  if(chosenTopic==='fixit'){fixItem=due[0]||stats.fix.filter(f=>fixFits(f,stats)).sort((a,b)=>a.due-b.due)[0]||null;if(!fixItem){chosenTopic='focus';toast('🔧 Your Fix-it list is empty — brilliant! Here’s a Focus mix instead.');}}
   else if(due.length&&Math.random()<0.5){const ok=due.filter(f=>chosenTopic==='mixed'||(chosenTopic==='focus'&&topics[f.tp].focus)||f.tp===chosenTopic);if(ok.length)fixItem=pick(ok);}}
  actualTopic=fixItem?fixItem.tp:chosenTopic==='mixed'?randomTopic():chosenTopic==='focus'?randomTopic(focusKeys):chosenTopic;drawTopics();drawCoach();let arr=bank[actualTopic];
  let permitted=arr.map((_,i)=>i);if(typeof suitsExam==='function'){const okx=permitted.filter(i=>suitsExam(arr[i]));if(okx.length)permitted=okx;}if(!fixItem&&typeof diffFilter==='function')permitted=diffFilter(arr,permitted,mode==='mock'?'match':level);

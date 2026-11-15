@@ -56,12 +56,17 @@ From building Apollo's Maths Missions (Nov 2026). Starlane-specific lessons are 
 23. **Check the claim before fixing.** "Let's go opened Apollo's topic" was a test misreading: the plan was right.
 24. **Keep the rig in the repo.** The previous scratch test scripts were lost when the working sandbox was reset.
 25. **Run the rig in a real web origin** (it serves both repos); file:// hides cross-site and loading issues.
+26. **Changing a setting must redraw everything that depends on it.** The exam picker updated the header but left the
+    old exam's question on screen and today's plan pointing at the old focus topics. Detect the change in one place
+    (`syncExam`, which every route goes through) and refresh from there, rather than in each control.
+27. **Wide tables break on phones and tablets.** The exam plan table was 1,136 px wide inside a 296 px phone window;
+    edit forms become cards below ~1000 px. Screenshot every grown-up tab at 375 and 820 px, not just the child's page.
 
 ## Automation
 
-26. GitHub Actions need **write permission and "Allow GitHub Actions to create and approve pull requests"** to
+28. GitHub Actions need **write permission and "Allow GitHub Actions to create and approve pull requests"** to
     open PRs; auto-merge with `gh pr merge` after a load check; request a Pages build afterwards.
-27. Scheduled workflows pause after 60 days without repo activity; merges count as activity.
-28. Sandbox AI-generated code (`node:vm`, no `require`, time limit) and confirm answers with an independent solve.
-29. Some sites (Eton) block automated fetches — list them "to check by hand" instead of reporting errors.
-30. Keep the Anthropic API key only as a GitHub secret, in its own Console workspace with a spending limit.
+29. Scheduled workflows pause after 60 days without repo activity; merges count as activity.
+30. Sandbox AI-generated code (`node:vm`, no `require`, time limit) and confirm answers with an independent solve.
+31. Some sites (Eton) block automated fetches — list them "to check by hand" instead of reporting errors.
+32. Keep the Anthropic API key only as a GitHub secret, in its own Console workspace with a spending limit.
