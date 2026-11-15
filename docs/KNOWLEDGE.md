@@ -1,6 +1,6 @@
 # Apollo's Maths Missions — knowledge base
 
-*Stuart Okin, Director of Cyber Regulation and Emerging Technologies, Ofgem — personal project.*
+*Stuart Okin — personal project, written in a personal capacity.*
 *Last full update: 13 November 2026 (version 2.80).*
 
 Written so that a future person or AI model, starting cold, can understand the whole app and why it is the way

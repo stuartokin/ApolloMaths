@@ -1,6 +1,6 @@
 # Roadmap and open items
 
-*Stuart Okin, Director of Cyber Regulation and Emerging Technologies, Ofgem — personal project.*
+*Stuart Okin — personal project, written in a personal capacity.*
 *As of 13 November 2026 (version 2.80). Items marked **(stated)** are Stuart's own requirements; the rest are
 known gaps found during the work, for him to prioritise.*
 
