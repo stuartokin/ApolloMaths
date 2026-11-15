@@ -37,7 +37,7 @@ Principles that shaped everything:
 | Site switch | `config.js` (`window.APP_CONFIG = { arcade: true }`) |
 
 Static site, **no build step**, plain scripts loaded in order by `index.html` (globals shared between files).
-Stuart updates it by uploading changed files through GitHub's web page. `sw.js` makes it installable and
+Changes are committed and pushed straight to `main` (see CLAUDE.md); GitHub Pages deploys in about a minute. `sw.js` makes it installable and
 offline-capable (bump `CACHE='maths-missions-vN'` every release).
 
 ## 3. Code map
@@ -63,7 +63,6 @@ Load order matters: data first, then rendering, storage, features, `app.js`, the
 | Voice | `js/speech.js`, `js/voices.js` | Device speech: four roles (tour guide, announcer, question reader, teacher), natural voices first |
 | Other | `js/scratchpad.js`, `js/print.js`, `js/pwa.js`, `js/windows.js` | Scratchpad, paper mocks, install, movable/resizable windows |
 | Question engine page | `engine.html` | Only the question files + `Engine.ask(kind, exam, name)`, for the Starlane site |
-| **Dead files** | `js/starlane*.js`, `js/vendor/three-*` | Old built-in Starlane, unused since 2.79 — **delete** (Stuart, by hand) |
 
 ## 4. Data model
 
@@ -157,10 +156,10 @@ names follow the theme (e.g. Pony Derby). No two-player mode and no CRT switch s
 ## 9. Releasing a version (the routine)
 
 1. Change code. 2. In `js/data/help.js` bump `APP_VERSION` and add a `versionHistory` entry (child-friendly
-`kids` line, `items`, `tags`). 3. Add a `- **vX.Y:**` line to the README changelog. 4. `node tools/make-version.js`
+`kids` line, `items`, `tags`). 3. Add a `- **vX.Y:**` line to the README changelog and a plain-English entry to `CHANGELOG.md`. 4. `node tools/make-version.js`
 (writes `version.json`). 5. Bump `CACHE` in `sw.js`; add any new script to `index.html` **and** the `sw.js`
-list. 6. `python tests/run_all.py` — all green. 7. Diff against a fresh clone of the live repo and zip only the
-changed files (folder structure kept); list files to delete.
+list. 6. `python tests/run_all.py` — all green. 7. Commit and push to `main` (backup tag first if major); check the
+"pages build and deployment" run succeeded. (Before November 2026 changes were zipped for Stuart to upload — no longer.)
 
 ## 10. History in brief
 

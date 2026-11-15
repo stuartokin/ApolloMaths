@@ -11,6 +11,9 @@ pip install -r tests/requirements.txt
 python -m playwright install chromium
 ```
 
+In a Claude cloud sandbox Chromium is already installed: skip the second line and instead pin the Python package to
+the pre-installed version, e.g. `pip install playwright==1.63.0` (check `node -e "console.log(require('playwright/package.json').version)"`).
+
 Keep the Starlane repo next to this one if you want the arcade's Starlane check (`somewhere/ApolloMaths`,
 `somewhere/Starlane`), or set `APOLLO_ROOT` / `STARLANE_ROOT`. The rig serves both at
 `http://localhost:8765/ApolloMaths/` and `/Starlane/` (change with `RIG_PORT`), exactly as GitHub Pages does.

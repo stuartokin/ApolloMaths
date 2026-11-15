@@ -9,10 +9,9 @@ From building Apollo's Maths Missions (Nov 2026). Starlane-specific lessons are 
    with a recommendation, then one decision at a time.
 2. **He tests on real devices** (Galaxy Fold, iPad, laptop, a ~3,000 px-wide monitor) and reports with
    screenshots and screen recordings. Look closely at every image; the detail he mentions is usually there.
-3. **Deliver only changed files**, zipped with folder structure, built by diffing against a fresh clone of the
-   live repo. List files he must delete. `.github/` files he adds by hand. A lone changed `index.html` can go alone.
-4. **A follow-up package must include everything still unreleased** — if he hasn't uploaded the previous zip,
-   the new one has to contain both, and say so.
+3. **Push straight to `main` yourself** (since November 2026; zips for him to upload are superseded). Run the rig
+   first, back-up tag before anything major, then check the Pages deploy run.
+4. **Say what is live and what isn't.** If a deploy is still running when you reply, say so.
 5. **Be honest about what was tested and what wasn't**, and own mistakes plainly (e.g. hidden save buttons in
    2.75; versions 2.69–2.80 first dated a day late).
 6. **Children and other families will use it.** He asked early for the child's name to be asked rather than
@@ -56,6 +55,9 @@ From building Apollo's Maths Missions (Nov 2026). Starlane-specific lessons are 
 23. **Check the claim before fixing.** "Let's go opened Apollo's topic" was a test misreading: the plan was right.
 24. **Keep the rig in the repo.** The previous scratch test scripts were lost when the working sandbox was reset.
 25. **Run the rig in a real web origin** (it serves both repos); file:// hides cross-site and loading issues.
+    In a cloud sandbox, Python Playwright must match the pre-installed browser: `pip install playwright==<the
+    version of the node one>` (1.63.0 in Nov 2026), never `playwright install`. Clone Starlane next to this repo
+    (or set `STARLANE_ROOT`) so the arcade's Starlane check runs too.
 26. **Changing a setting must redraw everything that depends on it.** The exam picker updated the header but left the
     old exam's question on screen and today's plan pointing at the old focus topics. Detect the change in one place
     (`syncExam`, which every route goes through) and refresh from there, rather than in each control.

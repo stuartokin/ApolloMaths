@@ -9,10 +9,6 @@ Starlane repo's `docs/ROADMAP.md`.
 
 ## Housekeeping (do first)
 
-- **Delete the dead Starlane files** from this repo: `js/starlane.js`, `js/starlane-modern.js`,
-  `js/starlane-adventures.js`, `js/starlane-audio.js`, `js/vendor/three-bundle.js`,
-  `js/vendor/three-LICENSE.txt`, and the stray public `QA-report-questions-hints-lessons.md`. Nothing loads them
-  since 2.79.
 - **Run the test rig in CI**: a `.github/workflows/tests.yml` that installs Playwright + Chromium, checks out
   this repo and Starlane side by side, and runs `python tests/run_all.py` on every push to `main`. Then the
   exam-watch auto-merge should also require the rig to pass (today it only checks the files load).
@@ -38,6 +34,8 @@ Starlane repo's `docs/ROADMAP.md`.
   for Kent (Quest) and Trafford (FSCE) to watch.
 
 ## Done
+
+- **By 15 Nov 2026**: the dead Starlane files, `js/vendor/three-*` and the stray QA report were deleted.
 
 - **15 Nov 2026 (2.81)**: checked the question bank against every exam (no question types leak between exams);
   changing the exam now refreshes the child's page straight away; Fix-it keeps to the exam; the exam plan works on
