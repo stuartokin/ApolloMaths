@@ -43,6 +43,8 @@ Starlane repo's `docs/ROADMAP.md`.
   site, or send them to a session to become ApolloMaths question types.
 - Starlane's future content (more systems, missions, adventures, question packs, story arcs with different endings)
   is planned in the Starlane repo's `docs/ROADMAP.md` (R6, R7).
+- **Stuart's to-do list for questions and Starlane content** is at the top of the Starlane repo's `docs/ROADMAP.md`
+  (19 Nov 2026).
 
 ## Done
 
