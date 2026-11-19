@@ -3,6 +3,10 @@
 Plain-English summary of each release. The technical detail of every version is in the README's changelog
 (`- **vX.Y:**` lines), and the in-app version history is `versionHistory` in `js/data/help.js`.
 
+## Docs — 19 November 2026 (no app change)
+- Roadmap: importing generated questions at runtime (with a Question lab to preview and check them) added as the
+  next to-do, with the open questions for Stuart.
+
 ## 2.82 — 15 November 2026
 - Focus areas follow the exam automatically (when the app opens and whenever the exam changes) until a grown-up
   chooses their own in Grown-ups → Focus areas. "↺ Follow the exam again" returns to automatic.

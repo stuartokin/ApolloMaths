@@ -63,12 +63,15 @@ From building Apollo's Maths Missions (Nov 2026). Starlane-specific lessons are 
     (`syncExam`, which every route goes through) and refresh from there, rather than in each control.
 27. **Wide tables break on phones and tablets.** The exam plan table was 1,136 px wide inside a 296 px phone window;
     edit forms become cards below ~1000 px. Screenshot every grown-up tab at 375 and 820 px, not just the child's page.
+28. **Know what each "test" place is for.** Starlane test mode is a game sandbox, not a question tester; the parent's
+    "Check Starlane questions" only samples 10. To try built-in questions use a separate "Test" child. Questions from
+    outside the repo (e.g. written by Gemini) appear nowhere until added as generators (see ROADMAP "To do next").
 
 ## Automation
 
-28. GitHub Actions need **write permission and "Allow GitHub Actions to create and approve pull requests"** to
+29. GitHub Actions need **write permission and "Allow GitHub Actions to create and approve pull requests"** to
     open PRs; auto-merge with `gh pr merge` after a load check; request a Pages build afterwards.
-29. Scheduled workflows pause after 60 days without repo activity; merges count as activity.
-30. Sandbox AI-generated code (`node:vm`, no `require`, time limit) and confirm answers with an independent solve.
-31. Some sites (Eton) block automated fetches — list them "to check by hand" instead of reporting errors.
-32. Keep the Anthropic API key only as a GitHub secret, in its own Console workspace with a spending limit.
+30. Scheduled workflows pause after 60 days without repo activity; merges count as activity.
+31. Sandbox AI-generated code (`node:vm`, no `require`, time limit) and confirm answers with an independent solve.
+32. Some sites (Eton) block automated fetches — list them "to check by hand" instead of reporting errors.
+33. Keep the Anthropic API key only as a GitHub secret, in its own Console workspace with a spending limit.

@@ -115,6 +115,10 @@ brought into line on load), then `examRefreshPage` replaces the unanswered quest
 redraws topics, focus cards, today's plan and "Next best thing" (`Hub.nextText`). `tests/test_exams.py` checks all of
 this at phone, tablet, laptop and huge sizes.
 
+**Trying questions.** There is no question tester yet: built-in questions are tried by playing as a separate "Test"
+child (pick a topic under ✏️ Practise). Starlane test mode is a game sandbox, not a question tester. Questions from
+outside (e.g. AI chats) can't be loaded at runtime — that is on the ROADMAP ("To do next").
+
 Each child has an **exam plan** (several tests with school, date and result); the app trains for the next
 upcoming one, the header badge counts down, and a passed test asks "what's next?". Apollo: Tiffin Stage 2
 (12 Nov 2026, result due March) then Eton via the ISEB Pre-Test (Eton's deadline 30 Nov 2026 for Sept 2029 entry).
