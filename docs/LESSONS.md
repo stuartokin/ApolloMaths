@@ -64,8 +64,9 @@ From building Apollo's Maths Missions (Nov 2026). Starlane-specific lessons are 
 27. **Wide tables break on phones and tablets.** The exam plan table was 1,136 px wide inside a 296 px phone window;
     edit forms become cards below ~1000 px. Screenshot every grown-up tab at 375 and 820 px, not just the child's page.
 28. **Know what each "test" place is for.** Starlane test mode is a game sandbox, not a question tester; the parent's
-    "Check Starlane questions" only samples 10. To try built-in questions use a separate "Test" child. Questions from
-    outside the repo (e.g. written by Gemini) appear nowhere until added as generators (see ROADMAP "To do next").
+    "Check Starlane questions" only samples 10. To try built-in questions use a separate "Test" child. Outside questions (e.g. written by Gemini) never load into ApolloMaths;
+    on the standalone Starlane site a grown-up can load them as a 📚 Question bank. Fetch every repo fresh before
+    planning: on 19 Nov a plan for Starlane banks was made from a stale clone — they already existed (v29–30).
 
 ## Automation
 

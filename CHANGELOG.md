@@ -4,8 +4,8 @@ Plain-English summary of each release. The technical detail of every version is 
 (`- **vX.Y:**` lines), and the in-app version history is `versionHistory` in `js/data/help.js`.
 
 ## Docs — 19 November 2026 (no app change)
-- Roadmap: importing generated questions at runtime (with a Question lab to preview and check them) added as the
-  next to-do, with the open questions for Stuart.
+- Decided: ApolloMaths keeps its own fixed questions; grown-ups bring their own questions in Starlane played on
+  its own (📚 Question banks, Starlane v29–30). Roadmap updated; Starlane's future content plans are in its repo.
 
 ## 2.82 — 15 November 2026
 - Focus areas follow the exam automatically (when the app opens and whenever the exam changes) until a grown-up

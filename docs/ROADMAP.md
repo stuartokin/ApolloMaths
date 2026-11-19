@@ -1,7 +1,7 @@
 # Roadmap and open items
 
 *Stuart Okin — personal project, written in a personal capacity.*
-*As of 19 November 2026 (version 2.82). Items marked **(stated)** are Stuart's own requirements; the rest are
+*As of 19 November 2026 (version 2.82; questions decision 19 Nov). Items marked **(stated)** are Stuart's own requirements; the rest are
 known gaps found during the work, for him to prioritise.*
 
 Starlane's future requirements (adult science questions, the science-research and adventure workflows) are in the
@@ -33,24 +33,16 @@ Starlane repo's `docs/ROADMAP.md`.
   schools move to FSCE for September 2028 entry, per the agent's first report); unconfirmed provider changes
   for Kent (Quest) and Trafford (FSCE) to watch.
 
-## To do next (stated)
+## Decided
 
-- **Import generated questions while the app is running** (Stuart, 19 Nov 2026 — "let's come back to this").
-  Stuart had Gemini write questions and wanted to try them; today the app can only ask questions built into its code
-  (generators in `js/data/questions-*.js`, added by hand or by the exam watch), so outside questions can't be tried
-  anywhere. He looked for them in Starlane test mode, but that is a game sandbox (god mode, jump anywhere, stage
-  adventures) whose maths comes from the same built-in bank. The idea, discussed but not designed or built:
-  - a way to **generate questions** (any AI or by hand) in a set format: question, answer, unit, three hints, worked
-    steps, exam, topic, level — ideally templates with number ranges, so each question can make new numbers;
-  - **import them at runtime** (paste or file, in Grown-ups), stored on the device with the child's progress or as a
-    family question pack, with nothing written to GitHub (privacy rule);
-  - **check before use**: format, answer matches the worked steps, hint 1 doesn't give the answer away, level suits
-    the exam; a preview (a "🧪 Question lab": pick exam/topic/type, see hints and method, try answering, nothing
-    recorded), then switch them on for practice, mocks and Starlane;
-  - option to send good ones to Claude to become permanent question types in the repo.
-  Open questions for Stuart: what Gemini's output looks like (paste a sample); fixed questions or templates; per
-  child or per family; should they ever count in mocks/readiness. Until then: test built-in questions as a separate
-  "Test" child so a real child's progress isn't touched.
+- **Questions in ApolloMaths stay fixed (Stuart, 19 Nov 2026).** ApolloMaths only uses its own built-in questions,
+  chosen by Stuart; nothing is imported at runtime here, and Starlane opened from ApolloMaths follows the child's
+  exam. "Bring your own questions" lives in **Starlane played on its own**: 📚 Question banks for grown-ups (built in
+  Starlane v29–30 — guide in the Starlane repo's `docs/QUESTION-BANKS.md`). People may send Stuart questions; he
+  decides what becomes built-in. Gemini-written questions for Apollo: try them as a Starlane bank on the standalone
+  site, or send them to a session to become ApolloMaths question types.
+- Starlane's future content (more systems, missions, adventures, question packs, story arcs with different endings)
+  is planned in the Starlane repo's `docs/ROADMAP.md` (R6, R7).
 
 ## Done
 
