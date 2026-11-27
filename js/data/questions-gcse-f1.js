@@ -74,6 +74,6 @@ mk('gcse_graphs',T(()=>{const [n,d]=pick([[2,1],[1,2],[3,1],[2,3],[-1,4],[-3,2],
 })();
 // Tidy every GCSE question (both files): "1x" → "x", "−1x" → "−x", and drop "+ 0" before "=" or the end of the maths.
 // Each generator is wrapped, keeping its tier, calculator, marks and year tags.
-const gcseTidy=t=>typeof t!=='string'?t:t.replace(/(^|[^\d.\w}])1([a-z])(?![a-z])/g,'$1$2').replace(/ [+\-] 0(?=\s*(\\\)|=))/g,'').replace(/([=(]\s*)\+ /g,'$1');
+const gcseTidy=t=>typeof t!=='string'?t:t.replace(/(^|[^\d.\w}])1([a-z])(?![a-z])/g,'$1$2').replace(/ [+\-] 0(?=\s*(\\\)|=))/g,'').replace(/ [+\-−] 0[a-z](\^\d|[²³])?(?![\w.])/g,'').replace(/([=(]\s*)\+ /g,'$1');
 function gcseTidyAll(){for(const k of Object.keys(bank).filter(k=>/^gcse_/.test(k)))bank[k]=bank[k].map(g=>{if(g.tidy)return g;const w=Object.assign(function(){const q=g();q.q=gcseTidy(q.q);if(Array.isArray(q.h))q.h=q.h.map(gcseTidy);if(Array.isArray(q.s))q.s=q.s.map(gcseTidy);if(typeof q.show==='string')q.show=gcseTidy(q.show);return q;},g);w.tidy=true;return w;});}
 gcseTidyAll();

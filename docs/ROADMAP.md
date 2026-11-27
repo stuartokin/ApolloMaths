@@ -1,7 +1,7 @@
 # Roadmap and open items
 
 *Stuart Okin — personal project, written in a personal capacity.*
-*As of 27 November 2026 (version 2.88). Items marked **(stated)** are Stuart's own requirements; the rest are
+*As of 27 November 2026 (version 2.89). Items marked **(stated)** are Stuart's own requirements; the rest are
 known gaps found during the work, for him to prioritise.*
 
 Starlane's future requirements (adult science questions, the science-research and adventure workflows) are in the
@@ -45,7 +45,8 @@ key stages and SATs (Apollo needs them). Phases, agreed 27 Nov:
      spend), the wording and feedback (calm, no comic sound effects), celebrations and the arcade (“break room”).
      **Waiting on Stuart to approve the Customise proofs** before building.
    - **(1) Groundwork — 2.86. (2) Senior look — 2.87. (3) GCSE Foundation content — 2.88** (99 new types, estimated grade).
-     **Next: (4) GCSE Higher** (~100 types: surds and indices in depth, algebraic fractions, completing the square,
+     **(4) GCSE Higher and all boards — 2.89.** GCSE is complete. Next: **A level Maths** (pure, statistics, mechanics; each
+     board's large data set), then Further Maths. Earlier note on (4): GCSE Higher (~100 types: surds and indices in depth, algebraic fractions, completing the square,
      functions and iteration, circle theorems, sine/cosine rules and 3D trig, vectors proofs, histograms and cumulative
      frequency, conditional probability), then WJEC, CCEA, Edexcel IGCSE and Cambridge IGCSE profiles; then A level.
      Possible later: mock papers ordered easy → hard like real papers; multi-part questions; an on-screen calculator. Later ideas for the look: arcade “break
@@ -98,6 +99,7 @@ Each year: update `SATS_DAY` (exams.js) and the SATs dates in `EXAM_EXTRA.ks2sat
 
 ## Done
 
+- **27 Nov 2026 (2.89)**: GCSE Higher and all boards — GCSE complete.
 - **27 Nov 2026 (2.88)**: GCSE Foundation content and estimated grade.
 - **27 Nov 2026 (2.87)**: the senior look and Customise.
 - **27 Nov 2026 (2.86)**: GCSE groundwork (KaTeX, algebra answers, graphs, tiers, papers, formula sheet, Look setting).

@@ -86,6 +86,46 @@
    "exam": "mtc",
    "label": "GOV.UK — multiplication tables check (collection)",
    "url": "https://www.gov.uk/government/collections/multiplication-tables-check"
+  },
+  {
+   "exam": "gcse_aqa",
+   "label": "AQA — GCSE Mathematics (8300)",
+   "url": "https://www.aqa.org.uk/subjects/mathematics/gcse/mathematics-8300"
+  },
+  {
+   "exam": "gcse_edexcel",
+   "label": "Pearson Edexcel — GCSE Mathematics (1MA1)",
+   "url": "https://qualifications.pearson.com/en/qualifications/edexcel-gcses/mathematics-2015.html"
+  },
+  {
+   "exam": "gcse_ocr",
+   "label": "OCR — GCSE Mathematics (J560)",
+   "url": "https://www.ocr.org.uk/qualifications/gcse/mathematics-j560-from-2015/"
+  },
+  {
+   "exam": "gcse_eduqas",
+   "label": "WJEC Eduqas — GCSE Mathematics",
+   "url": "https://www.eduqas.co.uk/qualifications/mathematics-gcse/"
+  },
+  {
+   "exam": "gcse_wjec",
+   "label": "WJEC — GCSE Mathematics and Numeracy specification",
+   "url": "https://www.wjec.co.uk/media/ojhfscmj/wjec-gcse-mathematics-and-numeracy-specification.pdf"
+  },
+  {
+   "exam": "gcse_ccea",
+   "label": "CCEA — GCSE Mathematics",
+   "url": "https://ccea.org.uk/key-stage-4/gcse/subjects/gcse-mathematics-2017"
+  },
+  {
+   "exam": "igcse_edexcel",
+   "label": "Pearson Edexcel — International GCSE Mathematics A",
+   "url": "https://qualifications.pearson.com/en/qualifications/edexcel-international-gcses/international-gcse-mathematics-a-2016.html"
+  },
+  {
+   "exam": "igcse_cambridge",
+   "label": "Cambridge IGCSE Mathematics 0580 syllabus 2025–2027",
+   "url": "https://www.cambridgeinternational.org/Images/662466-2025-2027-syllabus.pdf"
   }
  ],
  "schoolsToTrack": [
@@ -95,6 +135,8 @@
   "Harrow School",
   "ISEB Common Pre-Test schools",
   "London and Surrey grammar schools",
-  "Standards and Testing Agency (KS2 SATs)"
+  "Standards and Testing Agency (KS2 SATs)",
+  "GCSE maths boards (AQA, Edexcel, OCR, Eduqas, WJEC, CCEA)",
+  "International GCSE (Edexcel, Cambridge)"
  ]
 }

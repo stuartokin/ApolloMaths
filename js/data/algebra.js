@@ -31,15 +31,15 @@ const Alg=(()=>{
   for(let i=0;i<PTS.length;i++){const env={};vars.forEach((v,j)=>env[v]=PTS[(i+j)%PTS.length]+j*0.31);let x,y;try{x=fa(env);y=fb(env);}catch(e){return false;}
    if(!Number.isFinite(x)||!Number.isFinite(y))return false;if(Math.abs(x-y)>1e-6*Math.max(1,Math.abs(y)))return false;}return true;}
  // numbers in an answer like "x = 2, x = -1/3", "(3, -2)", "2 and 0.5"
- function numbers(raw){const s=String(raw).replace(/[−–—]/g,'-').replace(/\band\b|\bor\b|;|:/gi,',').replace(/[a-z]\s*=/gi,'').replace(/[()]/g,'');
+ function numbers(raw){const s=String(raw).replace(/[−–—]/g,'-').replace(/\band\b|\bor\b|;|:/gi,',').replace(/[a-z]\s*=/gi,'').replace(/[()°]/g,'');
   return s.split(',').map(x=>x.trim()).filter(Boolean).map(x=>{if(/^-?\d*\.?\d+\s*\/\s*-?\d*\.?\d+$/.test(x)){const[a,b]=x.split('/');return +a/ +b;}
    if(/sqrt|√/.test(x)){try{return parse(x)({});}catch(e){return NaN;}}return +x;});}
  const close=(a,b,tol)=>Math.abs(a-b)<=tol;
  function judgeSet(c,raw,ordered){const got=numbers(raw);if(!got.length||got.some(v=>!Number.isFinite(v)))return 'empty';const want=c.vals.slice();if(got.length!==want.length)return 'wrong';
   const tol=c.tol!==undefined?c.tol:0.006;if(ordered)return want.every((w,i)=>close(got[i],w,tol))?'ok':'wrong';
   const left=got.slice();for(const w of want){const i=left.findIndex(g=>close(g,w,tol));if(i<0)return 'wrong';left.splice(i,1);}return 'ok';}
- function judgeExpr(c,raw){let t=String(raw).trim();if(!t)return 'empty';t=t.replace(/^[a-z]\s*=\s*/i,'');const ok=same(t,c.ans,c.vars);if(ok===null)return 'wrong';if(!ok)return 'wrong';
-  const s=clean(t);if(c.form==='expanded'&&s.includes('('))return 'expandit';if(c.form==='factorised'&&!s.includes('('))return 'factoriseit';if(c.form==='surd'&&!s.includes('sqrt'))return 'surdit';if(c.form==='primes'&&(!/^[0-9^*()]+$/.test(s)||[...s.matchAll(/(\^?)(\d+)/g)].some(m=>!m[1]&&!isPrime(+m[2]))))return 'primesit';if(c.form==='stdform'&&!/^-?[1-9](\.\d+)?\*10\^\(?-?\d+\)?$/.test(s))return 'stdformit';return 'ok';}
+ function judgeExpr(c,raw){let t=String(raw).trim();if(!t)return 'empty';t=t.replace(/^[^=]*=\s*/,'');const ok=same(t,c.ans,c.vars);if(ok===null)return 'wrong';if(!ok)return 'wrong';
+  const s=clean(t);if(c.form==='expanded'&&s.includes('('))return 'expandit';if(c.form==='factorised'&&!s.includes('('))return 'factoriseit';if(c.form==='surd'&&!s.includes('sqrt'))return 'surdit';if(c.form==='primes'&&(!/^[0-9^*()]+$/.test(s)||[...s.matchAll(/(\^?)(\d+)/g)].some(m=>!m[1]&&!isPrime(+m[2]))))return 'primesit';if(c.form==='square'&&!/^-?\d*\(x[+-][\d.\/]+\)\^2([+-][\d.\/]+)?$/.test(s))return 'squareit';if(c.form==='stdform'&&!/^-?[1-9](\.\d+)?\*10\^\(?-?\d+\)?$/.test(s))return 'stdformit';return 'ok';}
  return {parse,same,numbers,judgeSet,judgeExpr,clean};
 })();
 // the app's judge() learns the new kinds; everything else is marked as before

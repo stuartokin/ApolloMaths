@@ -1,7 +1,22 @@
 {
- "version": "2.88",
+ "version": "2.89",
  "date": "27 November 2026",
  "releases": [
+  {
+   "v": "2.89",
+   "date": "27 November 2026",
+   "kids": [
+    "🎓 GCSE Maths is complete: Higher questions and every board — AQA, Edexcel, OCR, Eduqas, WJEC, CCEA and both International GCSEs"
+   ],
+   "tags": [
+    "new",
+    "parents"
+   ],
+   "items": [
+    "📐 GCSE Higher: 63 new question types (186 GCSE types in all) — surds and rationalising, fractional and negative indices, recurring decimals, bounds, completing the square, algebraic fractions, quadratic inequalities, functions and inverses, iteration, circle and tangent gradients, graph transformations, trig equations, velocity–time graphs, sine and cosine rules, ½ab sin C, 3D trigonometry, circle theorems, vectors, similar solids, frustums, segments, histograms, quartiles, conditional probability, stratified sampling and more.",
+    "🏫 New boards: WJEC Eduqas (England), WJEC GCSE Mathematics and Numeracy (Wales), CCEA (Northern Ireland), Pearson Edexcel International GCSE and Cambridge IGCSE (Core/Extended) — each with its own papers, timings, calculator rules and tier names. Boards that grade with letters show your mock percentage instead of a 9–1 estimate."
+   ]
+  },
   {
    "v": "2.88",
    "date": "27 November 2026",
@@ -140,27 +155,6 @@
    ],
    "items": [
     "🤖 Exam information is now AI-maintained: the exam-watch agent’s checked updates (key dates and new questions) go live automatically, and Key dates shows “Kept up to date by an AI agent — last checked …”."
-   ]
-  },
-  {
-   "v": "2.79",
-   "date": "13 November 2026",
-   "kids": [
-    "🧭 A refreshed tour, and your Focus Zone now names your own exam"
-   ],
-   "tags": [
-    "parents",
-    "fix"
-   ],
-   "items": [
-    "🛡️ Deleting a player now needs their name typed exactly (plus the grown-up passphrase), and deleted players go to a ♻️ recycle bin for 30 days — restore them from “Who’s playing?” with all their progress.",
-    "🪐 Starlane now always opens from its own site (stuartokin.github.io/Starlane); the copy built into ApolloMaths has been removed, so the app is smaller and faster.",
-    "🚀 Maths questions sent to Starlane now use the child’s own name and theme (never “Apollo”).",
-    "⭐ The Focus Zone names each child’s own exam, and existing players on other exams get focus topics from their exam (unless a grown-up chose them).",
-    "👪 The family-codes reminder moved from the children’s screen to the Grown-ups button (⚠️). Setup adds “🙂 I’ll design my own” for the character.",
-    "🎓 The guided tour and Help are updated for the new layout — the tour now visits every area (16 steps).",
-    "🤖 Exam watch: it now proposes key dates from official sources (shown with ✨ once you merge) and drafts whole question generators, each run 50 times in a sandbox and checked by a second solve.",
-    "🧩 engine.html: the question engine on its own, so the Starlane site can offer exam practice."
    ]
   }
  ]

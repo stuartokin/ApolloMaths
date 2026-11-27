@@ -3,6 +3,11 @@
 Plain-English summary of each release. The technical detail of every version is in the README's changelog
 (`- **vX.Y:**` lines), and the in-app version history is `versionHistory` in `js/data/help.js`.
 
+## 2.89 — 27 November 2026
+- **GCSE Higher**: 63 new question types (186 GCSE types in all).
+- **Every board**: AQA, Edexcel, OCR, Eduqas, WJEC (Wales), CCEA (Northern Ireland), Edexcel International GCSE and
+  Cambridge IGCSE, each with its papers, timings, calculator rules and tier names; letter-graded boards show mock %.
+
 ## 2.88 — 27 November 2026
 - **GCSE Foundation content**: 99 new question types (123 in all) across number, algebra, graphs, ratio and rates,
   geometry, measures and statistics, with lessons; drawn graphs and tables.

@@ -116,3 +116,7 @@ From building Apollo's Maths Missions (Nov 2026). Starlane-specific lessons are 
     searches for these patterns; also stop generators producing a zero middle term where that changes the question.
 48. **Floating-point rounding is not school rounding.** `78.335.toFixed(2)` gives 78.33; work in whole numbers
     (thousandths) and round half up yourself.
+49. **A `while` with an empty body hangs the whole check.** `while(b===a){}` never ends; the generator check sat for two
+    minutes. Change a variable inside every loop, and bound search loops (`for(let t=0;t<200&&!ok;t++)`).
+50. **Exam ids grow.** A filter written as `/^gcse_/` silently skipped `igcse_…` mocks. Use the list of ids
+    (`GCSE_IDS`) or a pattern that covers every family.

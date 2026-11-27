@@ -89,6 +89,17 @@ async def main(p):
     cl = await pg.evaluate("(()=>{const c=cleanStats(JSON.parse(JSON.stringify(stats)));const m=c.mocks[c.mocks.length-1];return {ex:m.ex,tier:m.tier,paper:m.paper,mk:m.mk}})()")
     R.check(cl == {'ex': 'gcse_aqa', 'tier': 'H', 'paper': 'p2', 'mk': 78}, 'mock exam, tier and paper survive a progress file', cl)
 
+    # 6c. 2.89: Higher content and every board
+    hi = await pg.evaluate("(()=>{const ks=Object.keys(bank).filter(k=>/^gcse_/.test(k));return {types:ks.reduce((n,k)=>n+bank[k].length,0),h:ks.reduce((n,k)=>n+bank[k].filter(g=>g.tier==='H').length,0)}})()")
+    R.check(hi['types'] >= 180 and hi['h'] >= 70, 'GCSE has 180+ question types, 70+ of them Higher-only', hi)
+    boards = await pg.evaluate("""(()=>{const out={};for(const id of ['gcse_aqa','gcse_edexcel','gcse_ocr','gcse_eduqas','gcse_wjec','gcse_ccea','igcse_edexcel','igcse_cambridge']){const p=EXAMS[id];
+      const own=Object.keys(topics).filter(k=>/^gcse_/.test(k)).every(k=>topics[k].exams.includes(id));out[id]={papers:(p.papers||[]).length,nonCalc:(p.papers||[]).filter(x=>x.calc===false).length,own,inOrder:EXAM_ORDER.includes(id)};}return out;})()""")
+    R.check(all(b['papers'] >= 2 and b['own'] and b['inOrder'] for b in boards.values()) and boards['igcse_edexcel']['nonCalc'] == 0 and boards['gcse_eduqas']['nonCalc'] == 1, 'all eight GCSE / IGCSE boards have their papers and the GCSE questions', boards)
+    cam = await pg.evaluate("""(()=>{stats.examPlan=[{id:'igcse_cambridge',school:'',date:'',result:'',tier:'F'}];syncExam(stats);const m=examMock();const g=GcseGrade.grade();
+      stats.mocks.push({t:Date.now(),score:10,total:20,secs:60,timedOut:false,mk:40,mkOf:80,ex:'igcse_cambridge',tier:'F',paper:'p1'});const g2=GcseGrade.grade();
+      stats.examPlan=[{id:'gcse_aqa',school:'',date:'',result:'',tier:'H'}];syncExam(stats);return {mins:m.mins,marks:m.marks,letters:g2.letters,pct:g2.pct};})()""")
+    R.check(cam == {'mins': 90, 'marks': 80, 'letters': True, 'pct': 50}, 'Cambridge Core papers are 90 minutes / 80 marks, and letter-graded boards show a mock % instead of a 9–1 grade', cam)
+
     # 7. Starlane, lessons, explainers
     sl = await pg.evaluate("""(()=>{setExam('gcse_aqa');let n=0,bad=0;for(let i=0;i<200;i++){const q=examQuestion('trade');if(q){n++;if(/\\\\\\(|\\\\frac/.test(q.q))bad++;}}return {n,bad};})()""")
     R.check(sl['bad'] == 0, 'Starlane never gets LaTeX or algebra answers it can’t show', sl)
