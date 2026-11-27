@@ -3,6 +3,13 @@
 Plain-English summary of each release. The technical detail of every version is in the README's changelog
 (`- **vX.Y:**` lines), and the in-app version history is `versionHistory` in `js/data/help.js`.
 
+## 2.85 — 27 November 2026
+- **KS1: Year 1 and Year 2 maths.** Picture questions (clocks, coins, number lines, tens and ones, arrays, fraction
+  shapes, counters), tap-to-answer in practice, questions read aloud. 36 question types; Year 2 has KS1-style papers.
+- **KS3: Year 7, 8 and 9 maths.** Five topics, 46 question types held back by year (Pythagoras and compound interest
+  wait for Year 9). 13+ Common Entrance now uses them too.
+- New `ks1ks3` test suite.
+
 ## 2.84 — 27 November 2026
 - **KS2 SATs mocks for all three papers**: Paper 1 arithmetic and Papers 2 and 3 reasoning (24 questions, 40 minutes),
   scored in marks; choose the paper in Mock exam.

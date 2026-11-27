@@ -24,9 +24,15 @@
  window.addEventListener('load',()=>{setInterval(()=>{try{drawPapers();}catch(e){}},1500);});
  // ---- topic grid and chosen topics ----
  {const base=drawTopics;drawTopics=function(){base.apply(this,arguments);document.querySelectorAll('#topics [data-topic]').forEach(b=>{const k=b.dataset.topic;if(topics[k]&&offExam(k))b.classList.add('hidden');});};}
- {const base=newQuestion;newQuestion=function(){if(topics[chosenTopic]&&offExam(chosenTopic))chosenTopic='mixed';const r=base.apply(this,arguments);try{perQStart();}catch(e){}return r;};}
+ {const base=newQuestion;newQuestion=function(){if(topics[chosenTopic]&&offExam(chosenTopic))chosenTopic='mixed';const r=base.apply(this,arguments);try{perQStart();}catch(e){}readQuestion();return r;};}
  // mocks keep to the paper's topics
  {const base=randomTopic;randomTopic=function(arr){const m=mode==='mock'?examMock():null,mt=m&&Array.isArray(m.topics)?m.topics.filter(k=>bank[k]&&bank[k].length&&!offExam(k)):null;if(mt&&mt.length)return base(mt);return arr===undefined?base():base(arr);};}
+ // ---- younger children (2.85): tap-to-answer in practice (profile.tap) and questions read aloud (profile.read) ----
+ {const base=examMCQ;examMCQ=function(cur,md){const p=examProfile();if(p&&p.tap&&md!=='mock'){const r=base(cur,'mock');const t=document.querySelector('#mcqBox .mini');if(t)t.textContent='Tap your answer (or type it):';return r;}return base(cur,md);};}
+ const spoken=t=>String(t||'').replace(/<[^>]+>/g,' ').replace(/□/g,' what number ').replace(/×/g,' times ').replace(/÷/g,' divided by ').replace(/−/g,' minus ').replace(/=\s*$/,' equals what?').replace(/\s+/g,' ').trim();
+ function readQuestion(){try{const p=examProfile();if(!p||!p.read||!current||finished||typeof Speech==='undefined'||!stats.speech||stats.speech.announce===false)return;if(Speech.ok===false||(typeof Speech.ok==='function'&&!Speech.ok()))return;setTimeout(()=>{if(current&&!finished)Speech.say(spoken(current.q),'question');},350);}catch(e){}}
+ // a wrong tap in practice leaves the other answers open, so a young child can try again
+ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-mcq]');if(!b)return;const p=examProfile();if(!p||!p.tap||mode==='mock')return;setTimeout(()=>{if(done||finished)return;document.querySelectorAll('.mcq-opt').forEach(x=>{if(!x.classList.contains('picked'))x.disabled=false;else x.classList.add('wrong-pick');});},80);});
  // ---- marks ----
  const marksOf=c=>{try{const g=bank[c.topic][c.generator];return g&&g.mk?g.mk:1;}catch(e){return 1;}};
  {const base=record;record=function(){const r=base.apply(this,arguments);try{const it=sessionLog[sessionLog.length-1];if(it&&current)it.mk=marksOf(current);}catch(e){}return r;};}

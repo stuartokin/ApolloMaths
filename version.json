@@ -1,7 +1,23 @@
 {
- "version": "2.84",
+ "version": "2.85",
  "date": "27 November 2026",
  "releases": [
+  {
+   "v": "2.85",
+   "date": "27 November 2026",
+   "kids": [
+    "🧒 Years 1 and 2: picture questions — clocks, coins, number lines and more — that you can tap and hear read aloud. 🧑‍🎓 Years 7, 8 and 9: KS3 maths, from negative numbers to Pythagoras"
+   ],
+   "tags": [
+    "new",
+    "parents"
+   ],
+   "items": [
+    "🧒 New exams: Year 1 and Year 2 maths (KS1). Picture questions (clock faces, coins, number lines, tens and ones, arrays, fraction shapes, counters), answer buttons to tap in practice (a wrong tap leaves the others open), and questions read aloud when sound is on. 36 question types. Year 2 has KS1-style Papers 1 (arithmetic) and 2 (reasoning). Year 3 now includes some KS1 revision.",
+    "🧑‍🎓 New exams: Year 7, Year 8 and Year 9 maths (KS3): five topics — negatives, powers and primes; equations and sequences; ratio and percentages; geometry (polygons, circles, Pythagoras, bearings); probability and statistics — 46 question types held back by year, with lessons and explainers.",
+    "🎓 13+ Common Entrance now includes the KS3 topics too."
+   ]
+  },
   {
    "v": "2.84",
    "date": "27 November 2026",
@@ -143,25 +159,6 @@
     "🖥️ Large desktops use the whole width (four columns above 1,800 pixels), and very large displays scale everything up (120% from 2,400 pixels, 140% from 3,200) so it stays readable.",
     "ℹ️ The footer shows just the essentials — name, Help, version and ℹ️ About — with the rest behind ℹ️.",
     "👕 Each theme has a starter outfit (nature, mission or rainbow T-shirt) with its own held item and scene. Switching theme swaps the starter items; anything bought stays owned."
-   ]
-  },
-  {
-   "v": "2.75",
-   "date": "13 November 2026",
-   "kids": [
-    "🏠 Your own room, your own character and a Shop that matches what you love — animals, space, music or football"
-   ],
-   "tags": [
-    "new",
-    "parents"
-   ],
-   "items": [
-    "🧭 A new student space: on laptops a side rail with your character, name, points and streak, the five areas (Today, Practise, Mock exam, Learn, 🏠 My room), a pinned 🔊 sound button and 👪 Grown-ups; a slim header; the page uses the full width. On phones the bar stays at the bottom with sound pinned at the top right.",
-    "🏠 My room (was Rewards): your character, the 🛍️ Shop (renamed from Kit Shop), 🎨 My theme, medals, the leaderboard and — once found — your games.",
-    "🛍️ Each theme has its own Shop: animals (ranger shirts, wellies, binoculars, hedgehog, fox, owl, forest and ocean scenes), space (flight suits, helmets, robot buddy, moon base) and music & art (smocks, guitars, headphones, parrot, stage and gallery). Football themes keep the original Shop. Arcade game names follow the theme (e.g. Garden Guardians, Pony Derby).",
-    "👧 Adding a player asks what they love (theme), whether their character is a girl or a boy, and their team for football. New children start with their theme’s starter items and focus topics chosen from their exam.",
-    "👪 Grown-ups: the parent dashboard now has 👨‍👩‍👧 Family & data (save, open, export, every-question export, players and family codes), and the parent box has left the children’s screen. ⚙️ Menu is in the usual order: switch player, theme & character, sound, voices, help, install, grown-ups.",
-    "🐞 Fixed “undefined%” on the Keep training bars for new players."
    ]
   }
  ]

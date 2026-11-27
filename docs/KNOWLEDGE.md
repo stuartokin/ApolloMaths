@@ -1,7 +1,7 @@
 # Apollo's Maths Missions — knowledge base
 
 *Stuart Okin — personal project, written in a personal capacity.*
-*Last full update: 13 November 2026 (version 2.80); exam switching updated 15 November 2026 (2.82); key stages and SATs 27 November 2026 (2.83–2.84).*
+*Last full update: 13 November 2026 (version 2.80); exam switching updated 15 November 2026 (2.82); key stages, SATs, KS1 and KS3 27 November 2026 (2.83–2.85).*
 
 Written so that a future person or AI model, starting cold, can understand the whole app and why it is the way
 it is. Lessons learned are in `LESSONS.md`, future requirements in `ROADMAP.md`, the test rig in
@@ -49,11 +49,11 @@ Load order matters: data first, then rendering, storage, features, `app.js`, the
 | Area | Files | Notes |
 |---|---|---|
 | Core | `js/core.js` | `R(a,b)` random (leans with `QDIFF` for difficulty), `Q(…)` question builder, `mk(topic, fn)` registers a generator into `bank` |
-| Topics & questions | `js/data/topics.js`, `questions-core.js`, `questions-focus.js`, `questions-extra.js`, `questions-exams.js`, `questions-agent.js`, `questions-sats.js`, `questions-ks2.js` | 34 topics; ~351 generators. KS2 reasoning and the tables check (`questions-ks2.js`, 2.84): `ks2_number/measure/shape/stats/problems`, `mtc_tables`. SATs arithmetic (`questions-sats.js`, 2.83): five topics with `topics[k].exams=['ks2sats']` and generators tagged `fn.years=[first,last]` (National Curriculum year) and `fn.mk` (marks). A generator returns `{q, a, u, h:[3 hints], s:[worked steps], fig?, table?, kind?}`. `fn.exams=[…]` limits it to exams; `fn.diff` 0/1/2 |
+| Topics & questions | `js/data/topics.js`, `questions-core.js`, `questions-focus.js`, `questions-extra.js`, `questions-exams.js`, `questions-agent.js`, `questions-sats.js`, `questions-ks2.js`, `questions-ks1.js`, `questions-ks3.js` | 44 topics; ~433 generators. KS1 (`ks1_*`, 2.85) and KS3 (`ks3_*`, 2.85). KS2 reasoning and the tables check (`questions-ks2.js`, 2.84): `ks2_number/measure/shape/stats/problems`, `mtc_tables`. SATs arithmetic (`questions-sats.js`, 2.83): five topics with `topics[k].exams=['ks2sats']` and generators tagged `fn.years=[first,last]` (National Curriculum year) and `fn.mk` (marks). A generator returns `{q, a, u, h:[3 hints], s:[worked steps], fig?, table?, kind?}`. `fn.exams=[…]` limits it to exams; `fn.diff` 0/1/2 |
 | Difficulty | `js/data/difficulty.js` | `rateQuestionTypes()` rates each generator; adaptive level per child per exam in `stats.adapt` (3 right first time → up, 2 misses → down); `diffFilter`, `setQDiff`, `qOK` (rejects accidentally trivial questions such as 5:5) |
 | Exams | `js/data/exams.js`, `exam-dates.js` | `EXAMS` (5 profiles: weights, style, sources), exam **plan** per child, header badge, mocks per exam, readiness, key dates, Sources, Starlane question socket (`examQuestion`), parent tabs Plan/Readiness/Starlane |
-| Learning | `js/data/lessons.js`, `learning.js`, `learning-more.js`, `learning-sats.js`, `learning-ks2.js`, `explainers.js`, `marking.js`, `metrics.js`, `js/learn.js` | Learn missions (6 steps per topic, active-reading gates), Example Studio, "Explain it simply", answer marking (`judge`), readiness, Today's plan (`planFor`) |
-| Rendering | `js/render/render.js`, `avatar.js`, `avatar-extra.js` | Diagrams from specs (`F('cuboid',…)`), fractions the Tiffin way (`fracHTML`), the character SVG (`drawAvatar`) |
+| Learning | `js/data/lessons.js`, `learning.js`, `learning-more.js`, `learning-sats.js`, `learning-ks2.js`, `learning-ks1-ks3.js`, `explainers.js`, `marking.js`, `metrics.js`, `js/learn.js` | Learn missions (6 steps per topic, active-reading gates), Example Studio, "Explain it simply", answer marking (`judge`), readiness, Today's plan (`planFor`) |
+| Rendering | `js/render/render.js`, `figures-ks1.js` (clock, coins, number line, array, fraction shapes, tens, counters — 2.85), `avatar.js`, `avatar-extra.js` | Diagrams from specs (`F('cuboid',…)`), fractions the Tiffin way (`fracHTML`), the character SVG (`drawAvatar`) |
 | Storage & players | `js/storage.js`, `js/players.js`, `js/protect.js` | Profiles, per-player stats, progress files (File System Access API with auto-save on Chrome/Edge; download elsewhere), "Who's playing?", recycle bin |
 | Family & Admin | `js/family.js`, `js/admin.js`, `js/data/arcade-rules.js` | Parent passphrase (PBKDF2), child's secret word/number code, fair-play locks, Admin PIN, play-time rules |
 | Shop & character | `js/locker.js`, `js/data/shop.js`, `shop-extra.js`, `shop-themes.js` | 274 items (kits, hats, boots, extras, pets, scenes, celebrations, titles, frames, Maths Legends cards, skills); themed catalogues |
@@ -104,7 +104,7 @@ Load order matters: data first, then rendering, storage, features, `app.js`, the
 
 Profiles (`EXAMS`): `tiffin1` Tiffin Stage 1 (quick, computer-marked), `tiffin2` Tiffin Stage 2 (written),
 `grammar11` 11+ grammar (multiple choice), `iseb` ISEB Common Pre-Test (Eton, Harrow and others; adaptive,
-Year 5 curriculum), `ce13` 13+ Common Entrance / scholarship (Year 8), `ks2sats` KS2 SATs (Year 6; 2.83), `y3`/`y4`/`y5` Year 3–5 maths and `mtc` the Year 4 multiplication tables check (2.84). `EXAM_ORDER` lists the KS2 profiles first. Each has topic **weights** (practice and
+Year 5 curriculum), `ce13` 13+ Common Entrance / scholarship (Year 8), `ks2sats` KS2 SATs (Year 6; 2.83), `y3`/`y4`/`y5` Year 3–5 maths and `mtc` the Year 4 multiplication tables check (2.84), `y1`/`y2` (KS1) and `y7`/`y8`/`y9` (KS3) (2.85). `EXAM_ORDER` runs from Year 1 to 13+. Each has topic **weights** (practice and
 Starlane follow them), a style, and **official sources** shown under 🎓 Exam & sources.
 
 **How the question bank follows the exam.** Mixed practice picks a topic by the exam's weights (`randomTopic` →
@@ -129,7 +129,10 @@ returns the chosen one. Profiles with `only:true` (Years 3–5, tables check) gi
 11+ puzzles never reach a Year 3 child. The tables check mock has `perQ:6`: a countdown under the question, a miss after
 6 seconds, and it moves on by itself after an answer. Year 4 children get “➕ Add the times-tables check” (`MTC_DAY`).
 `examFocusFor(id, s)` ranks topics by `examWeight` for that child, so focus never includes a topic with nothing for
-their year. KS1 and KS3 come next (ROADMAP).
+their year. **KS1 (2.85)** profiles have `tap` (answer buttons in practice too, via `examMCQ`; a wrong tap
+leaves the others open) and `read` (each question is read aloud with `Speech.say` when sound is on; ×, ÷, − and □ are
+said as words). Year 2 has KS1-style papers. **KS3 (2.85)**: Years 7–9 use the five `ks3_*` topics (held back by year)
+plus older word-problem topics at low weight; 13+ CE includes the KS3 topics. GCSE comes next (ROADMAP).
 
 **Trying questions.** There is no question tester yet: built-in questions are tried by playing as a separate "Test"
 child (pick a topic under ✏️ Practise). Starlane test mode is a game sandbox, not a question tester. ApolloMaths never loads
@@ -194,5 +197,6 @@ list. 6. `python tests/run_all.py` — all green. 7. Commit and push to `main` (
 | 13 Nov | This knowledge base and the test rig |
 | 2.81 | 15 Nov: changing the exam refreshes the child's page (question, focus, plan, mock); Fix-it keeps to the exam; exam plan as cards on phones/tablets; `exams` test suite |
 | 2.82 | 15 Nov: focus areas always follow the exam until a grown-up chooses their own (`focusMine`) |
+| 2.85 | 27 Nov: KS1 (Years 1–2: pictures, tap, read aloud, 36 types, Year 2 papers) and KS3 (Years 7–9, 46 types; also in 13+ CE), `ks1ks3` suite |
 | 2.84 | 27 Nov: SATs Papers 2–3 (reasoning, 5 topics, 47 types), Year 3–5 profiles, Year 4 tables check (6 s per question), paper picker, `ks2` suite |
 | 2.83 | 27 Nov: key stages begin — KS2 SATs exam, five arithmetic topics (36 types), Paper 1 mock in marks, school year in Plan, “Add KS2 SATs”, `stages` test suite |

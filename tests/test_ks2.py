@@ -4,7 +4,7 @@ Paper 1 (arithmetic) and Papers 2 and 3 (reasoning); the tables check gives 6 se
 itself; a Year 4 child's plan offers the check; charts and tables draw; the question engine serves the new exams."""
 from rig import *
 
-KS2 = ['arith_add', 'arith_mult', 'arith_div', 'arith_frac', 'arith_pct', 'ks2_number', 'ks2_measure', 'ks2_shape', 'ks2_stats', 'ks2_problems', 'mtc_tables']
+KS2 = ['arith_add', 'arith_mult', 'arith_div', 'arith_frac', 'arith_pct', 'ks2_number', 'ks2_measure', 'ks2_shape', 'ks2_stats', 'ks2_problems', 'mtc_tables', 'ks1_number', 'ks1_calc', 'ks1_mult', 'ks1_measure', 'ks1_shape']
 REASON = ['ks2_number', 'ks2_measure', 'ks2_shape', 'ks2_stats', 'ks2_problems']
 SAMPLE = """(()=>{chosenTopic='mixed';mode='training';const seen={},late=[];let n=0;for(let i=0;i<300;i++){finished=false;matchDone=0;done=false;newQuestion();
   const g=bank[current.topic][current.generator];seen[current.topic]=(seen[current.topic]||0)+1;if(g.years&&g.years[0]>childYear())late.push(current.topic);n++;}
@@ -75,7 +75,7 @@ async def main(p):
 
     # 5. charts, tables, lessons and explainers for every new topic
     figs = await pg.evaluate("""(()=>{const bad=[];for(const k of %s){const L=learnMissions[k];if(!L||L.length<4)bad.push(k+': lesson');if(!explainers[k])bad.push(k+': explainer');
-      bank[k].forEach((g,i)=>{const q=g();if(q.fig){const h=renderFigure(q.fig);if(!h||h.length<50)bad.push(k+'#'+i+': figure');}});}return bad;})()""" % json.dumps(KS2[5:]))
+      bank[k].forEach((g,i)=>{const q=g();if(q.fig){const h=renderFigure(q.fig);if(!h||h.length<50)bad.push(k+'#'+i+': figure');}});}return bad;})()""" % json.dumps(KS2[5:11]))
     R.check(not figs, 'every new topic has a lesson and an explainer, and its charts and tables draw', figs)
     try:
         await pg.goto(f'{serve()}/ApolloMaths/engine.html'); await pg.wait_for_timeout(600)

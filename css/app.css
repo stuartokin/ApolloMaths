@@ -546,3 +546,4 @@ body.student #famBanner{display:none!important}
 @media(max-width:560px){.plan-edit tr{grid-template-columns:1fr}}
 /* 2.84: seconds left per question (tables check) and the SATs paper picker */
 .perq{font-weight:900;font-size:18px;margin:0 0 10px;color:#3b4256}.perq.urgent{color:#e51c35}.paper-pick{margin:10px 0 0;align-items:center}
+.mcq-opt.wrong-pick{opacity:.45;text-decoration:line-through}

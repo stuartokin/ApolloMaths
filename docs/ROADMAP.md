@@ -1,7 +1,7 @@
 # Roadmap and open items
 
 *Stuart Okin — personal project, written in a personal capacity.*
-*As of 27 November 2026 (version 2.84). Items marked **(stated)** are Stuart's own requirements; the rest are
+*As of 27 November 2026 (version 2.85). Items marked **(stated)** are Stuart's own requirements; the rest are
 known gaps found during the work, for him to prioritise.*
 
 Starlane's future requirements (adult science questions, the science-research and adventure workflows) are in the
@@ -27,9 +27,11 @@ key stages and SATs (Apollo needs them). Phases, agreed 27 Nov:
    multiplication tables check (6-second countdown), paper picker, “Add the times-tables check”.
    Possible later: more reasoning types (two-part answers, “explain” questions, drawing on a grid), a Year 6 profile
    separate from SATs, scaled scores from the marks (the STA publishes conversion tables each July).
-3. **2.85 — next:** **KS1** (Years 1–2: pictures — clocks, coins, number lines, counters, fraction bars; tap-to-answer, read-aloud
-   on) and **KS3** (Years 7–9, about 80 types; 13+ CE sits inside). New figure types in `render.js`.
-4. **Then:** GCSE (shared content written once; board profiles AQA, Edexcel, OCR, Eduqas/WJEC, CCEA, IGCSE with their
+3. **2.85 — done:** **KS1** (Years 1–2: pictures — clocks, coins, number lines, counters, fraction bars; tap-to-answer, read-aloud
+   on) and **KS3** (Years 7–9, 46 types; 13+ CE uses them). New figures in `figures-ks1.js`.
+   Possible later: more KS3 types (graphs of lines, transformations, constructions), drag-and-drop answers for KS1,
+   Reception/EYFS.
+4. **Next:** GCSE (shared content written once; board profiles AQA, Edexcel, OCR, Eduqas/WJEC, CCEA, IGCSE with their
    papers, calculator rules and formula sheets; Foundation/Higher). Needs KaTeX (self-hosted), an algebra-answer
    checker, graphs and loading per stage. The **older look** (character, hobbies, backgrounds, “Customise” shop) comes
    with GCSE — send Stuart proof images first.
@@ -74,6 +76,7 @@ Each year: update `SATS_DAY` (exams.js) and the SATs dates in `EXAM_EXTRA.ks2sat
 
 ## Done
 
+- **27 Nov 2026 (2.85)**: KS1 (Years 1–2) and KS3 (Years 7–9).
 - **27 Nov 2026 (2.84)**: SATs reasoning papers, Years 3–5, the Year 4 tables check.
 - **27 Nov 2026 (2.83)**: KS2 SATs and school years (see “Key stages, GCSE and A level”). Fixed: 50-question 11+ mocks were
   cut to 40 when progress was reopened.

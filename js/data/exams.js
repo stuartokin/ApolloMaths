@@ -49,15 +49,32 @@ const yearProfile=(y,extra)=>Object.assign({name:`Year ${y} maths (national curr
  sources:NC_SRC,note:'There are no national tests in Years 3 and 5; Year 4 has the multiplication tables check. Our questions are original and follow the national curriculum for each year.',
  badge:`Year ${y} maths`,mock:{n:20,mins:30,mcq:false},dates:[]},extra||{});
 EXAMS.y3=yearProfile(3);EXAMS.y4=yearProfile(4);EXAMS.y5=yearProfile(5);
+Object.assign(EXAMS.y3.weights,{ks1_number:.4,ks1_calc:.4,ks1_mult:.4,ks1_measure:.4,ks1_shape:.4});   // KS1 revision
+// KS1 (2.85): Years 1 and 2 — pictures, tap-to-answer (tap) and questions read aloud (read). Year 2 has KS1-test-style papers.
+const KS1W={ks1_number:1.2,ks1_calc:1.3,ks1_mult:1,ks1_measure:1.1,ks1_shape:1};
+const ks1Profile=(y,extra)=>Object.assign({name:`Year ${y} maths (national curriculum)`,short:`Year ${y}`,schools:'Any school in England — practice that follows the national curriculum',age:`Year ${y} (age ${y+4}–${y+5})`,year:y,only:true,tap:true,read:true,style:'written',
+ format:`Short picture questions across the Year ${y} curriculum: counting, adding and taking away, groups, money, time, shapes and fractions. Tap an answer (or type it); questions are read aloud.`,
+ weights:Object.assign({},KS1W),sources:NC_SRC,note:'Our questions are original and follow the national curriculum for each year.',badge:`Year ${y} maths`,mock:{n:15,mins:20,mcq:true},dates:[]},extra||{});
+EXAMS.y1=ks1Profile(1);
+EXAMS.y2=ks1Profile(2,{note:'The KS1 tests (end of Year 2) became optional for schools in 2023–24; many still use them. Our papers copy their style, not their content.',sources:[['GOV.UK — KS1 maths past papers and test materials','https://www.gov.uk/government/collections/national-curriculum-assessments-practice-materials'],...NC_SRC.slice(0,1)],
+ papers:[{id:'p1',paper:'KS1 Paper 1: arithmetic',n:25,mins:20,mcq:true,marks:25,topics:['ks1_calc','ks1_mult']},{id:'p2',paper:'KS1 Paper 2: reasoning',n:25,mins:35,mcq:true,marks:35,topics:['ks1_number','ks1_calc','ks1_mult','ks1_measure','ks1_shape']}]});
+// KS3 (2.85): Years 7–9 — national curriculum, plus the best of the older word-problem topics. 13+ CE uses the KS3 topics too.
+const KS3_SRC=[['GOV.UK — national curriculum: mathematics programmes of study (key stage 3)','https://www.gov.uk/government/publications/national-curriculum-in-england-mathematics-programmes-of-study']];
+const ks3Profile=y=>({name:`Year ${y} maths (KS3)`,short:`Year ${y}`,schools:'Any secondary school in England — practice that follows the KS3 national curriculum',age:`Year ${y} (age ${y+4}–${y+5})`,year:y,only:true,style:'written',
+ format:`Practice across KS3 up to Year ${y}: number, algebra, ratio and percentages, geometry, probability and statistics. Questions from later years are held back.`,
+ weights:{ks3_number:1.3,ks3_algebra:1.4,ks3_ratio:1.3,ks3_geometry:1.3,ks3_stats:1.2,algebra:.5,probability:.5,ratio:.4,percent:.4,averages:.4,sequences:.4,coordinates:.4,area:.4,volume:.4,speed:.4,divisibility:.4,reasoning:.3,logic:.3},
+ sources:KS3_SRC,note:'There are no national tests in KS3. Our questions are original and follow the KS3 programme of study; Year 9 also prepares for GCSE.',badge:`Year ${y} maths`,mock:{n:25,mins:45,mcq:false},dates:[]});
+EXAMS.y7=ks3Profile(7);EXAMS.y8=ks3Profile(8);EXAMS.y9=ks3Profile(9);
+Object.assign(EXAMS.ce13.weights,{ks3_number:1.2,ks3_algebra:1.4,ks3_ratio:1.2,ks3_geometry:1.3,ks3_stats:1.2});
 EXAMS.mtc={name:'Year 4 multiplication tables check',short:'Tables check',schools:'All state-funded primary schools in England (Standards and Testing Agency)',age:'Year 4 — in June (2027: a two-week window from 7 June)',year:4,only:true,style:'quick',
  format:'An on-screen check: 25 multiplication questions up to 12 × 12, with 6 seconds to answer each and a 3-second pause between them. No hints, no going back.',
  weights:{mtc_tables:3,arith_mult:.6,arith_div:.6,arith_add:.3,ks2_number:.3},
  sources:[['GOV.UK — multiplication tables check (collection)','https://www.gov.uk/government/collections/multiplication-tables-check'],['GOV.UK — multiplication tables check administration guidance','https://www.gov.uk/government/publications/multiplication-tables-check-administration-guidance'],NC_SRC[0]],
  note:'The Standards and Testing Agency publishes a free “try it out” area for the check through schools. Our questions copy its format, not its content.',
  badge:'Year 4 multiplication tables check',mock:{n:25,mins:4,mcq:false,perQ:6,marks:25,paper:'Multiplication tables check',topics:['mtc_tables']},dates:[['Multiplication tables check — 2-week window opens','2027-06-07']]};
-const EXAM_ORDER=['y3','y4','mtc','y5','ks2sats','tiffin1','tiffin2','grammar11','iseb','ce13'];
+const EXAM_ORDER=['y1','y2','y3','y4','mtc','y5','ks2sats','tiffin1','tiffin2','grammar11','iseb','y7','y8','y9','ce13'];
 // which exam a child is preparing for (existing children are recognised from their exam name — Apollo stays on Tiffin Stage 2)
-function examId(s){s=s||(typeof stats!=='undefined'?stats:null);const e=s&&s.exam||{};if(e.profile&&EXAMS[e.profile])return e.profile;const n=String(e.name||'');return /\bsats\b|key stage 2/i.test(n)?'ks2sats':/tables check/i.test(n)?'mtc':/^year ([345]) maths/i.test(n)?'y'+n.match(/^year ([345])/i)[1]:/stage\s*1/i.test(n)?'tiffin1':/common entrance|13\+/i.test(n)?'ce13':/iseb|pre-?test/i.test(n)?'iseb':/grammar/i.test(n)?'grammar11':'tiffin2';}
+function examId(s){s=s||(typeof stats!=='undefined'?stats:null);const e=s&&s.exam||{};if(e.profile&&EXAMS[e.profile])return e.profile;const n=String(e.name||'');return /\bsats\b|key stage 2/i.test(n)?'ks2sats':/tables check/i.test(n)?'mtc':/^year ([1-9]) maths/i.test(n)?'y'+n.match(/^year ([1-9])/i)[1]:/stage\s*1/i.test(n)?'tiffin1':/common entrance|13\+/i.test(n)?'ce13':/iseb|pre-?test/i.test(n)?'iseb':/grammar/i.test(n)?'grammar11':'tiffin2';}
 function examProfile(s){return EXAMS[examId(s)];}
 // topics that belong to particular exams (topics[k].exams, e.g. SATs arithmetic) count 0 everywhere else
 function examWeight(k,s){const t=topics[k];if(t&&Array.isArray(t.exams)&&(!t.exams.includes(examId(s))||(bank[k]&&!bank[k].some(g=>suitsExam(g,s)))))return 0;   // …or when nothing in it suits the child's school year yet

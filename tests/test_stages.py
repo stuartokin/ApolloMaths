@@ -26,7 +26,8 @@ async def main(p):
       seen[current.topic]=(seen[current.topic]||0)+1;if(examWeight(current.topic)===0||!suitsExam(bank[current.topic][current.generator]))bad++;}return {seen,bad};})()""")
     arith = sum(v for k, v in mix['seen'].items() if k in ARITH)
     R.check(mix['bad'] == 0, 'mixed practice only serves topics and types that suit SATs (400 questions)', mix['bad'])
-    R.check(arith >= 120 and not any(k in mix['seen'] for k in ('speed', 'probability', 'tiffin')), 'arithmetic comes up often; topics outside the KS2 curriculum never do', f'{arith}/400 arithmetic')
+    sats = arith + sum(v for k, v in mix['seen'].items() if k.startswith('ks2_'))
+    R.check(arith >= 70 and sats >= 240 and not any(k in mix['seen'] for k in ('speed', 'probability', 'tiffin')), 'arithmetic and SATs reasoning make up most practice; topics outside the KS2 curriculum never do', f'{arith} arithmetic, {sats} SATs-level of 400')
     grid = await pg.evaluate("ARITH=%s;ARITH.filter(k=>{const b=document.querySelector('#topics [data-topic='+k+']');return b&&!b.classList.contains('hidden')}).length" % json.dumps(ARITH))
     R.check(grid == 5, 'the five arithmetic topics are in her topic grid', grid)
 

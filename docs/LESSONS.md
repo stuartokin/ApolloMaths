@@ -97,3 +97,8 @@ From building Apollo's Maths Missions (Nov 2026). Starlane-specific lessons are 
     for her year. Grep for the logic, not just the function name, and route every copy through one function.
 40. **A late-opening Welcome window can block a click.** In tests, close dialogs again just before clicking (it opened
     after the player was added and covered the SATs paper buttons).
+41. **New topics change old tests' expectations.** Adding KS1 revision to Year 3 and reasoning to SATs made two earlier
+    checks fail (they listed exact topics or a fixed share of arithmetic). Write checks about the rule (“only
+    curriculum topics for this year”), not a snapshot of today's mix.
+42. **Young children need the answer buttons back after a wrong tap.** The multiple-choice code disables every option
+    after one tap (right for mocks); KS1 practice re-enables the others so a child can try again.
