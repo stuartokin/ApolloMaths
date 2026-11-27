@@ -23,6 +23,16 @@ Object.assign(learnMissions,{
   M('Finding an angle',[{p:'Use the inverse function on your calculator: sin⁻¹, cos⁻¹ or tan⁻¹.'},{eg:'tan θ = 5/12 → θ = tan⁻¹(0.4167) ≈ 22.6°'}],'sin θ = 0.5. What is θ?',['30°','60°','45°','0.5°'],'sin 30° = 0.5.'),
   M('Arcs and sectors',[{eg:'Sector area = \\(\\frac{\\theta}{360}\\times\\pi r^2\\) · Arc length = \\(\\frac{\\theta}{360}\\times 2\\pi r\\)'}],'What fraction of a circle is a 90° sector?',['1/4','1/2','1/3','1/90'],'90/360 = 1/4.'),
   M('Pythagoras in 3D',[{p:'The diagonal of a cuboid: \\(d^2 = a^2 + b^2 + c^2\\).'}],'A 2 × 3 × 6 cuboid. Diagonal?',['7','11','√13','49'],'4 + 9 + 36 = 49, √49 = 7.')],
+ gcse_graphs:[
+  M('y = mx + c',[{p:'m is the gradient (steepness); c is where the line crosses the y-axis.'},{fig:F('graph',{x:[-4,4],y:[-6,6],fns:['2*x-1']})},{eg:'y = 2x − 1: gradient 2, y-intercept −1'}],'What is the y-intercept of y = 3x + 5?',['5','3','8','−5'],'c = 5.'),
+  M('Finding a gradient',[{p:'Gradient = change in y ÷ change in x, between any two points.'},{eg:'(1, 2) to (4, 11): 9 ÷ 3 = 3'}],'Gradient from (0, 1) to (2, 9)?',['4','8','2','5'],'(9 − 1) ÷ (2 − 0) = 8 ÷ 2 = 4.'),
+  M('Parallel and perpendicular',[{ul:['Parallel lines have the same gradient','Perpendicular gradients multiply to −1 (negative reciprocal)']}],'Perpendicular to gradient 2?',['−1/2','2','−2','1/2'],'Negative reciprocal of 2 is −½.'),
+  M('Quadratic graphs',[{p:'The roots are where the curve crosses the x-axis; the turning point is the top or bottom of the curve.'},{fig:F('graph',{x:[-2,5],y:[-5,6],fns:['(x-1)*(x-3)']})}],'Roots of y = (x − 1)(x − 3)?',['x = 1 and x = 3','x = −1 and x = −3','x = 3 only','x = 2'],'Each bracket is zero at x = 1 or x = 3.')],
+ gcse_measures:[
+  M('Area formulas',[{ul:['Rectangle: l × w','Triangle: ½ × b × h','Trapezium: ½(a + b)h','Circle: πr²']}],'Area of a triangle, base 10, height 6?',['30','60','16','36'],'½ × 10 × 6 = 30.'),
+  M('Circles',[{p:'Circumference = πd = 2πr. Area = πr². A semicircle’s perimeter includes the diameter.'}],'Circumference of a circle with d = 10 (to 1 d.p.)?',['31.4','78.5','15.7','62.8'],'π × 10 ≈ 31.4.'),
+  M('Volume and surface area',[{ul:['Prism / cylinder: area of cross-section × length','Cuboid surface area: add the 6 faces']},{eg:'Cylinder r = 3, h = 10: π × 9 × 10 ≈ 282.7 cm³'}],'Volume of a 2 × 3 × 4 cuboid?',['24','9','52','14'],'2 × 3 × 4 = 24.'),
+  M('Converting area units',[{p:'1 m = 100 cm, so 1 m² = 100 × 100 = 10 000 cm². Square the length factor!'}],'How many cm² in 3 m²?',['30 000','300','3 000','300 000'],'3 × 10 000 = 30 000.')],
  gcse_stats:[
   M('Tree diagrams',[{p:'Multiply ALONG the branches; ADD the outcomes you want.'},{eg:'P(two heads) = 0.5 × 0.5 = 0.25'}],'P(A) = 0.3, P(B) = 0.5, independent. P(A and B)?',['0.15','0.8','0.2','0.35'],'Independent: multiply, 0.3 × 0.5 = 0.15.'),
   M('Without replacement',[{p:'After the first pick there is one fewer item, so the second fraction changes.'},{eg:'5 red, 3 blue: P(red, red) = 5/8 × 4/7 = 20/56 = 5/14'}],'4 red, 2 blue, two picks without replacement. P(both blue)?',['1/15','1/9','4/36','1/3'],'2/6 × 1/5 = 2/30 = 1/15.'),
@@ -34,6 +44,8 @@ Object.assign(explainers,{
  gcse_algebra:[{m:/Solve/,idea:'Solving means finding the value(s) that make the equation true. Quadratics usually have two answers.',check:'Put each answer back into the equation — does it give 0 (or the right total)?'},{idea:'Expanding multiplies out brackets; factorising puts them back. They are opposites.',check:'Expand your factorised answer (or factorise your expanded one) to check you get back to the start.'}],
  gcse_ratio:[{idea:'Proportion and percentage questions are about multipliers: find the multiplier (or k), then use it.',check:'Does your answer go up or down the way the question says it should?'}],
  gcse_geometry:[{m:/sin|cos|tan|angle|hypotenuse|right-angled/i,idea:'In a right-angled triangle, the trig ratios link an angle to two sides. Label O, A and H from the angle first.',check:'Is the hypotenuse still the longest side? Is your angle less than 90°?'},{idea:'Use the right formula, keep units, and round only at the end.',check:'Estimate with round numbers — is your answer close?'}],
+ gcse_graphs:[{idea:'A graph is a picture of an equation: every point on the line makes the equation true.',check:'Pick a point you found and put it into the equation — does it work?'}],
+ gcse_measures:[{idea:'Measures: use the right formula, keep the units the same, and remember area is squared and volume is cubed.',check:'Does the size and the unit of your answer make sense?'}],
  gcse_stats:[{idea:'Probabilities are between 0 and 1. For two events, think about AND (multiply) or OR (add).',check:'Is your probability between 0 and 1? Do all the outcomes add up to 1?'}]
 });
 })();

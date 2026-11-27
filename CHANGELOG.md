@@ -3,6 +3,13 @@
 Plain-English summary of each release. The technical detail of every version is in the README's changelog
 (`- **vX.Y:**` lines), and the in-app version history is `versionHistory` in `js/data/help.js`.
 
+## 2.88 — 27 November 2026
+- **GCSE Foundation content**: 99 new question types (123 in all) across number, algebra, graphs, ratio and rates,
+  geometry, measures and statistics, with lessons; drawn graphs and tables.
+- **Estimated GCSE grade** from the last three mock papers (AQA June 2025 boundaries as a guide).
+- GCSE mock papers are 25 questions in 90 minutes, scored in marks.
+- Fixes: tidier algebra wording, rounding of numbers ending in 5, graphs with different axis scales.
+
 ## 2.87 — 27 November 2026
 - **The senior look** for GCSE and A level ("Night study", with a light theme), automatic from Year 10: own character,
   calm wording, XP and levels, and **🎨 Customise** — age-appropriate outfits, trainers, accessories, desk and room,

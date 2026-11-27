@@ -38,7 +38,7 @@
  {const base=record;record=function(){const r=base.apply(this,arguments);try{const it=sessionLog[sessionLog.length-1];if(it&&current)it.mk=marksOf(current);}catch(e){}return r;};}
  {const base=finishSession;finishSession=function(){const wasMock=mode==='mock'&&!finished,m=examMock(),r=base.apply(this,arguments);perQStop();
   if(wasMock&&m.marks&&sessionLog.length){const of=sessionLog.reduce((n,x)=>n+(x.mk||1),0),got=sessionLog.reduce((n,x)=>n+(x.correct&&!x.skipped?(x.mk||1):0),0),last=stats.mocks[stats.mocks.length-1];
-   if(last){last.mk=got;last.mkOf=of;save();}const fb=get('feedback');if(fb)fb.insertAdjacentHTML('beforeend',`<br><b>📝 ${esc(m.paper||'Marks')}: ${got} out of ${of} marks.</b>${m.id==='p1'?' In the real paper long multiplication and long division are worth 2 marks each.':''}`);}
+   if(last){last.mk=got;last.mkOf=of;last.ex=examId();if(m.id)last.paper=m.id;if(typeof childTier==='function'&&childTier())last.tier=childTier();save();}const fb=get('feedback');if(fb)fb.insertAdjacentHTML('beforeend',`<br><b>📝 ${esc(m.paper||'Marks')}: ${got} out of ${of} marks.</b>${m.id==='p1'?' In the real paper long multiplication and long division are worth 2 marks each.':''}`);}
   return r;};}
  // ---- seconds per question (the tables check) ----
  let pqTimer=null,pqToken=0;

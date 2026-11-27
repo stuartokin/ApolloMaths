@@ -25,14 +25,14 @@ const Maths=(()=>{
 // fracHTML (render.js) draws maths between \( … \); everything else as before
 {const base=fracHTML;fracHTML=function(text){if(!Maths.has(text))return base(text);return String(text).split(/\\\(([\s\S]+?)\\\)/).map((part,i)=>i%2?Maths.tex(part):base(part)).join('');};}
 // ---------- graphs ----------
-function graphSVG(o){o=o||{};const [x0,x1]=o.x||[-5,5],[y0,y1]=o.y||[-5,5],st=o.step||1,W=340,H=Math.round(340*(y1-y0)/(x1-x0))||340,pad=26;
+function graphSVG(o){o=o||{};const [x0,x1]=o.x||[-5,5],[y0,y1]=o.y||[-5,5],st=o.step||1,sty=o.stepY||st,W=340,H=o.h||Math.min(460,Math.round(340*(y1-y0)/(x1-x0)))||340,pad=26;
  const sx=x=>pad+(x-x0)/(x1-x0)*(W-2*pad),sy=y=>H-pad-(y-y0)/(y1-y0)*(H-2*pad);let g='';
  for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st)g+=line(sx(x),sy(y0),sx(x),sy(y1),{c:'#d5d9e3',w:1});
- for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st)g+=line(sx(x0),sy(y),sx(x1),sy(y),{c:'#d5d9e3',w:1});
+ for(let y=Math.ceil(y0/sty)*sty;y<=y1;y+=sty)g+=line(sx(x0),sy(y),sx(x1),sy(y),{c:'#d5d9e3',w:1});
  if(y0<=0&&y1>=0)g+=line(sx(x0),sy(0),sx(x1),sy(0),{w:2});if(x0<=0&&x1>=0)g+=line(sx(0),sy(y0),sx(0),sy(y1),{w:2});
- const lab=o.labelEvery||st*(x1-x0>12?2:1);
+ const lab=o.labelEvery||st*(x1-x0>12?2:1),laby=o.labelEveryY||(o.stepY?sty:lab);
  for(let x=Math.ceil(x0/lab)*lab;x<=x1;x+=lab)if(x)g+=txt(sx(x),sy(Math.max(y0,Math.min(0,y1)))+12,String(x).replace('-','−'),{size:10});
- for(let y=Math.ceil(y0/lab)*lab;y<=y1;y+=lab)if(y)g+=txt(sx(Math.max(x0,Math.min(0,x1)))-10,sy(y),String(y).replace('-','−'),{size:10,anchor:'end'});
+ for(let y=Math.ceil(y0/laby)*laby;y<=y1;y+=laby)if(y)g+=txt(sx(Math.max(x0,Math.min(0,x1)))-10,sy(y),String(y).replace('-','−'),{size:10,anchor:'end'});
  g+=txt(sx(x1)-6,sy(Math.max(y0,Math.min(0,y1)))-10,'x',{size:13,extra:' font-style="italic"'})+txt(sx(Math.max(x0,Math.min(0,x1)))+12,sy(y1)+8,'y',{size:13,extra:' font-style="italic"'});
  const COL=['#e51c35','#3b6fe0','#2ba36b'];(o.fns||[]).forEach((f,k)=>{let fn;try{fn=Alg.parse(f);}catch(e){return;}let d='',pen=false;
   for(let i=0;i<=240;i++){const x=x0+(x1-x0)*i/240;let y;try{y=fn({x});}catch(e){y=NaN;}if(!Number.isFinite(y)||y<y0-1||y>y1+1){pen=false;continue;}d+=(pen?'L':'M')+f1(sx(x))+' '+f1(sy(y))+' ';pen=true;}

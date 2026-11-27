@@ -1,7 +1,24 @@
 {
- "version": "2.87",
+ "version": "2.88",
  "date": "27 November 2026",
  "releases": [
+  {
+   "v": "2.88",
+   "date": "27 November 2026",
+   "kids": [
+    "📚 GCSE Maths now has 123 kinds of question across seven topics, and your estimated grade from mock papers"
+   ],
+   "tags": [
+    "new",
+    "parents"
+   ],
+   "items": [
+    "📚 GCSE Foundation content: 99 new question types across number, algebra, graphs (new), ratio and rates, geometry, measures (new) and probability and statistics — each with hints, a worked method and lessons. Graphs and tables are drawn on screen; answers can be expressions, both roots of a quadratic, coordinates, ratios or prime-factor form.",
+    "🎯 Estimated GCSE grade: shown at the top of the page and in Grown-ups → Readiness, from the last three mock papers, using AQA’s June 2025 grade boundaries as a guide.",
+    "📝 GCSE mock papers are now 25 questions in 90 minutes, scored in marks, for AQA, Edexcel and OCR.",
+    "🔧 Fixes: tidier algebra (no “1x” or “+ 0”), correct rounding of numbers ending in 5, and graphs with different scales on each axis."
+   ]
+  },
   {
    "v": "2.87",
    "date": "27 November 2026",
@@ -144,19 +161,6 @@
     "🎓 The guided tour and Help are updated for the new layout — the tour now visits every area (16 steps).",
     "🤖 Exam watch: it now proposes key dates from official sources (shown with ✨ once you merge) and drafts whole question generators, each run 50 times in a sandbox and checked by a second solve.",
     "🧩 engine.html: the question engine on its own, so the Starlane site can offer exam practice."
-   ]
-  },
-  {
-   "v": "2.78",
-   "date": "13 November 2026",
-   "kids": [
-    "🕹️ Every arcade game now lets you choose: 🧍 My player or 👾 Classic"
-   ],
-   "tags": [
-    "games"
-   ],
-   "items": [
-    "🕹️ Every arcade game except Starlane now has the 🧍 My player / 👾 Classic choice that Invaders had. My player puts your character and theme into the game; Classic is the original game with its original items. Each game remembers its own choice."
    ]
   }
  ]

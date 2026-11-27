@@ -1,7 +1,7 @@
 # Apollo's Maths Missions — knowledge base
 
 *Stuart Okin — personal project, written in a personal capacity.*
-*Last full update: 13 November 2026 (version 2.80); exam switching updated 15 November 2026 (2.82); key stages, SATs, KS1 and KS3, GCSE groundwork and senior look 27 November 2026 (2.83–2.87).*
+*Last full update: 13 November 2026 (version 2.80); exam switching updated 15 November 2026 (2.82); key stages, SATs, KS1 and KS3, GCSE groundwork and senior look, GCSE Foundation 27 November 2026 (2.83–2.88).*
 
 Written so that a future person or AI model, starting cold, can understand the whole app and why it is the way
 it is. Lessons learned are in `LESSONS.md`, future requirements in `ROADMAP.md`, the test rig in
@@ -141,6 +141,12 @@ only when needed, plain-text fallback). New answer kinds `expr`, `set`, `coord` 
 sheet (a revision copy — boards provide the real one, confirmed by Ofqual for the life of the current GCSEs) and
 calculator labels.
 
+**GCSE Foundation (2.88).** Seven GCSE topics (number, algebra, graphs, ratio, geometry, measures, statistics), 123
+types in `questions-gcse.js` + `questions-gcse-f1.js` + `questions-gcse-f2.js` (new types are always appended, so
+Fix-it's question numbers stay valid). `gcseTidyAll()` tidies wording. The **estimated grade** (`GcseGrade.grade()`,
+gcse.js) averages the last three GCSE mocks of the child's tier and maps the percentage onto AQA's June 2025 boundaries
+(Higher 9/8/7/6/5/4/3 = 219/191/164/130/96/63/46; Foundation 5/4/3/2/1 = 188/160/119/79/39, out of 240) — a guide only.
+
 **The senior look (2.87)** — chosen by Stuart (27 Nov): proof B “Night study” with a light theme, everything
 age-appropriate for 14–18. It is a layer: `css/senior.css` only applies under `body.look-senior`; `js/senior.js` swaps
 the characters (`drawSenior`), opens 🎨 Customise instead of the Locker Room, calms the wording (text-node swaps, `notice`
@@ -212,6 +218,7 @@ list. 6. `python tests/run_all.py` — all green. 7. Commit and push to `main` (
 | 13 Nov | This knowledge base and the test rig |
 | 2.81 | 15 Nov: changing the exam refreshes the child's page (question, focus, plan, mock); Fix-it keeps to the exam; exam plan as cards on phones/tablets; `exams` test suite |
 | 2.82 | 15 Nov: focus areas always follow the exam until a grown-up chooses their own (`focusMine`) |
+| 2.88 | 27 Nov: GCSE Foundation content (123 types, 7 topics), estimated grade, 25-question papers |
 | 2.87 | 27 Nov: senior look (Night study + light theme), Customise, hobbies, XP levels, new character, `senior` suite |
 | 2.86 | 27 Nov: GCSE groundwork — KaTeX, graphs, algebra answers, tiers, board papers, formula sheet, Look setting, 24 GCSE types, `gcse` suite |
 | 2.85 | 27 Nov: KS1 (Years 1–2: pictures, tap, read aloud, 36 types, Year 2 papers) and KS3 (Years 7–9, 46 types; also in 13+ CE), `ks1ks3` suite |

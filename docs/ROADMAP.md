@@ -1,7 +1,7 @@
 # Roadmap and open items
 
 *Stuart Okin — personal project, written in a personal capacity.*
-*As of 27 November 2026 (version 2.87). Items marked **(stated)** are Stuart's own requirements; the rest are
+*As of 27 November 2026 (version 2.88). Items marked **(stated)** are Stuart's own requirements; the rest are
 known gaps found during the work, for him to prioritise.*
 
 Starlane's future requirements (adult science questions, the science-research and adventure workflows) are in the
@@ -44,8 +44,11 @@ key stages and SATs (Apollo needs them). Phases, agreed 27 Nov:
      desk and room, backdrops, titles, study perks — no cartoon kits or pets), the rewards (XP and levels; credits to
      spend), the wording and feedback (calm, no comic sound effects), celebrations and the arcade (“break room”).
      **Waiting on Stuart to approve the Customise proofs** before building.
-   - **(1) Groundwork — done in 2.86. (2) Senior look — done in 2.87.** Next: (3) GCSE Foundation content (~100 types)
-     and the England boards' full mocks; then Higher, other boards, A level. Later ideas for the look: arcade “break
+   - **(1) Groundwork — 2.86. (2) Senior look — 2.87. (3) GCSE Foundation content — 2.88** (99 new types, estimated grade).
+     **Next: (4) GCSE Higher** (~100 types: surds and indices in depth, algebraic fractions, completing the square,
+     functions and iteration, circle theorems, sine/cosine rules and 3D trig, vectors proofs, histograms and cumulative
+     frequency, conditional probability), then WJEC, CCEA, Edexcel IGCSE and Cambridge IGCSE profiles; then A level.
+     Possible later: mock papers ordered easy → hard like real papers; multi-part questions; an on-screen calculator. Later ideas for the look: arcade “break
      room” with the senior character; more items per hobby; drawn item art instead of emoji icons; a day-streak freeze.
    - Order: (1) groundwork — maths display (KaTeX, self-hosted), algebra-answer checking, graphs, calculator flag,
      formula sheet, tier + board in the Plan, loading per stage, the look switch; (2) the senior look; (3) GCSE
@@ -95,6 +98,7 @@ Each year: update `SATS_DAY` (exams.js) and the SATs dates in `EXAM_EXTRA.ks2sat
 
 ## Done
 
+- **27 Nov 2026 (2.88)**: GCSE Foundation content and estimated grade.
 - **27 Nov 2026 (2.87)**: the senior look and Customise.
 - **27 Nov 2026 (2.86)**: GCSE groundwork (KaTeX, algebra answers, graphs, tiers, papers, formula sheet, Look setting).
 - **27 Nov 2026 (2.85)**: KS1 (Years 1–2) and KS3 (Years 7–9).

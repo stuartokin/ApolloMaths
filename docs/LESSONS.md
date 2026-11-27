@@ -111,3 +111,8 @@ From building Apollo's Maths Missions (Nov 2026). Starlane-specific lessons are 
     phone bar; redirecting only one left phones going to the children's room. Test both bars.
 46. **A layer that rewrites text must not fight another layer.** student.js rewrites the rail points every second;
     rewriting the same element flickered. Hide the original and show your own element instead.
+47. **Randomly generated algebra needs a tidy-up pass.** Coefficients of 1 and 0 (“1x”, “+ 0”, “x² + 0x”) appear in
+    otherwise-correct questions. One wrapper (`gcseTidyAll`) fixes the wording everywhere, and the generator check now
+    searches for these patterns; also stop generators producing a zero middle term where that changes the question.
+48. **Floating-point rounding is not school rounding.** `78.335.toFixed(2)` gives 78.33; work in whole numbers
+    (thousandths) and round half up yourself.

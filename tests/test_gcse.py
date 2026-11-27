@@ -5,7 +5,7 @@ order; simultaneous equations take (x, y); graphs draw; the formula sheet opens;
 never gets LaTeX; GCSE topics have lessons and explainers."""
 from rig import *
 
-GCSE = ['gcse_number', 'gcse_algebra', 'gcse_ratio', 'gcse_geometry', 'gcse_stats']
+GCSE = ['gcse_number', 'gcse_algebra', 'gcse_graphs', 'gcse_ratio', 'gcse_geometry', 'gcse_measures', 'gcse_stats']
 FIND = """(async(tp,gi)=>{chosenTopic=tp;mode='training';for(let i=0;i<400;i++){finished=false;matchDone=0;done=false;newQuestion();if(current.generator===gi)break;}await new Promise(r=>setTimeout(r,200));return current.q;})"""
 
 async def type_answer(pg, txt):
@@ -75,6 +75,19 @@ async def main(p):
     await add_player(pg, 'Kit', exam='y5', theme='space'); await pg.wait_for_timeout(1200); await close_dialogs(pg)
     y5 = await pg.evaluate("({senior:document.body.classList.contains('look-senior'),katexReq:!!document.querySelector('script[src*=katex]')})")
     R.check(not y5['senior'] and not y5['katexReq'], 'a Year 5 child keeps today’s look and never loads the maths library', y5)
+
+    # 6b. 2.88: Foundation content, seven topics, the estimated grade
+    cov = await pg.evaluate("(()=>{const ks=Object.keys(bank).filter(k=>/^gcse_/.test(k));return {topics:ks.length,types:ks.reduce((n,k)=>n+bank[k].length,0),f:ks.reduce((n,k)=>n+bank[k].filter(g=>g.tier==='F').length,0)}})()")
+    R.check(cov['topics'] >= 7 and cov['types'] >= 120 and cov['f'] >= 25, 'GCSE has seven topics and 120+ question types, with Foundation-only ones', cov)
+    await pg.evaluate("setExam('gcse_aqa');stats.examPlan[0].tier='H';syncExam(stats)")
+    g0 = await pg.evaluate("(()=>{stats.mocks=stats.mocks.filter(m=>!m.ex);return GcseGrade.grade();})()")
+    g1 = await pg.evaluate("(()=>{stats.mocks.push({t:Date.now(),score:20,total:25,secs:60,timedOut:false,mk:55,mkOf:80,ex:'gcse_aqa',tier:'H',paper:'p1'});return GcseGrade.grade();})()")
+    g2 = await pg.evaluate("(()=>{stats.mocks.push({t:Date.now(),score:24,total:25,secs:60,timedOut:false,mk:78,mkOf:80,ex:'gcse_aqa',tier:'H',paper:'p2'});return GcseGrade.grade();})()")
+    R.check(g0['n'] == 0 and g1['grade'] == 7 and g2['grade'] == 8, 'the estimated grade follows mock marks (68.75% → 7; then 83% → 8)', {'none': g0, 'one': g1, 'two': g2})
+    await pg.wait_for_timeout(1700)
+    R.check('Estimated grade' in await pg.evaluate("(document.getElementById('gradeChip')||{}).textContent||''"), 'the estimated grade shows at the top of the page')
+    cl = await pg.evaluate("(()=>{const c=cleanStats(JSON.parse(JSON.stringify(stats)));const m=c.mocks[c.mocks.length-1];return {ex:m.ex,tier:m.tier,paper:m.paper,mk:m.mk}})()")
+    R.check(cl == {'ex': 'gcse_aqa', 'tier': 'H', 'paper': 'p2', 'mk': 78}, 'mock exam, tier and paper survive a progress file', cl)
 
     # 7. Starlane, lessons, explainers
     sl = await pg.evaluate("""(()=>{setExam('gcse_aqa');let n=0,bad=0;for(let i=0;i<200;i++){const q=examQuestion('trade');if(q){n++;if(/\\\\\\(|\\\\frac/.test(q.q))bad++;}}return {n,bad};})()""")

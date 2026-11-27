@@ -11,6 +11,17 @@
  function seniorOn(s){s=s||stats;const l=s&&s.look;if(l==='senior')return true;if(l==='junior')return false;return childYear(s)>=10||['gcse','alevel'].includes(examStage(s));}
  function applyLook(){try{const on=seniorOn(stats);document.body.classList.toggle('look-senior',on);document.body.dataset.stage=examStage(stats)||'';if(on||examStage(stats))Maths.load();}catch(e){}}
  window.Look={seniorOn,apply:applyLook,LOOKS};
+ // ---- estimated grade (2.88): from the last three GCSE mock papers, using AQA's June 2025 grade boundaries (out of 240)
+ // as percentages. Clearly an estimate: real boundaries change every year and differ between boards.
+ const BOUNDS={H:[[9,219],[8,191],[7,164],[6,130],[5,96],[4,63],[3,46]],F:[[5,188],[4,160],[3,119],[2,79],[1,39]]};
+ function grade(s){s=s||stats;if(examStage(s)!=='gcse')return null;const t=childTier(s)||'H',ms=(s.mocks||[]).filter(x=>x.mkOf&&x.ex&&/^gcse_/.test(x.ex)&&(x.tier||'H')===t).slice(-3);if(!ms.length)return {tier:t,n:0};
+  const pct=ms.reduce((a,x)=>a+x.mk/x.mkOf,0)/ms.length,row=BOUNDS[t].find(([,b])=>pct>=b/240);return {tier:t,n:ms.length,pct:Math.round(100*pct),grade:row?row[0]:(t==='H'?'U (below 3)':'U')};}
+ window.GcseGrade={grade,BOUNDS};
+ function gradeChip(){const hero=document.querySelector('.hero');if(!hero)return;let c=document.getElementById('gradeChip');const g=grade();if(!g){if(c)c.remove();return;}
+  if(!c){c=document.createElement('button');c.type='button';c.id='gradeChip';c.className='exam-badge grade-chip';c.title='How this is worked out';c.addEventListener('click',()=>{if(typeof toast==='function')toast('Estimated from your last three mock papers, using AQA’s June 2025 grade boundaries. Real boundaries change every year — it is a guide, not a promise.');});const b=hero.querySelector('.exam-badge');(b||hero.querySelector('h1')).insertAdjacentElement('afterend',c);}
+  const t=g.n?`🎯 Estimated grade: <b>${g.grade}</b> <span class="mini">(${g.tier==='F'?'Foundation':'Higher'} · ${g.pct}% over ${g.n} mock paper${g.n>1?'s':''})</span>`:`🎯 Do a mock paper to see your estimated grade`;if(c.innerHTML!==t)c.innerHTML=t;}
+ window.addEventListener('load',()=>{gradeChip();setInterval(gradeChip,1500);});
+ {const base=readinessBlock;readinessBlock=function(s){const g=grade(s),extra=!g?'':`<section class="exam-box"><h3>🎯 Estimated GCSE grade</h3><p>${g.n?`<b>Grade ${g.grade}</b> (${g.tier==='F'?'Foundation':'Higher'} tier) — ${g.pct}% across the last ${g.n} mock paper${g.n>1?'s':''}.`:'No GCSE mock papers yet — the estimate appears after the first one.'}</p><p class="section-note">Worked out with AQA’s June 2025 grade boundaries (out of 240) as percentages. Boundaries change every year and differ between boards, so treat it as a guide.</p></section>`;return extra+base(s);};}
  // the Plan tab: a Look choice beside the School year
  {const base=yearPick;yearPick=function(s){const l=s.look&&LOOKS[s.look]?s.look:'auto';return base(s)+`<p class="exam-year"><label>Look <select data-look-pick>${Object.entries(LOOKS).map(([k,v])=>`<option value="${k}"${k===l?' selected':''}>${v}</option>`).join('')}</select></label> <span class="section-note">Now showing: ${seniorOn(s)?'senior':'children’s'} look.</span></p>`;};}
  document.addEventListener('change',e=>{const f=e.target.closest&&e.target.closest('[data-look-pick]');if(!f||typeof stats==='undefined')return;stats.look=f.value;save(false);applyLook();planChanged(f.closest('[data-exam-box]'));if(typeof toast==='function')toast('Look: '+LOOKS[f.value]);});
@@ -40,6 +51,6 @@
   draw();if(!Maths.ready())Maths.when(()=>{if(d.open)draw();});if(!d.open)d.showModal();}
  // ---- right value, wrong form ----
  let lastCode='';{const base=judge;judge=function(c,raw){const r=base(c,raw);lastCode=r;return r;};}
- const NOTE={expandit:'Right value — now EXPAND it (multiply out the brackets).',factoriseit:'Right value — now FACTORISE it (put it in brackets).',surdit:'Right value — now leave it as a SURD (use √), not a decimal.',stdformit:'Right value — now write it in STANDARD FORM (a × 10ⁿ with 1 ≤ a < 10).'};
+ const NOTE={primesit:'Right value — now write it using PRIME numbers only (e.g. 2³ × 3 × 5).',expandit:'Right value — now EXPAND it (multiply out the brackets).',factoriseit:'Right value — now FACTORISE it (put it in brackets).',surdit:'Right value — now leave it as a SURD (use √), not a decimal.',stdformit:'Right value — now write it in STANDARD FORM (a × 10ⁿ with 1 ≤ a < 10).'};
  {const base=notice;notice=function(type,msg){if(type==='try'&&NOTE[lastCode]){msg=NOTE[lastCode];lastCode='';}return base(type,msg);};}
 })();

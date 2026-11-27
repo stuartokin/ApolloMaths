@@ -70,13 +70,13 @@ Object.assign(EXAMS.ce13.weights,{ks3_number:1.2,ks3_algebra:1.4,ks3_ratio:1.2,k
 // its own papers. stage:'gcse' switches on maths display, the formula sheet and (from Year 10) the senior look.
 // tiers: the Plan asks Foundation or Higher (entry.tier); fn.tier 'F' or 'H' keeps a question to one tier.
 // Papers: calc:false is a non-calculator paper (questions with fn.calc===true are left out of it).
-const GCSE_TOPICS={gcse_number:1.2,gcse_algebra:1.5,gcse_ratio:1.2,gcse_geometry:1.3,gcse_stats:1.1,ks3_number:.3,ks3_algebra:.3,ks3_ratio:.3,ks3_geometry:.3,ks3_stats:.3};
-const GCSE_COMMON={stage:'gcse',year:10,only:true,style:'written',tiers:true,formula:true,mock:{n:20,mins:90,mcq:false},dates:[],
+const GCSE_TOPICS={gcse_number:1.3,gcse_algebra:1.5,gcse_graphs:1.2,gcse_ratio:1.3,gcse_geometry:1.3,gcse_measures:1.2,gcse_stats:1.2,ks3_number:.3,ks3_algebra:.3,ks3_ratio:.3,ks3_geometry:.3,ks3_stats:.3};
+const GCSE_COMMON={stage:'gcse',year:10,only:true,style:'written',tiers:true,formula:true,mock:{n:25,mins:90,mcq:false},dates:[],
  format:'Three papers of 1 hour 30 minutes. Foundation tier (grades 1–5) or Higher tier (grades 4–9). Paper 1 is non-calculator; a formulae sheet is provided in the exam.',
  note:'Every board follows the same DfE subject content; boards publish past papers and mark schemes on their websites. Our questions are original, in the style of those papers.'};
 const DFE_GCSE=['DfE — GCSE mathematics subject content','https://www.gov.uk/government/publications/gcse-mathematics-subject-content-and-assessment-objectives'];
 const OFQUAL_SHEET=['Ofqual — formulae sheets in GCSE maths (decisions)','https://www.gov.uk/government/consultations/proposed-changes-to-the-assessment-of-mathematics-physics-and-combined-science-gcses/outcome/decisions-proposed-changes-to-the-assessment-of-mathematics-physics-and-combined-science-gcses'];
-const gpapers=(marks,names)=>names.map(([id,paper,calc])=>({id,paper,calc,n:20,mins:90,mcq:false,marks}));
+const gpapers=(marks,names)=>names.map(([id,paper,calc])=>({id,paper,calc,n:25,mins:90,mcq:false,marks}));
 EXAMS.gcse_aqa=Object.assign({},GCSE_COMMON,{name:'GCSE Maths — AQA (8300)',short:'AQA GCSE',schools:'AQA — the most widely used GCSE maths board in England',age:'Years 10–11 — exams in May and June',weights:Object.assign({},GCSE_TOPICS),badge:'GCSE Maths · AQA',
  sources:[['AQA — GCSE Mathematics (8300): specification, past papers and formulae sheet','https://www.aqa.org.uk/subjects/mathematics/gcse/mathematics-8300'],DFE_GCSE,OFQUAL_SHEET],
  papers:gpapers(80,[['p1','Paper 1 (non-calculator)',false],['p2','Paper 2 (calculator)',true],['p3','Paper 3 (calculator)',true]])});
