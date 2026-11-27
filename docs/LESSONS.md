@@ -127,3 +127,5 @@ From building Apollo's Maths Missions (Nov 2026). Starlane-specific lessons are 
     negative number needs its own − key (2.90 `#minusKey`). Test on a touch context (`is_mobile`, `has_touch`).
 53. **An invalid `font:` shorthand is dropped whole** (`font:900 26px/1 inherit` is invalid), leaving a tiny default glyph.
     Use the separate properties, and look at a screenshot.
+54. **A random-mix check needs headroom.** The SATs mix check (≥ 240 of 400) sat on its average (~242) and failed by
+    chance in the 2.90 run. Set thresholds well below the usual value (now 220) and re-run a failure before chasing it.
