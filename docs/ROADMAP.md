@@ -86,6 +86,9 @@ Each year: update `SATS_DAY` (exams.js) and the SATs dates in `EXAM_EXTRA.ks2sat
 
 ## Future plans (not scheduled)
 
+The whole key stages / SATs / GCSE programme (2.83–2.90) is written up in `docs/WRITEUP-2026-11.md`.
+
+
 - **A level Maths and Further Maths, all boards** (Stuart, 27 Nov 2026: “put the A level into future plan”). When it
   starts: pure, statistics and mechanics; each board's large data set; then Further Maths. It reuses the GCSE
   groundwork (KaTeX, algebra checking, graphs, senior look). Ask Stuart before starting.

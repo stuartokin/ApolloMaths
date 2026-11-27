@@ -11,7 +11,8 @@ Before changing anything, read in this order:
 1. **`docs/KNOWLEDGE.md`** — what the app is, the code map, data model, exams, grown-ups, arcade, release routine.
 2. **`docs/LESSONS.md`** — what went wrong before and how to avoid it.
 3. **`docs/ROADMAP.md`** — open items and Stuart's stated plans.
-4. **`tests/README.md`** — the test rig. Run `python tests/run_all.py` before and after every change.
+4. **`docs/WRITEUP-2026-11.md`** — plain-English write-up of the key stages, SATs and GCSE work (2.83–2.90): decisions, what was built, what is untested.
+5. **`tests/README.md`** — the test rig. Run `python tests/run_all.py` before and after every change.
 
 ## Starlane Trader (the space game in the arcade)
 
