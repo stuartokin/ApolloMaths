@@ -88,3 +88,7 @@ From building Apollo's Maths Missions (Nov 2026). Starlane-specific lessons are 
     grown-up a one-tap button (“➕ Add KS2 SATs”) and tell Stuart to press it.
 37. **In the cloud sandbox, pushing a git tag can be refused** (the remote hangs up). The backup was made as a branch
     `backup/YYYY-MM-DD-<what>` through the GitHub tools instead; reset `main` to it the same way to undo.
+38. **Check the deploy after every push — a broken link stopped the site for 8 days.** On 19 Nov a link named
+    `ApolloMaths` (left by a test run) was committed; GitHub Pages' build fails on a link that points nowhere, so nothing
+    published from 19 to 27 Nov (including the exam watch's 23 Nov update). Removed in 2.83, ignored in `.gitignore`,
+    and `test_static` now fails if any link is committed.

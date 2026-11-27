@@ -11,6 +11,8 @@ Plain-English summary of each release. The technical detail of every version is 
 - SATs topics never appear for other exams (practice, topic grid, focus, Starlane).
 - Fix: 50-question 11+ mocks were saved as out of 40 when progress was reopened.
 - Exam watch now checks the Standards and Testing Agency pages and SATs dates. New `stages` test suite.
+- Fix: the site had not published since 19 November (a stray link in the repo broke the GitHub Pages build); removed,
+  and a test now stops it happening again.
 
 ## Docs — 19 November 2026 (no app change)
 - Decided: ApolloMaths keeps its own fixed questions; grown-ups bring their own questions in Starlane played on

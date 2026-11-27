@@ -26,6 +26,9 @@ async def main(p):
     leaks = [str(f.relative_to(APOLLO)) for f in APOLLO.rglob('*') if f.is_file() and '.git' not in f.parts and f.suffix in ('.js', '.html', '.md', '.json', '.yml', '.py', '.mjs')
              and re.search(r'sk-ant-[A-Za-z0-9_-]{10,}', f.read_text(encoding='utf-8', errors='ignore'))]
     R.check(not leaks, 'no API keys in the repo', leaks)
+    links = subprocess.run(['git', '-C', str(APOLLO), 'ls-files', '-s'], capture_output=True, text=True).stdout.splitlines()
+    links = [l.split('\t')[-1] for l in links if l.startswith('120000')]
+    R.check(not links, 'no links (symlinks) are committed — one stopped GitHub Pages building from 19 to 27 Nov 2026', links)
     pg = await browser(p); await open_app(pg)
     sweep = await pg.evaluate("""(()=>{let types=0,samples=0,bad=[],trivial=0;const lv={0:0,1:0,2:0};
       for(const [tp,list] of Object.entries(bank))list.forEach((g,ix)=>{types++;lv[g.diff]=(lv[g.diff]||0)+1;
