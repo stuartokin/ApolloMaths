@@ -31,7 +31,19 @@ key stages and SATs (Apollo needs them). Phases, agreed 27 Nov:
    on) and **KS3** (Years 7–9, 46 types; 13+ CE uses them). New figures in `figures-ks1.js`.
    Possible later: more KS3 types (graphs of lines, transformations, constructions), drag-and-drop answers for KS1,
    Reception/EYFS.
-4. **Next:** GCSE (shared content written once; board profiles AQA, Edexcel, OCR, Eduqas/WJEC, CCEA, IGCSE with their
+4. **Next: GCSE.** Plan agreed 27 Nov 2026 (Stuart):
+   - **Two looks.** Today's look stays for Years 1–9, SATs, 11+ and 13+. GCSE and A level get a new “senior” look —
+     a layer over the same app (own CSS, character, hobbies, Customise shop); questions, mocks, dashboard, saving and
+     arcade are shared; progress carries over. It switches on **automatically from Year 10**; grown-ups can switch any
+     child either way.
+   - **Calculators:** students use their own; questions and papers say calculator / non-calculator.
+   - **Mock order:** AQA, Edexcel, OCR first; then Eduqas, WJEC (Wales), CCEA (NI), Edexcel IGCSE, Cambridge IGCSE.
+   - **Look proofs** (three directions) are in `docs/proofs/` (`make.py` rebuilds them): A Studio (clean cards, hobby
+     backdrop — recommended), B Night study (dark, lo-fi city), C HUD (gaming, neon). **Waiting on Stuart to choose.**
+   - Order: (1) groundwork — maths display (KaTeX, self-hosted), algebra-answer checking, graphs, calculator flag,
+     formula sheet, tier + board in the Plan, loading per stage, the look switch; (2) the senior look; (3) GCSE
+     Foundation (~100 types) + England mocks; (4) Higher (~100) + other boards; then A level, then Further Maths.
+   GCSE (earlier note) (shared content written once; board profiles AQA, Edexcel, OCR, Eduqas/WJEC, CCEA, IGCSE with their
    papers, calculator rules and formula sheets; Foundation/Higher). Needs KaTeX (self-hosted), an algebra-answer
    checker, graphs and loading per stage. The **older look** (character, hobbies, backgrounds, “Customise” shop) comes
    with GCSE — send Stuart proof images first.
