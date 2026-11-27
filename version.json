@@ -1,7 +1,24 @@
 {
- "version": "2.82",
- "date": "15 November 2026",
+ "version": "2.83",
+ "date": "27 November 2026",
  "releases": [
+  {
+   "v": "2.83",
+   "date": "27 November 2026",
+   "kids": [
+    "➕ KS2 SATs practice: five new arithmetic missions (adding, multiplying, dividing, fractions, percentages) and a Paper 1 mock — 36 questions in 30 minutes, scored in marks like the real test"
+   ],
+   "tags": [
+    "new",
+    "parents"
+   ],
+   "items": [
+    "🎓 New exam: KS2 SATs (Year 6). Practice and focus topics follow the national tests, with 36 new arithmetic question types (column methods, long multiplication and long division, decimals, negative numbers, fraction calculations, percentages, order of operations, squares and cubes) — each with three hints, a worked method, a Learn mission and “Explain it simply”.",
+    "🏆 SATs Paper 1 mock: 36 arithmetic questions in 30 minutes, scored in marks (long multiplication and long division are worth 2, as in the real paper).",
+    "📅 Grown-ups → Plan: a School year picker (questions taught after that year are held back) and, for Year 6 children, “➕ Add KS2 SATs — 13 May 2027”. Key dates now include the SATs maths days, results and the Year 4 times-tables check.",
+    "🔧 Fix: a 50-question 11+ mock was saved as out of 40 when progress was reopened."
+   ]
+  },
   {
    "v": "2.82",
    "date": "15 November 2026",
@@ -143,22 +160,6 @@
     "🖥️ Wide screens use the space: Today shows the next best thing beside today’s plan; Practise and Mock exam have missions on the left, the question in the middle and the coach and game modes on the right; Rewards puts your player beside medals and the leaderboard. Phones still stack.",
     "⚙️ The menu now drops down under its button instead of hiding behind the header.",
     "🎨 Themes (⚙️ Menu → 🎨 Theme), chosen per child: ⚽ Anfield (the original), ⚽ Football — my team (any club name and team colour), 🚀 Space, 🐾 Animals & nature and 🎵 Music & art. Each changes the colours, background, header and sticker, and the stories in the questions — in practice and in Starlane — while the maths stays the same."
-   ]
-  },
-  {
-   "v": "2.73",
-   "date": "13 November 2026",
-   "kids": [
-    "🧭 A tidier app: Today, Practise, Mock exam, Learn and Rewards along the top (or the bottom on a phone)"
-   ],
-   "tags": [
-    "new",
-    "parents"
-   ],
-   "items": [
-    "🧭 New layout: the home page is organised into five areas — 🎯 Today (with one big “next best thing” button), ✏️ Practise, 🏆 Mock exam, 📚 Learn and 🎁 Rewards — shown one at a time, with the bar at the bottom on phones. Starting practice from anywhere jumps to Practise; “⛶ Focus on the question” hides everything else. The header buttons (switch player, help, sound, voices, install) are in ⚙️ Menu, and the save banner shrinks to a chip once progress is saved.",
-    "👪 Parent dashboard regrouped: Overview (summary cards), 📋 Plan (exam plan and key dates), 📈 Progress (readiness, focus areas, topics, question types, mocks, learning), ⏱️ Time & activity, 🎮 Games & rewards (Starlane, shop) and ⚙️ Settings & data — plus a “find anything” box.",
-    "📱 Fixed: on narrow phones the save banner no longer makes the page scroll sideways."
    ]
   }
  ]

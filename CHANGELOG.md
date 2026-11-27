@@ -3,6 +3,15 @@
 Plain-English summary of each release. The technical detail of every version is in the README's changelog
 (`- **vX.Y:**` lines), and the in-app version history is `versionHistory` in `js/data/help.js`.
 
+## 2.83 — 27 November 2026
+- Key stages begin with **KS2 SATs (Year 6)**: a new exam with five arithmetic topics (36 question types with hints,
+  worked methods, Learn missions and explainers) and a **Paper 1 mock** — 36 questions in 30 minutes, scored in marks.
+- Grown-ups → Plan: a **School year** picker (later-year questions are held back) and **➕ Add KS2 SATs** for Year 6
+  children. Key dates include the 2027 SATs maths days (12–13 May), results (6 July) and the times-tables check (from 7 June).
+- SATs topics never appear for other exams (practice, topic grid, focus, Starlane).
+- Fix: 50-question 11+ mocks were saved as out of 40 when progress was reopened.
+- Exam watch now checks the Standards and Testing Agency pages and SATs dates. New `stages` test suite.
+
 ## Docs — 19 November 2026 (no app change)
 - Decided: ApolloMaths keeps its own fixed questions; grown-ups bring their own questions in Starlane played on
   its own (📚 Question banks, Starlane v29–30). Roadmap updated; Starlane's future content plans are in its repo.

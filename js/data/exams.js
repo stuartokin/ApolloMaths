@@ -30,11 +30,22 @@ const EXAMS={
   sources:[['Eton College — Year 9 (13+) admissions (King’s Scholarship papers are published on Eton’s website)','https://www.etoncollege.com/admissions/year-9-13/'],['Harrow School — admissions process (Academic Scholarship past papers on its scholarships page)','https://www.harrowschool.org.uk/admissions/admissions-process'],['Harrow School — Year 9 entry','https://www.harrowschool.org.uk/admissions/year-9-entry'],['ISEB — Common Entrance 13+ timetable','https://www.iseb.co.uk/ce-case-exam-dates/ce-13-exam-timetable/']],
   note:'Common Entrance papers are sold by ISEB’s publisher; Eton and Harrow publish some scholarship papers. We link to them and write our own questions in their style.'}
 };
-const EXAM_ORDER=['tiffin1','tiffin2','grammar11','iseb','ce13'];
+// KS2 SATs (2.83): the national curriculum tests in Year 6. Practice and Paper 1 mocks are arithmetic; reasoning comes in 2.84.
+EXAMS.ks2sats={name:'KS2 SATs (Year 6 national tests)',short:'KS2 SATs',schools:'All state-funded primary schools in England (set by the Standards and Testing Agency)',age:'Year 6 — in May (2027: maths on 12 and 13 May)',year:6,
+ format:'Three maths papers: Paper 1 arithmetic (36 questions, 40 marks, 30 minutes) and Papers 2 and 3 reasoning (35 marks, 40 minutes each). No calculator. Long multiplication and long division are worth 2 marks, with a mark for correct working.',style:'written',
+ weights:{arith_add:1.5,arith_mult:1.6,arith_div:1.6,arith_frac:1.6,arith_pct:1.5,fractions:1,percent:1,ratio:.9,geometry:.9,shapes:.9,measure:.9,area:.8,volume:.8,units:1,time:.9,data:1,averages:.8,coordinates:.9,algebra:.8,sequences:.8,patterns:.8,divisibility:1,equivfrac:1,logic:.4,reasoning:.5,speed:0,probability:0,tiffin:0},
+ sources:[['GOV.UK — KS2 maths past papers and test materials (2016 onwards)','https://www.gov.uk/government/collections/national-curriculum-assessments-practice-materials'],['GOV.UK — key stage 1 and key stage 2 test dates','https://www.gov.uk/guidance/key-stage-1-and-key-stage-2-test-dates'],['GOV.UK — 2027 key stage 2 tests: information for parents','https://www.gov.uk/government/publications/key-stage-2-national-curriculum-tests-and-results-information-for-parents/2027-key-stage-2-national-curriculum-tests-information-for-parents'],['GOV.UK — KS2 mathematics test framework','https://www.gov.uk/government/publications/key-stage-2-mathematics-test-framework'],['GOV.UK — national curriculum: mathematics programmes of study','https://www.gov.uk/government/publications/national-curriculum-in-england-mathematics-programmes-of-study']],
+ note:'The Standards and Testing Agency publishes past papers with mark schemes free on GOV.UK. Our questions are original, written in the style of those papers.'};
+for(const k of ['tiffin1','tiffin2','grammar11','iseb'])EXAMS[k].year=6;EXAMS.ce13.year=8;
+const EXAM_ORDER=['ks2sats','tiffin1','tiffin2','grammar11','iseb','ce13'];
 // which exam a child is preparing for (existing children are recognised from their exam name — Apollo stays on Tiffin Stage 2)
-function examId(s){s=s||(typeof stats!=='undefined'?stats:null);const e=s&&s.exam||{};if(e.profile&&EXAMS[e.profile])return e.profile;const n=String(e.name||'');return /stage\s*1/i.test(n)?'tiffin1':/common entrance|13\+/i.test(n)?'ce13':/iseb|pre-?test/i.test(n)?'iseb':/grammar/i.test(n)?'grammar11':'tiffin2';}
+function examId(s){s=s||(typeof stats!=='undefined'?stats:null);const e=s&&s.exam||{};if(e.profile&&EXAMS[e.profile])return e.profile;const n=String(e.name||'');return /\bsats\b|key stage 2/i.test(n)?'ks2sats':/stage\s*1/i.test(n)?'tiffin1':/common entrance|13\+/i.test(n)?'ce13':/iseb|pre-?test/i.test(n)?'iseb':/grammar/i.test(n)?'grammar11':'tiffin2';}
 function examProfile(s){return EXAMS[examId(s)];}
-function examWeight(k,s){const w=examProfile(s).weights;return w&&w[k]!==undefined?w[k]:1;}
+// topics that belong to particular exams (topics[k].exams, e.g. SATs arithmetic) count 0 everywhere else
+function examWeight(k,s){const t=topics[k];if(t&&Array.isArray(t.exams)&&(!t.exams.includes(examId(s))||(bank[k]&&!bank[k].some(g=>suitsExam(g,s)))))return 0;   // …or when nothing in it suits the child's school year yet
+ const w=examProfile(s).weights;return w&&w[k]!==undefined?w[k]:1;}
+// the child's school year: set by a grown-up in the Plan tab (stats.year), or taken from the exam (Year 6 for 11+ and SATs)
+function childYear(s){s=s||(typeof stats!=='undefined'?stats:null);const y=s&&+s.year;return y>=1&&y<=13?y:(examProfile(s).year||6);}
 let setExam;setExam=function(id){if(!EXAMS[id]||typeof stats==='undefined')return;stats.exam=Object.assign({},stats.exam||{},{profile:id,name:EXAMS[id].name});if(typeof save==='function')save(false);}
 // Parent page: which exam, what it is like, and the official sources our questions are modelled on
 let examBlock;examBlock=function(s){const id=examId(s),p=EXAMS[id],mine=(typeof stats!=='undefined'&&s===stats);
@@ -88,6 +99,7 @@ const EXAM_EXTRA={
  tiffin2:{badge:'Tiffin · Stage 2 (written maths)',mock:{n:40,mins:50,mcq:false},dates:[['Tiffin Girls’ Stage Two test — 2027 entry','2026-11-07'],['Tiffin School Stage Two test — 2027 entry','2026-11-12'],['Offers for 2027 entry (expected)','2027-03-01']]},
  grammar11:{badge:'11+ grammar test (multiple choice)',mock:{n:50,mins:50,mcq:true},dates:[]},
  iseb:{badge:'ISEB Common Pre-Test',mock:{n:40,mins:40,mcq:true},dates:[['ISEB Pre-Test testing opens (2026–27)','2026-09-01'],['Eton — last day to sit the ISEB Pre-Test (September 2029 entry)','2026-11-30'],['Eton — ISEB results emailed (mid-December)','2026-12-15'],['ISEB Pre-Test testing closes (late May)','2027-05-28']]},
+ ks2sats:{badge:'KS2 SATs — maths',mock:{n:36,mins:30,mcq:false,marks:40,paper:'Paper 1: arithmetic',topics:['arith_add','arith_mult','arith_div','arith_frac','arith_pct']},dates:[['KS2 SATs — maths Papers 1 (arithmetic) and 2 (reasoning)','2027-05-12'],['KS2 SATs — maths Paper 3 (reasoning)','2027-05-13'],['KS2 results to schools (expected)','2027-07-06'],['Year 4 multiplication tables check (2 weeks from)','2027-06-07']]},
  ce13:{badge:'13+ Common Entrance / scholarship',mock:{n:30,mins:60,mcq:false},dates:[['Common Entrance sitting (2–6 Nov)','2026-11-02'],['Common Entrance sitting (25–29 Jan)','2027-01-25'],['Common Entrance sitting (7–11 Jun)','2027-06-07']]}};
 for(const k in EXAM_EXTRA)Object.assign(EXAMS[k],EXAM_EXTRA[k]);
 const DATES_NOTE='Dates as published by the schools and ISEB (checked November 2026). Always confirm on the official pages — the exam-watch agent proposes updates.';
@@ -101,7 +113,8 @@ function currentEntry(s){const pl=examPlan(s),up=pl.filter(p=>!entryDone(p)).sor
 function syncExam(s){s=s||stats;const c=currentEntry(s);if(!EXAMS[c.id])c.id='tiffin2';s.exam=Object.assign({},s.exam||{},{profile:c.id,name:EXAMS[c.id].name,date:c.date||''});}
 function examMock(s){return (examProfile(s).mock)||{n:40,mins:50,mcq:false};}
 // mixed practice: generators can be marked for particular exams (fn.exams); others suit every exam
-function suitsExam(fn,s){return !fn||!fn.exams||fn.exams.includes(examId(s));}
+// …and question types tagged with school years (fn.years=[first, last]) wait until the child has reached that year
+function suitsExam(fn,s){return !fn||((!fn.exams||fn.exams.includes(examId(s)))&&(!Array.isArray(fn.years)||fn.years[0]<=childYear(s)));}
 // ---------- the header, and every place that used to say "Tiffin" ----------
 let hdrLast='';
 function examHeader(){if(typeof stats==='undefined'||!document.querySelector('.hero'))return;syncExam(stats);const c=currentEntry(stats),p=EXAMS[c.id],d=daysTo(c.date),done=entryDone(c);
@@ -133,9 +146,15 @@ examBlock=function(s){const mine=(typeof stats!=='undefined'&&s===stats),pl=exam
  const row=(e,i)=>mine?`<tr data-plan-row="${i}"><td><select data-plan="id">${EXAM_ORDER.map(k=>`<option value="${k}"${k===e.id?' selected':''}>${esc(EXAMS[k].name)}</option>`).join('')}</select></td><td><input data-plan="school" value="${esc(e.school||'')}" placeholder="School (optional)" maxlength="40"></td><td><input type="date" data-plan="date" value="${esc(e.date||'')}"></td><td><input data-plan="result" value="${esc(e.result||'')}" placeholder="e.g. due March 2027" maxlength="40"></td><td>${e===c?'🎯 focus':entryDone(e)?'✓ done':'later'}</td><td><button type="button" data-plan-del="${i}" title="Remove">✕</button></td></tr>`
   :`<tr><td>${esc(EXAMS[e.id].name)}</td><td>${esc(e.school||'')}</td><td>${esc(fmtDay(e.date))}</td><td>${esc(e.result||'')}</td><td>${e===c?'🎯 focus':entryDone(e)?'✓ done':'later'}</td></tr>`;
  return `<section class="exam-box" data-exam-box><h3>🎓 Exam plan &amp; sources</h3><p class="section-note">The app trains for the <b>next upcoming test</b> (🎯). When a test has passed it moves on to the next one in the plan.</p>
- <div class="plan-wrap"><table class="plan${mine?' plan-edit':''}"><tr><th>Test</th><th>School</th><th>Date</th><th>Result</th><th></th>${mine?'<th></th>':''}</tr>${pl.map(row).join('')}</table></div>${mine?'<p><button type="button" data-plan-add>➕ Add a test</button></p>':''}
+ <div class="plan-wrap"><table class="plan${mine?' plan-edit':''}"><tr><th>Test</th><th>School</th><th>Date</th><th>Result</th><th></th>${mine?'<th></th>':''}</tr>${pl.map(row).join('')}</table></div>${mine?`<p><button type="button" data-plan-add>➕ Add a test</button>${satsOffer(s)?` <button type="button" class="primary" data-plan-sats>➕ Add KS2 SATs — ${esc(fmtDay(SATS_DAY))}</button>`:''}</p>${yearPick(s)}`:`<p class="section-note">School year: ${s.year?'Year '+s.year:'not set (Year '+childYear(s)+' from the exam)'}</p>`}
  <p class="section-note"><b>Now training for: ${esc(p.name)}</b> — ${esc(p.schools)} · ${esc(p.age)}. ${esc(p.format)}</p>
  <details><summary>📚 Where our questions come from</summary><p class="section-note">${esc(p.note)} Every question in the app is original, written in the style of these papers.</p><ul>${p.sources.map(([l,u])=>`<li><a href="${esc(u)}" target="_blank" rel="noopener">${esc(l)}</a></li>`).join('')}</ul><p class="section-note">Sources last checked: ${EXAM_CHECKED}.</p></details></section>`;};
+// school year and the SATs shortcut (2.83). SATS_DAY is the last maths paper, so SATs stay in focus until the tests end.
+const SATS_DAY='2027-05-13';
+function satsOffer(s){return childYear(s)===6&&isoToday()<=SATS_DAY&&!examPlan(s).some(e=>e.id==='ks2sats');}
+function yearPick(s){return `<p class="exam-year"><label>School year <select data-year-pick><option value="0"${s.year?'':' selected'}>Not set — use the exam (Year ${examProfile(s).year||6})</option>${[1,2,3,4,5,6,7,8,9,10,11,12,13].map(y=>`<option value="${y}"${+s.year===y?' selected':''}>Year ${y}</option>`).join('')}</select></label> <span class="section-note">Questions taught after this year are held back.</span></p>`;}
+document.addEventListener('change',e=>{const f=e.target.closest&&e.target.closest('[data-year-pick]');if(!f||typeof stats==='undefined')return;stats.year=+f.value||0;planChanged(f.closest('[data-exam-box]'));try{examRefreshPage(null);}catch(x){}if(typeof toast==='function')toast(stats.year?`School year set to Year ${stats.year}`:'School year now follows the exam');});
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-plan-sats]');if(!b||typeof stats==='undefined')return;if(!examPlan(stats).some(x=>x.id==='ks2sats'))examPlan(stats).push({id:'ks2sats',school:'',date:SATS_DAY,result:''});planChanged(b.closest('[data-exam-box]'));if(typeof toast==='function')toast('KS2 SATs added to the plan');});
 function planChanged(box){syncExam(stats);if(typeof save==='function')save(false);hdrLast='';examHeader();if(box)box.outerHTML=examBlock(stats);}
 document.addEventListener('change',e=>{const f=e.target.closest&&e.target.closest('[data-plan]');if(!f)return;const tr=f.closest('[data-plan-row]'),i=+tr.dataset.planRow,pl=examPlan(stats);if(!pl[i])return;pl[i][f.dataset.plan]=f.value;planChanged(f.closest('[data-exam-box]'));});
 document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('[data-plan-add]');if(a){examPlan(stats).push({id:'iseb',school:'',date:'',result:''});planChanged(a.closest('[data-exam-box]'));return;}
@@ -145,7 +164,7 @@ setExam=function(id){if(!EXAMS[id]||typeof stats==='undefined')return;const c=cu
 // When the exam being trained for changes (the plan is edited, a test date passes, a new player is set up), the child's
 // page follows at once: a fresh question from the new exam (a mock starts again at the new length), focus topics that
 // suit it (unless a grown-up chose their own), and today's plan, "Next best thing", the topic grid and focus cards redrawn.
-function examFocusFor(id){if(!EXAMS[id]||/^tiffin/.test(id))return DEFAULT_FOCUS.slice();const w=EXAMS[id].weights||{};return Object.keys(topics).filter(k=>k!=='tiffin').sort((a,b)=>(w[b]||1)-(w[a]||1)).slice(0,5);}
+function examFocusFor(id){if(!EXAMS[id]||/^tiffin/.test(id))return DEFAULT_FOCUS.slice();const w=EXAMS[id].weights||{};return Object.keys(topics).filter(k=>k!=='tiffin'&&!(Array.isArray(topics[k].exams)&&!topics[k].exams.includes(id))&&w[k]!==0).sort((a,b)=>(w[b]||1)-(w[a]||1)).slice(0,5);}
 {const base=syncExam;syncExam=function(s){const mine=typeof stats!=='undefined'&&(!s||s===stats),was=mine?examId(stats):null;base(s);if(mine&&was!==examId(stats))examSwitched(was);};}
 // focus topics follow the exam until a grown-up chooses their own (stats.focusMine); returns true if they changed
 function focusFollowExam(s){s=s||stats;if(!s||s.focusMine)return false;const want=examFocusFor(examId(s)),f=Array.isArray(s.focus)?s.focus:[];

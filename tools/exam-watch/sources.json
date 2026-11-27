@@ -66,6 +66,21 @@
    "exam": "ce13",
    "label": "ISEB — Common Entrance 13+ timetable",
    "url": "https://www.iseb.co.uk/ce-case-exam-dates/ce-13-exam-timetable/"
+  },
+  {
+   "exam": "ks2sats",
+   "label": "GOV.UK — key stage 1 and key stage 2 test dates",
+   "url": "https://www.gov.uk/guidance/key-stage-1-and-key-stage-2-test-dates"
+  },
+  {
+   "exam": "ks2sats",
+   "label": "GOV.UK — national curriculum assessments: practice materials (past papers)",
+   "url": "https://www.gov.uk/government/collections/national-curriculum-assessments-practice-materials"
+  },
+  {
+   "exam": "ks2sats",
+   "label": "GOV.UK — KS2 mathematics test framework",
+   "url": "https://www.gov.uk/government/publications/key-stage-2-mathematics-test-framework"
   }
  ],
  "schoolsToTrack": [
@@ -74,6 +89,7 @@
   "Eton College",
   "Harrow School",
   "ISEB Common Pre-Test schools",
-  "London and Surrey grammar schools"
+  "London and Surrey grammar schools",
+  "Standards and Testing Agency (KS2 SATs)"
  ]
 }

@@ -76,3 +76,15 @@ From building Apollo's Maths Missions (Nov 2026). Starlane-specific lessons are 
 31. Sandbox AI-generated code (`node:vm`, no `require`, time limit) and confirm answers with an independent solve.
 32. Some sites (Eton) block automated fetches — list them "to check by hand" instead of reporting errors.
 33. Keep the Anthropic API key only as a GitHub secret, in its own Console workspace with a spending limit.
+
+## Key stages (2.83)
+
+34. **A topic missing from an exam's `weights` counts 1, not 0.** Adding new topics would have leaked SATs arithmetic
+    into every 11+ exam. Topics that belong to particular exams carry `topics[k].exams`, and `examWeight` gives them 0
+    elsewhere; `examFocusFor` and the topic grid follow it. Test both directions (`stages` suite).
+35. **Cleaners can silently cap data.** The mocks cleaner limited `total` to 40, so 50-question 11+ mocks reloaded as
+    out of 40. When adding a size (a 36-question paper), check the cleaner's limits.
+36. **Plan data lives on the family's device.** "Add SATs to Apollo's plan" can't be done from the repo — give the
+    grown-up a one-tap button (“➕ Add KS2 SATs”) and tell Stuart to press it.
+37. **In the cloud sandbox, pushing a git tag can be refused** (the remote hangs up). The backup was made as a branch
+    `backup/YYYY-MM-DD-<what>` through the GitHub tools instead; reset `main` to it the same way to undo.
