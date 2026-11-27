@@ -156,7 +156,7 @@ instead of a 9–1 estimate; `minsF`/`marksF` give the lower tier its own paper 
 
 **The senior look (2.87)** — chosen by Stuart (27 Nov): proof B “Night study” with a light theme, everything
 age-appropriate for 14–18. It is a layer: `css/senior.css` only applies under `body.look-senior`; `js/senior.js` swaps
-the characters (`drawSenior`), opens 🎨 Customise instead of the Locker Room, calms the wording (text-node swaps, `notice`
+the characters (`drawSenior`), opens 🎨 Customise instead of the Locker Room (2.90: a MutationObserver on `#locker` also catches locker.js's own first-run open; a new player starts on the Hobby tab with a welcome note, and the add-player form offers hobbies once a GCSE/A-level exam is chosen), calms the wording (text-node swaps, `notice`
 and `toast` wrappers) and shows Level/XP. Shop data: `js/data/senior-shop.js` — senior items are owned in `stats.sOwned`
 and paid from the same `spent` as the children's items (checked by `cleanSenior`). XP = all points ever earned; credits
 = wallet. Hobbies replace themes for older students (accent colour, own desk items and backdrop); questions keep the
@@ -232,3 +232,6 @@ list. 6. `python tests/run_all.py` — all green. 7. Commit and push to `main` (
 | 2.85 | 27 Nov: KS1 (Years 1–2: pictures, tap, read aloud, 36 types, Year 2 papers) and KS3 (Years 7–9, 46 types; also in 13+ CE), `ks1ks3` suite |
 | 2.84 | 27 Nov: SATs Papers 2–3 (reasoning, 5 topics, 47 types), Year 3–5 profiles, Year 4 tables check (6 s per question), paper picker, `ks2` suite |
 | 2.83 | 27 Nov: key stages begin — KS2 SATs exam, five arithmetic topics (36 types), Paper 1 mock in marks, school year in Plan, “Add KS2 SATs”, `stages` test suite |
+
+
+**Minus key (2.90).** On touch screens (`@media (pointer:coarse)`) a − key (`#minusKey`) sits beside the answer box, because number keypads on many phones and tablets have no minus. Behaviour is in `js/stages.js`: on a plain number it toggles a leading minus; in longer answers it types one at the cursor. The optional Learn “Have a go” box doesn't have one yet (Starlane's questions are tap-to-answer, so it doesn't need one).

@@ -3,6 +3,12 @@
 Plain-English summary of each release. The technical detail of every version is in the README's changelog
 (`- **vX.Y:**` lines), and the in-app version history is `versionHistory` in `js/data/help.js`.
 
+## 2.90 — 27 November 2026
+- **Minus key on phones and tablets**: the number keypad on many devices (Samsung, iPad) has no minus sign, so a
+  − key now sits beside the answer box on touch screens. Type 5, tap −, and it becomes −5.
+- **New GCSE players start in Customise**, not the children's Locker Room. The add-player form offers grown-up
+  hobbies (and "young man / young woman") once a GCSE exam is chosen, and they are applied straight away.
+
 ## 2.89 — 27 November 2026
 - **GCSE Higher**: 63 new question types (186 GCSE types in all).
 - **Every board**: AQA, Edexcel, OCR, Eduqas, WJEC (Wales), CCEA (Northern Ireland), Edexcel International GCSE and

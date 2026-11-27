@@ -1,7 +1,21 @@
 {
- "version": "2.89",
+ "version": "2.90",
  "date": "27 November 2026",
  "releases": [
+  {
+   "v": "2.90",
+   "date": "27 November 2026",
+   "kids": [
+    "➖ On phones and tablets there is now a − key beside the answer box, for negative answers"
+   ],
+   "tags": [
+    "fix"
+   ],
+   "items": [
+    "➖ Touch screens get a − key beside the answer box: many number keypads (Samsung, iPad) have no minus sign. Type 5, tap −, and it becomes −5; tap again to remove it.",
+    "🎓 A new GCSE player is now welcomed in Customise (pick a hobby, then your character) instead of the children’s Locker Room, and the add-player form offers hobbies rather than children’s interests once GCSE is chosen."
+   ]
+  },
   {
    "v": "2.89",
    "date": "27 November 2026",
@@ -144,17 +158,6 @@
     "🎓 Changing the exam in Grown-ups → Plan now refreshes the child’s page at once: the question on screen is replaced by one from the new exam, focus topics move to the new exam (unless you chose your own), and today’s plan, Next best thing and the mock length follow. A mock in progress starts again at the new exam’s length.",
     "🔧 The Fix-it list no longer brings back question types from a different exam.",
     "📱 On phones and tablets the exam plan shows one card per test (no sideways scrolling), and on phones the dashboard tabs sit in one scrolling strip so the content has room."
-   ]
-  },
-  {
-   "v": "2.80",
-   "date": "13 November 2026",
-   "kids": [],
-   "tags": [
-    "parents"
-   ],
-   "items": [
-    "🤖 Exam information is now AI-maintained: the exam-watch agent’s checked updates (key dates and new questions) go live automatically, and Key dates shows “Kept up to date by an AI agent — last checked …”."
    ]
   }
  ]

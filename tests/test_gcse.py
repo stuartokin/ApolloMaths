@@ -15,7 +15,7 @@ async def type_answer(pg, txt):
 async def main(p):
     R = Result('gcse')
     pg = await browser(p, 1366, 900); await open_app(pg)
-    await add_player(pg, 'Jo', exam='gcse_aqa', theme='football'); await pg.wait_for_timeout(1500); await close_dialogs(pg)
+    await add_player(pg, 'Jo', exam='gcse_aqa', theme='hb:football'); await pg.wait_for_timeout(1500); await close_dialogs(pg)
 
     # 1. look, stage and maths display
     s = await pg.evaluate("({exam:examId(),stage:examStage(),senior:document.body.classList.contains('look-senior'),year:childYear(),tier:childTier()})")

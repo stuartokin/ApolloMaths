@@ -46,8 +46,9 @@ const Senior=(()=>{
  function labelTheme(){const b=document.getElementById('snTheme');if(b)b.textContent=sn().theme==='light'?'🌙 Dark theme':'☀️ Light theme';}
  // ---------- 🎨 Customise ----------
  let tab='outfits',confirmId=null,preview=null;
- const dlg=()=>{let d=document.getElementById('snShop');if(!d){d=document.createElement('dialog');d.id='snShop';d.className='sn-shop';d.setAttribute('aria-label','Customise');document.body.appendChild(d);d.addEventListener('click',onClick);}return d;};
- function open(t){if(t)tab=t;confirmId=null;preview=null;render();const d=dlg();if(!d.open)d.showModal();}
+ const dlg=()=>{let d=document.getElementById('snShop');if(!d){d=document.createElement('dialog');d.id='snShop';d.className='sn-shop';d.setAttribute('aria-label','Customise');document.body.appendChild(d);d.addEventListener('click',onClick);d.addEventListener('close',()=>{if(welcome){welcome=false;tab=SN_CATS[0][0];}});}return d;};
+ let welcome=false;
+ function open(t,isWelcome){welcome=!!isWelcome;if(t)tab=t;confirmId=null;preview=null;render();const d=dlg();if(!d.open)d.showModal();}
  const visible=it=>!it.hobby||it.hobby===sn().hobby;
  const equipped=it=>it.slot.startsWith('d_')||['wall','floor'].includes(it.slot)?sn().desk[it.slot]===it.id:sn()[it.slot]===it.id;
  function state(it){if(snOwns(stats,it.id))return equipped(it)?'on':'own';if(it.earn)return 'earn';if(it.lvl&&lvl()<it.lvl)return 'lock';return credits()>=it.price?'buy':'short';}
@@ -58,7 +59,7 @@ const Senior=(()=>{
  function lookTab(){const a=stats.avatar,o=avatarOptions,sw=(key,list)=>list.map(([c,l],i)=>`<button class="swatch${a[key]===i?' on':''}" style="background:${c}" data-look="${key}" data-val="${i}" aria-label="${l}" title="${l}" type="button"></button>`).join(''),
    ch=(key,list)=>list.map(([v,l])=>`<button class="chip${a[key]===v?' active':''}" data-look="${key}" data-val="${v}" type="button">${l}</button>`).join('');
   return `<div class="sn-look"><p><b>Skin tone</b><br>${o.skinOrder.map(i=>`<button class="swatch${a.skin===i?' on':''}" style="background:${o.skins[i][0]}" data-look="skin" data-val="${i}" aria-label="${o.skins[i][1]}" type="button"></button>`).join('')}</p>
-   <p><b>Hair</b><br>${ch('hair',o.hair)}</p><p><b>Hair colour</b><br>${sw('hairCol',o.hairColours)}</p><p><b>Head covering</b><br>${ch('cover',o.covers)}</p>${a.cover&&a.cover!=='none'?`<p><b>Covering colour</b><br>${sw('coverCol',o.coverCols)}</p>`:''}</div>`;}
+   <p><b>Character</b><br>${ch('body',[['boy','Young man'],['girl','Young woman']])}</p><p><b>Hair</b><br>${ch('hair',o.hair)}</p><p><b>Hair colour</b><br>${sw('hairCol',o.hairColours)}</p><p><b>Head covering</b><br>${ch('cover',o.covers)}</p>${a.cover&&a.cover!=='none'?`<p><b>Covering colour</b><br>${sw('coverCol',o.coverCols)}</p>`:''}</div>`;}
  function hobbyTab(){return `<p class="sn-mute">Your hobby sets your accent colour and unlocks its own desk items and backdrop. You can change it any time.</p><div class="sn-hobbies">${Object.entries(HOBBIES).map(([k,h])=>`<button type="button" class="sn-hob${sn().hobby===k?' on':''}" data-hobby="${k}" style="--h:${h.acc}"><span>${h.icon}</span>${esc(h.name)}</button>`).join('')}</div>`;}
  function render(){const d=dlg(),L=lvl(),next=snXpFor(L+1),xp=snXP(stats),pv=preview&&SN_BY[preview]?preview:null,pvSn=pv?previewSn(pv):sn();
   const tabs=[...SN_CATS,['hobby','Hobby'],['look','Hair & skin']];
@@ -66,7 +67,7 @@ const Senior=(()=>{
   d.innerHTML=`<div class="sn-wrap"><header class="sn-head"><h2>🎨 Customise</h2><span class="sn-chip">💳 <b>${credits().toLocaleString('en-GB')}</b> credits</span><span class="sn-chip">Level <b>${L}</b> · ${(next-xp).toLocaleString('en-GB')} XP to Level ${L+1}</span><button type="button" class="sn-chip" data-theme="1">${sn().theme==='light'?'🌙 Dark':'☀️ Light'}</button><button type="button" class="sn-x" data-close="1" aria-label="Close">✕</button></header>
    <div class="sn-cols"><aside class="sn-me"><div class="sn-avbox">${drawSenior(stats.avatar,pvSn)}</div>${pv?`<p class="sn-mute center">Trying: <b>${esc(SN_BY[pv].name)}</b></p>`:`<p class="center"><b>${esc(playerName())}</b>${sn().title&&SN_BY[sn().title]?` · <span class="sn-acc">${esc(SN_BY[sn().title].name)}</span>`:''}</p>`}<div class="sn-deskbox">${drawDesk(pvSn)}</div>
     <div class="sn-earn"><b>How you earn</b><div>✅ Right first time <span>+20</span></div><div>📘 Lesson finished <span>+25</span></div><div>🔧 Fix-it cleared <span>+10</span></div><div>📝 Every question in a mock <span>XP</span></div><p class="sn-mute">XP sets your level and never goes down. Credits are what you spend.</p></div></aside>
-   <section class="sn-main"><nav class="sn-tabs">${tabs.map(([k,l])=>`<button type="button" class="${tab===k?'on':''}" data-tab="${k}">${l}</button>`).join('')}</nav>${body}</section></div></div>`;}
+   <section class="sn-main">${welcome?`<div class="sn-welcome">👋 <b>Welcome, ${esc(playerName())}.</b> Pick a hobby — it sets your colours and unlocks its own desk items — then set your character under <b>Hair &amp; skin</b>. Right answers earn XP and credits to spend here. <button type="button" class="sn-btn" data-close="1">Start studying</button></div>`:''}<nav class="sn-tabs">${tabs.map(([k,l])=>`<button type="button" class="${tab===k?'on':''}" data-tab="${k}">${l}</button>`).join('')}</nav>${body}</section></div></div>`;}
  function previewSn(id){const it=SN_BY[id],p=JSON.parse(JSON.stringify(sn()));if(!it)return p;if(it.slot.startsWith('d_')||['wall','floor'].includes(it.slot))p.desk[it.slot]=id;else if(it.slot!=='perk')p[it.slot]=id;return p;}
  function use(id){const it=SN_BY[id];if(!it||!snOwns(stats,id))return;if(it.slot.startsWith('d_')||['wall','floor'].includes(it.slot))sn().desk[it.slot]=id;else if(it.slot!=='perk')sn()[it.slot]=id;save(false);}
  function takeOff(id){const it=SN_BY[id];if(!it)return;if(it.slot.startsWith('d_')||['wall','floor'].includes(it.slot))sn().desk[it.slot]=null;else if(['head','eyes','wrist'].includes(it.slot))sn()[it.slot]=null;save(false);}
@@ -85,7 +86,22 @@ const Senior=(()=>{
    const len=2*ctx.sampleRate,buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);let last=0;for(let i=0;i<len;i++){const w=Math.random()*2-1;last=(last+0.02*w)/1.02;d[i]=last*3.5;}
    const src=ctx.createBufferSource();src.buffer=buf;src.loop=true;const f=ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=900;const gn=ctx.createGain();gn.gain.value=0.25;src.connect(f).connect(gn).connect(ctx.destination);src.start();node=gn;}catch(e){}}return{set};})();
  // ---------- start ----------
- function init(){themeBtn();labelTheme();apply();tick();setInterval(()=>{apply();tick();labelTheme();},800);
+ function guardLocker(){const lk=document.getElementById('locker');if(!lk)return;const swap=()=>{if(!lk.open||!on())return;const first=!stats.avatar.created;try{lk.close();}catch(e){}if(first){stats.avatar.created=true;save(false);}open(first?'hobby':null,first);};
+  new MutationObserver(swap).observe(lk,{attributes:true,attributeFilter:['open']});swap();}
+ // a hobby chosen on the add-player form (GCSE / A level) is applied as the new profile opens
+ function newHobby(){try{const raw=sessionStorage.getItem('am-new-hobby');if(!raw)return;const n=JSON.parse(raw),cur=Storage.current&&Storage.current();if(!cur||String(cur.name).toLowerCase()!==String(n.name).toLowerCase())return;sessionStorage.removeItem('am-new-hobby');if(HOBBIES[n.hobby]){sn().hobby=n.hobby;save(false);}}catch(e){}}
+ // the add-player form: choosing a GCSE / A-level exam swaps the children's interests for senior hobbies
+ const KID_TH=new Map();
+ function formFor(){const ex=document.getElementById('newExam'),th=document.getElementById('newTheme'),bd=document.getElementById('newBody'),cl=document.getElementById('newClub');if(!ex||!th)return;
+  const e=typeof EXAMS!=='undefined'&&EXAMS[ex.value],sen=!!e&&['gcse','alevel'].includes(e.stage);if(th.dataset.sen===String(sen))return;
+  if(!KID_TH.has('th'))KID_TH.set('th',th.innerHTML);if(bd&&!KID_TH.has('bd'))KID_TH.set('bd',bd.innerHTML);
+  th.innerHTML=sen?`<option value="">Hobby… (choose one)</option>${Object.entries(HOBBIES).map(([k,h])=>`<option value="hb:${k}">${h.icon} ${esc(h.name)}</option>`).join('')}`:KID_TH.get('th');th.setAttribute('aria-label',sen?'Hobby':'Interests');
+  if(bd)bd.innerHTML=sen?'<option value="">Character…</option><option value="boy">A young man</option><option value="girl">A young woman</option>':KID_TH.get('bd');if(cl)cl.classList.toggle('hidden',sen);th.dataset.sen=String(sen);}
+ document.addEventListener('change',e=>{if(e.target&&e.target.id==='newExam')formFor();});
+ new MutationObserver(()=>{const th=document.getElementById('newTheme');if(th&&!th.dataset.sen)formFor();}).observe(document.documentElement,{childList:true,subtree:true});
+ document.addEventListener('submit',e=>{if(!e.target||e.target.id!=='addPlayerForm')return;const th=document.getElementById('newTheme');if(th&&/^hb:/.test(th.value)){const hobby=th.value.slice(3);th.value='';
+  try{const nm=document.getElementById('newName');sessionStorage.setItem('am-new-hobby',JSON.stringify({name:(nm&&nm.value||'').trim(),hobby}));}catch(x){}}},true);
+ function init(){newHobby();guardLocker();themeBtn();labelTheme();apply();tick();setInterval(()=>{apply();tick();labelTheme();},800);
   document.addEventListener('pointerdown',()=>{if(on()&&sn().sounds&&snOwns(stats,'sn_sounds'))Sounds.set(true);},{once:true});}
  window.addEventListener('load',()=>setTimeout(init,50));
  return {open,apply,on,render};

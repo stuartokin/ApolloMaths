@@ -13,7 +13,7 @@ async def main(p):
     R.check(not y['senior'] and not y['snAv'] and 'SHOOT' in y['shoot'], 'a Year 5 child keeps today’s look, character and wording', y)
 
     # 2. a GCSE student gets the senior look
-    await add_player(pg, 'Jo', exam='gcse_aqa', theme='music'); await pg.wait_for_timeout(2000); await close_dialogs(pg)
+    await add_player(pg, 'Jo', exam='gcse_aqa', theme='hb:music'); await pg.wait_for_timeout(2000); await close_dialogs(pg)
     s = await pg.evaluate("""(()=>{const shell=document.querySelector('.shell').innerText;return {senior:document.body.classList.contains('look-senior'),scene:!!document.getElementById('snScene'),
       av:!!document.querySelector('#sAv .sn-av'),hello:(document.getElementById('snHello')||{}).textContent||'',check:document.getElementById('check').textContent,
       kid:['SHOOT','GOAL!','⚽','power points','MATCH DAY','KERPOW'].filter(w=>shell.includes(w))};})()""")
@@ -56,12 +56,43 @@ async def main(p):
     R.check(sk == 4, 'hair and skin can be changed in Customise', sk)
     await pg.evaluate("document.getElementById('snShop').close()")
 
+    # 5b. a NEW GCSE player (2.90): the form offers hobbies, and the first window is Customise, not the children's Locker Room
+    await pg.evaluate("(document.getElementById('switchPlayer')||{click(){}}).click()"); await pg.wait_for_timeout(600)
+    await pg.fill('#newName', 'Ari'); await pg.select_option('#newExam', 'y5')
+    kid = await pg.evaluate("[...document.querySelectorAll('#newTheme option')].map(o=>o.value)")
+    await pg.select_option('#newExam', 'gcse_edexcel')
+    sen = await pg.evaluate("({th:[...document.querySelectorAll('#newTheme option')].map(o=>o.value),bd:document.getElementById('newBody').textContent,club:document.getElementById('newClub').classList.contains('hidden')})")
+    R.check('football' in kid and 'hb:f1' in sen['th'] and 'football' not in sen['th'] and 'young woman' in sen['bd'] and sen['club'], 'choosing GCSE on the add-player form swaps children’s interests for hobbies', sen)
+    await pg.select_option('#newTheme', 'hb:f1'); await pg.select_option('#newBody', 'girl')
+    await pg.evaluate("document.getElementById('addPlayerForm').requestSubmit()")
+    await until(pg, "typeof playerName==='function'&&playerName()==='Ari'", 15000); await pg.wait_for_timeout(2500)
+    w = await pg.evaluate("({locker:document.getElementById('locker').open,shop:!!(document.getElementById('snShop')||{}).open,welcome:!!document.querySelector('#snShop .sn-welcome'),tab:(document.querySelector('#snShop .sn-tabs button.on')||{}).textContent,hobby:stats.senior.hobby,body:stats.avatar.body,senior:document.body.classList.contains('look-senior')})")
+    R.check(w['senior'] and not w['locker'] and w['shop'] and w['welcome'] and w['tab'] == 'Hobby', 'a new GCSE player is welcomed in Customise (Hobby tab), not the children’s Locker Room', w)
+    R.check(w['hobby'] == 'f1' and w['body'] == 'girl', 'the hobby and character chosen on the form are applied', w)
+    await pg.evaluate("document.querySelector('#snShop .sn-welcome [data-close]').click()"); await pg.wait_for_timeout(300)
+    again = await pg.evaluate("(()=>{Locker.open('look',true);return {locker:document.getElementById('locker').open,shop:document.getElementById('snShop').open,welcome:!!document.querySelector('#snShop .sn-welcome')}})()")
+    R.check(not again['locker'] and again['shop'] and not again['welcome'], 'the Locker Room never opens for a senior player', again)
+    await pg.evaluate("document.getElementById('snShop').close()")
+
     # 6. phone: no sideways scrolling, bottom bar says Customise
     await pg.set_viewport_size({'width': 390, 'height': 844}); await pg.wait_for_timeout(1200)
     ph = await pg.evaluate("({wide:document.documentElement.scrollWidth-innerWidth,nav:(document.getElementById('hubNav')||{}).textContent||''})")
     R.check(ph['wide'] <= 1 and 'Customise' in ph['nav'], 'on a phone the page fits and the bar says Customise', ph)
     await pg.evaluate("Senior.open('outfits')"); await pg.wait_for_timeout(400)
     R.check(await pg.evaluate("(()=>{const d=document.getElementById('snShop');return d.scrollWidth<=d.clientWidth+1&&d.getBoundingClientRect().right<=innerWidth+1})()"), 'Customise fits a phone screen')
+    # 7. touch screens get a minus key (Samsung / iPad number keypads have none) (2.90)
+    tp = await browser(p, 412, 900, mobile=True); await open_app(tp)
+    await add_player(tp, 'Neg', exam='y7'); await tp.wait_for_timeout(800); await close_dialogs(tp)
+    await tp.evaluate("chosenTopic=Object.keys(topics).find(k=>topics[k].exams&&topics[k].exams.includes('y7'))||chosenTopic;setMode('training');restartSession()"); await tp.wait_for_timeout(400); await close_dialogs(tp)
+    vis = await tp.evaluate("getComputedStyle(document.getElementById('minusKey')).display!=='none'")
+    await tp.fill('#answer', '5'); await tp.tap('#minusKey'); v1 = await tp.input_value('#answer')
+    await tp.tap('#minusKey'); v2 = await tp.input_value('#answer')
+    await tp.fill('#answer', ''); await tp.tap('#minusKey'); await tp.type('#answer', '12'); v3 = await tp.input_value('#answer')
+    R.check(vis and v1 == '-5' and v2 == '5' and v3 == '-12', 'on a touch screen the − key makes 5 into −5 and back, and starts a negative answer', [vis, v1, v2, v3])
+    await tp.evaluate("current={...current,a:-12,show:'-12'}"); await tp.fill('#answer', ''); await tp.tap('#minusKey'); await tp.type('#answer', '12'); await tp.tap('#check'); await tp.wait_for_timeout(300)
+    R.check(await tp.evaluate("!!stats&&document.getElementById('feedback').textContent.length>0&&!/try|not quite/i.test(document.getElementById('feedback').textContent)"), 'an answer typed with the − key is marked right', await tp.evaluate("document.getElementById('feedback').textContent.slice(0,60)"))
+    R.check(not await pg.evaluate("getComputedStyle(document.getElementById('minusKey')).display!=='none'"), 'with a mouse (no touch) the − key stays hidden')
+    R.check(not tp.errors, 'no page errors on the touch screen', tp.errors[:3]); await tp.close_all()
     R.check(not pg.errors, 'no page errors', pg.errors[:3]); await pg.close_all(); return R
 
 if __name__ == '__main__': run(main)

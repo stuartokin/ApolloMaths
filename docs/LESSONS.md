@@ -120,3 +120,10 @@ From building Apollo's Maths Missions (Nov 2026). Starlane-specific lessons are 
     minutes. Change a variable inside every loop, and bound search loops (`for(let t=0;t<200&&!ok;t++)`).
 50. **Exam ids grow.** A filter written as `/^gcse_/` silently skipped `igcse_…` mocks. Use the list of ids
     (`GCSE_IDS`) or a pattern that covers every family.
+51. **Wrapping a module's public function doesn't catch its own internal calls.** `senior.js` wrapped `Locker.open`, but
+    `locker.js` calls its private `open()` for a new player, so a GCSE student met the children's Locker Room first.
+    Watch the outcome (here a MutationObserver on the dialog's `open`) or test the real first-run path, not just the button.
+52. **`inputmode="decimal"` has no minus key on many touch keyboards** (Samsung, iPad). Any answer box that can take a
+    negative number needs its own − key (2.90 `#minusKey`). Test on a touch context (`is_mobile`, `has_touch`).
+53. **An invalid `font:` shorthand is dropped whole** (`font:900 26px/1 inherit` is invalid), leaving a tiny default glyph.
+    Use the separate properties, and look at a screenshot.

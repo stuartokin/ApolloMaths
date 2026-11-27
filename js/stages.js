@@ -51,4 +51,14 @@
  const afterAnswer=()=>{const m=mode==='mock'?examMock():null;if(!m||!m.perQ||finished||!current)return;const q=current;setTimeout(()=>{if(current!==q||finished)return;if(!done&&!q.wrongs.length)return;perQStop();setTimeout(()=>{if(current===q&&!finished)skip();},1500);},60);};
  document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#check'))afterAnswer();},true);
  document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='answer')afterAnswer();},true);
+ // the minus key (2.90): number keypads on many phones and tablets (Samsung, iPad) have no minus sign. Shown on touch screens.
+ // For a plain number it switches the minus sign on and off at the front (type 5, tap −, get −5); in longer answers such as
+ // "x = 2, 3" it types a minus where the cursor is.
+ document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('#minusKey'))e.preventDefault();},true);
+ document.addEventListener('click',e=>{if(!(e.target.closest&&e.target.closest('#minusKey')))return;const an=get('answer');if(!an||an.disabled)return;
+  const v=an.value;let at;
+  if(/^\s*[-−]?[\d.,\s/]*$/.test(v)){an.value=/^\s*[-−]/.test(v)?v.replace(/^\s*[-−]/,''):'-'+v.replace(/^\s+/,'');at=an.value.length;}
+  else{const a=an.selectionStart==null?v.length:an.selectionStart,b=an.selectionEnd==null?a:an.selectionEnd;an.value=v.slice(0,a)+'-'+v.slice(b);at=a+1;}
+  try{an.focus({preventScroll:true});an.setSelectionRange(at,at);}catch(x){}an.dispatchEvent(new Event('input',{bubbles:true}));});
+
 })();

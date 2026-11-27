@@ -97,6 +97,8 @@ Each year: update `SATS_DAY` (exams.js) and the SATs dates in `EXAM_EXTRA.ks2sat
   checked by a maths teacher. Stuart has called for testers on LinkedIn (27 Nov 2026). Fix what testers report
   before new content. Board facts still to check against the boards' own pages: CCEA timings, the WJEC
   Intermediate tier, Cambridge IGCSE durations.
+- Stuart's first try (27 Nov 2026, Fold): new GCSE player got the children's Locker Room, and no minus on the keypad —
+  both fixed in 2.90. Still to do: the optional Learn “Have a go” box has no − key yet.
 
 ## Decided
 

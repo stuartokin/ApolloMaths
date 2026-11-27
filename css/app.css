@@ -551,3 +551,7 @@ body.student #famBanner{display:none!important}
 .tex-plain{font-family:'Cambria Math','STIX Two Math','DejaVu Serif',serif;white-space:nowrap}.katex{font-size:1.08em}
 .formula-sheet{max-width:min(640px,94vw);border:3px solid var(--dark);border-radius:18px;padding:0}.formula-sheet::backdrop{background:#0008}
 .fs-in{padding:18px 20px;max-height:86vh;overflow:auto}.fs-t{width:100%;border-collapse:collapse}.fs-t th{text-align:left;font-size:13px;padding:8px 10px 8px 0;vertical-align:top;width:34%}.fs-t td{padding:8px 0;border-bottom:1px solid #e3e5ec;overflow-x:auto;max-width:0}
+/* 2.90: a minus key beside the answer box on touch screens (number keypads on many phones and tablets have no minus) */
+.minus-key{display:none;flex:0 0 auto;min-width:52px;min-height:48px;padding:0 12px;border-radius:12px;border:3px solid var(--line);background:#fff;color:var(--ink);font-family:inherit;font-size:34px;font-weight:900;line-height:1;cursor:pointer}
+@media (pointer:coarse){.minus-key{display:inline-block}}
+.answer-row .minus-key[hidden]{display:none}
