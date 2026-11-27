@@ -29,7 +29,8 @@ function cleanMetrics(s){
  const ms=s.mastery&&typeof s.mastery==='object'?s.mastery:{};s.mastery={};for(const k of Object.keys(ms))if(topics[k]&&Array.isArray(ms[k]))s.mastery[k]=ms[k].filter(v=>[60,80,95].includes(v));
  s.announced=(Array.isArray(s.announced)?s.announced:[]).filter(id=>typeof id==='string').slice(-500);s.shopVer=Math.floor(num(s.shopVer,0,99));s.newSince=num(s.newSince);s.dealSeen=isDay(s.dealSeen)?s.dealSeen:'';
  const ex=s.exam&&typeof s.exam==='object'?s.exam:{};s.exam={name:str(ex.name,40).trim()||EXAM_DEFAULT.name,date:isDay(ex.date)?ex.date:EXAM_DEFAULT.date};
- s.year=Math.floor(num(s.year,0,13));   // school year 1–13, 0 = not set (follows the exam)
+ s.year=Math.floor(num(s.year,0,13));
+ s.look=['auto','junior','senior'].includes(s.look)?s.look:'auto';   // 2.86: which look (Grown-ups → Plan)   // school year 1–13, 0 = not set (follows the exam)
  return s;}
 
 // ---------- Fix-it list (spaced practice of question types that went wrong) ----------

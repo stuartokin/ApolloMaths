@@ -547,3 +547,7 @@ body.student #famBanner{display:none!important}
 /* 2.84: seconds left per question (tables check) and the SATs paper picker */
 .perq{font-weight:900;font-size:18px;margin:0 0 10px;color:#3b4256}.perq.urgent{color:#e51c35}.paper-pick{margin:10px 0 0;align-items:center}
 .mcq-opt.wrong-pick{opacity:.45;text-decoration:line-through}
+/* 2.86: maths display and the formula sheet */
+.tex-plain{font-family:'Cambria Math','STIX Two Math','DejaVu Serif',serif;white-space:nowrap}.katex{font-size:1.08em}
+.formula-sheet{max-width:min(640px,94vw);border:3px solid var(--dark);border-radius:18px;padding:0}.formula-sheet::backdrop{background:#0008}
+.fs-in{padding:18px 20px;max-height:86vh;overflow:auto}.fs-t{width:100%;border-collapse:collapse}.fs-t th{text-align:left;font-size:13px;padding:8px 10px 8px 0;vertical-align:top;width:34%}.fs-t td{padding:8px 0;border-bottom:1px solid #e3e5ec;overflow-x:auto;max-width:0}

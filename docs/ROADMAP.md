@@ -1,7 +1,7 @@
 # Roadmap and open items
 
 *Stuart Okin — personal project, written in a personal capacity.*
-*As of 27 November 2026 (version 2.85). Items marked **(stated)** are Stuart's own requirements; the rest are
+*As of 27 November 2026 (version 2.86). Items marked **(stated)** are Stuart's own requirements; the rest are
 known gaps found during the work, for him to prioritise.*
 
 Starlane's future requirements (adult science questions, the science-research and adventure workflows) are in the
@@ -44,6 +44,7 @@ key stages and SATs (Apollo needs them). Phases, agreed 27 Nov:
      desk and room, backdrops, titles, study perks — no cartoon kits or pets), the rewards (XP and levels; credits to
      spend), the wording and feedback (calm, no comic sound effects), celebrations and the arcade (“break room”).
      **Waiting on Stuart to approve the Customise proofs** before building.
+   - **(1) Groundwork — done in 2.86.** Next: (2) the senior look (2.87).
    - Order: (1) groundwork — maths display (KaTeX, self-hosted), algebra-answer checking, graphs, calculator flag,
      formula sheet, tier + board in the Plan, loading per stage, the look switch; (2) the senior look; (3) GCSE
      Foundation (~100 types) + England mocks; (4) Higher (~100) + other boards; then A level, then Further Maths.
@@ -92,6 +93,7 @@ Each year: update `SATS_DAY` (exams.js) and the SATs dates in `EXAM_EXTRA.ks2sat
 
 ## Done
 
+- **27 Nov 2026 (2.86)**: GCSE groundwork (KaTeX, algebra answers, graphs, tiers, papers, formula sheet, Look setting).
 - **27 Nov 2026 (2.85)**: KS1 (Years 1–2) and KS3 (Years 7–9).
 - **27 Nov 2026 (2.84)**: SATs reasoning papers, Years 3–5, the Year 4 tables check.
 - **27 Nov 2026 (2.83)**: KS2 SATs and school years (see “Key stages, GCSE and A level”). Fixed: 50-question 11+ mocks were

@@ -1,7 +1,24 @@
 {
- "version": "2.85",
+ "version": "2.86",
  "date": "27 November 2026",
  "releases": [
+  {
+   "v": "2.86",
+   "date": "27 November 2026",
+   "kids": [
+    "📐 GCSE Maths has started: proper maths on screen, algebra answers, graphs and a formula sheet"
+   ],
+   "tags": [
+    "new",
+    "parents"
+   ],
+   "items": [
+    "🎓 New exams: GCSE Maths for AQA, Pearson Edexcel and OCR, with Foundation or Higher chosen in Grown-ups → Plan and each board’s three papers in Mock exam (Paper 1 non-calculator for AQA and Edexcel). This first release has 24 GCSE question types plus KS3 revision; many more follow.",
+    "✍️ Algebra answers: type an expression (e.g. 6x + 10) and it is marked by its value, with a nudge if it needs expanding, factorising, a surd or standard form. Quadratics take both answers in any order; simultaneous equations take (x, y).",
+    "📈 Proper maths display (fractions, powers, roots) and graphs, plus a 📐 formula sheet to revise from (the board gives you its own in the exam). Questions say whether a calculator is needed.",
+    "🎨 Grown-ups → Plan has a Look setting: automatic (a new senior look from Year 10 — arriving in the next version), children’s, or senior."
+   ]
+  },
   {
    "v": "2.85",
    "date": "27 November 2026",
@@ -142,23 +159,6 @@
     "🕹️ Every arcade game except Starlane now uses the child’s own character as the player — in the maze, the snake, the racing car, the ships, the bat, the road crossing — or as a mascot in Pinball and Block Drop, ringed in the theme colour, with theme items to collect (⚽, 🐞, ⭐ or 🎵).",
     "🧹 Removed the two-player option and the retro-screen (old-TV scanlines) switch from the arcade.",
     "🖥️ Very large displays now scale only the children’s screen, so pop-up windows (the parent dashboard, the arcade) always fit."
-   ]
-  },
-  {
-   "v": "2.76",
-   "date": "13 November 2026",
-   "kids": [
-    "💾 One save button that tells you whether you’re saved — and themed starter outfits"
-   ],
-   "tags": [
-    "parents",
-    "fix"
-   ],
-   "items": [
-    "💾 Saving has one clear home: a save button in the side rail (top right on phones) that shows “✅ Saved 15:13” or “⚠️ Not saved — tap to save”, and opens Save, Open, Save as and Export. Fixed: the save buttons had been hidden on the child’s screen when progress wasn’t saved yet.",
-    "🖥️ Large desktops use the whole width (four columns above 1,800 pixels), and very large displays scale everything up (120% from 2,400 pixels, 140% from 3,200) so it stays readable.",
-    "ℹ️ The footer shows just the essentials — name, Help, version and ℹ️ About — with the rest behind ℹ️.",
-    "👕 Each theme has a starter outfit (nature, mission or rainbow T-shirt) with its own held item and scene. Switching theme swaps the starter items; anything bought stays owned."
    ]
   }
  ]

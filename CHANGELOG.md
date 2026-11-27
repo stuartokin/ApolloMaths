@@ -3,6 +3,14 @@
 Plain-English summary of each release. The technical detail of every version is in the README's changelog
 (`- **vX.Y:**` lines), and the in-app version history is `versionHistory` in `js/data/help.js`.
 
+## 2.86 — 27 November 2026
+- **GCSE groundwork.** GCSE Maths profiles for AQA, Edexcel and OCR, Foundation/Higher in the Plan, each board's
+  papers (non-calculator paper included). Proper maths display (KaTeX, kept in the repo), graphs, a formula sheet,
+  algebra answers marked by value (with "now expand / factorise" nudges), quadratics and simultaneous equations.
+  A first 24 GCSE question types; KS3 topics give revision.
+- **Look setting** in Grown-ups → Plan (automatic from Year 10, children's, senior); the senior look itself is 2.87.
+- New `gcse` test suite.
+
 ## 2.85 — 27 November 2026
 - **KS1: Year 1 and Year 2 maths.** Picture questions (clocks, coins, number lines, tens and ones, arrays, fraction
   shapes, counters), tap-to-answer in practice, questions read aloud. 36 question types; Year 2 has KS1-style papers.

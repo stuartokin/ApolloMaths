@@ -5,7 +5,7 @@
 <script>var stats={exam:{profile:'grammar11'},adapt:{}};window.esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));function save(){}</script>
 <script src="js/core.js"></script><script src="js/data/topics.js"></script>
 <script src="js/data/questions-core.js"></script><script src="js/data/questions-focus.js"></script><script src="js/data/questions-extra.js"></script>
-<script src="js/data/questions-agent.js"></script><script src="js/data/questions-exams.js"></script><script src="js/data/questions-sats.js"></script><script src="js/data/questions-ks2.js"></script><script src="js/data/questions-ks1.js"></script><script src="js/data/questions-ks3.js"></script><script src="js/data/difficulty.js"></script><script src="js/data/exams.js"></script>
+<script src="js/data/questions-agent.js"></script><script src="js/data/questions-exams.js"></script><script src="js/data/questions-sats.js"></script><script src="js/data/questions-ks2.js"></script><script src="js/data/questions-ks1.js"></script><script src="js/data/questions-ks3.js"></script><script src="js/data/questions-gcse.js"></script><script src="js/data/difficulty.js"></script><script src="js/data/exams.js"></script>
 <script>
 window.Engine={ready:true,exams:()=>EXAM_ORDER.map(k=>({id:k,name:EXAMS[k].name})),
  ask(kind,exam,name){if(EXAMS[exam])stats.exam.profile=exam;const nm=String(name||'Commander').slice(0,20),fix=t=>String(t==null?'':t).replace(/\bApollo(’s|'s)?\b/g,(m,p)=>nm+(p||''));

@@ -2,7 +2,7 @@
 // DATA: KS3 (Years 7–9) — original questions following the KS3 national curriculum; they also serve 13+ Common Entrance.
 // Tagged by year (fn.years). Topics belong to the Year 7–9 profiles and ce13 (topics[k].exams).
 (function(){
-const KS3=['y7','y8','y9','ce13'];
+const KS3=['y7','y8','y9','ce13','gcse_aqa','gcse_edexcel','gcse_ocr'];   // GCSE uses KS3 as revision (2.86)
 Object.assign(topics,{
  ks3_number:{label:'Number: negatives, powers & primes',emoji:'🧮',exams:KS3,coach:['Negatives: same signs multiply to +, different signs to −.','Powers before × and ÷; roots and powers undo each other.','Use prime factors for HCF and LCM.']},
  ks3_algebra:{label:'Algebra: equations & sequences',emoji:'🔤',exams:KS3,coach:['Do the same to both sides of an equation.','Substitute carefully — put negatives in brackets.','nth term: the number in front of n is the common difference.']},

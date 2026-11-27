@@ -102,3 +102,8 @@ From building Apollo's Maths Missions (Nov 2026). Starlane-specific lessons are 
     curriculum topics for this year”), not a snapshot of today's mix.
 42. **Young children need the answer buttons back after a wrong tap.** The multiple-choice code disables every option
     after one tap (right for mocks); KS1 practice re-enables the others so a child can try again.
+43. **Code that runs while progress is being cleaned can't use app.js's variables.** `suitsExam` read `mode` (a `let`
+    in app.js) and the whole app failed to load: the cleaner calls it before app.js has run. Read such variables inside
+    `try`, or pass them in.
+44. **Normalising input can create false clues.** Turning “x²” into “x^(2)” made a correct expanded answer look as if it
+    still had brackets. Keep normalised forms minimal (x^2), and test the exact strings children type.

@@ -66,15 +66,40 @@ const ks3Profile=y=>({name:`Year ${y} maths (KS3)`,short:`Year ${y}`,schools:'An
  sources:KS3_SRC,note:'There are no national tests in KS3. Our questions are original and follow the KS3 programme of study; Year 9 also prepares for GCSE.',badge:`Year ${y} maths`,mock:{n:25,mins:45,mcq:false},dates:[]});
 EXAMS.y7=ks3Profile(7);EXAMS.y8=ks3Profile(8);EXAMS.y9=ks3Profile(9);
 Object.assign(EXAMS.ce13.weights,{ks3_number:1.2,ks3_algebra:1.4,ks3_ratio:1.2,ks3_geometry:1.3,ks3_stats:1.2});
+// GCSE (2.86): one set of questions (the DfE subject content is the same for every board); each board is a profile with
+// its own papers. stage:'gcse' switches on maths display, the formula sheet and (from Year 10) the senior look.
+// tiers: the Plan asks Foundation or Higher (entry.tier); fn.tier 'F' or 'H' keeps a question to one tier.
+// Papers: calc:false is a non-calculator paper (questions with fn.calc===true are left out of it).
+const GCSE_TOPICS={gcse_number:1.2,gcse_algebra:1.5,gcse_ratio:1.2,gcse_geometry:1.3,gcse_stats:1.1,ks3_number:.3,ks3_algebra:.3,ks3_ratio:.3,ks3_geometry:.3,ks3_stats:.3};
+const GCSE_COMMON={stage:'gcse',year:10,only:true,style:'written',tiers:true,formula:true,mock:{n:20,mins:90,mcq:false},dates:[],
+ format:'Three papers of 1 hour 30 minutes. Foundation tier (grades 1–5) or Higher tier (grades 4–9). Paper 1 is non-calculator; a formulae sheet is provided in the exam.',
+ note:'Every board follows the same DfE subject content; boards publish past papers and mark schemes on their websites. Our questions are original, in the style of those papers.'};
+const DFE_GCSE=['DfE — GCSE mathematics subject content','https://www.gov.uk/government/publications/gcse-mathematics-subject-content-and-assessment-objectives'];
+const OFQUAL_SHEET=['Ofqual — formulae sheets in GCSE maths (decisions)','https://www.gov.uk/government/consultations/proposed-changes-to-the-assessment-of-mathematics-physics-and-combined-science-gcses/outcome/decisions-proposed-changes-to-the-assessment-of-mathematics-physics-and-combined-science-gcses'];
+const gpapers=(marks,names)=>names.map(([id,paper,calc])=>({id,paper,calc,n:20,mins:90,mcq:false,marks}));
+EXAMS.gcse_aqa=Object.assign({},GCSE_COMMON,{name:'GCSE Maths — AQA (8300)',short:'AQA GCSE',schools:'AQA — the most widely used GCSE maths board in England',age:'Years 10–11 — exams in May and June',weights:Object.assign({},GCSE_TOPICS),badge:'GCSE Maths · AQA',
+ sources:[['AQA — GCSE Mathematics (8300): specification, past papers and formulae sheet','https://www.aqa.org.uk/subjects/mathematics/gcse/mathematics-8300'],DFE_GCSE,OFQUAL_SHEET],
+ papers:gpapers(80,[['p1','Paper 1 (non-calculator)',false],['p2','Paper 2 (calculator)',true],['p3','Paper 3 (calculator)',true]])});
+EXAMS.gcse_edexcel=Object.assign({},GCSE_COMMON,{name:'GCSE Maths — Pearson Edexcel (1MA1)',short:'Edexcel GCSE',schools:'Pearson Edexcel',age:'Years 10–11 — exams in May and June',weights:Object.assign({},GCSE_TOPICS),badge:'GCSE Maths · Edexcel',
+ sources:[['Pearson Edexcel — GCSE Mathematics (1MA1): specification and past papers','https://qualifications.pearson.com/en/qualifications/edexcel-gcses/mathematics-2015.html'],DFE_GCSE,OFQUAL_SHEET],
+ papers:gpapers(80,[['p1','Paper 1 (non-calculator)',false],['p2','Paper 2 (calculator)',true],['p3','Paper 3 (calculator)',true]])});
+EXAMS.gcse_ocr=Object.assign({},GCSE_COMMON,{name:'GCSE Maths — OCR (J560)',short:'OCR GCSE',schools:'OCR',age:'Years 10–11 — exams in May and June',weights:Object.assign({},GCSE_TOPICS),badge:'GCSE Maths · OCR',
+ format:'Three papers of 1 hour 30 minutes (100 marks each). Foundation: Papers 1–3; Higher: Papers 4–6. The middle paper (2 or 5) is non-calculator; a formulae sheet is provided.',
+ sources:[['OCR — GCSE Mathematics (J560): specification and past papers','https://www.ocr.org.uk/qualifications/gcse/mathematics-j560-from-2015/'],DFE_GCSE,OFQUAL_SHEET],
+ papers:gpapers(100,[['p1','Paper 1 / 4 (calculator)',true],['p2','Paper 2 / 5 (non-calculator)',false],['p3','Paper 3 / 6 (calculator)',true]])});
+const GCSE_IDS=['gcse_aqa','gcse_edexcel','gcse_ocr'];
+function examStage(s){return examProfile(s).stage||'';}
+// Foundation or Higher, from the plan entry being trained for (Higher if not set)
+function childTier(s){s=s||(typeof stats!=='undefined'?stats:null);if(!s||!examProfile(s).tiers)return '';const c=currentEntry(s);return c&&c.tier==='F'?'F':'H';}
 EXAMS.mtc={name:'Year 4 multiplication tables check',short:'Tables check',schools:'All state-funded primary schools in England (Standards and Testing Agency)',age:'Year 4 — in June (2027: a two-week window from 7 June)',year:4,only:true,style:'quick',
  format:'An on-screen check: 25 multiplication questions up to 12 × 12, with 6 seconds to answer each and a 3-second pause between them. No hints, no going back.',
  weights:{mtc_tables:3,arith_mult:.6,arith_div:.6,arith_add:.3,ks2_number:.3},
  sources:[['GOV.UK — multiplication tables check (collection)','https://www.gov.uk/government/collections/multiplication-tables-check'],['GOV.UK — multiplication tables check administration guidance','https://www.gov.uk/government/publications/multiplication-tables-check-administration-guidance'],NC_SRC[0]],
  note:'The Standards and Testing Agency publishes a free “try it out” area for the check through schools. Our questions copy its format, not its content.',
  badge:'Year 4 multiplication tables check',mock:{n:25,mins:4,mcq:false,perQ:6,marks:25,paper:'Multiplication tables check',topics:['mtc_tables']},dates:[['Multiplication tables check — 2-week window opens','2027-06-07']]};
-const EXAM_ORDER=['y1','y2','y3','y4','mtc','y5','ks2sats','tiffin1','tiffin2','grammar11','iseb','y7','y8','y9','ce13'];
+const EXAM_ORDER=['y1','y2','y3','y4','mtc','y5','ks2sats','tiffin1','tiffin2','grammar11','iseb','y7','y8','y9','ce13','gcse_aqa','gcse_edexcel','gcse_ocr'];
 // which exam a child is preparing for (existing children are recognised from their exam name — Apollo stays on Tiffin Stage 2)
-function examId(s){s=s||(typeof stats!=='undefined'?stats:null);const e=s&&s.exam||{};if(e.profile&&EXAMS[e.profile])return e.profile;const n=String(e.name||'');return /\bsats\b|key stage 2/i.test(n)?'ks2sats':/tables check/i.test(n)?'mtc':/^year ([1-9]) maths/i.test(n)?'y'+n.match(/^year ([1-9])/i)[1]:/stage\s*1/i.test(n)?'tiffin1':/common entrance|13\+/i.test(n)?'ce13':/iseb|pre-?test/i.test(n)?'iseb':/grammar/i.test(n)?'grammar11':'tiffin2';}
+function examId(s){s=s||(typeof stats!=='undefined'?stats:null);const e=s&&s.exam||{};if(e.profile&&EXAMS[e.profile])return e.profile;const n=String(e.name||'');return /gcse.*aqa/i.test(n)?'gcse_aqa':/gcse.*edexcel/i.test(n)?'gcse_edexcel':/gcse.*ocr/i.test(n)?'gcse_ocr':/\bsats\b|key stage 2/i.test(n)?'ks2sats':/tables check/i.test(n)?'mtc':/^year ([1-9]) maths/i.test(n)?'y'+n.match(/^year ([1-9])/i)[1]:/stage\s*1/i.test(n)?'tiffin1':/common entrance|13\+/i.test(n)?'ce13':/iseb|pre-?test/i.test(n)?'iseb':/grammar/i.test(n)?'grammar11':'tiffin2';}
 function examProfile(s){return EXAMS[examId(s)];}
 // topics that belong to particular exams (topics[k].exams, e.g. SATs arithmetic) count 0 everywhere else
 function examWeight(k,s){const t=topics[k];if(t&&Array.isArray(t.exams)&&(!t.exams.includes(examId(s))||(bank[k]&&!bank[k].some(g=>suitsExam(g,s)))))return 0;   // …or when nothing in it suits the child's school year yet
@@ -94,7 +119,7 @@ function examQuestion(kind,s){if(typeof bank==='undefined')return null;if(Math.r
  const all=Object.keys(bank).filter(k=>bank[k]&&bank[k].length&&examWeight(k,s)>0),pref=(EXAM_KIND_TOPICS[kind]||[]).filter(k=>all.includes(k));
  const pickW=list=>{const tot=list.reduce((n,k)=>n+examWeight(k,s),0);let v=Math.random()*tot;for(const k of list){v-=examWeight(k,s);if(v<=0)return k;}return list[0];};
  for(let t=0;t<40;t++){const tp=pref.length&&Math.random()<.6?pickW(pref):pickW(all),list0=bank[tp],list1=list0.filter(g=>suitsExam(g,s)).length?list0.filter(g=>suitsExam(g,s)):list0,list=typeof diffFilter==='function'?diffFilter(list1,list1.map((_,i)=>i),'match').map(i=>list1[i]):list1;let q;try{if(typeof setQDiff==='function')setQDiff('match');q=list[Math.floor(Math.random()*list.length)]();QDIFF=0;if(typeof qOK==='function'&&!qOK(q))continue;}catch(e){continue;}
-  if(!q||typeof q.q!=='string'||q.fig||q.table||!Number.isFinite(+q.a)||q.q.length>230||/which|\bnot\b|odd one/i.test(q.q)||(String(q.a).split('.')[1]||'').length>2)continue;
+  if(!q||typeof q.q!=='string'||q.fig||q.table||/\\\(/.test(q.q)||['expr','set','coord'].includes(q.kind)||!Number.isFinite(+q.a)||q.q.length>230||/which|\bnot\b|odd one/i.test(q.q)||(String(q.a).split('.')[1]||'').length>2)continue;
   const a=+q.a,dp=(String(q.a).split('.')[1]||'').length,fm=v=>dp?(+v).toFixed(dp):String(Math.round(v)),set=new Set([fm(a)]),d=[1,2,5,10,Math.max(1,Math.round(a*.1)),Math.max(1,Math.round(a*.5)),3];let k=0;
   while(set.size<4&&k<40){const v=a+(Math.random()<.5?-1:1)*d[k%d.length]*(dp?Math.pow(10,-dp)*10:1);if(v>=0||a<0)set.add(fm(v));k++;}
   if(typeof personalise==='function')q=personalise(q);else if(typeof themeText==='function')q=themeText(q,s);return{how:(Array.isArray(q.s)&&q.s.length?q.s:Array.isArray(q.h)?q.h:[]).map(x=>String(x).replace(/<[^>]+>/g,'')).join(' ').slice(0,300),q:q.q.replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' '),opts:[...set].sort(()=>Math.random()-.5),ans:fm(a),u:q.u||'',topic:tp,exam:examId(s)};}
@@ -149,7 +174,10 @@ function syncExam(s){s=s||stats;const c=currentEntry(s);if(!EXAMS[c.id])c.id='ti
 function examMock(s){return (examProfile(s).mock)||{n:40,mins:50,mcq:false};}
 // mixed practice: generators can be marked for particular exams (fn.exams); others suit every exam
 // …and question types tagged with school years (fn.years=[first, last]) wait until the child has reached that year
-function suitsExam(fn,s){return !fn||((!fn.exams||fn.exams.includes(examId(s)))&&(!Array.isArray(fn.years)||fn.years[0]<=childYear(s)));}
+function suitsExam(fn,s){if(!fn)return true;if(fn.exams&&!fn.exams.includes(examId(s)))return false;if(Array.isArray(fn.years)&&fn.years[0]>childYear(s))return false;
+ if(fn.tier&&examProfile(s).tiers&&fn.tier!==childTier(s))return false;                       // Foundation-only or Higher-only (2.86)
+ if(fn.calc===true){let md='';try{md=mode;}catch(e){}if(md==='mock'&&examMock(s).calc===false)return false;}   // calculator questions stay out of non-calculator papers
+ return true;}
 // ---------- the header, and every place that used to say "Tiffin" ----------
 let hdrLast='';
 function examHeader(){if(typeof stats==='undefined'||!document.querySelector('.hero'))return;syncExam(stats);const c=currentEntry(stats),p=EXAMS[c.id],d=daysTo(c.date),done=entryDone(c);
@@ -178,7 +206,7 @@ function examMCQ(cur,mode){const host=document.getElementById('answer');if(!host
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-mcq]');if(!b)return;const an=document.getElementById('answer'),ck=document.getElementById('check');if(!an||an.disabled)return;an.value=b.dataset.mcq;document.querySelectorAll('.mcq-opt').forEach(x=>x.disabled=true);b.classList.add('picked');if(ck)ck.click();});
 // ---------- parent page: the plan (with sources), readiness, key dates and a printable report ----------
 examBlock=function(s){const mine=(typeof stats!=='undefined'&&s===stats),pl=examPlan(s),c=currentEntry(s),p=EXAMS[c.id];
- const row=(e,i)=>mine?`<tr data-plan-row="${i}"><td><select data-plan="id">${EXAM_ORDER.map(k=>`<option value="${k}"${k===e.id?' selected':''}>${esc(EXAMS[k].name)}</option>`).join('')}</select></td><td><input data-plan="school" value="${esc(e.school||'')}" placeholder="School (optional)" maxlength="40"></td><td><input type="date" data-plan="date" value="${esc(e.date||'')}"></td><td><input data-plan="result" value="${esc(e.result||'')}" placeholder="e.g. due March 2027" maxlength="40"></td><td>${e===c?'🎯 focus':entryDone(e)?'✓ done':'later'}</td><td><button type="button" data-plan-del="${i}" title="Remove">✕</button></td></tr>`
+ const row=(e,i)=>mine?`<tr data-plan-row="${i}"><td><select data-plan="id">${EXAM_ORDER.map(k=>`<option value="${k}"${k===e.id?' selected':''}>${esc(EXAMS[k].name)}</option>`).join('')}</select></td><td><input data-plan="school" value="${esc(e.school||'')}" placeholder="School (optional)" maxlength="40">${EXAMS[e.id]&&EXAMS[e.id].tiers?`<select data-plan="tier" aria-label="Tier"><option value="H"${e.tier!=='F'?' selected':''}>Higher (4–9)</option><option value="F"${e.tier==='F'?' selected':''}>Foundation (1–5)</option></select>`:''}</td><td><input type="date" data-plan="date" value="${esc(e.date||'')}"></td><td><input data-plan="result" value="${esc(e.result||'')}" placeholder="e.g. due March 2027" maxlength="40"></td><td>${e===c?'🎯 focus':entryDone(e)?'✓ done':'later'}</td><td><button type="button" data-plan-del="${i}" title="Remove">✕</button></td></tr>`
   :`<tr><td>${esc(EXAMS[e.id].name)}</td><td>${esc(e.school||'')}</td><td>${esc(fmtDay(e.date))}</td><td>${esc(e.result||'')}</td><td>${e===c?'🎯 focus':entryDone(e)?'✓ done':'later'}</td></tr>`;
  return `<section class="exam-box" data-exam-box><h3>🎓 Exam plan &amp; sources</h3><p class="section-note">The app trains for the <b>next upcoming test</b> (🎯). When a test has passed it moves on to the next one in the plan.</p>
  <div class="plan-wrap"><table class="plan${mine?' plan-edit':''}"><tr><th>Test</th><th>School</th><th>Date</th><th>Result</th><th></th>${mine?'<th></th>':''}</tr>${pl.map(row).join('')}</table></div>${mine?`<p><button type="button" data-plan-add>➕ Add a test</button>${planOffers(s).map(o=>` <button type="button" class="primary" data-plan-offer="${o.id}"${o.id==='ks2sats'?' data-plan-sats':''}>➕ Add ${esc(o.label)} — ${esc(fmtDay(o.date))}</button>`).join('')}</p>${yearPick(s)}`:`<p class="section-note">School year: ${s.year?'Year '+s.year:'not set (Year '+childYear(s)+' from the exam)'}</p>`}

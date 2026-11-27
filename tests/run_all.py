@@ -5,7 +5,7 @@ Writes tests/out/report.md (used by the automated workflows as their evidence)."
 import sys, time, asyncio, importlib, datetime
 from rig import *
 from playwright.async_api import async_playwright
-SUITES = ['static', 'child', 'grownups', 'exams', 'stages', 'ks2', 'ks1ks3', 'arcade']
+SUITES = ['static', 'child', 'grownups', 'exams', 'stages', 'ks2', 'ks1ks3', 'gcse', 'arcade']
 
 async def go(names):
     results = []

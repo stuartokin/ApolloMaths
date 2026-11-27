@@ -1,7 +1,7 @@
 # Apollo's Maths Missions — knowledge base
 
 *Stuart Okin — personal project, written in a personal capacity.*
-*Last full update: 13 November 2026 (version 2.80); exam switching updated 15 November 2026 (2.82); key stages, SATs, KS1 and KS3 27 November 2026 (2.83–2.85).*
+*Last full update: 13 November 2026 (version 2.80); exam switching updated 15 November 2026 (2.82); key stages, SATs, KS1 and KS3, GCSE groundwork 27 November 2026 (2.83–2.86).*
 
 Written so that a future person or AI model, starting cold, can understand the whole app and why it is the way
 it is. Lessons learned are in `LESSONS.md`, future requirements in `ROADMAP.md`, the test rig in
@@ -53,7 +53,7 @@ Load order matters: data first, then rendering, storage, features, `app.js`, the
 | Difficulty | `js/data/difficulty.js` | `rateQuestionTypes()` rates each generator; adaptive level per child per exam in `stats.adapt` (3 right first time → up, 2 misses → down); `diffFilter`, `setQDiff`, `qOK` (rejects accidentally trivial questions such as 5:5) |
 | Exams | `js/data/exams.js`, `exam-dates.js` | `EXAMS` (5 profiles: weights, style, sources), exam **plan** per child, header badge, mocks per exam, readiness, key dates, Sources, Starlane question socket (`examQuestion`), parent tabs Plan/Readiness/Starlane |
 | Learning | `js/data/lessons.js`, `learning.js`, `learning-more.js`, `learning-sats.js`, `learning-ks2.js`, `learning-ks1-ks3.js`, `explainers.js`, `marking.js`, `metrics.js`, `js/learn.js` | Learn missions (6 steps per topic, active-reading gates), Example Studio, "Explain it simply", answer marking (`judge`), readiness, Today's plan (`planFor`) |
-| Rendering | `js/render/render.js`, `figures-ks1.js` (clock, coins, number line, array, fraction shapes, tens, counters — 2.85), `avatar.js`, `avatar-extra.js` | Diagrams from specs (`F('cuboid',…)`), fractions the Tiffin way (`fracHTML`), the character SVG (`drawAvatar`) |
+| Rendering | `js/render/render.js`, `maths.js` (KaTeX + graphs, 2.86), `figures-ks1.js` (clock, coins, number line, array, fraction shapes, tens, counters — 2.85), `avatar.js`, `avatar-extra.js` | Diagrams from specs (`F('cuboid',…)`), fractions the Tiffin way (`fracHTML`), the character SVG (`drawAvatar`) |
 | Storage & players | `js/storage.js`, `js/players.js`, `js/protect.js` | Profiles, per-player stats, progress files (File System Access API with auto-save on Chrome/Edge; download elsewhere), "Who's playing?", recycle bin |
 | Family & Admin | `js/family.js`, `js/admin.js`, `js/data/arcade-rules.js` | Parent passphrase (PBKDF2), child's secret word/number code, fair-play locks, Admin PIN, play-time rules |
 | Shop & character | `js/locker.js`, `js/data/shop.js`, `shop-extra.js`, `shop-themes.js` | 274 items (kits, hats, boots, extras, pets, scenes, celebrations, titles, frames, Maths Legends cards, skills); themed catalogues |
@@ -132,7 +132,14 @@ returns the chosen one. Profiles with `only:true` (Years 3–5, tables check) gi
 their year. **KS1 (2.85)** profiles have `tap` (answer buttons in practice too, via `examMCQ`; a wrong tap
 leaves the others open) and `read` (each question is read aloud with `Speech.say` when sound is on; ×, ÷, − and □ are
 said as words). Year 2 has KS1-style papers. **KS3 (2.85)**: Years 7–9 use the five `ks3_*` topics (held back by year)
-plus older word-problem topics at low weight; 13+ CE includes the KS3 topics. GCSE comes next (ROADMAP).
+plus older word-problem topics at low weight; 13+ CE includes the KS3 topics. **GCSE (2.86).** `gcse_aqa`, `gcse_edexcel`, `gcse_ocr` share one question set
+(`questions-gcse.js`, plus KS3 topics as revision) and differ in `papers` (OCR's middle paper is the non-calculator one).
+`stage:'gcse'` → `examStage()`; the plan entry's `tier` (F/H) → `childTier()`; `fn.tier` and `fn.calc` filter questions
+in `suitsExam`. Maths in question text is LaTeX between `\\(` and `\\)`, drawn by KaTeX (`js/render/maths.js`, loaded
+only when needed, plain-text fallback). New answer kinds `expr`, `set`, `coord` are marked by `js/data/algebra.js`.
+`js/gcse.js` adds the Look setting (`stats.look`; `body.look-senior` from Year 10 or on a GCSE exam), the 📐 formula
+sheet (a revision copy — boards provide the real one, confirmed by Ofqual for the life of the current GCSEs) and
+calculator labels. The senior look's styles, character and Customise shop are 2.87.
 
 **Trying questions.** There is no question tester yet: built-in questions are tried by playing as a separate "Test"
 child (pick a topic under ✏️ Practise). Starlane test mode is a game sandbox, not a question tester. ApolloMaths never loads
@@ -197,6 +204,7 @@ list. 6. `python tests/run_all.py` — all green. 7. Commit and push to `main` (
 | 13 Nov | This knowledge base and the test rig |
 | 2.81 | 15 Nov: changing the exam refreshes the child's page (question, focus, plan, mock); Fix-it keeps to the exam; exam plan as cards on phones/tablets; `exams` test suite |
 | 2.82 | 15 Nov: focus areas always follow the exam until a grown-up chooses their own (`focusMine`) |
+| 2.86 | 27 Nov: GCSE groundwork — KaTeX, graphs, algebra answers, tiers, board papers, formula sheet, Look setting, 24 GCSE types, `gcse` suite |
 | 2.85 | 27 Nov: KS1 (Years 1–2: pictures, tap, read aloud, 36 types, Year 2 papers) and KS3 (Years 7–9, 46 types; also in 13+ CE), `ks1ks3` suite |
 | 2.84 | 27 Nov: SATs Papers 2–3 (reasoning, 5 topics, 47 types), Year 3–5 profiles, Year 4 tables check (6 s per question), paper picker, `ks2` suite |
 | 2.83 | 27 Nov: key stages begin — KS2 SATs exam, five arithmetic topics (36 types), Paper 1 mock in marks, school year in Plan, “Add KS2 SATs”, `stages` test suite |
