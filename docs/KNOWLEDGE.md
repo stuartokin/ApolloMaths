@@ -1,7 +1,7 @@
 # Apollo's Maths Missions — knowledge base
 
 *Stuart Okin — personal project, written in a personal capacity.*
-*Last full update: 13 November 2026 (version 2.80); exam switching updated 15 November 2026 (2.82); key stages, SATs, KS1 and KS3, GCSE groundwork 27 November 2026 (2.83–2.86).*
+*Last full update: 13 November 2026 (version 2.80); exam switching updated 15 November 2026 (2.82); key stages, SATs, KS1 and KS3, GCSE groundwork and senior look 27 November 2026 (2.83–2.87).*
 
 Written so that a future person or AI model, starting cold, can understand the whole app and why it is the way
 it is. Lessons learned are in `LESSONS.md`, future requirements in `ROADMAP.md`, the test rig in
@@ -139,7 +139,15 @@ in `suitsExam`. Maths in question text is LaTeX between `\\(` and `\\)`, drawn b
 only when needed, plain-text fallback). New answer kinds `expr`, `set`, `coord` are marked by `js/data/algebra.js`.
 `js/gcse.js` adds the Look setting (`stats.look`; `body.look-senior` from Year 10 or on a GCSE exam), the 📐 formula
 sheet (a revision copy — boards provide the real one, confirmed by Ofqual for the life of the current GCSEs) and
-calculator labels. The senior look's styles, character and Customise shop are 2.87.
+calculator labels.
+
+**The senior look (2.87)** — chosen by Stuart (27 Nov): proof B “Night study” with a light theme, everything
+age-appropriate for 14–18. It is a layer: `css/senior.css` only applies under `body.look-senior`; `js/senior.js` swaps
+the characters (`drawSenior`), opens 🎨 Customise instead of the Locker Room, calms the wording (text-node swaps, `notice`
+and `toast` wrappers) and shows Level/XP. Shop data: `js/data/senior-shop.js` — senior items are owned in `stats.sOwned`
+and paid from the same `spent` as the children's items (checked by `cleanSenior`). XP = all points ever earned; credits
+= wallet. Hobbies replace themes for older students (accent colour, own desk items and backdrop); questions keep the
+theme word swaps. The arcade still uses the children's head for “My player” (a possible later change).
 
 **Trying questions.** There is no question tester yet: built-in questions are tried by playing as a separate "Test"
 child (pick a topic under ✏️ Practise). Starlane test mode is a game sandbox, not a question tester. ApolloMaths never loads
@@ -204,6 +212,7 @@ list. 6. `python tests/run_all.py` — all green. 7. Commit and push to `main` (
 | 13 Nov | This knowledge base and the test rig |
 | 2.81 | 15 Nov: changing the exam refreshes the child's page (question, focus, plan, mock); Fix-it keeps to the exam; exam plan as cards on phones/tablets; `exams` test suite |
 | 2.82 | 15 Nov: focus areas always follow the exam until a grown-up chooses their own (`focusMine`) |
+| 2.87 | 27 Nov: senior look (Night study + light theme), Customise, hobbies, XP levels, new character, `senior` suite |
 | 2.86 | 27 Nov: GCSE groundwork — KaTeX, graphs, algebra answers, tiers, board papers, formula sheet, Look setting, 24 GCSE types, `gcse` suite |
 | 2.85 | 27 Nov: KS1 (Years 1–2: pictures, tap, read aloud, 36 types, Year 2 papers) and KS3 (Years 7–9, 46 types; also in 13+ CE), `ks1ks3` suite |
 | 2.84 | 27 Nov: SATs Papers 2–3 (reasoning, 5 topics, 47 types), Year 3–5 profiles, Year 4 tables check (6 s per question), paper picker, `ks2` suite |

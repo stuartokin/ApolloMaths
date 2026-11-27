@@ -107,3 +107,7 @@ From building Apollo's Maths Missions (Nov 2026). Starlane-specific lessons are 
     `try`, or pass them in.
 44. **Normalising input can create false clues.** Turning “x²” into “x^(2)” made a correct expanded answer look as if it
     still had brackets. Keep normalised forms minimal (x^2), and test the exact strings children type.
+45. **The same button can live in two places.** “My room” is `[data-go]` in the laptop rail but `[data-area-go]` in the
+    phone bar; redirecting only one left phones going to the children's room. Test both bars.
+46. **A layer that rewrites text must not fight another layer.** student.js rewrites the rail points every second;
+    rewriting the same element flickered. Hide the original and show your own element instead.

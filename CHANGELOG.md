@@ -3,6 +3,12 @@
 Plain-English summary of each release. The technical detail of every version is in the README's changelog
 (`- **vX.Y:**` lines), and the in-app version history is `versionHistory` in `js/data/help.js`.
 
+## 2.87 — 27 November 2026
+- **The senior look** for GCSE and A level ("Night study", with a light theme), automatic from Year 10: own character,
+  calm wording, XP and levels, and **🎨 Customise** — age-appropriate outfits, trainers, accessories, desk and room,
+  backdrops, frames, earned titles and a focus-sounds perk; ten hobbies with their own colours and items.
+  Younger children see no change. New `senior` test suite.
+
 ## 2.86 — 27 November 2026
 - **GCSE groundwork.** GCSE Maths profiles for AQA, Edexcel and OCR, Foundation/Higher in the Plan, each board's
   papers (non-calculator paper included). Proper maths display (KaTeX, kept in the repo), graphs, a formula sheet,

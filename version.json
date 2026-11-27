@@ -1,7 +1,24 @@
 {
- "version": "2.86",
+ "version": "2.87",
  "date": "27 November 2026",
  "releases": [
+  {
+   "v": "2.87",
+   "date": "27 November 2026",
+   "kids": [
+    "🌙 GCSE and A level get their own look: “Night study” (with a light theme), your own character, XP levels and 🎨 Customise"
+   ],
+   "tags": [
+    "new",
+    "parents"
+   ],
+   "items": [
+    "🌙 The senior look for GCSE and A level (automatic from Year 10; grown-ups can change it in Grown-ups → Plan): a calm night-city design with a ☀️/🌙 light theme, a greeting instead of the comic title, and calmer wording — Submit, “✓ Correct”, XP and levels, no football or comic words. Younger children see no change.",
+    "🎨 Customise replaces the Shop for older students: outfits (hoodies, bomber, denim, puffer, varsity), trainers, accessories (headphones, glasses, cap, beanie, smartwatch), desk and room items, backdrops, frames, titles earned by mastery and a focus-sounds perk. Ten hobbies (football analytics, F1, music production, gaming, fashion, coding, space, film, travel, fitness) each set the accent colour and add their own items.",
+    "🧑 A new character with natural proportions, drawn with your own skin tone, hair and head covering; “Your space” shows your desk set-up.",
+    "💳 Credits to spend are the same points as before; XP (everything you have ever earned) sets your level and never goes down. Purchases are checked when progress is reopened."
+   ]
+  },
   {
    "v": "2.86",
    "date": "27 November 2026",
@@ -140,25 +157,6 @@
    ],
    "items": [
     "🕹️ Every arcade game except Starlane now has the 🧍 My player / 👾 Classic choice that Invaders had. My player puts your character and theme into the game; Classic is the original game with its original items. Each game remembers its own choice."
-   ]
-  },
-  {
-   "v": "2.77",
-   "date": "13 November 2026",
-   "kids": [
-    "🕹️ You are the player in every arcade game now — in your own theme!"
-   ],
-   "tags": [
-    "games",
-    "parents",
-    "fix"
-   ],
-   "items": [
-    "👪 Parent dashboard: one fixed size whatever tab you pick (only the content scrolls, and each tab opens at the top); maximise fills the screen exactly; and fixed “undefined%” in the readiness tables — the cause was two functions with the same name. “No test date set yet” instead of “has passed” when there is no date.",
-    "💾 Not saved is now impossible to miss: a red, gently pulsing save button on laptops; on phones a red “Not saved — tap to save” ribbon across the top and a red 💾 button.",
-    "🕹️ Every arcade game except Starlane now uses the child’s own character as the player — in the maze, the snake, the racing car, the ships, the bat, the road crossing — or as a mascot in Pinball and Block Drop, ringed in the theme colour, with theme items to collect (⚽, 🐞, ⭐ or 🎵).",
-    "🧹 Removed the two-player option and the retro-screen (old-TV scanlines) switch from the arcade.",
-    "🖥️ Very large displays now scale only the children’s screen, so pop-up windows (the parent dashboard, the arcade) always fit."
    ]
   }
  ]
