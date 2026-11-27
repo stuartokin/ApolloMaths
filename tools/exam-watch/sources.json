@@ -81,6 +81,11 @@
    "exam": "ks2sats",
    "label": "GOV.UK — KS2 mathematics test framework",
    "url": "https://www.gov.uk/government/publications/key-stage-2-mathematics-test-framework"
+  },
+  {
+   "exam": "mtc",
+   "label": "GOV.UK — multiplication tables check (collection)",
+   "url": "https://www.gov.uk/government/collections/multiplication-tables-check"
   }
  ],
  "schoolsToTrack": [

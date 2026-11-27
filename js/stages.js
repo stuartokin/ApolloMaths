@@ -1,23 +1,48 @@
 'use strict';
-// STAGES (2.83): layers for key stages, school years and SATs, wrapped around app.js (never rewriting it).
-// - topics that belong to other exams (topics[k].exams, e.g. SATs arithmetic) are hidden from the topic grid;
-// - a mock for an exam whose mock lists topics (SATs Paper 1: arithmetic) only uses those topics;
-// - mocks with marks (SATs: long multiplication and long division are worth 2) are scored in marks as well.
+// STAGES (2.83–2.84): layers for key stages, school years, SATs and the tables check, wrapped around app.js (never rewriting it).
+// - topics the exam doesn't use (examWeight 0: another exam's topics, nothing for the child's year, or not in an only-listed profile)
+//   are hidden from the topic grid, and a chosen one falls back to mixed practice;
+// - exams with several papers (SATs: Paper 1 arithmetic, Papers 2 and 3 reasoning) get a paper picker in Mock exam, and
+//   examMock() returns the chosen paper; a mock keeps to its paper's topics;
+// - mocks with marks are scored in marks as well (fn.mk; long multiplication and long division are worth 2);
+// - a paper with perQ (the Year 4 tables check) gives perQ seconds per question, then moves on by itself.
 (function(){
- const gated=k=>topics[k]&&Array.isArray(topics[k].exams);
- const offExam=k=>gated(k)&&typeof examWeight==='function'&&examWeight(k)===0;
- const mockTopics=()=>{const m=typeof examMock==='function'?examMock():null;return m&&Array.isArray(m.topics)?m.topics.filter(k=>bank[k]&&bank[k].length):null;};
- // topic grid: hide topics from another exam
- {const base=drawTopics;drawTopics=function(){base.apply(this,arguments);document.querySelectorAll('#topics [data-topic]').forEach(b=>{if(offExam(b.dataset.topic))b.classList.add('hidden');});};}
- // a chosen topic from another exam (e.g. after the exam changed) falls back to mixed practice
- {const base=newQuestion;newQuestion=function(){if(offExam(chosenTopic))chosenTopic='mixed';return base.apply(this,arguments);};}
- // mocks keep to the exam's own paper
- {const base=randomTopic;randomTopic=function(arr){const mt=mode==='mock'?mockTopics():null;if(mt&&mt.length)return base(mt);return arr===undefined?base():base(arr);};}
- // marks per question (fn.mk, default 1)
+ const offExam=k=>typeof examWeight==='function'&&examWeight(k)===0;
+ // ---- papers ----
+ let paperIx=0;try{paperIx=+sessionStorage.getItem('am-paper')||0;}catch(e){}
+ const papers=()=>{const p=typeof examProfile==='function'?examProfile():null;return p&&Array.isArray(p.papers)?p.papers:null;};
+ const curPaper=()=>{const ps=papers();if(!ps)return null;if(!ps[paperIx])paperIx=0;return ps[paperIx];};
+ {const base=examMock;examMock=function(s){const m=base(s),p=(!s||s===stats)?curPaper():null;return p?Object.assign({},m,p):m;};}
+ function drawPapers(){const ex=document.getElementById('modeExplainer');if(!ex)return;let box=document.getElementById('paperPick');const ps=papers();
+  if(!box){box=document.createElement('div');box.id='paperPick';box.className='choices paper-pick';const micro=ex.closest('.micro')||ex;micro.insertAdjacentElement('beforebegin',box);}
+  if(!ps||mode!=='mock'){box.classList.add('hidden');box.innerHTML='';return;}
+  const key=ps.map(p=>p.id).join()+paperIx;if(box.dataset.key===key&&!box.classList.contains('hidden'))return;box.dataset.key=key;box.classList.remove('hidden');
+  box.innerHTML=`<span class="mini"><b>Choose a paper:</b></span>`+ps.map((p,i)=>`<button type="button" class="chip${i===paperIx?' active':''}" data-paper="${i}">${esc(p.paper)} · ${p.n} q · ${p.mins} min</button>`).join('');}
+ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-paper]');if(!b)return;paperIx=+b.dataset.paper||0;try{sessionStorage.setItem('am-paper',paperIx);}catch(x){}
+  drawPapers();setMode('mock');if(typeof hdrLast!=='undefined'){hdrLast='';examHeader();}restartSession();});
+ {const base=setMode;setMode=function(){const r=base.apply(this,arguments);try{drawPapers();}catch(e){}return r;};}
+ window.addEventListener('load',()=>{setInterval(()=>{try{drawPapers();}catch(e){}},1500);});
+ // ---- topic grid and chosen topics ----
+ {const base=drawTopics;drawTopics=function(){base.apply(this,arguments);document.querySelectorAll('#topics [data-topic]').forEach(b=>{const k=b.dataset.topic;if(topics[k]&&offExam(k))b.classList.add('hidden');});};}
+ {const base=newQuestion;newQuestion=function(){if(topics[chosenTopic]&&offExam(chosenTopic))chosenTopic='mixed';const r=base.apply(this,arguments);try{perQStart();}catch(e){}return r;};}
+ // mocks keep to the paper's topics
+ {const base=randomTopic;randomTopic=function(arr){const m=mode==='mock'?examMock():null,mt=m&&Array.isArray(m.topics)?m.topics.filter(k=>bank[k]&&bank[k].length&&!offExam(k)):null;if(mt&&mt.length)return base(mt);return arr===undefined?base():base(arr);};}
+ // ---- marks ----
  const marksOf=c=>{try{const g=bank[c.topic][c.generator];return g&&g.mk?g.mk:1;}catch(e){return 1;}};
  {const base=record;record=function(){const r=base.apply(this,arguments);try{const it=sessionLog[sessionLog.length-1];if(it&&current)it.mk=marksOf(current);}catch(e){}return r;};}
- {const base=finishSession;finishSession=function(){const wasMock=mode==='mock'&&!finished,m=typeof examMock==='function'?examMock():{},r=base.apply(this,arguments);
+ {const base=finishSession;finishSession=function(){const wasMock=mode==='mock'&&!finished,m=examMock(),r=base.apply(this,arguments);perQStop();
   if(wasMock&&m.marks&&sessionLog.length){const of=sessionLog.reduce((n,x)=>n+(x.mk||1),0),got=sessionLog.reduce((n,x)=>n+(x.correct&&!x.skipped?(x.mk||1):0),0),last=stats.mocks[stats.mocks.length-1];
-   if(last){last.mk=got;last.mkOf=of;save();}const fb=get('feedback');if(fb)fb.insertAdjacentHTML('beforeend',`<br><b>📝 ${esc(m.paper||'Marks')}: ${got} out of ${of} marks.</b> In the real paper long multiplication and long division are worth 2 marks each.`);}
+   if(last){last.mk=got;last.mkOf=of;save();}const fb=get('feedback');if(fb)fb.insertAdjacentHTML('beforeend',`<br><b>📝 ${esc(m.paper||'Marks')}: ${got} out of ${of} marks.</b>${m.id==='p1'?' In the real paper long multiplication and long division are worth 2 marks each.':''}`);}
   return r;};}
+ // ---- seconds per question (the tables check) ----
+ let pqTimer=null,pqToken=0;
+ function perQStop(){if(pqTimer){clearInterval(pqTimer);pqTimer=null;}const el=document.getElementById('perQ');if(el)el.classList.add('hidden');}
+ function perQBox(){let el=document.getElementById('perQ');if(!el){const a=get('answer'),row=a&&(a.closest('.answer-row')||a.parentElement);if(!row)return null;el=document.createElement('div');el.id='perQ';el.className='perq';el.setAttribute('aria-live','off');row.insertAdjacentElement('beforebegin',el);}return el;}
+ function perQStart(){perQStop();const m=mode==='mock'?examMock():null;if(!m||!m.perQ||finished||!current)return;const tok=++pqToken,q=current,end=Date.now()+m.perQ*1000,el=perQBox();if(!el)return;const mt=get('methodTag');if(mt)mt.textContent=mt.textContent.replace(/ · ⏱ aim for about a minute each/,'')+` · ⏱ ${m.perQ} seconds each`;
+  const draw=()=>{const left=Math.max(0,Math.ceil((end-Date.now())/1000));el.classList.remove('hidden');el.textContent=`⏱️ ${left} second${left===1?'':'s'}`;el.classList.toggle('urgent',left<=2);return left;};draw();
+  pqTimer=setInterval(()=>{if(tok!==pqToken||current!==q||finished){perQStop();return;}if(!draw()){perQStop();if(!done){notice('info',`Time’s up — it was ${fmtAns(q)}. Next one!`);}setTimeout(()=>{if(current===q&&!finished)skip();},1500);}},200);}
+ // one answer per question: after SHOOT (or Enter) the check moves on by itself
+ const afterAnswer=()=>{const m=mode==='mock'?examMock():null;if(!m||!m.perQ||finished||!current)return;const q=current;setTimeout(()=>{if(current!==q||finished)return;if(!done&&!q.wrongs.length)return;perQStop();setTimeout(()=>{if(current===q&&!finished)skip();},1500);},60);};
+ document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#check'))afterAnswer();},true);
+ document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='answer')afterAnswer();},true);
 })();

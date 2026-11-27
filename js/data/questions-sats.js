@@ -5,7 +5,7 @@
 // fn.mk = marks in the real paper (long multiplication and long division are worth 2).
 // The topics belong only to the exams listed in topics[k].exams (examWeight gives every other exam 0).
 (function(){
-const SATS=['ks2sats'];
+const SATS=['ks2sats','y3','y4','y5','mtc'];
 Object.assign(topics,{
  arith_add:{label:'Adding & subtracting',emoji:'➕',exams:SATS,coach:['Line the digits up by place value — ones under ones (and decimal points under each other).','Start from the ones column; exchange (carry or borrow) when you need to.','Check with the inverse: an answer to a subtraction plus the number taken away gives the start.']},
  arith_mult:{label:'Multiplying',emoji:'✖️',exams:SATS,coach:['Short multiplication for × 1 digit; long multiplication for × 2 digits.','In long multiplication, multiply by the ones, then by the tens (put a 0 first), then add the two rows.','Estimate first (round both numbers) so you can spot a wrong answer.']},

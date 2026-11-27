@@ -1,7 +1,24 @@
 {
- "version": "2.83",
+ "version": "2.84",
  "date": "27 November 2026",
  "releases": [
+  {
+   "v": "2.84",
+   "date": "27 November 2026",
+   "kids": [
+    "🧠 SATs reasoning papers, Year 3, 4 and 5 practice, and a times-tables check with a 6-second timer — just like the real one"
+   ],
+   "tags": [
+    "new",
+    "parents"
+   ],
+   "items": [
+    "🏆 KS2 SATs mocks now offer all three papers: Paper 1 arithmetic (36 questions, 30 minutes) and Papers 2 and 3 reasoning (24 questions, 40 minutes each), all scored in marks. Choose the paper in Mock exam.",
+    "🧠 Five new SATs-level reasoning topics (place value, rounding, Roman numerals, negative numbers; money, time and measures; angles, shape and position; tables, charts and averages; word problems) — 47 question types with hints, worked methods, lessons and explainers. Charts and timetables are drawn on screen.",
+    "📅 New exams: Year 3, Year 4 and Year 5 maths (national curriculum practice — nothing from later years and no 11+ puzzles) and the Year 4 multiplication tables check (25 questions, 6 seconds each, moves on by itself).",
+    "👪 Grown-ups → Plan: Year 4 children get “➕ Add the times-tables check”. Focus topics only include topics the child’s year can actually practise."
+   ]
+  },
   {
    "v": "2.83",
    "date": "27 November 2026",
@@ -145,21 +162,6 @@
     "👧 Adding a player asks what they love (theme), whether their character is a girl or a boy, and their team for football. New children start with their theme’s starter items and focus topics chosen from their exam.",
     "👪 Grown-ups: the parent dashboard now has 👨‍👩‍👧 Family & data (save, open, export, every-question export, players and family codes), and the parent box has left the children’s screen. ⚙️ Menu is in the usual order: switch player, theme & character, sound, voices, help, install, grown-ups.",
     "🐞 Fixed “undefined%” on the Keep training bars for new players."
-   ]
-  },
-  {
-   "v": "2.74",
-   "date": "13 November 2026",
-   "kids": [
-    "🎨 Choose your own theme: Football (any team), Space, Animals or Music & art — even the questions change!"
-   ],
-   "tags": [
-    "new"
-   ],
-   "items": [
-    "🖥️ Wide screens use the space: Today shows the next best thing beside today’s plan; Practise and Mock exam have missions on the left, the question in the middle and the coach and game modes on the right; Rewards puts your player beside medals and the leaderboard. Phones still stack.",
-    "⚙️ The menu now drops down under its button instead of hiding behind the header.",
-    "🎨 Themes (⚙️ Menu → 🎨 Theme), chosen per child: ⚽ Anfield (the original), ⚽ Football — my team (any club name and team colour), 🚀 Space, 🐾 Animals & nature and 🎵 Music & art. Each changes the colours, background, header and sticker, and the stories in the questions — in practice and in Starlane — while the maths stays the same."
    ]
   }
  ]

@@ -92,3 +92,8 @@ From building Apollo's Maths Missions (Nov 2026). Starlane-specific lessons are 
     `ApolloMaths` (left by a test run) was committed; GitHub Pages' build fails on a link that points nowhere, so nothing
     published from 19 to 27 Nov (including the exam watch's 23 Nov update). Removed in 2.83, ignored in `.gitignore`,
     and `test_static` now fails if any link is committed.
+39. **Old copies of a rule hide in later layers.** Focus topics were chosen by the same "top five weights" code in three
+    places (exams.js and twice in student.js); fixing one left a Year 3 child with a focus topic that had no questions
+    for her year. Grep for the logic, not just the function name, and route every copy through one function.
+40. **A late-opening Welcome window can block a click.** In tests, close dialogs again just before clicking (it opened
+    after the player was added and covered the SATs paper buttons).

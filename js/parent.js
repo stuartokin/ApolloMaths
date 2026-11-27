@@ -82,7 +82,7 @@ const Parent=(()=>{
   if(ds.close!==undefined){close();return;}
   if(ds.ptab){tab=ds.ptab;pending=null;render();return;}
   if(ds.usesug!==undefined){pending=suggestFocus(viewed().s).top;render();return;}
-  if(ds.defocus!==undefined){const s=viewed().s;saveFocus(typeof examFocusFor==='function'?examFocusFor(examId(s)):DEFAULT_FOCUS.slice(),true);return;}
+  if(ds.defocus!==undefined){const s=viewed().s;saveFocus(typeof examFocusFor==='function'?examFocusFor(examId(s),s):DEFAULT_FOCUS.slice(),true);return;}
   if(ds.savefocus!==undefined){if(pending.length!==5){toast('Please choose exactly 5 Focus areas.');return;}saveFocus(pending);return;}
   if(ds.csv){exportCsv(ds.csv);return;}
   if(ds.report){printReport();return;}

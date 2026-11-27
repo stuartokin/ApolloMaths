@@ -544,3 +544,5 @@ body.student #famBanner{display:none!important}
  .plan-edit td{border:0;padding:0}.plan-edit td:last-child{text-align:right}
  .plan-edit select,.plan-edit input{width:100%;max-width:100%;box-sizing:border-box;margin:0;font-size:16px;padding:6px}}
 @media(max-width:560px){.plan-edit tr{grid-template-columns:1fr}}
+/* 2.84: seconds left per question (tables check) and the SATs paper picker */
+.perq{font-weight:900;font-size:18px;margin:0 0 10px;color:#3b4256}.perq.urgent{color:#e51c35}.paper-pick{margin:10px 0 0;align-items:center}

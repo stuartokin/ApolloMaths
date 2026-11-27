@@ -3,6 +3,15 @@
 Plain-English summary of each release. The technical detail of every version is in the README's changelog
 (`- **vX.Y:**` lines), and the in-app version history is `versionHistory` in `js/data/help.js`.
 
+## 2.84 — 27 November 2026
+- **KS2 SATs mocks for all three papers**: Paper 1 arithmetic and Papers 2 and 3 reasoning (24 questions, 40 minutes),
+  scored in marks; choose the paper in Mock exam.
+- **Five SATs-level reasoning topics** (47 question types, with lessons and explainers; bar charts and timetables drawn).
+- **New exams: Year 3, Year 4 and Year 5 maths** (national curriculum only, nothing from later years) and the **Year 4
+  multiplication tables check** (25 questions, 6 seconds each, moving on by itself).
+- Grown-ups → Plan offers “Add the times-tables check” for Year 4. Focus topics follow the child's year.
+- New `ks2` test suite.
+
 ## 2.83 — 27 November 2026
 - Key stages begin with **KS2 SATs (Year 6)**: a new exam with five arithmetic topics (36 question types with hints,
   worked methods, Learn missions and explainers) and a **Paper 1 mock** — 36 questions in 30 minutes, scored in marks.
