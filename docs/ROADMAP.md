@@ -38,8 +38,12 @@ key stages and SATs (Apollo needs them). Phases, agreed 27 Nov:
      child either way.
    - **Calculators:** students use their own; questions and papers say calculator / non-calculator.
    - **Mock order:** AQA, Edexcel, OCR first; then Eduqas, WJEC (Wales), CCEA (NI), Edexcel IGCSE, Cambridge IGCSE.
-   - **Look proofs** (three directions) are in `docs/proofs/` (`make.py` rebuilds them): A Studio (clean cards, hobby
-     backdrop — recommended), B Night study (dark, lo-fi city), C HUD (gaming, neon). **Waiting on Stuart to choose.**
+   - **Look chosen (Stuart, 27 Nov 2026): B “Night study”, with a light-theme switch** (proofs in `docs/proofs/`;
+     `make.py` and `make2.py` rebuild them: `proof-B-*` are the chosen look, light mode and the Customise screen).
+   - **Everything must be age-appropriate for 14–18 (Stuart):** the Customise shop (outfits, trainers, accessories,
+     desk and room, backdrops, titles, study perks — no cartoon kits or pets), the rewards (XP and levels; credits to
+     spend), the wording and feedback (calm, no comic sound effects), celebrations and the arcade (“break room”).
+     **Waiting on Stuart to approve the Customise proofs** before building.
    - Order: (1) groundwork — maths display (KaTeX, self-hosted), algebra-answer checking, graphs, calculator flag,
      formula sheet, tier + board in the Plan, loading per stage, the look switch; (2) the senior look; (3) GCSE
      Foundation (~100 types) + England mocks; (4) Higher (~100) + other boards; then A level, then Further Maths.
